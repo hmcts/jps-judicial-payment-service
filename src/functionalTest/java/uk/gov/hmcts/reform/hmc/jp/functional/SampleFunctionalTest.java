@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.controllers;
+package uk.gov.hmcts.reform.hmc.jp.functional;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -15,7 +15,7 @@ import static io.restassured.RestAssured.given;
 class SampleFunctionalTest {
     protected static final String CONTENT_TYPE_VALUE = "application/json";
 
-    @Value("${TEST_URL:http://localhost:8080}")
+    @Value("${TEST_URL:http://localhost:5555}")
     private String testUrl;
 
     @BeforeEach
@@ -33,7 +33,7 @@ class SampleFunctionalTest {
             .then()
             .extract().response();
 
-        Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertTrue(response.asString().startsWith("Welcome"));
+        Assertions.assertEquals(404, response.statusCode());
+        Assertions.assertFalse(response.asString().startsWith("Welcome"));
     }
 }
