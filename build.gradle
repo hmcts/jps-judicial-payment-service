@@ -8,7 +8,6 @@ plugins {
   id 'org.owasp.dependencycheck' version '8.1.0'
   id 'com.github.ben-manes.versions' version '0.45.0'
   id 'org.sonarqube' version '3.5.0.2730'
-  id "com.github.spacialcircumstances.gradle-cucumber-reporting" version "0.1.25"
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -102,7 +101,10 @@ task cucumberCli() {
 }
 
 task functional(type: Test) {
-  include 'src/functionalTest/java/Cucumber/Options/TestRunner.java'
+  description = "Runs functional tests"
+  group = "Verification"
+  testClassesDirs = sourceSets.functionalTest.output.classesDirs
+  classpath = sourceSets.functionalTest.runtimeClasspath
 }
 
 task integration(type: Test) {
