@@ -206,7 +206,7 @@ dependencies {
   }
 }
 
-mainClassName = 'uk.gov.hmcts.reform.demo.Application'
+mainClassName = 'uk.gov.hmcts.reform.hmc.jp.Application'
 
 bootJar {
   archiveFileName = "spring-boot-template.jar"
