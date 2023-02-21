@@ -26,7 +26,7 @@ sourceSets {
       runtimeClasspath += main.output
       srcDir file('src/functionalTest/java')
     }
-    resources.srcDir file('src/functionalTest/uk.gov.hmcts.reform.hmc.jp.functional.resources')
+    resources.srcDir file('src/functionalTest/resources')
   }
 
   integrationTest {
@@ -35,7 +35,7 @@ sourceSets {
       runtimeClasspath += main.output
       srcDir file('src/integrationTest/java')
     }
-    resources.srcDir file('src/integrationTest/uk.gov.hmcts.reform.hmc.jp.functional.resources')
+    resources.srcDir file('src/integrationTest/resources')
   }
 
   smokeTest {
@@ -44,7 +44,7 @@ sourceSets {
       runtimeClasspath += main.output
       srcDir file('src/smokeTest/java')
     }
-    resources.srcDir file('src/smokeTest/uk.gov.hmcts.reform.hmc.jp.functional.resources')
+    resources.srcDir file('src/smokeTest/resources')
   }
 }
 
@@ -89,13 +89,12 @@ task cucumberCli() {
   doLast {
     javaexec {
       main = "io.cucumber.core.cli.Main"
-      classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+      classpath += configurations.cucumberRuntime + sourceSets.functionalTest.output
       args = [
         '--plugin', 'pretty',
         '--plugin', 'html:target/cucumber-report.html',
-        '--glue', 'uk.gov.hmcts.reform.hmc.jp.functional.stepDefinitions',
-        'src/functionalTest/java/uk/gov/hmcts/reform/hmc/jp/functional/features',
-        'src/functionalTest/java/Cucumber/Options/TestRunner.java']
+        '--glue', 'uk.gov.hmcts.reform.hmc.jp', 'src/functionalTest/resources/features'
+        ]
     }
   }
 }

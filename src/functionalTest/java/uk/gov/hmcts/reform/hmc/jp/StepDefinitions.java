@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.functional.stepDefinitions;
+package uk.gov.hmcts.reform.hmc.jp;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.When;
