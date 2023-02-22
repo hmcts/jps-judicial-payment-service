@@ -1,14 +1,15 @@
 version: '2.1'
 
 services:
-  spring-boot-template:
+  hmc-judicial-payment-service:
     build:
       context: .
       args:
         - http_proxy
         - https_proxy
         - no_proxy
-    image: hmctspublic.azurecr.io/spring-boot/template
+    image: hmctspublic.azurecr.io/hmc/hmc-judicial-payment-service
+    container_name: hmc-judicial-payment-service
     environment:
       # these environment variables are used by java-logging library
       - ROOT_APPENDER

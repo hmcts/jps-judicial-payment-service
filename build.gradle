@@ -16,7 +16,7 @@ version = '0.0.1'
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(17)
+    languageVersion = JavaLanguageVersion.of(11)
   }
 }
 
@@ -165,8 +165,8 @@ project.tasks['check'].dependsOn integration
 
 sonarqube {
   properties {
-    property "sonar.projectName", "Reform :: spring-boot-template"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:spring-boot-template"
+    property "sonar.projectName", "Reform :: hmc-judicial-payment-service"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:hmc-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
   }
 }
@@ -245,10 +245,10 @@ dependencies {
   testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
-mainClassName = 'uk.gov.hmcts.reform.demo.Application'
+mainClassName = 'uk.gov.hmcts.reform.hmc.jp.Application'
 
 bootJar {
-  archiveFileName = "spring-boot-template.jar"
+  archiveFileName = "hmc-judicial-payment-service.jar"
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
