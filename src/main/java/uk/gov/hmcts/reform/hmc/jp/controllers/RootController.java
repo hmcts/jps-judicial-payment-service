@@ -23,6 +23,7 @@ public class RootController {
      */
     @GetMapping("/")
     public ResponseEntity<String> welcome() {
+
         return ok("Welcome to hmc-judicial-payment-service");
     }
 }
