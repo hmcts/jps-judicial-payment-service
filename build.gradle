@@ -245,6 +245,10 @@ dependencies {
   testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
+rootProject.tasks.named("processFunctionalTestResources") {
+  duplicatesStrategy = 'include'
+}
+
 mainClassName = 'uk.gov.hmcts.reform.hmc.jp.Application'
 
 bootJar {
