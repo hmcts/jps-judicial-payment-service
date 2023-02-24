@@ -42,4 +42,4 @@ jobs:
         with:
           skip_dirty_check: false
           commit_message: "Suppressing CVE - Actions"
-          branch: maste
+          branch: master
