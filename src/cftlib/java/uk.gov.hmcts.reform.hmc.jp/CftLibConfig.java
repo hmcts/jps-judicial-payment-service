@@ -11,9 +11,9 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CftLibConfig.class);
 
-    private static final String ROLE_APPROVER = "caseworker";
-    private static final String ROLE_PUBLISHER = "caseworker-autotest1";
-    private static final String ROLE_COURT_CLERK = "caseworker-befta_master";
+    private static final String ROLE_APPROVER = "payment-session-approver";
+    private static final String ROLE_PUBLISHER = "payment-session-publisher";
+    private static final String ROLE_COURT_CLERK = "payment-session-clerk";
     private static final String ROLE_CCD_IMPORT = "ccd-import";
 
     @Override
