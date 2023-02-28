@@ -198,12 +198,20 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
+  annotationProcessor group: 'org.mapstruct', name: 'mapstruct-processor', version: '1.4.2.Final'
+
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
+
+  compile group: 'org.flywaydb', name: 'flyway-core', version: '7.7.0'
+  compileOnly group: 'org.mapstruct', name: 'mapstruct', version: versions.mapstruct
+
+  runtime group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
+
 }
 
 mainClassName = 'uk.gov.hmcts.reform.hmc.jp.Application'
