@@ -25,7 +25,12 @@ To build the project execute the following command:
 ### Running the application
 
 The easiest way to run the application locally is to use the `bootWithCCD` Gradle task.
-
+First time running or when you pull new images you will first need to run the below 
+```bash
+ az acr login --name hmctsprivate --subscription DCD-CNP-PROD
+ az acr login --name hmctspublic --subscription DCD-CNP-PROD
+```
+All subsequent times of starting the application locally you can just run without the above
 ```bash
  ./gradlew bootWithCCD
 ```
