@@ -1,7 +1,5 @@
 # Spring Boot application template
 
-[![Build Status](https://travis-ci.org/hmcts/spring-boot-template.svg?branch=master)](https://travis-ci.org/hmcts/spring-boot-template)
-
 ## Purpose
 
 Purpose of the judicial-payment-service goes here
@@ -10,7 +8,8 @@ Purpose of the judicial-payment-service goes here
 
 ### Prerequisites
 
-* JDK 17
+- [JDK 17](https://java.com)
+- [Docker](https://www.docker.com)
 
 ### Building the application
 
@@ -25,27 +24,18 @@ To build the project execute the following command:
 
 ### Running the application
 
-Create the image of the application by executing the following command:
-
+The easiest way to run the application locally is to use the `bootWithCCD` Gradle task.
+First time running or when you pull new images you will first need to run the below 
 ```bash
-  ./gradlew assemble
+ az acr login --name hmctsprivate --subscription DCD-CNP-PROD
+ az acr login --name hmctspublic --subscription DCD-CNP-PROD
+```
+All subsequent times of starting the application locally you can just run without the above
+```bash
+ ./gradlew bootWithCCD
 ```
 
-Create docker image:
-
-```bash
-  docker-compose build
-```
-
-Run the distribution (created in `build/install/spring-boot-template` directory)
-by executing the following command:
-
-```bash
-  docker-compose up
-```
-
-This will start the API container exposing the application's port
-(set to `4550` in this template app).
+This will start the application and its dependent services.
 
 In order to test if the application is up, you can call its health endpoint:
 
@@ -59,38 +49,58 @@ You should get a response similar to this:
   {"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
 ```
 
-### Alternative script to run application
+### Alternative running the application
 
-To skip all the setting up and building, just execute the following command:
-
-```bash
-./bin/run-in-docker.sh
-```
-
-For more information:
+Create the image of the application by executing the following command:
 
 ```bash
-./bin/run-in-docker.sh -h
+ ./gradlew assemble
 ```
 
-Script includes bare minimum environment variables necessary to start api instance. Whenever any variable is changed or any other script regarding docker image/container build, the suggested way to ensure all is cleaned up properly is by this command:
+Create docker image:
 
 ```bash
-docker-compose rm
+docker-compose build
 ```
 
-It clears stopped containers correctly. Might consider removing clutter of images too, especially the ones fiddled with:
+Run the distribution (created in `build/install/hmc-judicial-payment-service` directory)
+by executing the following command:
 
 ```bash
-docker images
-
-docker image rm <image-id>
+  docker-compose up
 ```
 
-There is no need to remove postgres and java or similar core images.
+This will start the API container exposing the application's port
+(set to `4550` in this template app).
+
+In order to test if the application is up, you can call its health endpoint:
+
+```bash
+curl http://localhost:4561/health
+```
+
+You should get a response similar to this:
+
+```
+{"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
+```
 
 
-## License
+## Developing
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+### Unit tests
+To run all unit tests execute the following command:
+```bash
+  ./gradlew test
+```
+### Integration tests
+To run all integration tests execute the following command:
+```bash
+  ./gradlew integration
+```
+### Functional tests
+To run all integration tests execute the following command:
+```bash
+  ./gradlew functionalTest
+```
 
