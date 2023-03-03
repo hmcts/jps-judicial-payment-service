@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp;
+package uk.gov.hmcts.reform.jps;
 
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;

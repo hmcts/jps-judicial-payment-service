@@ -103,7 +103,7 @@ task functional() {
         '--plugin', "json:${rootDir}/target/cucumber.json",
         '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
         '--tags', '',
-        '--glue', 'uk.gov.hmcts.reform.hmc.jp', 'src/functionalTest/resources/features'
+        '--glue', 'uk.gov.hmcts.reform.jps', 'src/functionalTest/resources/features'
       ]
     }
   }
@@ -246,7 +246,7 @@ rootProject.tasks.named("processFunctionalTestResources") {
   duplicatesStrategy = 'include'
 }
 
-mainClassName = 'uk.gov.hmcts.reform.hmc.jp.Application'
+mainClassName = 'uk.gov.hmcts.reform.jps.Application'
 
 bootJar {
   archiveFileName = "hmc-judicial-payment-service.jar"
