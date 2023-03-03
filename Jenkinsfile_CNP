@@ -4,7 +4,7 @@ properties(
   [
     [
       $class       : 'GithubProjectProperty',
-      projectUrlStr: 'https://github.com/hmcts/hmc-judicial-payment-service'
+      projectUrlStr: 'https://github.com/hmcts/jps-judicial-payment-service'
     ],
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
   ]
@@ -15,7 +15,7 @@ properties(
 import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
-def product = "hmc"
+def product = "jps"
 def component = "judicial-payment-service"
 def branchesToSync = ['demo', 'ithc', 'perftest']
 
@@ -28,7 +28,7 @@ def secrets = [
   'ccd-${env}': [
 
   ],
-  'hmc-${env}': [
+  'jps-${env}': [
 
 
   ],
