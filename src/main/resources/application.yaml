@@ -20,27 +20,26 @@ spring:
     import: "optional:configtree:/mnt/secrets/hmc/"
   application:
     name: Judicial Payment Service
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+    jackson:
+      property-naming-strategy: SNAKE_CASE
+    datasource:
+      driver-class-name: org.postgresql.Driver
+      url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:5060}/${JUDICIAL_PAYMENT_SERVICE_NAME:judicial-payment-service}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:}
+      username: ${JUDICIAL_PAYMENT_SERVICE_USERNAME:hmc}
+      password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:hmc}
+      type: com.zaxxer.hikari.HikariDataSource
+    jpa:
+      database: postgresql
+      show-sql: false
+      hibernate:
+        ddl-auto: none
+      properties:
+        hibernate:
+          jdbc:
+            time_zone: UTC
+    flyway:
+      out-of-order: true
+      ignore-missing-migrations: true
 
 azure:
   application-insights:
