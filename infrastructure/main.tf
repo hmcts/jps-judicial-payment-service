@@ -17,7 +17,7 @@ provider "azurerm" {
    resource_group_name = "${local.sharedResourceGroup}"
  }
 
- module "hmc-hearing-management-db" {
+ module "hmc-judicial-payment-service-db" {
    source                = "git@github.com:hmcts/cnp-module-postgres?ref=master"
    product               = var.product
    component             = var.component

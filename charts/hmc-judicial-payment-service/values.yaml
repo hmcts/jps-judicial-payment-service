@@ -20,5 +20,5 @@ java:
         - name: judicial-payment-service-POSTGRES-DATABASE
           alias: JUDICIAL_PAYMENT_SERVICE_DB_NAME
           environment:
-            CFT_HEARING_SERVICE_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
+            JUDICIAL_PAYMENT_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
   environment:

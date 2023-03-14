@@ -3,7 +3,7 @@
  set -e
 
  if [ -z "$JUDICIAL_PAYMENT_SERVICE_DB_USERNAME" ] || [ -z "$JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD" ]; then
-   echo "ERROR: Missing environment variable. Set value for both 'CFT_HEARING_SERVICE_DB_USERNAME' and 'CFT_HEARING_SERVICE_DB_PASSWORD'."
+   echo "ERROR: Missing environment variable. Set value for both 'JUDICIAL_PAYMENT_SERVICE_DB_USERNAME' and 'JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD'."
    exit 1
  fi
 
