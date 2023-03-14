@@ -7,11 +7,11 @@ java:
       secrets:
         - AppInsightsInstrumentationKey
   environment:
-  JUDICIAL_PAYMENT_SERVICE_DB_HOST: "{{ .Release.Name }}-postgresql"
-  JUDICIAL_PAYMENT_SERVICE_DB_NAME: "{{ .Values.postgresql.postgresqlDatabase}}"
-  JUDICIAL_PAYMENT_SERVICE_DB_USERNAME: "{{ .Values.postgresql.postgresqlUsername}}"
-  JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
-  JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS: "?stringtype=unspecified"
-  JUDICIAL_PAYMENT_SERVICE_DB_PORT: 5432
+    JUDICIAL_PAYMENT_SERVICE_DB_HOST: "{{ .Release.Name }}-postgresql"
+    JUDICIAL_PAYMENT_SERVICE_DB_NAME: "{{ .Values.postgresql.postgresqlDatabase}}"
+    JUDICIAL_PAYMENT_SERVICE_DB_USERNAME: "{{ .Values.postgresql.postgresqlUsername}}"
+    JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD: "{{ .Values.postgresql.postgresqlPassword}}"
+    JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS: "?stringtype=unspecified"
+    JUDICIAL_PAYMENT_SERVICE_DB_PORT: 5432
   postgresql:
     enabled: true
