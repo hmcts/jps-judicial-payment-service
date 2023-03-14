@@ -230,7 +230,7 @@ dependencies {
   }
 
 
-  compile group: 'org.flywaydb', name: 'flyway-core', version: '7.7.0'
+  implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.15.2'
   compileOnly group: 'org.mapstruct', name: 'mapstruct', version: versions.mapstruct
 
   runtime group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
