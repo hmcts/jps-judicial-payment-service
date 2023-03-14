@@ -198,6 +198,10 @@ repositories {
   maven { url 'https://jitpack.io' }
 }
 
+def versions = [
+  mapstruct       : '1.4.2.Final',
+]
+
 ext {
   log4JVersion = "2.19.0"
   testcontainersVersion = '1.17.6'
@@ -231,9 +235,8 @@ dependencies {
 
 
   implementation group: 'org.flywaydb', name: 'flyway-core', version: '9.15.2'
-  compileOnly group: 'org.mapstruct', name: 'mapstruct', version: versions.mapstruct
-
-  runtime group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
+  implementation group: 'org.mapstruct', name: 'mapstruct', version: versions.mapstruct
+  implementation group: 'org.postgresql', name: 'postgresql', version: '42.5.1'
 
 
   implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.11.1'
