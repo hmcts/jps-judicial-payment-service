@@ -3,8 +3,8 @@ plugins {
   id 'checkstyle'
   id 'pmd'
   id 'jacoco'
-  id 'io.spring.dependency-management' version '1.1.0'
-  id 'org.springframework.boot' version '2.7.8'
+  id 'io.spring.dependency-management' version '1.0.11.RELEASE'
+  id 'org.springframework.boot' version '2.4.4'
   id 'org.owasp.dependencycheck' version '8.1.0'
   id 'com.github.ben-manes.versions' version '0.45.0'
   id 'org.sonarqube' version '3.5.0.2730'
@@ -15,6 +15,28 @@ plugins {
 
 group = 'uk.gov.hmcts.reform'
 version = '0.0.1'
+
+def versions = [
+  junit           : '5.7.2',
+  junitPlatform   : '1.7.2',
+  lombok          : '1.18.16',
+  mapstruct       : '1.4.2.Final',
+  reformLogging   : '5.1.7',
+  restAssured     : '4.2.1',
+  springBoot      : springBoot.class.package.implementationVersion,
+  springCloud     : '2020.0.1',
+  springfoxSwagger: '3.0.0',
+  testcontainers  : '1.15.2',
+  netty           : '4.1.68.Final',
+  serviceAuthVersion: '3.1.1',
+  tomcatEmbedded  : '9.0.69'
+]
+
+ext['spring-framework.version'] = '5.3.24'
+ext['log4j2.version'] = '2.17.1'
+ext['spring-security.version'] = '5.8.0'
+ext['snakeyaml.version'] = '1.33'
+ext['jackson.version'] = '2.14.1'
 
 java {
   toolchain {
@@ -210,16 +232,35 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
+  implementation group: 'org.springframework.security', name: 'spring-security-web'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-client'
+  implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose'
+  implementation group: 'org.springframework.security', name: 'spring-security-config'
+  implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
+
+  implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: versions.reformLogging
+  implementation group: 'com.github.hmcts.java-logging', name: 'logging-appinsights', version: versions.reformLogging
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.14'
 
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-api'
+  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j'
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceAuthVersion
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
+  implementation group: 'javax.inject', name: 'javax.inject', version: '1'
+  implementation group: 'io.jsonwebtoken', name: 'jjwt', version:'0.9.1'
 
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: log4JVersion
-  implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j', version: log4JVersion
+  implementation 'org.mapstruct:mapstruct-jdk8:1.3.1.Final'
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
+  testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0'
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
@@ -238,7 +279,19 @@ dependencies {
   implementation group: 'javax.el', name: 'javax.el-api', version: '3.0.1-b06'
   implementation group: 'org.testcontainers', name: 'junit-jupiter', version: testcontainersVersion
 
+
+  integrationTestImplementation sourceSets.main.runtimeClasspath
+  integrationTestImplementation sourceSets.test.runtimeClasspath
   cftlibImplementation group: 'org.springframework.boot', name: 'spring-boot-devtools'
+  integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.27.2'
+  integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testcontainers
+  testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.11.1'
+  testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '3.1.0'
+  testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.11.1'
+  testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
+  testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
+  implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+  annotationProcessor 'org.mapstruct:mapstruct-processor:1.3.1.Final', 'org.projectlombok:lombok:1.18.16', 'org.projectlombok:lombok-mapstruct-binding:0.2.0'
 
 }
 
