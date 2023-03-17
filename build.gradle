@@ -103,7 +103,7 @@ task functional() {
         '--plugin', "json:${rootDir}/target/cucumber.json",
         '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
         '--tags', '',
-        '--glue', 'uk.gov.hmcts.reform.hmc.jp', 'src/functionalTest/resources/features'
+        '--glue', 'uk.gov.hmcts.reform.jps', 'src/functionalTest/resources/features'
       ]
     }
   }
@@ -169,8 +169,8 @@ project.tasks['check'].dependsOn integration
 
 sonar {
   properties {
-    property "sonar.projectName", "Reform :: hmc-judicial-payment-service"
-    property "sonar.projectKey", "uk.gov.hmcts.reform:hmc-judicial-payment-service"
+    property "sonar.projectName", "Reform :: jps-judicial-payment-service"
+    property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
   }
 }
@@ -247,7 +247,7 @@ rootProject.tasks.named("processFunctionalTestResources") {
   duplicatesStrategy = 'include'
 }
 
-mainClassName = 'uk.gov.hmcts.reform.hmc.jp.Application'
+mainClassName = 'uk.gov.hmcts.reform.jps.Application'
 
 bootJar {
   archiveFileName = "hmc-judicial-payment-service.jar"
@@ -267,11 +267,11 @@ bootWithCCD {
   // TODO: update when we have db connections and authorised services
   environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_gw,ccd_gateway,ccd_data,ccd_next_hearing_date_updater")
   environment("RSE_LIB_S2S_PORT", 4502)
-  environment("RSE_LIB_ADDITIONAL_DATABASES", "hmc");
+  environment("RSE_LIB_ADDITIONAL_DATABASES", "jps");
   environment("CFT_HEARING_SERVICE_DB_USERNAME", "postgres")
   environment("CFT_HEARING_SERVICE_DB_PASSWORD", "postgres")
   environment("CFT_HEARING_SERVICE_DB_PORT", "6432")
-  environment("CFT_HEARING_SERVICE_DB_NAME", "hmc")
+  environment("CFT_HEARING_SERVICE_DB_NAME", "jps")
   environment("S2S_URL", "http://localhost:8489")
 }
 
