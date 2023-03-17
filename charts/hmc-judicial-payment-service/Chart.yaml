@@ -1,9 +1,9 @@
 apiVersion: v2
 appVersion: "1.0"
-description: A Helm chart for jps-judicial-payment-service App
-name: jps-judicial-payment-service
-home: https://github.com/hmcts/jps-judicial-payment-service
-version: 0.0.4
+description: A Helm chart for hmc-judicial-payment-service App
+name: hmc-judicial-payment-service
+home: https://github.com/hmcts/hmc-judicial-payment-service
+version: 0.0.5
 maintainers:
   - name: HMCTS CDM team
 dependencies:
