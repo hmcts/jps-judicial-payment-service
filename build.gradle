@@ -249,7 +249,7 @@ rootProject.tasks.named("processFunctionalTestResources") {
 mainClassName = 'uk.gov.hmcts.reform.jps.Application'
 
 bootJar {
-  archiveFileName = "hmc-judicial-payment-service.jar"
+  archiveFileName = "jps-judicial-payment-service.jar"
 
   manifest {
     attributes('Implementation-Version': project.version.toString())
