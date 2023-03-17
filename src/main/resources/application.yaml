@@ -12,12 +12,12 @@ management:
         include: health, info, prometheus
 
 springdoc:
-  packagesToScan: uk.gov.hmcts.reform.hmc.jp.controllers
+  packagesToScan: uk.gov.hmcts.reform.jps.controllers
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
   config:
-    import: "optional:configtree:/mnt/secrets/hmc/"
+    import: "optional:configtree:/mnt/secrets/jps/"
   application:
     name: Judicial Payment Service
 #  datasource:
@@ -44,4 +44,4 @@ spring:
 
 azure:
   application-insights:
-    instrumentation-key: ${hmc.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+    instrumentation-key: ${jps.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
