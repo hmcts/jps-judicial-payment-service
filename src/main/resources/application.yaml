@@ -25,8 +25,8 @@ spring:
     datasource:
       driver-class-name: org.postgresql.Driver
       url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:5060}/${JUDICIAL_PAYMENT_SERVICE_NAME:judicial-payment-service}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:}
-      username: ${JUDICIAL_PAYMENT_SERVICE_USERNAME:hmc}
-      password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:hmc}
+      username: ${JUDICIAL_PAYMENT_SERVICE_USERNAME:jps}
+      password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:jps}
       type: com.zaxxer.hikari.HikariDataSource
     jpa:
       database: postgresql

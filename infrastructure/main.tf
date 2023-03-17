@@ -12,12 +12,12 @@ provider "azurerm" {
    vaultName = "${var.raw_product}-${var.env}"
  }
 
- data "azurerm_key_vault" "hmc_shared_key_vault" {
+ data "azurerm_key_vault" "jps_shared_key_vault" {
    name                = "${local.vaultName}"
    resource_group_name = "${local.sharedResourceGroup}"
  }
 
- module "hmc-judicial-payment-service-db" {
+ module "jps-judicial-payment-service-db" {
    source                = "git@github.com:hmcts/cnp-module-postgres?ref=master"
    product               = var.product
    component             = var.component
@@ -44,30 +44,30 @@ provider "azurerm" {
 
  resource "azurerm_key_vault_secret" "POSTGRES-USER" {
    name         = "${var.component}-POSTGRES-USER"
-   value        = module.hmc-judicial-payment-service-db.user_name
-   key_vault_id = data.azurerm_key_vault.hmc_shared_key_vault.id
+   value        = module.jps-judicial-payment-service-db.user_name
+   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
  }
 
  resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
    name         = "${var.component}-POSTGRES-PASS"
-   value        = module.hmc-judicial-payment-service-db.postgresql_password
-   key_vault_id = data.azurerm_key_vault.hmc_shared_key_vault.id
+   value        = module.jps-judicial-payment-service-db.postgresql_password
+   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
  }
 
  resource "azurerm_key_vault_secret" "POSTGRES-HOST" {
    name         = "${var.component}-POSTGRES-HOST"
-   value        = module.hmc-judicial-payment-service-db.host_name
-   key_vault_id = data.azurerm_key_vault.hmc_shared_key_vault.id
+   value        = module.jps-judicial-payment-service-db.host_name
+   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
  }
 
  resource "azurerm_key_vault_secret" "POSTGRES-PORT" {
    name         = "${var.component}-POSTGRES-PORT"
-   value        = module.hmc-judicial-payment-service-db.postgresql_listen_port
-   key_vault_id = data.azurerm_key_vault.hmc_shared_key_vault.id
+   value        = module.jps-judicial-payment-service-db.postgresql_listen_port
+   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
  }
 
  resource "azurerm_key_vault_secret" "POSTGRES-DATABASE" {
    name         = "${var.component}-POSTGRES-DATABASE"
-   value        = module.hmc-judicial-payment-service-db.postgresql_database
-   key_vault_id = data.azurerm_key_vault.hmc_shared_key_vault.id
+   value        = module.jps-judicial-payment-service-db.postgresql_database
+   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
  }

@@ -280,10 +280,10 @@ bootWithCCD {
   environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_gw,ccd_gateway,ccd_data,ccd_next_hearing_date_updater")
   environment("RSE_LIB_S2S_PORT", 4502)
   environment("RSE_LIB_ADDITIONAL_DATABASES", "jps");
-  environment("CFT_HEARING_SERVICE_DB_USERNAME", "postgres")
-  environment("CFT_HEARING_SERVICE_DB_PASSWORD", "postgres")
-  environment("CFT_HEARING_SERVICE_DB_PORT", "6432")
-  environment("CFT_HEARING_SERVICE_DB_NAME", "jps")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_USERNAME", "postgres")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD", "postgres")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_PORT", "6432")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_NAME", "jps")
   environment("S2S_URL", "http://localhost:8489")
 }
 

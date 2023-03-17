@@ -10,7 +10,7 @@
  # Create role and database
  psql -v ON_ERROR_STOP=1 --username postgres --set USERNAME=$JUDICIAL_PAYMENT_SERVICE_DB_USERNAME --set PASSWORD=$JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD <<-EOSQL
    CREATE USER :USERNAME WITH PASSWORD ':PASSWORD';
-   CREATE DATABASE hmc_judicial-payment-service
+   CREATE DATABASE jps_judicial_payment_service
      WITH OWNER = :USERNAME
      ENCODING = 'UTF-8'
      CONNECTION LIMIT = -1;

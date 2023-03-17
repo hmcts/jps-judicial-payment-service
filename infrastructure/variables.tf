@@ -3,7 +3,7 @@ variable "product" {
 }
 
 variable "raw_product" {
-  default = "hmc"
+  default = "jps"
 }
 
 variable "component" {
@@ -67,11 +67,11 @@ variable "georedundant_backup" {
 // Define the values for mandatory/required parameters (see https://github.com/hmcts/cnp-module-postgres)
 
 variable "postgresql_user" {
-  default = "hmc"
+  default = "jps"
 }
 
 variable "database_name" {
-  default = "hmc_judicial-payment-service"
+  default = "jps_judicial_payment_service"
 }
 
 variable "postgresql_version" {
