@@ -1,11 +1,10 @@
 name: Suppressions
 
-#on:
-#  schedule:
-#    # At 12 midnight and every 3rd hour from 10am through 11pm
-#    - cron: "0 0,10-23/3 * * *"
-#  workflow_dispatch:
-on: [ pull_request, workflow_dispatch ]
+on:
+  schedule:
+    # At 12 midnight and every 3rd hour from 10am through 11pm
+    - cron: "0 0,10-23/3 * * *"
+  workflow_dispatch:
 
 jobs:
   build:
