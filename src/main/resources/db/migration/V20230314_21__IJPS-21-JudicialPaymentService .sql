@@ -12,3 +12,6 @@ CREATE TABLE public.judicial_payment_service (
 
 ALTER TABLE ONLY public.judicial_payment_service
     ADD CONSTRAINT payment_service_pkey PRIMARY KEY (fee_record_id);
+
+ALTER TABLE ONLY public.judicial_payment_service
+ADD CONSTRAINT uc_judicial_payment_service_fee_id UNIQUE (fee_id);
