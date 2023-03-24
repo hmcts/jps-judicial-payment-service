@@ -102,7 +102,7 @@ task functional() {
         '--threads', '1',
         '--plugin', "json:${rootDir}/target/cucumber.json",
         '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
-        '--tags', '',
+        '--tags', '@F-001',
         '--glue', 'uk.gov.hmcts.reform.jps', 'src/functionalTest/resources/features'
       ]
     }
@@ -230,6 +230,7 @@ dependencies {
   implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.11.1'
   testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.11.1'
   testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+  testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.36.0'
 
   implementation (group: 'org.glassfish.web', name: 'el-impl', version: '2.2.1-b05') {
     exclude group: 'javax.el', module: 'el-api'
