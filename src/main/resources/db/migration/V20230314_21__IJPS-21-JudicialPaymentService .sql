@@ -15,3 +15,15 @@ ALTER TABLE ONLY public.judicial_payment_service
 
 ALTER TABLE ONLY public.judicial_payment_service
 ADD CONSTRAINT uc_judicial_payment_service_fee_id UNIQUE (fee_id);
+
+CREATE SEQUENCE public.judicial_payment_service_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+ALTER TABLE ONLY public.judicial_payment_service
+ALTER COLUMN request_id SET DEFAULT nextval('public.judicial_payment_service_id_seq');
+
+ALTER SEQUENCE public.judicial_payment_service_id_seq OWNED BY public.judicial_payment_service.fee_id;
