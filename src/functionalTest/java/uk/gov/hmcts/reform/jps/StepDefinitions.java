@@ -6,6 +6,7 @@ import io.cucumber.java.en.When;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
@@ -62,6 +63,16 @@ public class StepDefinitions {
     @When("the request contains the additional header {string} as {string}")
     public void the_request_contains_the_additional_header_as(String header, String value) {
         given.header(header,value);
+    }
+
+    @When("the request body contains the {string} as {string}")
+    public void the_request_body_contains_the_as(String field, String value) {
+        given.body(field, ObjectMapperType.valueOf(value));
+    }
+
+    @Then("the response contains a new feeId")
+    public void the_response_contains_a_new_fee_id() {
+        response.then().assertThat().body("feeId", notNullValue());
     }
 
     @Then("the response has all the fields returned with correct values")
