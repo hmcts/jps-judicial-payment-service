@@ -81,4 +81,5 @@ variable "postgresql_version" {
 variable "db_replicas" {
   type    = list(string)
   default = []
+
 }
