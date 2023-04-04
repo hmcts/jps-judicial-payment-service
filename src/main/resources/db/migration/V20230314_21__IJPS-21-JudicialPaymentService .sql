@@ -14,7 +14,7 @@ ALTER TABLE ONLY public.judicial_fee
     ADD CONSTRAINT payment_service_pkey PRIMARY KEY (fee_record_id);
 
 ALTER TABLE ONLY public.judicial_fee
-ADD CONSTRAINT uc_judicial_payment_service_fee_id UNIQUE (fee_id);
+ADD CONSTRAINT uc_judicial_fee_id UNIQUE (fee_id);
 
 CREATE SEQUENCE public.judicial_fee_id_seq
     START WITH 1
@@ -23,7 +23,14 @@ CREATE SEQUENCE public.judicial_fee_id_seq
     NO MAXVALUE
     CACHE 1;
 
+CREATE SEQUENCE public.fee_record_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
 ALTER TABLE ONLY public.judicial_fee
-ALTER COLUMN request_id SET DEFAULT nextval('public.judicial_payment_service_id_seq');
+ALTER COLUMN request_id SET DEFAULT nextval('public.judicial_id_seq');
 
 ALTER SEQUENCE public.judicial_fee_id_seq OWNED BY public.judicial_fee.fee_id;
