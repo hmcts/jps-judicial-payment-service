@@ -6,10 +6,15 @@ import io.cucumber.java.en.When;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
+import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.hmc.jp.functional.resources.APIResources;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -62,6 +67,20 @@ public class StepDefinitions {
     @When("the request contains the additional header {string} as {string}")
     public void the_request_contains_the_additional_header_as(String header, String value) {
         given.header(header,value);
+    }
+
+    @When("the request body contains the {string} as in {string}")
+    public void the_request_body_contains_the(String description, String fileName) throws IOException {
+
+        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/"+fileName));
+
+        String body = new String(b);
+        given.body(body).then().log().all();
+    }
+
+    @Then("the response contains a new feeId")
+    public void the_response_contains_a_new_fee_id() {
+        response.then().assertThat().body("feeId", notNullValue());
     }
 
     @Then("the response has all the fields returned with correct values")
