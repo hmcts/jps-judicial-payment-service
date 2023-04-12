@@ -170,12 +170,12 @@ jacocoTestReport {
 project.tasks['sonar'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
-sonarqube {
+sonar {
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
-    property "sonar.exclusions", "**/domain/*.java,**/config/*.java,**/exception/*.java"
+    property "sonar.exclusions", "**/domain/*.java,**/config/*.java,**/exception/PendingMigrationScriptException.java"
   }
 }
 
