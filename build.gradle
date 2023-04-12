@@ -163,7 +163,7 @@ jacocoTestReport {
   reports {
     xml.required = true
     csv.required = false
-    xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    xml.destination file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
@@ -180,9 +180,8 @@ sonar {
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
-    property "sonar.jacoco.reportPath", "${project.buildDir}/jacoco/test.exec"
+    property "sonar.coverage.jacoco.xmlReportPaths", "${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml"
     property "sonar.exclusions",  coverageExclusionList.join(", ")
-    property "sonar.tests", "src/test/java"
   }
 }
 
