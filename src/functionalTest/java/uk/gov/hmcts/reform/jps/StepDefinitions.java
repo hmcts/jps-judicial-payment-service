@@ -12,6 +12,10 @@ import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.hmc.jp.functional.resources.APIResources;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static  org.hamcrest.Matchers.*;
@@ -65,9 +69,13 @@ public class StepDefinitions {
         given.header(header,value);
     }
 
-    @When("the request body contains the {string} as {string}")
-    public void the_request_body_contains_the_as(String field, String value) {
-        given.body(field, ObjectMapperType.valueOf(value));
+    @When("the request body contains the {string} as in {string}")
+    public void the_request_body_contains_the(String description, String fileName) throws IOException {
+
+        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/"+fileName));
+
+        String body = new String(b);
+        given.body(body).then().log().all();
     }
 
     @Then("the response contains a new feeId")

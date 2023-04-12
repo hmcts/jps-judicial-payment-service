@@ -6,11 +6,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "1234"
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload with all the fields" as in "S-002.1.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "positive" response is received with a "201 Created" status code
     And the response has all the fields returned with correct values
@@ -20,10 +16,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
   Scenario: Negative response, when the request is missing feeDescription
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload that is missing the feeDescription" as in "S-002.2.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "blabla"
@@ -32,10 +25,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
   Scenario: Negative response, when the request is missing judgeRoleTypeId
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload that is missing the judgeRoleTypeId" as in "S-002.3.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "blabla"
@@ -44,10 +34,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
   Scenario: Negative response, when the request is missing standardFee
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload that is missing the standardFee" as in "S-002.4.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "blabla"
@@ -56,10 +43,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
   Scenario: Negative response, when the request is missing effectiveFrom
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
+    And the request body contains the "payload that is missing the effectiveFrom" as in "S-002.4.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "blabla"
@@ -69,6 +53,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "1"
+    And the request body contains the "payload with all the fields" as in "S-002.1.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "004 unknown hmctsServiceCode"
@@ -78,11 +63,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "1234"
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "1234"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload with all the fields" as in "S-002.1.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "005 unknown judgeRoleTypeId"
@@ -92,11 +73,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
     Given a user with the IDAM role of "jps-admin"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "1234"
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the body contains the "effectiveFrom" as "1234"
+    And the request body contains the "payload with all the fields" as in "S-002.1.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "001 effective date matches existing fee record"
@@ -106,11 +83,7 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
     Given a user with the IDAM role of "caseworker"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "1235"
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload with all the fields" as in "S-002.1.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "401 Unauthorised" status code
 
@@ -119,10 +92,6 @@ Feature: F-002 - Scenarios for the POST /Fee endpoint
     Given a user with the IDAM role of "jps-admin"
     When a request is missing the S2S token
     And the request contains the "hmctsServiceCode" as "1237"
-    And the request body contains the "feeDescription" as "Description of the fee"
-    And the request body contains the "judgeRoleTypeId" as "12345"
-    And the request body contains the "standardFee" as "12345,10"
-    And the request body contains the "londonWeightedFee" as "12345,10"
-    And the request body contains the "effectiveFrom" as "10/10/2023"
+    And the request body contains the "payload with all the fields" as in "S-002.1.json"
     And a call is submitted to the "FeeEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "403 Forbidden" status code
