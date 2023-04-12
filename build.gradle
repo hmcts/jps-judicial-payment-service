@@ -170,7 +170,7 @@ jacocoTestReport {
 project.tasks['sonar'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
-sonar {
+sonarqube {
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
