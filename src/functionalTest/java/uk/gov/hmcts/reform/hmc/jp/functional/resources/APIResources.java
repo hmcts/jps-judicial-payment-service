@@ -2,7 +2,9 @@ package uk.gov.hmcts.reform.hmc.jp.functional.resources;
 
 public enum APIResources {
 
-    FeeEndpoint("/fee/{hmctsServiceCode}");
+    FeeEndpoint("/fee/{hmctsServiceCode}"),
+    SittingRecordsEndpoint("/sittingRecords/{hmctsServiceCode}");
+
     public String resource;
 
     APIResources(String resource) {

@@ -12,6 +12,10 @@ import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.hmc.jp.functional.resources.APIResources;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static  org.hamcrest.Matchers.*;
@@ -27,6 +31,11 @@ public class StepDefinitions {
     @Given("a user with the IDAM role of {string}")
     public void a_user_with_the_idam_role_of(String string) {
         System.out.println(string);
+    }
+
+    @Given("a record exists in fee table for the supplied hmctsServiceCode in the request along judgeRoleTypeId and sittingDate present in request where validFrom <= sittingDate")
+    public void a_record_exists_in_fee_table_for_the_supplied_hmcts_service_code_in_the_request_along_judge_role_type_id_and_sitting_date_present_in_request_where_valid_from_sitting_date() {
+        // Write code to insert in the db first
     }
 
     @When("a request is prepared with appropriate values")
@@ -68,6 +77,15 @@ public class StepDefinitions {
     @When("the request body contains the {string} as {string}")
     public void the_request_body_contains_the_as(String field, String value) {
         given.body(field, ObjectMapperType.valueOf(value));
+    }
+
+    @When("the request body contains the {string} as in {string}")
+    public void the_request_body_contains_the(String description, String fileName) throws IOException {
+
+        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/"+fileName));
+
+        String body = new String(b);
+        given.body(body).then().log().all();
     }
 
     @Then("the response contains a new feeId")
