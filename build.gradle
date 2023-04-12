@@ -175,7 +175,8 @@ sonar {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
-    property "sonar.exclusions", "**/domain/*.java,**/config/*.java,**/exception/PendingMigrationScriptException.java"
+    property "sonar.exclusions", "**/domain/*.java,**/config/*.java,**/exception/*Exception.java"
+    property "sonar.tests", "src/test/java"
   }
 }
 
