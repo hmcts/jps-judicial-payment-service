@@ -57,7 +57,8 @@ public class SittingRecordRepositoryTest {
             .build();
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
-        Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository.findById(persistedSittingRecord.getId());
+        Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
+            .findById(persistedSittingRecord.getId());
         assertThat(optionalSettingRecordToUpdate).isPresent();
         SittingRecord settingRecordToUpdate = optionalSettingRecordToUpdate.get();
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
@@ -93,7 +94,8 @@ public class SittingRecordRepositoryTest {
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
-        Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository.findById(persistedSittingRecord.getId());
+        Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
+            .findById(persistedSittingRecord.getId());
         assertThat(optionalSettingRecordToUpdate).isPresent();
         SittingRecord settingRecordToDelete = optionalSettingRecordToUpdate.get();
         recordRepository.deleteById(settingRecordToDelete.getId());
