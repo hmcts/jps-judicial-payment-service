@@ -14,7 +14,7 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
     private static final String ROLE_PUBLISHER = "jps-publisher";
     private static final String ROLE_SUBMITTER = "jps-submitter";
     private static final String ROLE_RECORDER = "jps-recorder";
-    private static final String ROLE_ADMIN = "jps-recorder";
+    private static final String ROLE_ADMIN = "jps-admin";
     private static final String ROLE_CCD_IMPORT = "ccd-import";
 
     @Override

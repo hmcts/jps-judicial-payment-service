@@ -59,13 +59,13 @@ idam:
   api:
     url: ${IDAM_API_URL:http://localhost:5000}
   s2s-auth:
-    microservice: hmc_judicial_payment_service
+    microservice: jps_judicial_payment_service
     totp_secret: ${IDAM_KEY_CFT_HEARING_SERVICE:AAAAAAAAAAAAAAAA}
     url: ${S2S_URL:http://localhost:8489}
   s2s-authorised:
-    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp, ccd_data}
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp, ccd_gw}
   client:
-    id: hmc_judicial_payment_service
+    id: jps_judicial_payment_service
     secret: ${CFT_HEARING_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
     redirect_uri: http://localhost:4561/oauth2redirect
 
