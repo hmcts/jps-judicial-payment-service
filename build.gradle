@@ -1,6 +1,8 @@
 import org.flywaydb.gradle.task.FlywayMigrateTask
 
 plugins {
+  id "java"
+  id "java-library"
   id 'application'
   id 'checkstyle'
   id 'pmd'
@@ -167,7 +169,8 @@ jacocoTestReport {
   }
 }
 
-project.tasks['sonar'].dependsOn test,jacocoTestReport, getFileContent
+
+project.tasks['sonar'].dependsOn test,jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 
