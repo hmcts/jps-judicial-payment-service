@@ -178,7 +178,7 @@ def coverageExclusionList = [
   '**uk/gov/hmcts/reform/jps/config/FlywayConfiguration*'
 ]
 
-sonarqube {
+sonar {
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
