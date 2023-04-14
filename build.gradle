@@ -179,6 +179,7 @@ def coverageExclusionList = [
 ]
 
 sonar {
+  println "file path -> ${jacocoTestReport.reports.xml.outputlocation.path}"
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
