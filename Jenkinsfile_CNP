@@ -12,13 +12,14 @@ properties(
 
 @Library("Infrastructure")
 
-import uk.gov.hmcts.contino.GradleBuilder
+//import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "jps"
 def component = "judicial-payment-service"
 def branchesToSync = ['demo', 'ithc', 'perftest']
 
+//GradleBuilder builder = new GradleBuilder(this, product)
 
 def secrets = [
   'rpx-${env}': [
@@ -52,7 +53,7 @@ withPipeline(type, product, component) {
   disableLegacyDeployment()
 
   afterAlways('test') {
-    builder.gradle('integration')
+    //builder.gradle('integration')
     // hmcts/cnp-jenkins-library may fail to copy artifacts after checkstyle error so repeat command (see /src/uk/gov/hmcts/contino/GradleBuilder.groovy)
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
   }
