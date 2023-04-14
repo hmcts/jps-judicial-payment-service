@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp;
+package uk.gov.hmcts.reform.jps;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

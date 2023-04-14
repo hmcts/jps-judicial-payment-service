@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.controllers;
+package uk.gov.hmcts.reform.jps.controllers;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,6 +23,7 @@ public class RootController {
      */
     @GetMapping("/")
     public ResponseEntity<String> welcome() {
-        return ok("Welcome to hmc-judicial-payment-service");
+        
+        return ok("Welcome to jps-judicial-payment-service");
     }
 }
