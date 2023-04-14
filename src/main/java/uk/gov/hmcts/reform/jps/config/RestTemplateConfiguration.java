@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.config;
+package uk.gov.hmcts.reform.jps.config;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;

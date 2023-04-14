@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.data;
+package uk.gov.hmcts.reform.jps.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;

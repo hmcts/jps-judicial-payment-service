@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.data;
+package uk.gov.hmcts.reform.jps.data;
 
 import com.google.common.collect.Lists;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +15,7 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.hmc.jp.data.SecurityUtils;
-import uk.gov.hmcts.reform.hmc.jp.security.idam.IdamRepository;
+import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.ArrayList;

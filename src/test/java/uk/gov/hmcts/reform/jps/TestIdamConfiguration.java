@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform;
+package uk.gov.hmcts.reform.jps;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

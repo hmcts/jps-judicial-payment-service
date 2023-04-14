@@ -1,9 +1,8 @@
-package uk.gov.hmcts.reform.hmc.jp;
+package uk.gov.hmcts.reform.jps;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.BeforeEach;
 import org.mockito.Mock;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,10 +15,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.util.ReflectionTestUtils;
-import uk.gov.hmcts.reform.TestIdamConfiguration;
-import uk.gov.hmcts.reform.hmc.jp.data.SecurityUtils;
-import uk.gov.hmcts.reform.hmc.jp.wiremock.extensions.DynamicOAuthJwkSetResponseTransformer;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.wiremock.extensions.DynamicOAuthJwkSetResponseTransformer;
 
 import javax.inject.Inject;
 

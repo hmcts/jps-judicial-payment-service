@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.security;
+package uk.gov.hmcts.reform.jps.security;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,8 +8,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
-import uk.gov.hmcts.reform.hmc.jp.security.JwtGrantedAuthoritiesConverter;
-import uk.gov.hmcts.reform.hmc.jp.security.idam.IdamRepository;
+import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.ArrayList;

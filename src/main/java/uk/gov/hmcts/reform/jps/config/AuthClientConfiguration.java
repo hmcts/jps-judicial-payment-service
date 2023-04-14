@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.config;
+package uk.gov.hmcts.reform.jps.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.openfeign.EnableFeignClients;

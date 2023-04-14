@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.config;
+package uk.gov.hmcts.reform.jps.config;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,7 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
-import uk.gov.hmcts.reform.hmc.jp.BaseTest;
+import uk.gov.hmcts.reform.jps.BaseTest;
 
 import java.net.URI;
 import java.util.List;
@@ -29,6 +29,7 @@ import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertThat;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.PUT;
@@ -94,10 +95,10 @@ public class RestTemplateConfigurationTest extends BaseTest {
             }));
         }
 
-        assertThat(futures, hasSize(totalNumberOfCalls));
+        assertSame(futures, hasSize(totalNumberOfCalls));
 
         for (Future<Integer> future: futures) {
-            assertThat(future.get(), is(SC_OK));
+            assertSame(future.get(), is(SC_OK));
         }
     }
 
@@ -110,8 +111,8 @@ public class RestTemplateConfigurationTest extends BaseTest {
     private void assertResponse(final ResponseEntity<JsonNode> response) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        assertThat(response.getBody(), is(objectMapper.readValue(RESPONSE_BODY, JsonNode.class)));
-        assertThat(response.getHeaders().get(CONTENT_TYPE), contains(MIME_TYPE));
-        assertThat(response.getStatusCode().value(), is(SC_OK));
+        assertSame(response.getBody(), is(objectMapper.readValue(RESPONSE_BODY, JsonNode.class)));
+        assertSame(response.getHeaders().get(CONTENT_TYPE), contains(MIME_TYPE));
+        assertSame(response.getStatusCode().value(), is(SC_OK));
     }
 }

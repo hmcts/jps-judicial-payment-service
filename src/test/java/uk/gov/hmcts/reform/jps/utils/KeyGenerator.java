@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.utils;
+package uk.gov.hmcts.reform.jps.utils;
 
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.jwk.RSAKey;

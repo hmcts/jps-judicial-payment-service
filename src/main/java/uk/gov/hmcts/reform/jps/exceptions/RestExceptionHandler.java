@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.exceptions;
+package uk.gov.hmcts.reform.jps.exceptions;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;

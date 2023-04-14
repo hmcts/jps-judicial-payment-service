@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.config;
+package uk.gov.hmcts.reform.jps.config;
 
 import org.springframework.boot.autoconfigure.cache.CacheManagerCustomizer;
 import org.springframework.cache.annotation.EnableCaching;

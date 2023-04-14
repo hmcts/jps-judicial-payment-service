@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp;
+package uk.gov.hmcts.reform.jps;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.data;
+package uk.gov.hmcts.reform.jps.data;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +8,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
-import uk.gov.hmcts.reform.hmc.jp.security.idam.IdamRepository;
+import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.Collection;

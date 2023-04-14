@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.exceptions;
+package uk.gov.hmcts.reform.jps.exceptions;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

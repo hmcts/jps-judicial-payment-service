@@ -1,5 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.wiremock.extensions;
-
+package uk.gov.hmcts.reform.jps.wiremock.extensions;
 
 import com.github.tomakehurst.wiremock.common.FileSource;
 import com.github.tomakehurst.wiremock.extension.Parameters;
@@ -10,7 +9,7 @@ import com.nimbusds.jose.JOSEException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 
-import static uk.gov.hmcts.reform.utils.KeyGenerator.getRsaJwk;
+import static uk.gov.hmcts.reform.jps.utils.KeyGenerator.getRsaJwk;
 
 @Slf4j
 public class DynamicOAuthJwkSetResponseTransformer extends ResponseTransformer {
@@ -40,8 +39,8 @@ public class DynamicOAuthJwkSetResponseTransformer extends ResponseTransformer {
     protected String dynamicResponse(Request request, Response response, Parameters parameters) {
         try {
             return "{"
-                + "\"keys\": [" + getRsaJwk().toPublicJWK().toJSONString() + "]"
-                + "}";
+                   + "\"keys\": [" + getRsaJwk().toPublicJWK().toJSONString() + "]"
+                   + "}";
 
         } catch (JOSEException ex) {
             log.error("Failure running RSA JWK Generator", ex);

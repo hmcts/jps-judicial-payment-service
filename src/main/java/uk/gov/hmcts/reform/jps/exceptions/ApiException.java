@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.exceptions;
+package uk.gov.hmcts.reform.jps.exceptions;
 
 public class ApiException extends RuntimeException {
 

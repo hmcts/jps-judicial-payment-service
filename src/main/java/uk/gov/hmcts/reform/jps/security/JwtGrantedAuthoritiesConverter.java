@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.security;
+package uk.gov.hmcts.reform.jps.security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,7 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
-import uk.gov.hmcts.reform.hmc.jp.security.idam.IdamRepository;
+import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 
 import java.util.ArrayList;

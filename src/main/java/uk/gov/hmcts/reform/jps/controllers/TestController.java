@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.hmc.jp.controllers;
+package uk.gov.hmcts.reform.jps.controllers;
 
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -8,8 +8,8 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.hmc.jp.data.SecurityUtils;
-import uk.gov.hmcts.reform.hmc.jp.exceptions.UnauthorisedException;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.exceptions.UnauthorisedException;
 
 import java.util.Arrays;
 import java.util.List;

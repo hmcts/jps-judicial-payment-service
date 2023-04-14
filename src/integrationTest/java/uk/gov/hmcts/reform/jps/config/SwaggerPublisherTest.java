@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import uk.gov.hmcts.reform.hmc.jp.BaseTest;
+import uk.gov.hmcts.reform.jps.BaseTest;
 
 import java.io.OutputStream;
 import java.nio.file.Files;
