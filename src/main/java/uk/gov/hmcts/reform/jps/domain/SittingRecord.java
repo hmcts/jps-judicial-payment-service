@@ -33,7 +33,8 @@ public class SittingRecord {
     @Column(name = "status_id")
     private String statusId;
 
-    private String region;
+    @Column(name = "region_id")
+    private String regionId;
 
     @Column(name =  "epims_id")
     private String epimsId;
@@ -49,6 +50,10 @@ public class SittingRecord {
 
     @Column(name = "judge_role_type_id")
     private String judgeRoleTypeId;
+
+    private boolean am;
+
+    private boolean pm;
 
     private String duration;
 
