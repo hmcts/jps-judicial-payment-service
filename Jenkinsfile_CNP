@@ -51,7 +51,8 @@ withPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()
-
+  builder.gradle('clean')
+  builder.gradle('build')
   afterAlways('test') {
     builder.gradle('integration')
     // hmcts/cnp-jenkins-library may fail to copy artifacts after checkstyle error so repeat command (see /src/uk/gov/hmcts/contino/GradleBuilder.groovy)
