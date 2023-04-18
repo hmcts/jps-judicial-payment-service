@@ -1,0 +1,65 @@
+package uk.gov.hmcts.reform.jps.controllers;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import uk.gov.hmcts.reform.jps.expection.MissingPathVariableException;
+import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
+import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import javax.validation.Valid;
+
+import static org.springframework.http.ResponseEntity.ok;
+
+
+@RestController
+@Validated
+@RequestMapping(
+    path = "/sitting-records",
+    produces = MediaType.APPLICATION_JSON_VALUE
+)
+@Slf4j
+public class SittingRecordController {
+
+    @GetMapping("/")
+    public ResponseEntity<String> welcome() {
+
+        return ok("Welcome to jps-judicial-payment-service");
+    }
+
+    @PostMapping(
+        path = {"/searchSittingRecords","/searchSittingRecords/{hmctsServiceCode}"}
+    )
+    public ResponseEntity<SittingRecordSearchResponse> searchSittingRecords(
+        @PathVariable("hmctsServiceCode") Optional<String> hmctsServiceCode,
+        @Valid @RequestBody SittingRecordSearchRequest sittingRecordSearchRequest) {
+
+        if (hmctsServiceCode.isEmpty()) {
+            throw new MissingPathVariableException("hmctsServiceCode is mandatory");
+        }
+        log.info("Value passed {}", sittingRecordSearchRequest);
+
+
+        return ok(SittingRecordSearchResponse.builder()
+                  .sittingRecords(
+                      List.of(SittingRecord.builder()
+                          .hmctsServiceId("1")
+                          .am(true)
+                          .changeDateTime(LocalDateTime.now())
+                          .statusId(StatusId.recorded.name())
+                          .build()))
+                  .build());
+    }
+}
