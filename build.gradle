@@ -174,7 +174,8 @@ project.tasks['check'].dependsOn integration
 
 
 def coverageExclusionList = [
-  '**uk/gov/hmcts/reform/jps/expection/PendingMigrationScriptException*'
+  '**uk/gov/hmcts/reform/jps/expection/PendingMigrationScriptException*',
+  '**uk/gov/hmcts/reform/jps/config/FlywayConfiguration*'
 ]
 
 sonar {
