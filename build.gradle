@@ -92,6 +92,7 @@ test {
   useJUnitPlatform()
   generateCucumberReports.enabled = false
   failFast = true
+  finalizedBy jacocoTestReport
 }
 
 task functional() {
