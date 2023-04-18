@@ -1,5 +1,5 @@
 create table public.sitting_record (
-   payment_session_id bigserial constraint pk_sitting_record primary key,
+   sitting_record_id bigserial constraint pk_sitting_record primary key,
    sitting_date date not null,
    status_id varchar(255) not null,
    region_id varchar(2) not null,
