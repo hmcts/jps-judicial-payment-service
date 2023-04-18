@@ -159,6 +159,7 @@ pmd {
   ruleSetFiles = files("config/pmd/ruleset.xml")
 }
 
+jacocoTestCoverageVerification.dependsOn jacocoTestReport
 jacocoTestReport {
   executionData(test, integration)
   reports {
