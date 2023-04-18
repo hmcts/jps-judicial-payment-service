@@ -24,7 +24,7 @@ public class SittingRecord {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "payment_session_ID")
+    @Column(name = "sitting_record_ID")
     private Long id;
 
     @Column(name = "sitting_date")
