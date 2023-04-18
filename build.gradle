@@ -164,12 +164,13 @@ jacocoTestReport {
   reports {
     xml.required = true
     csv.required = false
+    html.required = true
     xml.outputLocation = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
 
-project.tasks['sonar'].dependsOn test,jacocoTestReport
+project.tasks['sonar'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 
