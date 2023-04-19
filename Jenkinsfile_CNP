@@ -53,7 +53,6 @@ withPipeline(type, product, component) {
   disableLegacyDeployment()
 
   afterAlways('test') {
-    def files = findFiles(glob: '**/*.class') echo """${files[0].name} ${files[0].path} ${files[0].directory} ${files[0].length} ${files[0].lastModified}"""
     builder.gradle('integration')
     // hmcts/cnp-jenkins-library may fail to copy artifacts after checkstyle error so repeat command (see /src/uk/gov/hmcts/contino/GradleBuilder.groovy)
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
