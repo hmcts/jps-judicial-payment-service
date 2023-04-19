@@ -1,4 +1,5 @@
 import org.flywaydb.gradle.task.FlywayMigrateTask
+import groovy.io.FileType
 
 plugins {
   id 'application'
@@ -134,8 +135,16 @@ cucumberReports {
   notFailingStatuses = ["skipped", "passed"]
 }
 
-task test(type: Test) {
-  getFileContent
+task doLast {
+  def list = []
+
+  def dir = new File("${project.buildDir}")
+  dir.eachFileRecurse (FileType.FILES) { file ->
+    list << file
+  }
+  list.each {
+    println it.path
+  }
 }
 
 task integration(type: Test) {
