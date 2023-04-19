@@ -134,6 +134,10 @@ cucumberReports {
   notFailingStatuses = ["skipped", "passed"]
 }
 
+task test(type: Test) {
+  getFileContent
+}
+
 task integration(type: Test) {
   description = "Runs integration tests"
   group = "Verification"
