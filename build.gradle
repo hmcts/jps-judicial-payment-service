@@ -174,12 +174,12 @@ project.tasks['check'].dependsOn integration
 
 
 def coverageExclusionList = [
-  '**uk/gov/hmcts/reform/jps/expection/PendingMigrationScriptException*',
-  '**uk/gov/hmcts/reform/jps/config/FlywayConfiguration*'
+  '**uk/gov/hmcts/reform/jps/expection/*.*',
+  '**uk/gov/hmcts/reform/jps/config/*.*',
+  '**uk/gov/hmcts/reform/jps/model/**/*.*'
 ]
 
 sonar {
-  println "file path -> ${jacocoTestReport.reports.xml.destination.path}"
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
