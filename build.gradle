@@ -176,7 +176,7 @@ project.tasks['check'].dependsOn integration
 def coverageExclusionList = [
   '**uk/gov/hmcts/reform/jps/expection/*.*',
   '**uk/gov/hmcts/reform/jps/config/*.*',
-  '**uk/gov/hmcts/reform/jps/model/**/*.*'
+  '**uk/gov/hmcts/reform/jps/domain/*.*'
 ]
 
 sonar {
