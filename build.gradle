@@ -361,4 +361,20 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
   }
 }
 
+gradle.taskGraph.afterTask { Task task, TaskState state ->
 
+  if (task.name.equals("build")) {
+    println "build found enjoy maddeeeee"
+    def list = []
+    def dir = new File("${project.buildDir}")
+    dir.eachFileRecurse (groovy.io.FileType.FILES) { file ->
+      list << file
+    }
+    list.each {
+      println it.path
+    }
+  }
+  else {
+    println "executed task " + task.name
+  }
+}
