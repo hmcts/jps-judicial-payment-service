@@ -363,7 +363,7 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
 
 gradle.taskGraph.afterTask { Task task, TaskState state ->
 
-  if (task.name.equals("sonar")) {
+  if (task.name.equals("sonarqube")) {
     println "sonarqube found enjoy"
     def list = []
     def dir = new File("${project.buildDir}")
