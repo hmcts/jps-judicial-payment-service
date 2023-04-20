@@ -160,12 +160,16 @@ pmd {
 }
 
 jacocoTestReport {
+  doLast{
+    println "jococo report triggered -------------------------------"
+  }
   executionData(test, integration)
   reports {
     xml.required = true
     csv.required = false
     xml.outputLocation = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
+
 }
 
 
@@ -185,17 +189,6 @@ sonar {
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
     property "sonar.exclusions",  coverageExclusionList.join(", ")
-  }
-}
-
-task getFileContent {
-  doLast {
-    println "file path -> ${jacocoTestReport.reports.xml.outputlocation.path}"
-    def line
-    new File("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml").withReader { line = it.readLine() }
-    ext.hash = {
-      line
-    }
   }
 }
 
