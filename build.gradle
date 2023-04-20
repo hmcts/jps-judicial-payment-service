@@ -169,7 +169,7 @@ jacocoTestReport {
 }
 
 
-project.tasks['sonar'].dependsOn test,jacocoTestReport
+project.tasks['sonar'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 
@@ -373,6 +373,10 @@ gradle.taskGraph.afterTask { Task task, TaskState state ->
     list.each {
       println it.path
     }
+
+    def reportFile = new File("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    println("Does jacoco report file exists " + reportFile)
+
   }
   else {
     println "executed task >>> " + task.name
