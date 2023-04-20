@@ -375,7 +375,7 @@ gradle.taskGraph.afterTask { Task task, TaskState state ->
     }
 
     def reportFile = new File("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
-    println("Does jacoco report file exists " + reportFile)
+    println("Does jacoco report file exists " + reportFile.exists())
 
   }
   else {
