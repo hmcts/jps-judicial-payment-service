@@ -1,5 +1,4 @@
 import org.flywaydb.gradle.task.FlywayMigrateTask
-import groovy.io.FileType
 
 plugins {
   id 'application'
@@ -53,10 +52,6 @@ sourceSets {
     }
     resources.srcDir file('src/smokeTest/resources')
   }
-}
-
-test {
-  failFast = false
 }
 
 configurations {
@@ -135,18 +130,6 @@ cucumberReports {
   notFailingStatuses = ["skipped", "passed"]
 }
 
-task doLast {
-  def list = []
-
-  def dir = new File("${project.buildDir}")
-  dir.eachFileRecurse (FileType.FILES) { file ->
-    list << file
-  }
-  list.each {
-    println it.path
-  }
-}
-
 task integration(type: Test) {
   description = "Runs integration tests"
   group = "Verification"
@@ -186,7 +169,7 @@ jacocoTestReport {
 }
 
 
-project.tasks['sonar'].dependsOn test,jacocoTestReport
+project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 
@@ -202,17 +185,6 @@ sonar {
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
     property "sonar.exclusions",  coverageExclusionList.join(", ")
-  }
-}
-
-task getFileContent {
-  doLast {
-    println "file path -> ${jacocoTestReport.reports.xml.outputlocation.path}"
-    def line
-    new File("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml").withReader { line = it.readLine() }
-    ext.hash = {
-      line
-    }
   }
 }
 
@@ -370,7 +342,6 @@ flyway {
   user = System.getenv('FLYWAY_USER')
   password = System.getenv('FLYWAY_PASSWORD')
   baselineOnMigrate = true
-  cleanDisabled = false
 }
 
 task migratePostgresDatabase(type: FlywayMigrateTask) {
@@ -379,5 +350,4 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
     url = "jdbc:postgresql://${dburl}"
   }
 }
-
 
