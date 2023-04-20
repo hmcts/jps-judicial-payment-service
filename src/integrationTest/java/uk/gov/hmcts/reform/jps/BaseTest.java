@@ -45,7 +45,7 @@ public class BaseTest {
     @BeforeEach
     void init() {
         final String hostUrl = "http://localhost:" + wiremockPort;
-      //  ReflectionTestUtils.setField ("securityUtils", securityUtils);
+        //  ReflectionTestUtils.setField ("securityUtils", securityUtils);
 
         Jwt jwt = dummyJwt();
         when(authentication.getPrincipal()).thenReturn(jwt);
