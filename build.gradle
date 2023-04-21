@@ -164,38 +164,27 @@ jacocoTestReport {
   reports {
     xml.required = true
     csv.required = false
-    xml.destination = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    xml.outputLocation = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
 
-project.tasks['sonar'].dependsOn test,jacocoTestReport
+project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 
 def coverageExclusionList = [
-  '**uk/gov/hmcts/reform/jps/expection/PendingMigrationScriptException*',
-  '**uk/gov/hmcts/reform/jps/config/FlywayConfiguration*'
+  '**uk/gov/hmcts/reform/jps/expection/*.*',
+  '**uk/gov/hmcts/reform/jps/config/*.*',
+  '**uk/gov/hmcts/reform/jps/domain/*.*'
 ]
 
 sonar {
-  println "file path -> ${jacocoTestReport.reports.xml.destination.path}"
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
     property "sonar.exclusions",  coverageExclusionList.join(", ")
-  }
-}
-
-task getFileContent {
-  doLast {
-    println "file path -> ${jacocoTestReport.reports.xml.outputlocation.path}"
-    def line
-    new File("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml").withReader { line = it.readLine() }
-    ext.hash = {
-      line
-    }
   }
 }
 
