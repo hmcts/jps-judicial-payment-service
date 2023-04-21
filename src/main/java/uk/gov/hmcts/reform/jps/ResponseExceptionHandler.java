@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -16,6 +17,7 @@ import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.List.of;
 import static java.util.stream.Collectors.toList;
@@ -49,6 +51,24 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
         log.info("Bad request: {}", error);
 
+        return badRequest().body(error);
+    }
+    @Override
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(
+        HttpMessageNotReadableException exception,
+        HttpHeaders headers,
+        HttpStatus status,
+        WebRequest request
+    ) {
+        ModelValidationError error = new ModelValidationError(
+            of(new FieldError("RequestNotReadable",
+                  Optional.ofNullable(exception.getRootCause())
+                      .map(Throwable::getMessage)
+                      .orElse(exception.getMessage()
+                      )
+                )
+            )
+        );
         return badRequest().body(error);
     }
 

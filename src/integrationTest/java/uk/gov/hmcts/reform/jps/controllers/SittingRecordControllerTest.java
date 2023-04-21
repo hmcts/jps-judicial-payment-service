@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
+import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -92,6 +93,34 @@ class SittingRecordControllerTest {
 
         assertThat(actualErrors.getErrors()).isNotEmpty();
         assertThat(actualErrors.getErrors()).containsAll(expectedErrors.getErrors());
+    }
+
+    @Test
+    void shouldReturn400ResponseWhenEnumValuesIncorrect() throws Exception {
+        String requestJson = Resources.toString(getResource("searchSittingRecordsInValidEnumData.json"), UTF_8);
+        MvcResult response = mockMvc
+            .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(requestJson))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andReturn();
+
+        byte[] responseBody = response.getResponse().getContentAsByteArray();
+
+        ModelValidationError actualErrors = objectMapper.readValue(
+            responseBody,
+            ModelValidationError.class
+        );
+
+        assertThat(actualErrors.getErrors()).isNotEmpty();
+        assertThat(actualErrors.getErrors().size()).isEqualTo(1);
+
+        FieldError fieldError = actualErrors.getErrors().get(0);
+        assertThat(fieldError.getFieldName())
+            .isEqualTo("RequestNotReadable");
+        assertThat((fieldError.getMessage()))
+            .contains("one of the values accepted for Enum class: [ASCENDING, DESCENDING]");
     }
 
 }
