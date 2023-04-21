@@ -9,9 +9,9 @@ plugins {
   id 'org.springframework.boot' version '2.7.8'
   id 'org.owasp.dependencycheck' version '8.1.0'
   id 'com.github.ben-manes.versions' version '0.45.0'
-  id 'org.sonarqube' version '3.5.0.2730'
+  id 'org.sonarqube' version '4.0.0.2929'
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.23'
-  id 'uk.gov.hmcts.java' version '0.12.28'
+  id 'uk.gov.hmcts.java' version '0.12.43'
   id 'com.github.hmcts.rse-cft-lib' version '0.15.64'
   id 'org.flywaydb.flyway' version '9.10.1'
 }
@@ -169,33 +169,22 @@ jacocoTestReport {
 }
 
 
-project.tasks['sonar'].dependsOn test,jacocoTestReport
+project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
 
 
 def coverageExclusionList = [
-  '**uk/gov/hmcts/reform/jps/expection/*Exception*',
-  '**uk/gov/hmcts/reform/jps/config/*Configuration*'
+  '**uk/gov/hmcts/reform/jps/expection/*.*',
+  '**uk/gov/hmcts/reform/jps/config/*.*',
+  '**uk/gov/hmcts/reform/jps/domain/*.*'
 ]
 
 sonar {
-  println "file path -> ${jacocoTestReport.reports.xml.destination.path}"
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
     property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
     property "sonar.exclusions",  coverageExclusionList.join(", ")
-  }
-}
-
-task getFileContent {
-  doLast {
-    println "file path -> ${jacocoTestReport.reports.xml.outputlocation.path}"
-    def line
-    new File("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml").withReader { line = it.readLine() }
-    ext.hash = {
-      line
-    }
   }
 }
 
@@ -361,5 +350,4 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
     url = "jdbc:postgresql://${dburl}"
   }
 }
-
 

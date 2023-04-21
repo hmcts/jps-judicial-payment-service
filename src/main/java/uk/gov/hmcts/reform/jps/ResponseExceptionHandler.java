@@ -17,10 +17,9 @@ import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
 import java.util.List;
 
+import static java.util.List.of;
 import static java.util.stream.Collectors.toList;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.ResponseEntity.badRequest;
-import static org.springframework.http.ResponseEntity.status;
 
 @ControllerAdvice
 @Slf4j
@@ -54,7 +53,11 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(MissingPathVariableException.class)
-    protected ResponseEntity<String> handleMissingPathVariableException(MissingPathVariableException exception) {
-        return status(BAD_REQUEST).body(exception.getMessage());
+    protected ResponseEntity<Object> handleMissingPathVariableException(MissingPathVariableException exception) {
+
+        ModelValidationError error = new ModelValidationError(
+            of(new FieldError("PathVariable", exception.getMessage()))
+        );
+        return badRequest().body(error);
     }
 }

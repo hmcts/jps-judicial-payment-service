@@ -43,23 +43,23 @@ public class SittingRecordController {
         path = {"/searchSittingRecords","/searchSittingRecords/{hmctsServiceCode}"}
     )
     public ResponseEntity<SittingRecordSearchResponse> searchSittingRecords(
-        @PathVariable("hmctsServiceCode") Optional<String> hmctsServiceCode,
+        @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
         @Valid @RequestBody SittingRecordSearchRequest sittingRecordSearchRequest) {
 
-        if (hmctsServiceCode.isEmpty()) {
-            throw new MissingPathVariableException("hmctsServiceCode is mandatory");
-        }
-        log.info("Value passed {}", sittingRecordSearchRequest);
+        String hmctsServiceCode = requestHmctsServiceCode
+            .orElseThrow(() -> new MissingPathVariableException("hmctsServiceCode is mandatory"));
 
+        log.info("Value passed {}", sittingRecordSearchRequest);
 
         return ok(SittingRecordSearchResponse.builder()
                   .sittingRecords(
-                      List.of(SittingRecord.builder()
-                          .hmctsServiceId("1")
-                          .am(true)
-                          .changeDateTime(LocalDateTime.now())
-                          .statusId(StatusId.recorded.name())
-                          .build()))
+                      List.of(
+                          SittingRecord.builder()
+                              .hmctsServiceId(hmctsServiceCode)
+                              .am(true)
+                              .changeDateTime(LocalDateTime.now())
+                              .statusId(StatusId.RECORDED.name())
+                              .build()))
                   .build());
     }
 }

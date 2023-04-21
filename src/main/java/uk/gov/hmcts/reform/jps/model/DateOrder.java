@@ -1,6 +1,12 @@
 package uk.gov.hmcts.reform.jps.model;
 
 public enum DateOrder {
-    ascending,
-    descending
+    ASCENDING("ascending"),
+    DESCENDING("descending");
+
+    final String value;
+
+    DateOrder(String value) {
+        this.value = value;
+    }
 }

@@ -5,9 +5,9 @@ public enum Duration {
     PM("PM"),
     FULL_DAY("Full day");
 
-    String value;
+    final String value;
 
     Duration(String value) {
-        value = value;
+        this.value = value;
     }
 }

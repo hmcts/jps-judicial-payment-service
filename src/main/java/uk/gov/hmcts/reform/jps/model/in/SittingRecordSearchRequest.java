@@ -19,6 +19,7 @@ import javax.validation.constraints.Positive;
 @Data
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@SuppressWarnings("serial")
 public class SittingRecordSearchRequest implements Serializable {
     @Positive(message = "Page size can't be less than 1")
     private final int pageSize;
@@ -32,7 +33,7 @@ public class SittingRecordSearchRequest implements Serializable {
     @NotBlank(message = "Epims Id is mandatory")
     private final String epimsId;
 
-    @EnumNamePattern(regexp = "ascending|descending", message = "Expected value ascending|descending")
+    @EnumNamePattern(regexp = "ASCENDING|DESCENDING", message = "Expected value ascending|descending")
     @NotNull(message = "Date order is mandatory")
     private final DateOrder dateOrder;
 
@@ -46,10 +47,10 @@ public class SittingRecordSearchRequest implements Serializable {
     private final String personalCode;
     private final String judgeRoleTypeId;
 
-    @EnumNamePattern(regexp = "AM|PM|Full day", message = "Expected value AM|PM|Full day")
+    @EnumNamePattern(regexp = "AM|PM|FULL_DAY", message = "Expected value AM|PM|Full day")
     private final Duration duration;
 
-    @EnumNamePattern(regexp = "recorded|submitted|published", message = "Expected value recorded|submitted|published")
+    @EnumNamePattern(regexp = "RECORDED|SUBMITTED|PUBLISHED", message = "Expected value recorded|submitted|published")
     private final StatusId statusId;
     private final String createdByUserId;
 }
