@@ -6,7 +6,6 @@ import io.cucumber.java.en.When;
 
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
@@ -31,6 +30,11 @@ public class StepDefinitions {
     @Given("a user with the IDAM role of {string}")
     public void a_user_with_the_idam_role_of(String string) {
         System.out.println(string);
+    }
+
+    @Given("a record for the given hmctsServiceCode exists in the database")
+    public void a_record_for_the_given_hmcts_service_code_exists_in_the_database() {
+        // Write code here that turns the phrase above into concrete actions
     }
 
     @When("a request is prepared with appropriate values")
@@ -91,6 +95,22 @@ public class StepDefinitions {
             .body("judgeRoleTypeId",equalTo("<judgeRoleTypeId>"))
             .body("standardFee",equalTo(1234))
             .body("londonWeightedFee",equalTo(6869));
+    }
+
+    @Then("the response returns the matching sitting records")
+    public void the_response_returns_the_matching_sitting_records() {
+        response.then().assertThat().body("pageSize",equalTo("<pageSize>"))
+            .body("offset",equalTo("<offset>"))
+            .body("dateOrder",equalTo("<dateOrder>"))
+            .body("regionId",equalTo("<regionId>"))
+            .body("epimmsId",equalTo(1234))
+            .body("createdByUserId",equalTo(1234))
+            .body("personalCode",equalTo(1234))
+            .body("judgeRoleTypeId",equalTo(1234))
+            .body("duration",equalTo(1234))
+            .body("dateRangeFrom",equalTo(1234))
+            .body("dateRangeTo",equalTo(1234))
+            .body("statusIds",equalTo(6869));
     }
 
     @Then("the response contains {string} as {string}")

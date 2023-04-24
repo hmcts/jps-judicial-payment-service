@@ -1,0 +1,9 @@
+{
+  "pageSize": "<pageSize>",
+  "offset": "<offset>",
+  "dateOrder": "<dateOrder>",
+  "regionId": "<regionId>",
+  "epimmsId": "<epimmsId>",
+  "dateRangeFrom": "<dateRangeFrom>",
+  "dateRangeTo": "<dateRangeTo>"
+}

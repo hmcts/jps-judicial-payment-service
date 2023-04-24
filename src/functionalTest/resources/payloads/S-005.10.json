@@ -1,0 +1,12 @@
+{
+  "pageSize": "<pageSize>",
+  "offset": "<offset>",
+  "dateOrder": "<dateOrder>",
+  "regionId": "<regionId>",
+  "epimmsId": "<epimmsId>",
+  "createdByUserId": "<createdByUserId>",
+  "personalCode": "<personalCode>",
+  "judgeRoleTypeId": "<judgeRoleTypeId>",
+  "duration": "<duration>",
+  "statusIds": ["<statusId>"]
+}
