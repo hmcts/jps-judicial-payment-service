@@ -24,10 +24,17 @@ spring:
       property-naming-strategy: SNAKE_CASE
     datasource:
       driver-class-name: org.postgresql.Driver
-      url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:5060}/${JUDICIAL_PAYMENT_SERVICE_NAME:judicial-payment-service}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:}
-      username: ${JUDICIAL_PAYMENT_SERVICE_USERNAME:jps}
+      url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:5060}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:judicial-payment-service}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:}
+      username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:jps}
       password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:jps}
       type: com.zaxxer.hikari.HikariDataSource
+      hikari:
+        minimumIdle: 2
+        maximumPoolSize: 10
+        idleTimeout: 10000
+        poolName: JPSHikariCP
+        maxLifetime: 7200000
+        connectionTimeout: 30000
     jpa:
       database: postgresql
       show-sql: false
