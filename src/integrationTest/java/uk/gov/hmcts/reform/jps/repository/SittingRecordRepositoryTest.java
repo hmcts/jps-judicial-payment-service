@@ -31,7 +31,6 @@ class SittingRecordRepositoryTest {
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
@@ -53,7 +52,6 @@ class SittingRecordRepositoryTest {
             .contractTypeId(2L)
             .pm(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("555")
             .build();
@@ -91,7 +89,6 @@ class SittingRecordRepositoryTest {
             .am(true)
             .pm(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();

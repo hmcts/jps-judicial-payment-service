@@ -10,7 +10,6 @@ create table public.sitting_record (
    judge_role_type_id varchar(255) not null,
    am boolean,
    pm boolean,
-   duration varchar(255) not null,
    created_date_time timestamp not null,
    created_by_user_id varchar(255) not null,
    change_date_time timestamp,
