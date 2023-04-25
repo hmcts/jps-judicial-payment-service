@@ -1,3 +1,5 @@
+import org.flywaydb.gradle.task.FlywayMigrateTask
+
 plugins {
   id 'application'
   id 'checkstyle'
@@ -6,10 +8,11 @@ plugins {
   id 'org.springframework.boot' version '2.4.4'
   id 'org.owasp.dependencycheck' version '8.1.0'
   id 'com.github.ben-manes.versions' version '0.45.0'
-  id 'org.sonarqube' version '3.5.0.2730'
+  id 'org.sonarqube' version '4.0.0.2929'
   id 'com.github.spacialcircumstances.gradle-cucumber-reporting' version '0.1.23'
-  id 'uk.gov.hmcts.java' version '0.12.28'
+  id 'uk.gov.hmcts.java' version '0.12.43'
   id 'com.github.hmcts.rse-cft-lib' version '0.15.64'
+  id 'org.flywaydb.flyway' version '9.10.1'
 }
 
 group = 'uk.gov.hmcts.reform'
@@ -37,7 +40,7 @@ ext['jackson.version'] = '2.14.1'
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(11)
+    languageVersion = JavaLanguageVersion.of(17)
   }
 }
 
@@ -105,6 +108,7 @@ tasks.withType(Test) {
 }
 
 test {
+  useJUnitPlatform()
   generateCucumberReports.enabled = false
   failFast = true
 }
@@ -183,19 +187,27 @@ jacocoTestReport {
   reports {
     xml.required = true
     csv.required = false
-    xml.destination file("${buildDir}/reports/jacoco/test/jacocoTestReport.xml")
+    xml.outputLocation = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
 
-project.tasks['sonar'].dependsOn jacocoTestReport
+
+project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
+
+
+def coverageExclusionList = [
+  '**uk/gov/hmcts/reform/jps/expection/*.*',
+  '**uk/gov/hmcts/reform/jps/config/*.*',
+  '**uk/gov/hmcts/reform/jps/domain/*.*'
+]
 
 sonar {
   properties {
     property "sonar.projectName", "Reform :: jps-judicial-payment-service"
     property "sonar.projectKey", "uk.gov.hmcts.reform:jps-judicial-payment-service"
-    property "sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
-    property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/jps/Application.java," +
+    property "sonar.coverage.jacoco.xmlReportPaths", "${jacocoTestReport.reports.xml.destination.path}"
+    property "sonar.exclusions",  coverageExclusionList.join(", ") + "src/main/java/uk/gov/hmcts/reform/jps/Application.java," +
       "**/config/SecurityConfiguration.java," +
       "**/controller/TestController.java"
   }
@@ -231,12 +243,21 @@ ext {
 
 ext['snakeyaml.version'] = '1.33'
 
+def versions = [
+  lombok          : '1.18.24',
+  flyway          : '9.10.0',
+  postgresql      : '42.6.0'
+]
+
 dependencies {
+  annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
+  implementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-json'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-data-jpa'
+
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-cache'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-validation'
   implementation group: 'org.springframework.security', name: 'spring-security-web'
@@ -246,6 +267,7 @@ dependencies {
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-oauth2-resource-server'
 
   implementation group: 'io.springfox', name: 'springfox-swagger2', version: versions.springfoxSwagger
+
 
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.6.14'
 
@@ -261,7 +283,13 @@ dependencies {
 
   implementation group: 'io.rest-assured', name: 'rest-assured'
 
+
   testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0'
+
+  implementation group: 'org.flywaydb', name: 'flyway-core',  version: versions.flyway
+  implementation group: 'org.postgresql', name: 'postgresql', version: versions.postgresql
+
+
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
@@ -272,6 +300,7 @@ dependencies {
   implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.11.1'
   testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.11.1'
   testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+  testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.6'
 
   implementation (group: 'org.glassfish.web', name: 'el-impl', version: '2.2.1-b05') {
     exclude group: 'javax.el', module: 'el-api'
@@ -316,6 +345,7 @@ bootJar {
 }
 
 bootWithCCD {
+  group("cftlib")
   doFirst {
     // Set this flag to 'true', if you want the CFTLib containers to be recreates each time
     environment "RSE_LIB_CLEAN_BOOT", false
@@ -325,11 +355,13 @@ bootWithCCD {
   // TODO: update when we have db connections and authorised services
   environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_gw,ccd_gateway,ccd_data,ccd_next_hearing_date_updater")
   environment("RSE_LIB_S2S_PORT", 4502)
-  environment("RSE_LIB_ADDITIONAL_DATABASES", "jps");
-  environment("CFT_HEARING_SERVICE_DB_USERNAME", "postgres")
-  environment("CFT_HEARING_SERVICE_DB_PASSWORD", "postgres")
-  environment("CFT_HEARING_SERVICE_DB_PORT", "6432")
-  environment("CFT_HEARING_SERVICE_DB_NAME", "jps")
+  environment("RSE_LIB_ADDITIONAL_DATABASES", "jps")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_HOST", "localhost")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_USERNAME", "postgres")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD", "postgres")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_PORT", "6432")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_NAME", "jps")
+  environment("JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS", "?ssl=disable")
   environment("S2S_URL", "http://localhost:8489")
 }
 
@@ -358,6 +390,26 @@ rootProject.tasks.named("processSmokeTestResources") {
   duplicatesStrategy = 'include'
 }
 
+rootProject.tasks.named("processIntegrationTestResources") {
+  duplicatesStrategy = 'include'
+}
+
 wrapper {
     distributionType = Wrapper.DistributionType.ALL
 }
+
+flyway {
+  url = System.getenv('FLYWAY_URL')
+  user = System.getenv('FLYWAY_USER')
+  password = System.getenv('FLYWAY_PASSWORD')
+  baselineOnMigrate = true
+}
+
+task migratePostgresDatabase(type: FlywayMigrateTask) {
+  baselineOnMigrate = true
+  if (project.hasProperty("dburl")) {
+    url = "jdbc:postgresql://${dburl}"
+  }
+}
+
+

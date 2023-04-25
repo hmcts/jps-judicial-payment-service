@@ -20,27 +20,29 @@ spring:
     import: "optional:configtree:/mnt/secrets/jps/"
   application:
     name: Judicial Payment Service
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+  flyway:
+    enabled: true
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:5060}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:judicial-payment-service}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:}
+    username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:jps}
+    password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:jps}
+    properties:
+      charSet: UTF-8
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 10000
+      poolName: JPSHikariCP
+      maxLifetime: 7200000
+      connectionTimeout: 30000
+  jpa:
+    properties:
+      hibernate:
+        jdbc:
+          lob:
+            # silence the 'wall-of-text' - unnecessary exception throw about blob types
+            non_contextual_creation: true
 
   main:
     allow-bean-definition-overriding: true
@@ -91,3 +93,8 @@ http:
 azure:
   application-insights:
     instrumentation-key: ${jps.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+
+dbMigration:
+  # When true, the app will run DB migration on startup.
+  # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
+  runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
