@@ -21,7 +21,6 @@ version = '0.0.1'
 def versions = [
   junit           : '5.7.2',
   junitPlatform   : '1.7.2',
-  lombok          : '1.18.16',
   mapstruct       : '1.4.2.Final',
   reformLogging   : '5.1.7',
   restAssured     : '4.2.1',
@@ -31,7 +30,10 @@ def versions = [
   testcontainers  : '1.15.2',
   netty           : '4.1.68.Final',
   serviceAuthVersion: '3.1.1',
-  tomcatEmbedded  : '9.0.69'
+  tomcatEmbedded  : '9.0.69',
+  lombok          : '1.18.24',
+  flyway          : '9.10.0',
+  postgresql      : '42.6.0'
 ]
 
 ext['log4j2.version'] = '2.17.1'
@@ -242,12 +244,6 @@ ext {
 }
 
 ext['snakeyaml.version'] = '1.33'
-
-def versions = [
-  lombok          : '1.18.24',
-  flyway          : '9.10.0',
-  postgresql      : '42.6.0'
-]
 
 dependencies {
   annotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
