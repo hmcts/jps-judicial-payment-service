@@ -353,5 +353,9 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"
   }
+
+gradle.taskGraph.afterTask { Task task, TaskState state ->
+      println "executed task >>> " + task.name
+  }
 }
 
