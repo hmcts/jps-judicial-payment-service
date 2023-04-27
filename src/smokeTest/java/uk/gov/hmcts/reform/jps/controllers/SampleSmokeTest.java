@@ -20,7 +20,6 @@ class SampleSmokeTest {
 
     @BeforeEach
     public void setUp() {
-        System.out.println("test url : " + testUrl);
         RestAssured.baseURI = testUrl;
         RestAssured.useRelaxedHTTPSValidation();
     }
@@ -28,6 +27,7 @@ class SampleSmokeTest {
     @Test
     void smokeTest() {
         Response response = given()
+            .log().all()
             .contentType(ContentType.JSON)
             .when()
             .get()
