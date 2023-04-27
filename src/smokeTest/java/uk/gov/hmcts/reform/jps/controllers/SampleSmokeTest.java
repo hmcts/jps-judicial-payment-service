@@ -36,7 +36,6 @@ class SampleSmokeTest {
             .extract().response();
 
         Assertions.assertEquals(200, response.statusCode());
-
         Assertions.assertEquals("Welcome to jps-judicial-payment-service",
                                 response.asString());
     }
