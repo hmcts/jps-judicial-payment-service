@@ -356,7 +356,7 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
 
   gradle.taskGraph.afterTask { Task task, TaskState state ->
     println "executed after task >>> " + task.name
-    if (task.name.equals("smokeTest")) {
+    if (task.name.equals("smoke")) {
       println "TEST_URL " + System.getenv('TEST_URL')
     }
 
@@ -364,10 +364,7 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
 
   gradle.taskGraph.beforeTask { Task task ->
     println "executed before task >>> " + task.name
-    if (task.name.equals("smokeTest")) {
-      println "TEST_URL " + System.getenv('TEST_URL')
-    }
-
+    println "TEST_URL " + System.getenv('TEST_URL')
   }
 
 }
