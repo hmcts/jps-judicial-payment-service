@@ -11,11 +11,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import static io.restassured.RestAssured.given;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class SampleSmokeTest {
-    protected static final String CONTENT_TYPE_VALUE = "application/json";
 
-    @Value("${TEST_URL/:http://localhost:8080}")
+    @Value("${TEST_URL:http://localhost:4550}")
     private String testUrl;
 
     @BeforeEach
@@ -32,9 +31,11 @@ class SampleSmokeTest {
             .when()
             .get()
             .then()
+            .log().all()
             .extract().response();
 
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertTrue(response.asString().startsWith("Welcome"));
+        Assertions.assertEquals("Welcome to jps-judicial-payment-service",
+                                response.asString());
     }
 }
