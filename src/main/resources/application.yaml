@@ -24,7 +24,6 @@ spring:
       property-naming-strategy: SNAKE_CASE
   datasource:
     driver-class-name: org.postgresql.Driver
-    driverClassName: org.postgresql.Driver
     url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:6432}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:jps}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:?ssl=disable}
     username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:postgres}
     password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:postgres}
