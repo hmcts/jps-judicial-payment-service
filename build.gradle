@@ -354,19 +354,20 @@ task migratePostgresDatabase(type: FlywayMigrateTask) {
     url = "jdbc:postgresql://${dburl}"
   }
 
-gradle.taskGraph.afterTask { Task task, TaskState state ->
-  println "executed after task >>> " + task.name
-  if (task.name.equals("smokeTest")) {
-        println "TEST_URL " + System.getenv('TEST_URL')
-      }
+  gradle.taskGraph.afterTask { Task task, TaskState state ->
+    println "executed after task >>> " + task.name
+    if (task.name.equals("smokeTest")) {
+      println "TEST_URL " + System.getenv('TEST_URL')
+    }
 
   }
 
-gradle.taskGraph.beforeTask { Task task, TaskState state ->
-  println "executed before task >>> " + task.name
-  if (task.name.equals("smokeTest")) {
-    println "TEST_URL " + System.getenv('TEST_URL')
+  gradle.taskGraph.beforeTask { Task task ->
+    println "executed before task >>> " + task.name
+    if (task.name.equals("smokeTest")) {
+      println "TEST_URL " + System.getenv('TEST_URL')
     }
- }
-}
 
+  }
+
+}
