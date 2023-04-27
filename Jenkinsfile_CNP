@@ -67,7 +67,7 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Functional Tests/**/*'
   }
 
-  before('smoketest:preview') {
+  before('smokeTest:preview') {
     log.info "Test url is " + env.TEST_URL
   }
 }
