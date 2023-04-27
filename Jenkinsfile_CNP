@@ -51,7 +51,7 @@ withPipeline(type, product, component) {
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
   disableLegacyDeployment()
-  enableDbMigration('jps')
+  enableDbMigration('jps-judicial-payment-service')
 
   afterAlways('test') {
     builder.gradle('integration')
