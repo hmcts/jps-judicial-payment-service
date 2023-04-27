@@ -9,7 +9,7 @@ management:
     web:
       base-path: /
       exposure:
-        include: health, info, prometheus
+        include: health, info, env, configprops, flyway, prometheus
 
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.jps.controllers
@@ -27,9 +27,6 @@ spring:
     url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:6432}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:jps}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:?ssl=disable}
     username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:postgres}
     password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:postgres}
-    #url: jdbc:postgresql://jps-judicial-payment-service-pr-36-postgresql:5432/javadatabase?stringtype=unspecified
-    #username: javapostgres
-    #password: javapassword
     type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimumIdle: 2
