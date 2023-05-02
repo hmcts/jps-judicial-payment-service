@@ -197,7 +197,7 @@ sonar {
     property "sonar.coverage.jacoco.xmlReportPaths", "${rootDir}/build/reports/jacoco/codeCoverageReport/codeCoverageReport.xml"
     property "sonar.exclusions", "src/main/java/uk/gov/hmcts/reform/jps/Application.java," +
       "**/config/SecurityConfiguration.java," +
-      "**/controller/TestController.java"
+      "**/controllers/TestController.java"
   }
 }
 
