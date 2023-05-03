@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -14,6 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
+@Slf4j
 class SittingRecordRepositoryTest {
 
     @Autowired
@@ -36,6 +38,7 @@ class SittingRecordRepositoryTest {
             .build();
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        log.debug("Has record persisted ", persistedSittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
         assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
