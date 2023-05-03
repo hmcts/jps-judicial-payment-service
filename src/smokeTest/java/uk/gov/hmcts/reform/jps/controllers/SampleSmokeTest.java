@@ -6,16 +6,16 @@ import io.restassured.response.Response;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static io.restassured.RestAssured.given;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@ExtendWith(SpringExtension.class)
 class SampleSmokeTest {
-    protected static final String CONTENT_TYPE_VALUE = "application/json";
 
-    @Value("${TEST_URL:http://localhost:8080}")
+    @Value("${TEST_URL:http://localhost:4550}")
     private String testUrl;
 
     @BeforeEach
@@ -27,13 +27,16 @@ class SampleSmokeTest {
     @Test
     void smokeTest() {
         Response response = given()
+            .log().all()
             .contentType(ContentType.JSON)
             .when()
             .get()
             .then()
+            .log().all()
             .extract().response();
 
         Assertions.assertEquals(200, response.statusCode());
-        Assertions.assertTrue(response.asString().startsWith("Welcome"));
+        Assertions.assertEquals("Welcome to jps-judicial-payment-service",
+                                response.asString());
     }
 }
