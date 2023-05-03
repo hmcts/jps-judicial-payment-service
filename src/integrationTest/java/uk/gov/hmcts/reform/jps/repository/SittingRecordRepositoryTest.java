@@ -34,6 +34,7 @@ class SittingRecordRepositoryTest {
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
+
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
@@ -60,6 +61,7 @@ class SittingRecordRepositoryTest {
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
             .findById(persistedSittingRecord.getId());
         assertThat(optionalSettingRecordToUpdate).isPresent();
+
         SittingRecord settingRecordToUpdate = optionalSettingRecordToUpdate.get();
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
         settingRecordToUpdate.setChangeDateTime(LocalDateTime.now());
@@ -98,6 +100,7 @@ class SittingRecordRepositoryTest {
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
             .findById(persistedSittingRecord.getId());
         assertThat(optionalSettingRecordToUpdate).isPresent();
+
         SittingRecord settingRecordToDelete = optionalSettingRecordToUpdate.get();
         recordRepository.deleteById(settingRecordToDelete.getId());
 
