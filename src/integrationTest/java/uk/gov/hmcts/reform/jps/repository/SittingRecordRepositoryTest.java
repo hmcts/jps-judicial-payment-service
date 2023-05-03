@@ -15,7 +15,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
-@Slf4j
 class SittingRecordRepositoryTest {
 
     @Autowired
@@ -38,7 +37,6 @@ class SittingRecordRepositoryTest {
             .build();
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-        log.debug("Has record persisted ", persistedSittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
         assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
