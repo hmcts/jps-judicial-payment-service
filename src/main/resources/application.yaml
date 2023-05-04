@@ -48,10 +48,6 @@ spring:
     out-of-order: true
     ignore-missing-migrations: true
 
-azure:
-  application-insights:
-    instrumentation-key: ${jps.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
-
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
