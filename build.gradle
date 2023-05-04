@@ -47,7 +47,7 @@ ext['jackson.version'] = '2.14.1'
 
 java {
   toolchain {
-    languageVersion = JavaLanguageVersion.of(11)
+    languageVersion = JavaLanguageVersion.of(17)
   }
 }
 

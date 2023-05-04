@@ -47,7 +47,7 @@ spring:
   flyway:
     out-of-order: true
     ignore-missing-migrations: true
-
+    
   main:
     allow-bean-definition-overriding: true
   security:
@@ -93,10 +93,6 @@ http:
       timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:30000}
     read:
       timeout: ${HTTP_CLIENT_READ_TIMEOUT:60000}
-
-azure:
-  application-insights:
-    instrumentation-key: ${jps.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
 
 dbMigration:
   # When true, the app will run DB migration on startup.
