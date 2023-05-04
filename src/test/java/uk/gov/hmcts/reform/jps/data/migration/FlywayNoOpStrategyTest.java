@@ -7,6 +7,8 @@ import org.flywaydb.core.api.MigrationState;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
@@ -37,12 +39,14 @@ class FlywayNoOpStrategyTest {
         reset(flyway, infoService, info);
     }
 
-    @Test
-    void shouldNotThrowExceptionWhenAllMigrationsAreApplied() {
+    @ParameterizedTest
+    @EnumSource(value = MigrationState.class, names = {"BASELINE", "BASELINE_IGNORED", "SUCCESS"})
+    void shouldNotThrowExceptionWhenAllMigrationsAreApplied(MigrationState state) {
         MigrationInfo[] infos = { info, info };
         given(flyway.info()).willReturn(infoService);
         given(infoService.all()).willReturn(infos);
-        given(info.getState()).willReturn(MigrationState.SUCCESS);
+        given(info.getState())
+            .willReturn(state);
 
         Throwable exception = catchThrowable(() -> strategy.migrate(flyway));
         assertThat(exception).isNull();
@@ -59,4 +63,6 @@ class FlywayNoOpStrategyTest {
             .isInstanceOf(PendingMigrationScriptException.class)
             .hasMessageStartingWith("Found migration not yet applied");
     }
+
+
 }

@@ -20,15 +20,14 @@ spring:
     import: "optional:configtree:/mnt/secrets/jps/"
   application:
     name: Judicial Payment Service
-  flyway:
-    enabled: true
+    jackson:
+      property-naming-strategy: SNAKE_CASE
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:5060}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:judicial-payment-service}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:}
-    username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:jps}
-    password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:jps}
-    properties:
-      charSet: UTF-8
+    url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:6432}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:jps}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:?ssl=disable}
+    username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:postgres}
+    password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:postgres}
+    type: com.zaxxer.hikari.HikariDataSource
     hikari:
       minimumIdle: 2
       maximumPoolSize: 10
@@ -37,12 +36,17 @@ spring:
       maxLifetime: 7200000
       connectionTimeout: 30000
   jpa:
+    database: postgresql
+    show-sql: false
+    hibernate:
+      ddl-auto: none
     properties:
       hibernate:
         jdbc:
-          lob:
-            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-            non_contextual_creation: true
+          time_zone: UTC
+  flyway:
+    out-of-order: true
+    ignore-missing-migrations: true
 
 azure:
   application-insights:

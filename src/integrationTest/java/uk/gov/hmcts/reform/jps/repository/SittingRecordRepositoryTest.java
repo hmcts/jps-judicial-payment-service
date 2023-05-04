@@ -31,10 +31,10 @@ class SittingRecordRepositoryTest {
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
+
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
@@ -53,7 +53,6 @@ class SittingRecordRepositoryTest {
             .contractTypeId(2L)
             .pm(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("555")
             .build();
@@ -62,6 +61,7 @@ class SittingRecordRepositoryTest {
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
             .findById(persistedSittingRecord.getId());
         assertThat(optionalSettingRecordToUpdate).isPresent();
+
         SittingRecord settingRecordToUpdate = optionalSettingRecordToUpdate.get();
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
         settingRecordToUpdate.setChangeDateTime(LocalDateTime.now());
@@ -91,7 +91,6 @@ class SittingRecordRepositoryTest {
             .am(true)
             .pm(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
@@ -101,6 +100,7 @@ class SittingRecordRepositoryTest {
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
             .findById(persistedSittingRecord.getId());
         assertThat(optionalSettingRecordToUpdate).isPresent();
+
         SittingRecord settingRecordToDelete = optionalSettingRecordToUpdate.get();
         recordRepository.deleteById(settingRecordToDelete.getId());
 
