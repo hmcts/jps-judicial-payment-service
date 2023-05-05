@@ -7,7 +7,7 @@ locals {
   app_insights_config = jsonencode(
     merge(
       jsondecode(
-      file("${path.module}/../lib/applicationinsights.json")), { connectionString = data.azurerm_application_insights.ai.connection_string }
+      file("${path.module}/../lib/applicationinsights.json")), { connectionString = data.azurerm_application_insights.ai.connection_string.value }
     )
   )
 }
