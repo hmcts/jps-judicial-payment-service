@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.ResultActions;
 import uk.gov.hmcts.reform.jps.controllers.TestController;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.exceptions.ServiceException;
+import uk.gov.hmcts.reform.jps.exceptions.UnauthorisedException;
 
 import java.util.HashMap;
 
@@ -91,6 +92,20 @@ public class RestExceptionHandlerTest extends BaseTest {
         // THEN
         assertHttpErrorResponse(result, HttpStatus.INTERNAL_SERVER_ERROR.value(), testExceptionMessage,
             "INTERNAL_SERVER_ERROR");
+    }
+
+    @DisplayName("should return correct response when unauthorised is thrown")
+    @Test
+    void shouldHandleUnauthorisedException() throws Exception {
+        // WHEN
+        Mockito.doThrow(new UnauthorisedException(testExceptionMessage)).when(service).getHearing();
+
+        ResultActions result =  this.mockMvc.perform(get("/test")
+            .contentType(MediaType.APPLICATION_JSON));
+
+        // THEN
+        assertHttpErrorResponse(result, HttpStatus.UNAUTHORIZED.value(), testExceptionMessage,
+            "UNAUTHORIZED");
     }
 
     private void assertHttpErrorResponse(ResultActions result, int expectedStatusCode, String expectedMessage,
