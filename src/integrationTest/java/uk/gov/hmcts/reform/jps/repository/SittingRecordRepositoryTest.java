@@ -75,7 +75,6 @@ class SittingRecordRepositoryTest {
     @Test
     void shouldReturnEmptyWhenRecordNotFound() {
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository.findById(100L);
-
         assertThat(optionalSettingRecordToUpdate).isEmpty();
     }
 
