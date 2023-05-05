@@ -11,13 +11,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.expection.MissingPathVariableException;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
-import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
 import javax.validation.Valid;
 
@@ -51,15 +47,12 @@ public class SittingRecordController {
 
         log.info("Value passed {}", sittingRecordSearchRequest);
 
+        //TODO: Need to set these lookup fields
+        /*regionName;
+        personalName;
+        createdByUserName;
+        changeByUserName;*/
         return ok(SittingRecordSearchResponse.builder()
-                  .sittingRecords(
-                      List.of(
-                          SittingRecord.builder()
-                              .hmctsServiceId(hmctsServiceCode)
-                              .am(true)
-                              .changeDateTime(LocalDateTime.now())
-                              .statusId(StatusId.RECORDED.name())
-                              .build()))
                   .build());
     }
 }

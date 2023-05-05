@@ -119,7 +119,7 @@ class SittingRecordControllerTest {
         FieldError fieldError = actualErrors.getErrors().get(0);
         assertThat(fieldError.getFieldName())
             .isEqualTo("RequestNotReadable");
-        assertThat((fieldError.getMessage()))
+        assertThat(fieldError.getMessage())
             .contains("one of the values accepted for Enum class: [ASCENDING, DESCENDING]");
     }
 

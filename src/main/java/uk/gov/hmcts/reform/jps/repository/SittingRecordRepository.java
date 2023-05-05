@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 
 @Repository
-public interface SittingRecordRepository extends JpaRepository<SittingRecord, Long> {
+public interface SittingRecordRepository extends JpaRepository<SittingRecord, Long>, SittingRecordRepositorySearch {
 }

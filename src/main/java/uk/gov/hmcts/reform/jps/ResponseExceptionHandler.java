@@ -53,6 +53,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
         return badRequest().body(error);
     }
+
     @Override
     protected ResponseEntity<Object> handleHttpMessageNotReadable(
         HttpMessageNotReadableException exception,
@@ -64,8 +65,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
             of(new FieldError("RequestNotReadable",
                   Optional.ofNullable(exception.getRootCause())
                       .map(Throwable::getMessage)
-                      .orElse(exception.getMessage()
-                      )
+                      .orElse(exception.getMessage())
                 )
             )
         );

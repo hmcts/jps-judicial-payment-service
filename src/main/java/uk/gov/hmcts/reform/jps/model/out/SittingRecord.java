@@ -20,8 +20,8 @@ public class SittingRecord {
     private String personalName;
     private Long contractTypeId;
     private String judgeRoleTypeId;
-    private boolean am;
-    private boolean pm;
+    private String am;
+    private String pm;
     private LocalDateTime createdDateTime;
     private String createdByUserId;
     private String createdByUserName;
@@ -29,3 +29,5 @@ public class SittingRecord {
     private String changeByUserId;
     private String changeByUserName;
 }
+
+

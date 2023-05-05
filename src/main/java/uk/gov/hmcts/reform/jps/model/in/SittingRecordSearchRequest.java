@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.model.in;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
 @Data
+@Builder
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings("serial")
