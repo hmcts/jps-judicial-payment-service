@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -29,9 +27,6 @@ public class TestController {
 
     @GetMapping(path = "/test", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @ApiResponses(value = {
-        @ApiResponse(code = 200, message = "Hearing id is valid"),
-    })
     public ResponseEntity getHearing() {
         List<String> allowedRoles = Arrays.asList("jps-recorder", "jps-submitter", "jps-publisher", "jps-admin");
         securityUtils.getUserInfo().getRoles().stream()

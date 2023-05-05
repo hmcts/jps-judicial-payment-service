@@ -69,7 +69,7 @@ idam:
     totp_secret: ${IDAM_KEY_CFT_HEARING_SERVICE:AAAAAAAAAAAAAAAA}
     url: ${S2S_URL:http://localhost:8489}
   s2s-authorised:
-    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp, ccd_gw}
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
   client:
     id: jps_judicial_payment_service
     secret: ${CFT_HEARING_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
