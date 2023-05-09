@@ -71,9 +71,9 @@ class SittingRecoredServiceTest {
 
     private uk.gov.hmcts.reform.jps.model.out.SittingRecord getSittingRecord(
         SittingRecord sittingRecord) {
-        String notSet= null;
+        String notSet = null;
         return Optional.ofNullable(sittingRecord)
-            .map( persistedSittingRecord -> uk.gov.hmcts.reform.jps.model.out.SittingRecord.builder()
+            .map(persistedSittingRecord -> uk.gov.hmcts.reform.jps.model.out.SittingRecord.builder()
             .sittingRecordId(persistedSittingRecord.getId())
             .sittingDate(persistedSittingRecord.getSittingDate())
             .statusId(persistedSittingRecord.getStatusId())
