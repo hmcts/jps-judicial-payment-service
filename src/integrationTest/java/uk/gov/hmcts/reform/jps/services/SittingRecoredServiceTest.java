@@ -106,7 +106,6 @@ class SittingRecoredServiceTest {
             .contractTypeId(contractTypeId)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .duration("10")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId(USER_ID)
             .build();
