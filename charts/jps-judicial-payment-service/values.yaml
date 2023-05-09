@@ -19,6 +19,10 @@ java:
           alias: JUDICIAL_PAYMENT_SERVICE_DB_PORT
         - name: judicial-payment-service-POSTGRES-DATABASE
           alias: JUDICIAL_PAYMENT_SERVICE_DB_NAME
+        - name: idam-jps-judicial-payment-service-client-secret
+          alias: JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET
+        - name: jps-judicial-payment-service-s2s-secret
+          alias: IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE
   environment:
     JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
     RUN_DB_MIGRATION_ON_STARTUP: false
