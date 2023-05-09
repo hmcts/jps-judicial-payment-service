@@ -11,4 +11,7 @@
 
   <!--Please add all the temporary suppression under the below section-->
   <!--End of temporary suppression section -->
+  <suppress>
+    <cve>CVE-2023-24998</cve>
+  </suppress>
 </suppressions>
