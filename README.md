@@ -52,6 +52,7 @@ You should get a response similar to this:
 
 ### Recreating the users
 If you want to recreate the users run the following commands 
+NOTE: the prune command will remove all volumes not just cftLib
 ```bash
 docker container stop $(docker container ls -a -q)
 docker system prune -a -f --volumes
