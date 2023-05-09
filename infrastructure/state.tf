@@ -1,5 +1,6 @@
 terraform {
   backend "azurerm" {}
+
   required_providers {
     azuread = {
       source  = "hashicorp/azuread"
