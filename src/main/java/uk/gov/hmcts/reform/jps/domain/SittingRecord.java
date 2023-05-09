@@ -55,8 +55,6 @@ public class SittingRecord {
 
     private boolean pm;
 
-    private String duration;
-
     @Column(name = "created_date_time")
     private LocalDateTime createdDateTime;
 
