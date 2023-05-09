@@ -9,18 +9,6 @@ public interface SittingRecordRepositorySearch {
     List<SittingRecord> find(SittingRecordSearchRequest recordSearchRequest,
                              String hmctsServiceCode);
 
-    List<SittingRecord> findByUser(SittingRecordSearchRequest recordSearchRequest,
-                             String hmctsServiceCode,
-                             String userId);
-
-    List<SittingRecord> findByIgnoreUserId(SittingRecordSearchRequest recordSearchRequest,
-                             String hmctsServiceCode,
-                             String userId);
-
-    int recordCountByUser(SittingRecordSearchRequest recordSearchRequest,
-                          String hmctsServiceCode,
-                          String userId);
-
     int totalRecords(SittingRecordSearchRequest recordSearchRequest,
                           String hmctsServiceCode);
 }

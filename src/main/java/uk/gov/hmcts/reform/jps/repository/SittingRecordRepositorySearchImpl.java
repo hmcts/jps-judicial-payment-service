@@ -32,8 +32,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         CriteriaBuilder criteriaBuilder,
         CriteriaQuery<T> criteriaQuery,
         Root<V> sittingRecord,
-        Consumer<List<Predicate>> predicateConsumer,
-        boolean isCountQuery) {
+        Consumer<List<Predicate>> predicateConsumer) {
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
@@ -52,8 +51,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         Optional.ofNullable(recordSearchRequest.getStatusId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("statusId"), value.name())));
 
-        predicateConsumer.accept(predicates);
-
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
         if (duration.isPresent()) {
@@ -67,15 +64,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             }
         }
 
-        criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[predicates.size()])));
+        predicateConsumer.accept(predicates);
 
-        if (!isCountQuery) {
-            if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
-                criteriaQuery.orderBy(criteriaBuilder.asc(sittingRecord.get("createdDateTime")));
-            } else {
-                criteriaQuery.orderBy(criteriaBuilder.desc(sittingRecord.get("createdDateTime")));
-            }
-        }
+        Predicate[] predicatesArray = new Predicate[predicates.size()];
+        criteriaQuery.where(criteriaBuilder.and(predicates.toArray(predicatesArray)));
     }
 
     @Override
@@ -93,100 +85,27 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                             criteriaBuilder,
                             criteriaQuery,
                             sittingRecord,
-                            predicates ->
+                            predicates -> {
                                 Optional.ofNullable(recordSearchRequest.getCreatedByUserId())
                                     .ifPresent(value ->
-                                       predicates.add(criteriaBuilder.equal(sittingRecord.get("createdByUserId"),
-                                            value))),
-                false);
+                                                   predicates.add(criteriaBuilder.equal(
+                                                       sittingRecord.get("createdByUserId"),
+                                                       value
+                                                   )));
+
+                                if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
+                                    criteriaQuery.orderBy(criteriaBuilder.asc(sittingRecord.get("createdDateTime")));
+                                } else {
+                                    criteriaQuery.orderBy(criteriaBuilder.desc(sittingRecord.get("createdDateTime")));
+                                }
+                            }
+                            );
 
         TypedQuery<SittingRecord> typedQuery = entityManager.createQuery(criteriaQuery)
             .setMaxResults(recordSearchRequest.getPageSize())
             .setFirstResult(recordSearchRequest.getOffset());
 
         return typedQuery.getResultList();
-    }
-
-    @Override
-    public List<SittingRecord> findByUser(
-        SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode,
-        String userId) {
-
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<SittingRecord> criteriaQuery = criteriaBuilder.createQuery(SittingRecord.class);
-        Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
-        criteriaQuery.select(sittingRecord);
-
-        updateCriteriaQuery(recordSearchRequest,
-                            hmctsServiceCode,
-                            criteriaBuilder,
-                            criteriaQuery,
-                            sittingRecord,
-                            predicates ->
-                                predicates.add(criteriaBuilder.equal(sittingRecord.get("createdByUserId"), userId)),
-                            false);
-
-        TypedQuery<SittingRecord> typedQuery = entityManager.createQuery(criteriaQuery)
-            .setMaxResults(recordSearchRequest.getPageSize())
-            .setFirstResult(recordSearchRequest.getOffset());
-
-        return typedQuery.getResultList();
-    }
-
-    @Override
-    public List<SittingRecord> findByIgnoreUserId(
-        SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode,
-        String userId) {
-
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<SittingRecord> criteriaQuery = criteriaBuilder.createQuery(SittingRecord.class);
-        Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
-
-        criteriaQuery.select(sittingRecord);
-
-        updateCriteriaQuery(recordSearchRequest,
-                            hmctsServiceCode,
-                            criteriaBuilder,
-                            criteriaQuery,
-                            sittingRecord,
-                            predicates ->
-                                Optional.ofNullable(userId)
-                                    .ifPresent(value ->
-                                       predicates.add(criteriaBuilder.notEqual(sittingRecord.get("createdByUserId"),
-                                           value))),
-                false);
-
-
-        TypedQuery<SittingRecord> query = entityManager.createQuery(criteriaQuery);
-
-        return query.getResultList();
-    }
-
-    @Override
-    public int recordCountByUser(
-        SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode,
-        String userId) {
-
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-        Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
-
-        criteriaQuery.select(criteriaBuilder.count(sittingRecord));
-
-        updateCriteriaQuery(recordSearchRequest,
-                            hmctsServiceCode,
-                            criteriaBuilder,
-                            criteriaQuery,
-                            sittingRecord,
-                            predicates ->
-                                predicates.add(criteriaBuilder.equal(sittingRecord.get("createdByUserId"), userId)),
-                true);
-
-
-        return entityManager.createQuery(criteriaQuery).getSingleResult().intValue();
     }
 
     @Override
@@ -209,8 +128,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                 Optional.ofNullable(recordSearchRequest.getCreatedByUserId())
                                     .ifPresent(value ->
                                        predicates.add(criteriaBuilder.equal(sittingRecord.get("createdByUserId"),
-                                            value))),
-                true);
+                                            value)))
+        );
 
         return entityManager.createQuery(criteriaQuery).getSingleResult().intValue();
     }
