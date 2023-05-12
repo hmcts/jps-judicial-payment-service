@@ -77,6 +77,7 @@ idam:
     services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
   client:
     id: jps_judicial_payment_service
+    scope: openid roles profile
     secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
     redirect_uri: http://localhost:4561/oauth2redirect
   recorder:
@@ -91,6 +92,8 @@ idam:
   admin:
     username: ${JPS_ADMIN_USERNAME:jps-admin@gmail.com}
     password: ${JPS_ADMIN_PASSWORD:password}
+    # same for all environments - not used in jps but configured as idam mandates for token generation
+    redirect_uri: http://jps-judicial-payment-service/oauth2redirect
 
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
