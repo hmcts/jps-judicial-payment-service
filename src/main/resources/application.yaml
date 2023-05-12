@@ -47,7 +47,7 @@ spring:
   flyway:
     out-of-order: true
     ignore-missing-migrations: true
-    
+
   main:
     allow-bean-definition-overriding: true
   security:
@@ -60,6 +60,11 @@ spring:
           oidc:
             client-id: internal
             client-secret: internal
+
+test-url: ${TEST_URL:http://localhost:4550}
+
+s2s:
+  name: jps_webapp
 
 idam:
   api:
@@ -74,6 +79,18 @@ idam:
     id: jps_judicial_payment_service
     secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
     redirect_uri: http://localhost:4561/oauth2redirect
+  recorder:
+    username: ${JPS_RECORDER_USERNAME:jps-recorder@gmail.com}
+    password: ${JPS_RECORDER_PASSWORD:password}
+  submitter:
+    username: ${JPS_SUBMITTER_USERNAME:jps-submitter@gmail.com}
+    password: ${JPS_SUBMITTER_PASSWORD:password}
+  publisher:
+    username: ${JPS_PUBLISHER_USERNAME:jps-publisher@gmail.com}
+    password: ${JPS_PUBLISHER_PASSWORD:password}
+  admin:
+    username: ${JPS_ADMIN_USERNAME:jps-admin@gmail.com}
+    password: ${JPS_ADMIN_PASSWORD:password}
 
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
