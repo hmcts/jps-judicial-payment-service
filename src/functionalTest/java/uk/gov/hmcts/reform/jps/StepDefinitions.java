@@ -13,6 +13,7 @@ public class StepDefinitions {
     @When("framework is implemented")
     public void framework_is_implemented() {
     }
+
     @Then("{string} is printed")
     public void is_printed(String string) {
         System.out.println(string);
