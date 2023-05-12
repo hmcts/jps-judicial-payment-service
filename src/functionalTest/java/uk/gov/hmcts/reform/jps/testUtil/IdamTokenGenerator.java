@@ -5,7 +5,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import org.springframework.test.context.TestPropertySource;
 import uk.gov.hmcts.reform.idam.client.IdamClient;
 import uk.gov.hmcts.reform.idam.client.models.UserDetails;
@@ -13,9 +12,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserDetails;
 import java.util.concurrent.TimeUnit;
 
 @TestPropertySource("classpath:application.yaml")
-@Service
 @NoArgsConstructor
-
 public final class IdamTokenGenerator {
 
     @Value("${idam.recorder.username}")

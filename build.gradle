@@ -299,6 +299,8 @@ dependencies {
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
+  functionalTestImplementation sourceSets.main.runtimeClasspath
+  functionalTestImplementation sourceSets.test.runtimeClasspath
   cftlibImplementation group: 'org.springframework.boot', name: 'spring-boot-devtools'
   integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.27.2'
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testcontainers

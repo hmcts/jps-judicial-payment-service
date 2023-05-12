@@ -5,7 +5,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import uk.gov.hmcts.reform.jps.testUtil.*;
 
@@ -13,12 +12,6 @@ public class StepDefinitions {
 
     @Value("${test-url}")
     protected String testUrl;
-
-    @Autowired
-    protected IdamTokenGenerator idamTokenGenerator;
-
-    @Autowired
-    protected ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     RequestSpecification request;
     RequestSpecification given;
@@ -43,10 +36,12 @@ public class StepDefinitions {
 
     @Given("repo is created")
     public void repo_is_created() {
-//        String s2sToken = serviceAuthenticationGenerator.generate();
-//
-//        System.out.println(s2sToken);
+        ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+        String s2sToken = serviceAuthenticationGenerator.generate();
 
+        System.out.println(s2sToken);
+
+        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
         String recorderToken = idamTokenGenerator.generateIdamTokenForRecorder();
 
         System.out.println(recorderToken);
