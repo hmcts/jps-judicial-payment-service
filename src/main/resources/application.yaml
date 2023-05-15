@@ -48,6 +48,54 @@ spring:
     out-of-order: true
     ignore-missing-migrations: true
 
+  main:
+    allow-bean-definition-overriding: true
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${IDAM_OIDC_URL:http://localhost:5000}/o
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
+
+idam:
+  api:
+    url: ${IDAM_API_URL:http://localhost:5000}
+  s2s-auth:
+    microservice: jps_judicial_payment_service
+    totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:AAAAAAAAAAAAAAAA}
+    url: ${S2S_URL:http://localhost:8489}
+  s2s-authorised:
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
+  client:
+    id: jps_judicial_payment_service
+    scope: openid roles profile
+    secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
+    # same for all environments - not used in jps but configured as idam mandates for token generation
+    redirect_uri: http://jps-judicial-payment-service/oauth2redirect
+
+oidc:
+  issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
+
+http:
+  client:
+    max:
+      total: ${HTTP_CLIENT_MAX_TOTAL:100}
+      client_per_route: ${HTTP_CLIENT_MAX_CLIENT_PER_ROUTE:20}
+    seconds:
+      idle:
+        connection: ${HTTP_CLIENT_SECONDS_IDLE_CONNECTION:120}
+    validate:
+      after:
+        inactivity: ${HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY:2000}
+    connection:
+      timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:30000}
+    read:
+      timeout: ${HTTP_CLIENT_READ_TIMEOUT:60000}
+
 dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
