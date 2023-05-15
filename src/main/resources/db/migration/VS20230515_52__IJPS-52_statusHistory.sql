@@ -1,6 +1,6 @@
 
 CREATE TABLE public.status_history (
-	status_history_id bigint not null,
+	status_history_ID bigint not null,
   sitting_record_ID bigint not null,
   status_ID date not null,
   change_date_time timestamp not null,
