@@ -2,3 +2,57 @@ spring:
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     url: jdbc:tc:postgresql:11:///localhost?stringtype=unspecified
+  config:
+    import: application.yaml
+
+idam:
+  api:
+    url: https://idam-api.aat.platform.hmcts.net
+  s2s-auth:
+    microservice: jps_judicial_payment_service
+    totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:6G3UEH6L4XFUPVW5}
+    url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
+  s2s-authorised:
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
+  client:
+    id: jps_judicial_payment_service
+    scope: openid roles profile
+    secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
+    # same for all environments - not used in jps but configured as idam mandates for token generation
+    redirect_uri: http://jps-judicial-payment-service/oauth2redirect
+  jps:
+    system:
+      username: jps-recorder@gmail.com
+      password: PesZvqrb78
+
+
+security:
+  oauth2:
+    client:
+      provider:
+        oidc:
+          issuer-uri: ${idam.web.url}/o
+      registration:
+        oidc:
+          client-id: internal
+          client-secret: internal
+
+
+jps:
+  judicial:
+    payment:
+      service:
+        s2s:
+          secret: 6G3UEH6L4XFUPVW5
+
+location:
+  api:
+    url: http://rd-location-ref-api-aat.service.core-compute-aat.internal
+
+judicialUsers:
+  api:
+    url: http://rd-judicial-api-aat.service.core-compute-aat.internal
+
+caseworker:
+  api:
+    url: http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal

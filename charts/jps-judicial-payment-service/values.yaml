@@ -19,6 +19,19 @@ java:
           alias: JUDICIAL_PAYMENT_SERVICE_DB_PORT
         - name: judicial-payment-service-POSTGRES-DATABASE
           alias: JUDICIAL_PAYMENT_SERVICE_DB_NAME
+        - name: jps-judicial-payment-service-s2s-secret
+          alias: JPS_JUDICIAL_PAYMENT_SERVICE_S2S_SECRET
+        - name: idam-jps-system-username
+          alias: IDAM_JPS_SYSTEM_USERNAME
+        - name: idam-jps-system-password
+          alias: IDAM_JPS_SYSTEM_PASSWORD
+        - name: idam-jps-judicial-payment-service-client-secret
+          alias: IDAM_JPS_JUDICIAL_PAYMENT_SERVICE_CLIENT_SECRET
   environment:
     JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
     RUN_DB_MIGRATION_ON_STARTUP: false
+    IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
+    IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    LOCATION_API_URL: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    JUDICIAL_USERS_API_URL: http://rd-judicial-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    CASEWORKER_API_URL: http://rd-caseworker-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal

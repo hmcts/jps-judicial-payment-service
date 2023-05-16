@@ -16,6 +16,8 @@ springdoc:
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+  main:
+    allow-bean-definition-overriding: true
   config:
     import: "optional:configtree:/mnt/secrets/jps/"
   application:
@@ -52,3 +54,36 @@ dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
   runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
+
+location:
+  api:
+    url: ${LOCATION_API_URL:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API_URL:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+caseworker:
+  api:
+    url: ${CASEWORKER_API_URL:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
+
+
+idam:
+  api:
+    url: ${IDAM_API_URL:https://idam-api.aat.platform.hmcts.net}
+  s2s-auth:
+    microservice: jps_judicial_payment_service
+    totp_secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_S2S_SECRET:}
+    url: ${IDAM_S2S_AUTH_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+  s2s-authorised:
+    services: ${JPS_PAYMENT_SERVICE_S2S_AUTHORISED_SERVICES:jps_webapp}
+  client:
+    id: jps_judicial_payment_service
+    scope: openid roles profile
+    secret: ${IDAM_JPS_JUDICIAL_PAYMENT_SERVICE_CLIENT_SECRET:}
+    # same for all environments - not used in jps but configured as idam mandates for token generation
+    redirect_uri: http://jps-judicial-payment-service/oauth2redirect
+  jps:
+    system:
+      username: ${IDAM_JPS_SYSTEM_USERNAME:jps-system@gmail.com}
+      password: ${IDAM_JPS_SYSTEM_USERNAME:}
