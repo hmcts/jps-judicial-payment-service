@@ -10,7 +10,7 @@ idam:
     url: https://idam-api.aat.platform.hmcts.net
   s2s-auth:
     microservice: jps_judicial_payment_service
-    totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:6G3UEH6L4XFUPVW5}
+    totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:}
     url: http://rpe-service-auth-provider-aat.service.core-compute-aat.internal
   s2s-authorised:
     services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
@@ -23,7 +23,7 @@ idam:
   jps:
     system:
       username: jps-recorder@gmail.com
-      password: PesZvqrb78
+      password:
 
 
 security:
@@ -43,7 +43,7 @@ jps:
     payment:
       service:
         s2s:
-          secret: 6G3UEH6L4XFUPVW5
+          secret:
 
 location:
   api:

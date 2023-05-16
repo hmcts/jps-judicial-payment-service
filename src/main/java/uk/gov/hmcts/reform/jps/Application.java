@@ -1,10 +1,13 @@
 package uk.gov.hmcts.reform.jps;
 
+import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class })
+@OpenAPIDefinition
 @EnableFeignClients(basePackages = {
     "uk.gov.hmcts.reform.jps.refdata.location.client",
     "uk.gov.hmcts.reform.jps.refdata.judicial.client",
