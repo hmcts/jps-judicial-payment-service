@@ -22,13 +22,13 @@ public class LocationService {
 
     private void setRegionDetails(List<SittingRecord> sittingRecords, LocationApiResponse serviceCourtInfo) {
         sittingRecords.forEach(sittingRecord -> {
-                Optional<CourtVenue> courtVenue = getCourtVenue(
-                    serviceCourtInfo,
-                    sittingRecord.getRegionId()
-                );
-                sittingRecord.setRegionName(courtVenue.map(CourtVenue::getSiteName)
-                                                .orElse("N/A"));
-            });
+            Optional<CourtVenue> courtVenue = getCourtVenue(
+                serviceCourtInfo,
+                sittingRecord.getRegionId()
+            );
+            sittingRecord.setRegionName(courtVenue.map(CourtVenue::getSiteName)
+                                            .orElse("N/A"));
+        });
     }
 
     private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo, String regionId) {

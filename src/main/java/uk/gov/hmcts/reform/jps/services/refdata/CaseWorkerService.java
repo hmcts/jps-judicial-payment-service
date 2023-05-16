@@ -48,14 +48,14 @@ public class CaseWorkerService {
                                       Function<SittingRecord, String> caseWorkerId,
                                       BiConsumer<CaseWorkerApiResponse, SittingRecord> caseWorkerUpdate) {
         sittingRecords.forEach(sittingRecord -> {
-                    if (Objects.nonNull(caseWorkerId.apply(sittingRecord))) {
-                        CaseWorkerApiResponse caseWorkerApiResponse = caseWorkerResponse.apply(
-                             caseWorkerId.apply(sittingRecord)
-                         );
-                        caseWorkerUpdate.accept(caseWorkerApiResponse, sittingRecord);
-                    }
+                if (Objects.nonNull(caseWorkerId.apply(sittingRecord))) {
+                    CaseWorkerApiResponse caseWorkerApiResponse = caseWorkerResponse.apply(
+                         caseWorkerId.apply(sittingRecord)
+                     );
+                    caseWorkerUpdate.accept(caseWorkerApiResponse, sittingRecord);
+                }
             }
-            );
+        );
     }
 
 }

@@ -34,15 +34,15 @@ public class JudicialUserDetailsService {
 
 
         sittingRecords.forEach(sittingRecord -> {
-                String personalName = getJudicialUserResponse(
-                    sittingRecord.getPersonalCode(),
-                    judicialUserDetails
-                )
-                    .map(JudicialUserDetailsApiResponse::getFullName)
-                    .orElse("N/A");
+            String personalName = getJudicialUserResponse(
+                sittingRecord.getPersonalCode(),
+                judicialUserDetails
+            )
+                .map(JudicialUserDetailsApiResponse::getFullName)
+                .orElse("N/A");
 
-                sittingRecord.setPersonalName(personalName);
-            });
+            sittingRecord.setPersonalName(personalName);
+        });
     }
 
     private Optional<JudicialUserDetailsApiResponse> getJudicialUserResponse(
