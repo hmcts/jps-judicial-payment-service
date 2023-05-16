@@ -41,7 +41,6 @@ java:
     HTTP_CLIENT_SECONDS_IDLE_CONNECTION: '120'
     HTTP_CLIENT_MAX_CLIENT_PER_ROUTE: '20'
     HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY: '2000'
-    IDAM_S2S_AUTH_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     LOCATION_API_URL: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     JUDICIAL_USERS_API_URL: http://rd-judicial-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
     CASEWORKER_API_URL: http://rd-caseworker-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
