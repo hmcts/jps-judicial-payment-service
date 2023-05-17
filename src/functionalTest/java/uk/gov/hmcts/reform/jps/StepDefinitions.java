@@ -6,12 +6,19 @@ import io.cucumber.java.en.When;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.springframework.beans.factory.annotation.Value;
-import uk.gov.hmcts.reform.jps.testUtil.*;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.stereotype.Component;
+import uk.gov.hmcts.reform.jps.testUtil.ServiceAuthenticationGenerator;
 
+@Component
+@SpringBootTest
 public class StepDefinitions {
 
     @Value("${test-url}")
     protected String testUrl;
+
+//    @Autowired
+//    private ServiceAuthenticationGenerator serviceAuthenticationGenerator;
 
     RequestSpecification request;
     RequestSpecification given;
@@ -39,18 +46,20 @@ public class StepDefinitions {
         ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
         String s2sToken = serviceAuthenticationGenerator.generate();
 
-        System.out.println(s2sToken);
+        System.out.println("heree " + s2sToken);
 
-        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-        String recorderToken = idamTokenGenerator.generateIdamTokenForRecorder();
-
-        System.out.println(recorderToken);
+//        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
+//        String recorderToken = idamTokenGenerator.generateIdamTokenForRecorder();
+//
+//        System.out.println(recorderToken);
 
 //        request = new RequestSpecBuilder().setBaseUri("http://localhost:3000")
 //            .addHeader("Authorization",idamTokenGenerator.generateIdamTokenForRecorder())
 //            .setContentType(ContentType.JSON)
 //            .build();
-//        given = given().log().all().spec(request);
+//        given = given.log().all().spec(request);
+
+//        System.out.println(recorderToken);
     }
 
     @When("framework is implemented")
