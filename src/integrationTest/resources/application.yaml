@@ -4,9 +4,6 @@ spring:
     url: jdbc:tc:postgresql:11:///localhost?stringtype=unspecified
   main:
     allow-bean-definition-overriding: true
-  config:
-    import:
-      - application-itest.yaml
   application:
     name: Judicial Payment Service
     jackson:
