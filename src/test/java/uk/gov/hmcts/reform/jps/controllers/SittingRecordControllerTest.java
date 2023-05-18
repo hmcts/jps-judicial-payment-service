@@ -53,7 +53,7 @@ class SittingRecordControllerTest {
     private ObjectMapper objectMapper;
 
     @Autowired
-    MockMvc mockMvc;
+    private MockMvc mockMvc;
     @MockBean
     private SittingRecordService sittingRecordService;
     @MockBean
@@ -74,10 +74,11 @@ class SittingRecordControllerTest {
                                                   .contentType(MediaType.APPLICATION_JSON)
                                                   .content(requestJson)
             ).andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-            .andExpect(jsonPath("$.errors[0].fieldName").value("PathVariable"))
-            .andExpect(jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory"))
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            )
             .andReturn();
 
         assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();

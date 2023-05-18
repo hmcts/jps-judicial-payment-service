@@ -149,8 +149,6 @@ class SittingRecordRepositorySearchImplTest {
         when(typedQuery.setFirstResult(OFF_SET))
             .thenReturn(typedQuery);
         when(sittingRecord.<String>get(SITTING_DATE)).thenReturn(attributePath);
-        when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class)))
-            .thenReturn(mock(ComparisonPredicate.class));
     }
 
     @Test
