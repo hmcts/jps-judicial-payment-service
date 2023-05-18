@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.jps.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -13,6 +14,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -43,6 +45,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
             classes = {SecurityConfiguration.class,
                 JwtGrantedAuthoritiesConverter.class})})
 @AutoConfigureMockMvc(addFilters = false)
+@ImportAutoConfiguration(TestIdamConfiguration.class)
 class SittingRecordControllerTest {
     private static final String SSCS = "sscs";
 
