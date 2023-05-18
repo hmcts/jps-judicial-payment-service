@@ -27,7 +27,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class SittingRecordControllerTest {
+class SittingRecordControllerITest {
     private MockMvc mockMvc;
 
     @Autowired

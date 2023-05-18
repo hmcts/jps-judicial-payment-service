@@ -25,7 +25,7 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
-class SittingRecoredServiceTest {
+class SittingRecoredServiceITest {
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
     public static final String CONTRACT_TYPE_ID = "contractTypeId";
