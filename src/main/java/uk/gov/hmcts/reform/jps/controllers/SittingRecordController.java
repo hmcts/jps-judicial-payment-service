@@ -73,7 +73,7 @@ public class SittingRecordController {
             );
             regionService.setRegionDetails(hmctsServiceCode, sittingRecords);
             judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
-            caseWorkerService.setCaseWorkerDetails(sittingRecords);
+            //caseWorkerService.setCaseWorkerDetails(sittingRecords);
         }
 
         return ok(SittingRecordSearchResponse.builder()

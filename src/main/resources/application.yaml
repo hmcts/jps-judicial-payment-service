@@ -9,7 +9,7 @@ management:
     web:
       base-path: /
       exposure:
-        include: health, info, prometheus
+        include: health, info, prometheus, env
 
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.jps.controllers
@@ -78,7 +78,7 @@ idam:
   jps:
     system:
       username: ${IDAM_JPS_SYSTEM_USERNAME:jps-system@gmail.com}
-      password: ${IDAM_JPS_SYSTEM_USERNAME:}
+      password: ${IDAM_JPS_SYSTEM_PASSWORD:}
 
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
