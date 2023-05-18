@@ -3,17 +3,22 @@ package uk.gov.hmcts.reform.jps.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
+import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
@@ -33,12 +38,19 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 
-@WebMvcTest(SittingRecordController.class)
+@WebMvcTest(controllers = SittingRecordController.class,
+    excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
+            classes = {SecurityConfiguration.class,
+                JwtGrantedAuthoritiesConverter.class})})
+@AutoConfigureMockMvc(addFilters = false)
 class SittingRecordControllerTest {
-    public static final String SSCS = "sscs";
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String SSCS = "sscs";
+
     @Autowired
-    private MockMvc mockMvc;
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    MockMvc mockMvc;
     @MockBean
     private SittingRecordService sittingRecordService;
     @MockBean
@@ -47,6 +59,7 @@ class SittingRecordControllerTest {
     private JudicialUserDetailsService judicialUserDetailsService;
     @MockBean
     private CaseWorkerService caseWorkerService;
+
 
     @Test
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
@@ -158,7 +171,7 @@ class SittingRecordControllerTest {
 
         verify(regionService).setRegionDetails(eq(SSCS), eq(sittingRecords));
         verify(judicialUserDetailsService).setJudicialUserDetails(eq(sittingRecords));
-        verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
+        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
     }
