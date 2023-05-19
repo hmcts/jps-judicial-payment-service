@@ -5,10 +5,10 @@ import feign.Retryer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@SuppressWarnings("PMD")
+@SuppressWarnings("java:S2975")
 public class JpsRetryer extends Retryer.Default {
 
-    int attempt;
+    int retryCount;
 
     public JpsRetryer(int period, int maxPeriod, int maxAttempts) {
         super(period, maxPeriod, maxAttempts);
@@ -20,7 +20,7 @@ public class JpsRetryer extends Retryer.Default {
 
     @Override
     public void continueOrPropagate(RetryableException retryableException) {
-        log.warn("Feign retry attempt {} due to {} ", attempt++, retryableException.getCause().getMessage());
+        log.warn("Feign retry attempt {} due to {} ", retryCount++, retryableException.getCause().getMessage());
         super.continueOrPropagate(retryableException);
     }
 
