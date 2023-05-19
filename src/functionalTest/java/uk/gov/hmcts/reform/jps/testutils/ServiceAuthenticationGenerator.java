@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.jps.testUtil;
+package uk.gov.hmcts.reform.jps.testutils;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;

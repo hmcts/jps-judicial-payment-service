@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.jps.testUtil;
+package uk.gov.hmcts.reform.jps.testutils;
 
 import feign.Feign;
 import feign.jackson.JacksonDecoder;

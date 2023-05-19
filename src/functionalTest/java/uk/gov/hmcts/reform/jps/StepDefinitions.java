@@ -8,13 +8,14 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import uk.gov.hmcts.reform.jps.config.PropertiesReader;
-import uk.gov.hmcts.reform.jps.testUtil.IdamTokenGenerator;
-import uk.gov.hmcts.reform.jps.testUtil.ServiceAuthenticationGenerator;
+import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.OK;
 
+@SuppressWarnings("CheckStyle")
 public class StepDefinitions {
 
     PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
@@ -57,7 +58,7 @@ public class StepDefinitions {
     }
 
     @When("a call is submitted to the {string} endpoint using a {string} request")
-    public void a_call_is_submitted_to_the_endpoint(String resource, String method) {
+    public void a_call_is_submitted_to_the_endpoint_using_a_request(String resource, String method) {
 
         response = given.when().get("/test");
     }
