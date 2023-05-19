@@ -26,7 +26,7 @@ class JudicialUserDetailsServiceClientTest {
     @Mock
     private JudicialUserDetailsApi judicialUserDetailsApi;
     @InjectMocks
-    private JudicialUserDetailsServiceClient judicialUserDetailsServiceClient;
+    private JudicialUserDetailsServiceClient client;
 
     @Test
     void shouldReturnCaseWorkerApiResponseWhenValidCaseWorkerIsLookedUp() {
@@ -36,7 +36,7 @@ class JudicialUserDetailsServiceClientTest {
         when(judicialUserDetailsApi.getJudicialUserDetails("idamToken", "serviceToken", request))
             .thenReturn(List.of(JudicialUserDetailsApiResponse.builder().build()));
 
-        List<JudicialUserDetailsApiResponse> judicialUserDetails = judicialUserDetailsServiceClient.getJudicialUserDetails(
+        List<JudicialUserDetailsApiResponse> judicialUserDetails = client.getJudicialUserDetails(
             request);
         assertThat(judicialUserDetails).isNotNull();
     }

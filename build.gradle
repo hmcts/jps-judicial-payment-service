@@ -193,7 +193,8 @@ def coverageExclusionList = [
   "**/config/SecurityConfiguration.java",
   "**/controllers/TestController.java",
   "**uk/gov/hmcts/reform/jps/model/**/*",
-  "**uk/gov/hmcts/reform/jps/refdata/**/*"
+  "**uk/gov/hmcts/reform/jps/refdata/**/*",
+  "**uk/gov/hmcts/reform/jps/validator/*.*"
 ]
 
 sonar {
