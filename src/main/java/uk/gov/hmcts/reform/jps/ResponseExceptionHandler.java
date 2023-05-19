@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.List.of;
-import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.springframework.http.ResponseEntity.badRequest;
 
 @ControllerAdvice
@@ -45,7 +45,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(err -> new FieldError(err.getField(), err.getDefaultMessage()))
-                .collect(toList());
+                .collect(toUnmodifiableList());
 
         ModelValidationError error = new ModelValidationError(fieldErrors);
 

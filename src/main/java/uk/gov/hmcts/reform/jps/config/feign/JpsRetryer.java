@@ -5,7 +5,7 @@ import feign.Retryer;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-@SuppressWarnings("java:S2975")
+@SuppressWarnings({"java:S2975", " java:S1182"})
 public class JpsRetryer extends Retryer.Default {
 
     int retryCount;

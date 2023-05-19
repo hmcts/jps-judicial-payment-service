@@ -65,9 +65,7 @@ class SittingRecordServiceTest {
         );
 
         assertThat(sittingRecords)
-            .hasSize(2);
-
-        assertThat(sittingRecords)
+            .hasSize(2)
             .isEqualTo(getDomainSittingRecords(2));
     }
 
