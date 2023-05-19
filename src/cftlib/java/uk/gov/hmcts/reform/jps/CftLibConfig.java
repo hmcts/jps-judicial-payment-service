@@ -24,11 +24,11 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
 
     private void createIdamUsers(CFTLib lib) {
         LOGGER.info("About to create Idam users......................");
-        lib.createIdamUser("ccd.docker.default@hmcts.net", ROLE_CCD_IMPORT);
-        lib.createIdamUser("jps-submitter@gmail.com", ROLE_SUBMITTER);
-        lib.createIdamUser("jps-publisher@gmail.com", ROLE_PUBLISHER);
-        lib.createIdamUser("jps-recorder@gmail.com", ROLE_RECORDER);
-        lib.createIdamUser("jps-admin@gmail.com", ROLE_ADMIN);
+        lib.createIdamUser("jps-invalid-role@gmail.com", ROLE_CCD_IMPORT);
+        lib.createIdamUser("jps-submitter-role@gmail.com", ROLE_SUBMITTER);
+        lib.createIdamUser("jps-publisher-role@gmail.com", ROLE_PUBLISHER);
+        lib.createIdamUser("jps-recorder-role@gmail.com", ROLE_RECORDER);
+        lib.createIdamUser("jps-admin-role@gmail.com", ROLE_ADMIN);
         LOGGER.info("Finished creating Idam users......................");
     }
 }

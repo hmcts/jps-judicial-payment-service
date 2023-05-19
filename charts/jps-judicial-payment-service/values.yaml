@@ -39,6 +39,11 @@ java:
           alias: JPS_ADMIN_USERNAME
         - name: idam-jps-admin-password
           alias: JPS_ADMIN_PASSWORD
+        - name: idam-jps-invalid-username
+          alias: JPS_INVALID_USERNAME
+        - name: idam-jps-invalid-password
+          alias: JPS_INVALID_PASSWORD
+
   environment:
     JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
     RUN_DB_MIGRATION_ON_STARTUP: false

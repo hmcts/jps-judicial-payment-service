@@ -1,71 +1,52 @@
 package uk.gov.hmcts.reform.jps.testUtil;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import lombok.NoArgsConstructor;
+import feign.Feign;
+import feign.jackson.JacksonDecoder;
+import feign.jackson.JacksonEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.context.TestPropertySource;
-import uk.gov.hmcts.reform.idam.client.IdamClient;
-import uk.gov.hmcts.reform.idam.client.models.UserDetails;
+import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.jps.config.PropertiesReader;
 
-import java.util.concurrent.TimeUnit;
+import java.util.Base64;
 
-@TestPropertySource("classpath:application.yaml")
-@NoArgsConstructor
-public final class IdamTokenGenerator {
+@Service
+public class IdamTokenGenerator {
 
-    @Value("${idam.recorder.username}")
-    private String recorderUsername;
+    PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
+    String idamApiUrl = propertiesReader.getProperty("idam.api.url");
+    String clientId = propertiesReader.getProperty("client.id");
+    String redirectUri = propertiesReader.getProperty("idam.redirect_uri");
+    String clientSecret = propertiesReader.getProperty("idam.client.secret");
 
-    @Value("${idam.recorder.password}")
-    private String recorderPassword;
-
-    @Value("${idam.submitter.username}")
-    private String submitterUsername;
-
-    @Value("${idam.submitter.password}")
-    private String submitterPassword;
-
-    @Value("${idam.publisher.username}")
-    private String publisherUsername;
-
-    @Value("${idam.publisher.password}")
-    private String publisherPassword;
-
-    @Value("${idam.admin.username}")
-    private String adminUsername;
-
-    @Value("${idam.admin.password}")
-    private String adminPassword;
+    private final IdamApi idamApi;
 
     @Autowired
-    private IdamClient idamClient;
-
-    private final Cache<String, String> cache = Caffeine.newBuilder().expireAfterWrite(2, TimeUnit.HOURS).build();
-
-    public String generateIdamTokenForRecorder() {
-        String recorderUserToken = cache.getIfPresent(recorderUsername);
-        if (recorderUserToken == null) {
-            recorderUserToken = idamClient.getAccessToken(recorderUsername, recorderPassword);
-            cache.put(recorderUsername, recorderUserToken);
-        }
-        return recorderUserToken;
+    public IdamTokenGenerator() {
+        idamApi = Feign.builder()
+            .encoder(new JacksonEncoder())
+            .decoder(new JacksonDecoder())
+            .target(IdamApi.class, idamApiUrl);
     }
 
-    public String generateIdamTokenForSubmitter() {
-        return idamClient.getAccessToken(submitterUsername, submitterPassword);
-    }
+    public String authenticateUser(String username, String password) {
+        String authorisation = username + ":" + password;
+        String base64Authorisation = Base64.getEncoder().encodeToString(authorisation.getBytes());
 
-    public String generateIdamTokenForPublisher() {
-        return idamClient.getAccessToken(publisherUsername, publisherPassword);
-    }
+        IdamApi.AuthenticateUserResponse authenticateUserResponse = idamApi.authenticateUser(
+            "Basic " + base64Authorisation,
+            "code",
+            clientId,
+            redirectUri
+        );
 
-    public String generateIdamTokenForAdmin() {
-        return idamClient.getAccessToken(adminUsername, adminPassword);
-    }
+        IdamApi.TokenExchangeResponse tokenExchangeResponse = idamApi.exchangeCode(
+            authenticateUserResponse.getCode(),
+            "authorization_code",
+            clientId,
+            clientSecret,
+            redirectUri
+        );
 
-    public UserDetails getUserDetailsFor(final String token) {
-        return idamClient.getUserDetails(token);
+        return "Bearer " + tokenExchangeResponse.getAccessToken();
     }
 }
