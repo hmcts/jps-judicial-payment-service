@@ -30,7 +30,7 @@ public class StepDefinitions {
     String accessToken;
 
     @Given("a user with the IDAM role of {string}")
-    public void a_user_with_the_idam_role_of(String string) {
+    public void userWithTheIdamRoleOf(String string) {
 
         IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
         accessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
@@ -39,7 +39,7 @@ public class StepDefinitions {
     }
 
     @When("a request is prepared with appropriate values")
-    public void a_request_is_prepared_with_appropriate_values() {
+    public void requestIsPreparedWithAppropriateValues() {
 
         ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
         String s2sToken = serviceAuthenticationGenerator.generate();
@@ -58,13 +58,13 @@ public class StepDefinitions {
     }
 
     @When("a call is submitted to the {string} endpoint using a {string} request")
-    public void a_call_is_submitted_to_the_endpoint_using_a_request(String resource, String method) {
+    public void callIsSubmittedToTheEndpoint(String resource, String method) {
 
         response = given.when().get("/test");
     }
 
     @Then("a {string} response is received with a {string} status code")
-    public void a_response_is_received_with_a_status_code(String responseType, String responseCode) {
+    public void responseIsReceivedWithStatusCode(String responseType, String responseCode) {
 
         response.then().log().all().extract().response().asString();
         assertThat(response.getStatusCode()).isEqualTo(OK.value());
