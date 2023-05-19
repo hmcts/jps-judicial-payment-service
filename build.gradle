@@ -192,7 +192,7 @@ def coverageExclusionList = [
   "src/main/java/uk/gov/hmcts/reform/jps/Application.java",
   "**/config/SecurityConfiguration.java",
   "**/controllers/TestController.java",
-  "**uk/gov/hmcts/reform/jps/model/**/*"
+  "**uk/gov/hmcts/reform/jps/model/**/*",
   "**uk/gov/hmcts/reform/jps/refdata/**/*"
 ]
 
