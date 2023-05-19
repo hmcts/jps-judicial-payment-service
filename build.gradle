@@ -187,7 +187,7 @@ project.tasks['check'].dependsOn integration
 
 def coverageExclusionList = [
   '**uk/gov/hmcts/reform/jps/expection/*.*',
-  '**uk/gov/hmcts/reform/jps/config/*.*',
+  '**uk/gov/hmcts/reform/jps/config/**/*',
   '**uk/gov/hmcts/reform/jps/domain/*.*',
   "src/main/java/uk/gov/hmcts/reform/jps/Application.java",
   "**/config/SecurityConfiguration.java",

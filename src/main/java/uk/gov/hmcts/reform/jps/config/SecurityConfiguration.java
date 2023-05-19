@@ -42,7 +42,6 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
         "/webjars/**",
         "/v2/api-docs",
         "/health",
-        "/env",
         "/health/liveness",
         "/health/readiness",
         "/info",
