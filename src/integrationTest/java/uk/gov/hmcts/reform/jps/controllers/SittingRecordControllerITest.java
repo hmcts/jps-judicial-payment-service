@@ -51,10 +51,11 @@ class SittingRecordControllerITest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
               .contentType(MediaType.APPLICATION_JSON)
-              .content(requestJson))
+              .content(updatedRecord))
             .andDo(print())
             .andExpectAll(
                 status().isOk(),
@@ -88,7 +89,6 @@ class SittingRecordControllerITest {
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
-        System.out.println(updatedRecord);
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "BBA3")
               .contentType(MediaType.APPLICATION_JSON)
@@ -122,10 +122,11 @@ class SittingRecordControllerITest {
     @Test
     void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc
+        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
+        mockMvc
             .perform(post("/sitting-records/searchSittingRecords")
                          .contentType(MediaType.APPLICATION_JSON)
-                         .content(requestJson))
+                         .content(updatedRecord))
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.errors[0].fieldName")
@@ -133,7 +134,6 @@ class SittingRecordControllerITest {
             .andExpect(jsonPath("$.errors[0].message")
                            .value("hmctsServiceCode is mandatory"))
             .andReturn();
-        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
     }
 
     @Test
