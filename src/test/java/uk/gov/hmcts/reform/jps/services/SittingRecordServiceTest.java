@@ -69,6 +69,51 @@ class SittingRecordServiceTest {
             .isEqualTo(getDomainSittingRecords(2));
     }
 
+
+    @Test
+    void shouldReturnSittingRecordsWhenRecordPresentInDbWithAmNull() {
+        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = getDbSittingRecords(1);
+        dbSittingRecords.get(0).setAm(false);
+
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
+                                          isA(String.class)))
+            .thenReturn(dbSittingRecords);
+
+        List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
+            SittingRecordSearchRequest.builder().build(),
+            "test"
+        );
+
+        List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
+        domainSittingRecords.get(0).setAm(null);
+
+        assertThat(sittingRecords)
+            .hasSize(1)
+            .isEqualTo(domainSittingRecords);
+    }
+
+    @Test
+    void shouldReturnSittingRecordsWhenRecordPresentInDbWithPmNull() {
+        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = getDbSittingRecords(1);
+        dbSittingRecords.get(0).setPm(false);
+
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
+                                          isA(String.class)))
+            .thenReturn(dbSittingRecords);
+
+        List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
+            SittingRecordSearchRequest.builder().build(),
+            "test"
+        );
+
+        List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
+        domainSittingRecords.get(0).setPm(null);
+
+        assertThat(sittingRecords)
+            .hasSize(1)
+            .isEqualTo(domainSittingRecords);
+    }
+
     private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
         return LongStream.range(1, limit + 1)
             .mapToObj(count -> uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
