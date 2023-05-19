@@ -3,8 +3,8 @@
   "offset" :0,
   "regionId" : "1",
   "epimsId" : "123",
-  "dateRangeFrom" : "2007-12-11",
-  "dateRangeTo" : "2023-12-13",
+  "dateRangeFrom" : "2023-04-11",
+  "dateRangeTo" : "toDate",
   "dateOrder" : "ASCENDING",
   "duration" : "AM"
 }

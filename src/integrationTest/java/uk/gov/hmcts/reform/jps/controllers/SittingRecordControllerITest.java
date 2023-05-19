@@ -12,9 +12,13 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.google.common.io.Resources;
-import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
+import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -36,29 +40,83 @@ class SittingRecordControllerITest {
     @Autowired
     private WebApplicationContext wac;
 
+    @Autowired
+    private SittingRecordRepository recordRepository;
+
     @BeforeEach
     void setUp() {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
     @Test
-    void shouldHaveOkResponseWhenRequestIsValid() throws Exception {
-
+    void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult response = mockMvc
+        mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
               .contentType(MediaType.APPLICATION_JSON)
               .content(requestJson))
             .andDo(print())
-            .andExpect(status().isOk())
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.recordCount").value("0"),
+                jsonPath("$.sittingRecords").isEmpty()
+            )
             .andReturn();
+    }
 
-        byte[] responseBody = response.getResponse().getContentAsByteArray();
-        SittingRecordSearchResponse sittingRecordSearchResponse = objectMapper.readValue(
-            responseBody,
-            SittingRecordSearchResponse.class
-        );
-        assertThat(sittingRecordSearchResponse).isNotNull();
+    @Test
+    void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
+
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId("recorded")
+            .regionId("1")
+            .epimsId("123")
+            .hmctsServiceId("BBA3")
+            .personalCode("4923421")
+            .contractTypeId(2L)
+            .am(true)
+            .judgeRoleTypeId("HighCourt")
+            .createdDateTime(LocalDateTime.now())
+            .createdByUserId("jp-recorder")
+            .build();
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        assertThat(persistedSittingRecord).isNotNull();
+        assertThat(persistedSittingRecord.getId()).isNotNull();
+        assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
+
+        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
+        System.out.println(updatedRecord);
+        mockMvc
+            .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "BBA3")
+              .contentType(MediaType.APPLICATION_JSON)
+              .content(updatedRecord))
+            .andDo(print())
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.recordCount").value("1"),
+                jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].statusId").value("recorded"),
+                jsonPath("$.sittingRecords[0].regionId").value("1"),
+                jsonPath("$.sittingRecords[0].regionName").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].epimsId").value("123"),
+                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
+                jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
+                jsonPath("$.sittingRecords[0].personalName").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
+                jsonPath("$.sittingRecords[0].am").value("AM"),
+                jsonPath("$.sittingRecords[0].pm").isEmpty(),
+                jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].createdByUserId").value("jp-recorder"),
+                jsonPath("$.sittingRecords[0].createdByUserName").isEmpty(),
+                jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
+                jsonPath("$.sittingRecords[0].changeByUserId").isEmpty(),
+                jsonPath("$.sittingRecords[0].changeByUserName").isEmpty()
+            )
+            .andReturn();
     }
 
     @Test
