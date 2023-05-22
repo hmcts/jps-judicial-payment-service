@@ -67,6 +67,8 @@ class SittingRecordControllerITest {
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
+        String idamUrl = System.getenv("idam.api.uri");
+        System.out.println("idam url " + idamUrl);
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
@@ -79,7 +81,7 @@ class SittingRecordControllerITest {
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
+            .createdByUserId("08763527-646c-4dc4-8d82-0c3c2ddc7198")
             .build();
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
