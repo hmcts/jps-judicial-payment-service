@@ -1,5 +1,6 @@
 #!groovy
 import uk.gov.hmcts.contino.AppPipelineDsl
+
 properties(
   [
     [
@@ -11,8 +12,10 @@ properties(
 )
 
 @Library("Infrastructure")
-
+import uk.gov.hmcts.contino.AppPipelineConfig
 import uk.gov.hmcts.contino.GradleBuilder
+
+AppPipelineConfig pipelineConf;
 
 def type = "java"
 def product = "jps"
@@ -20,6 +23,10 @@ def component = "judicial-payment-service"
 def branchesToSync = ['demo', 'ithc', 'perftest']
 
 GradleBuilder builder = new GradleBuilder(this, product)
+
+def vaultOverrides = [
+  'preview': 'aat',
+]
 
 def secrets = [
   'rpx-${env}': [
@@ -29,7 +36,10 @@ def secrets = [
 
   ],
   'jps-${env}': [
-
+    secret('jps-judicial-payment-service-s2s-secret', 'IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE'),
+    secret('idam-jps-judicial-payment-service-client-secret', 'JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET'),
+    secret('idam-jps-system-username', 'IDAM_JPS_SYSTEM_USERNAME'),
+    secret('idam-jps-system-password', 'IDAM_JPS_SYSTEM_PASSWORD'),
 
   ],
   's2s-${env}': [
@@ -47,6 +57,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, component) {
+  pipelineConf = config;
   enableDbMigration('jps')
   syncBranchesWithMaster(branchesToSync)
   loadVaultSecrets(secrets)
