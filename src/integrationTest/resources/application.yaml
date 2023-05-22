@@ -43,7 +43,7 @@ idam:
   client:
     id: jps_judicial_payment_service
     scope: openid roles profile
-    secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
+    secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:oATacU8i2rfDrpXjMbgn}
     # same for all environments - not used in jps but configured as idam mandates for token generation
     redirect_uri: http://jps-judicial-payment-service/oauth2redirect
   jps:
