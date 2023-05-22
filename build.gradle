@@ -116,8 +116,11 @@ test {
   failFast = true
 }
 
-task functional() {
+task functional(type: Test) {
   description = "Runs functional tests"
+  testClassesDirs = sourceSets.functionalTest.output.classesDirs
+  classpath = sourceSets.functionalTest.runtimeClasspath
+
   dependsOn assemble, testClasses
   doFirst {
     generateCucumberReports.enabled = true
@@ -139,7 +142,7 @@ task functional() {
         delete "${rootDir}/Report for Functional Tests/"
         new File("${rootDir}/Report for Functional Tests").mkdirs()
         file("${rootDir}/target/cucumber-html-reports").renameTo(file("${rootDir}/Report for Functional Tests"))
-        logger.quiet("Functional test report moved to ---> file://${buildDir}/reports/tests/functional/overview-features.html")
+        logger.quiet("Functional test report moved to ---> file://${buildDir}/Report for Functional Tests/overview-features.html")
 
       }
     }

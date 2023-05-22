@@ -15,7 +15,6 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.OK;
 
-@SuppressWarnings("CheckStyle")
 public class StepDefinitions {
 
     PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
