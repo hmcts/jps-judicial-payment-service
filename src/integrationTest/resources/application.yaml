@@ -37,7 +37,7 @@ idam:
   s2s-auth:
     microservice: jps_judicial_payment_service
     totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:AAAAAAAAAAAAAAAA}
-    url: ${S2S_URL:http://ttp://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
+    url: ${S2S_URL:http://rpe-service-auth-provider-aat.service.core-compute-aat.internal}
   s2s-authorised:
     services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
   client:
