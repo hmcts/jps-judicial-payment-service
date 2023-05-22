@@ -68,7 +68,8 @@ class SittingRecordControllerITest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
         String idamUrl = System.getenv("idam.api.uri");
-        System.out.println("idam url " + idamUrl);
+        assertThat(idamUrl).as(idamUrl).isNull();
+        assertThat(idamUrl).as(idamUrl).isNotNull();
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
