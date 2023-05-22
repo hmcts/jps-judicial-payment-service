@@ -55,6 +55,10 @@ withPipeline(type, product, component) {
   enableAksStagingDeployment()
   disableLegacyDeployment()
 
+  onPR {
+    loadVaultSecrets(secrets)
+  }
+
   afterAlways('test') {
     builder.gradle('--info --rerun-tasks integration')
     // hmcts/cnp-jenkins-library may fail to copy artifacts after checkstyle error so repeat command (see /src/uk/gov/hmcts/contino/GradleBuilder.groovy)
