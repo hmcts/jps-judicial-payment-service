@@ -67,9 +67,14 @@ class SittingRecordControllerITest {
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
+        System.getenv().forEach((key, value) -> {
+            assertThat(key).as("key ", key).isNotNull();
+            assertThat(value).as("value ", value).isNotNull();
+        });
+
         String idamUrl = System.getenv("idam.api.uri");
-        assertThat(idamUrl).as(idamUrl).isNull();
-        assertThat(idamUrl).as(idamUrl).isNotNull();
+        assertThat(idamUrl).as("idam URL is null", idamUrl).isNull();
+        assertThat(idamUrl).as("idam URL is not null", idamUrl).isNotNull();
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
