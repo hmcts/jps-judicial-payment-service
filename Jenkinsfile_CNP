@@ -15,8 +15,6 @@ properties(
 import uk.gov.hmcts.contino.AppPipelineConfig
 import uk.gov.hmcts.contino.GradleBuilder
 
-AppPipelineConfig pipelineConf
-
 def type = "java"
 def product = "jps"
 def component = "judicial-payment-service"
@@ -55,8 +53,10 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   ]
 }
 
+def pipelineConf = new AppPipelineConfig()
+pipelineConf.vaultSecrets = secrets
+
 withPipeline(type, product, component) {
-  pipelineConf = config
   overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
   enableDbMigration('jps')
