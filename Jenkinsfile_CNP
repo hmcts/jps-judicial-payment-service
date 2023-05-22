@@ -56,9 +56,9 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, component) {
+  pipelineConf = config
   overrideVaultEnvironments(vaultOverrides)
   loadVaultSecrets(secrets)
-  pipelineConf = config
   enableDbMigration('jps')
   syncBranchesWithMaster(branchesToSync)
   enableAksStagingDeployment()
