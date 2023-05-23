@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -21,7 +21,7 @@ public class StatusHistoryRepositoryTest {
     @Test
     void shouldSaveStatusHistory() {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusID("recorded")
+            .statusId("recorded")
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
@@ -35,7 +35,7 @@ public class StatusHistoryRepositoryTest {
     @Test
     void shouldUpdateStatusHistoryWhenRecordIsPresent() {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusID("recorded")
+            .statusId("recorded")
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
@@ -64,7 +64,7 @@ public class StatusHistoryRepositoryTest {
     @Test
     void shouldDeleteSelectedHistory() {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusID("recorded")
+            .statusId("recorded")
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
