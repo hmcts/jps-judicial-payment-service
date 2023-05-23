@@ -49,7 +49,7 @@ idam:
   jps:
     system:
       username: jps-system@gmail.com
-      password: ${IDAM_JPS_SYSTEM_PASSWORD}
+      password: ${IDAM_JPS_SYSTEM_PASSWORD:}
 
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
