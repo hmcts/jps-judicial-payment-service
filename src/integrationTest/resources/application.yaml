@@ -41,7 +41,7 @@ idam:
   s2s-authorised:
     services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
   client:
-    id: jpswebapp
+    id: jps_judicial_payment_service
     scope: openid roles profile
     secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
     # same for all environments - not used in jps but configured as idam mandates for token generation
