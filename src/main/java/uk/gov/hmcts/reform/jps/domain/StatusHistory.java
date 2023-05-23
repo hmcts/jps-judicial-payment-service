@@ -24,15 +24,15 @@ public class StatusHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "status_history_ID")
+    @Column(name = "status_history_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sitting_record_ID")
-    private Long sittingRecordId;
+    @JoinColumn(name = "sitting_record_id")
+    private SittingRecord sittingRecordId;
 
-    @Column(name = "status_ID")
-    private String statusID;
+    @Column(name = "status_id")
+    private String statusId;
 
     @Column(name = "change_date_time")
     private LocalDateTime changeDateTime;
