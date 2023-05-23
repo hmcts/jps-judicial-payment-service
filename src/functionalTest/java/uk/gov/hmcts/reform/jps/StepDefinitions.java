@@ -13,9 +13,9 @@ import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
 
 public class StepDefinitions {
 
@@ -38,10 +38,11 @@ public class StepDefinitions {
 
         IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
 
-        if (role.equalsIgnoreCase("jps-recorder"))
+        if (role.equalsIgnoreCase("jps-recorder")) {
             accessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
-        else if (role.equalsIgnoreCase("ccd-import"))
+        } else if (role.equalsIgnoreCase("ccd-import")) {
             accessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+        }
     }
 
     @When("a request is prepared with appropriate values")
@@ -82,14 +83,15 @@ public class StepDefinitions {
         response.then().log().all().extract().response().asString();
 
         if (responseType.equalsIgnoreCase("positive")) {
-            if (responseCode.equalsIgnoreCase("200 OK"))
+            if (responseCode.equalsIgnoreCase("200 OK")) {
                 assertThat(response.getStatusCode()).isEqualTo(OK.value());
-        }
-        else {
-            if (responseCode.equalsIgnoreCase("401 Unauthorised"))
+            }
+        } else {
+            if (responseCode.equalsIgnoreCase("401 Unauthorised")) {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
-            else if (responseCode.equalsIgnoreCase("403 Forbidden"))
+            } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
+            }
         }
     }
 }
