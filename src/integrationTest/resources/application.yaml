@@ -4,6 +4,8 @@ spring:
     url: jdbc:tc:postgresql:11:///localhost?stringtype=unspecified
   main:
     allow-bean-definition-overriding: true
+  config:
+    import: "optional:configtree:/mnt/secrets/jps/"
   application:
     name: Judicial Payment Service
     jackson:
