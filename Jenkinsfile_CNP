@@ -33,8 +33,7 @@ def secrets = [
     secret('jps-judicial-payment-service-s2s-secret', 'IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE'),
     secret('idam-jps-judicial-payment-service-client-secret', 'JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET'),
     secret('idam-jps-system-username', 'IDAM_JPS_SYSTEM_USERNAME'),
-    secret('idam-jps-system-password', 'IDAM_JPS_SYSTEM_PASSWORD'),
-
+    secret('idam-jps-system-password', 'IDAM_JPS_SYSTEM_PASSWORD')
   ],
   's2s-${env}': [
 
