@@ -12,7 +12,6 @@ properties(
 )
 
 @Library("Infrastructure")
-import uk.gov.hmcts.contino.AppPipelineConfig
 import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
@@ -22,16 +21,23 @@ def branchesToSync = ['demo', 'ithc', 'perftest']
 
 GradleBuilder builder = new GradleBuilder(this, product)
 
-def vaultOverrides = [
-  'preview': 'aat',
-]
 
 def secrets = [
-  'jps-aat': [
+  'rpx-${env}': [
+
+  ],
+  'ccd-${env}': [
+
+  ],
+  'jps-${env}': [
     secret('jps-judicial-payment-service-s2s-secret', 'IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE'),
     secret('idam-jps-judicial-payment-service-client-secret', 'JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET'),
     secret('idam-jps-system-username', 'IDAM_JPS_SYSTEM_USERNAME'),
-    secret('idam-jps-system-password', 'IDAM_JPS_SYSTEM_PASSWORD')
+    secret('idam-jps-system-password', 'IDAM_JPS_SYSTEM_PASSWORD'),
+
+  ],
+  's2s-${env}': [
+
   ]
 ]
 
@@ -39,24 +45,18 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
   [$class     : 'AzureKeyVaultSecret',
    secretType : 'Secret',
    name       : secretName,
+   version    : '',
    envVariable: envVar
   ]
 }
 
-def pipelineConf = new AppPipelineConfig()
-pipelineConf.vaultSecrets = secrets
 
 withPipeline(type, product, component) {
-  enableAksStagingDeployment()
-  disableLegacyDeployment()
-  overrideVaultEnvironments(vaultOverrides)
-  loadVaultSecrets(secrets)
   enableDbMigration('jps')
   syncBranchesWithMaster(branchesToSync)
-
-  onPR {
-    loadVaultSecrets(secrets)
-  }
+  loadVaultSecrets(secrets)
+  enableAksStagingDeployment()
+  disableLegacyDeployment()
 
   afterAlways('test') {
     builder.gradle('--info --rerun-tasks integration')
