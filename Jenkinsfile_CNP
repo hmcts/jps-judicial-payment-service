@@ -21,7 +21,6 @@ def branchesToSync = ['demo', 'ithc', 'perftest']
 
 GradleBuilder builder = new GradleBuilder(this, product)
 
-
 def secrets = [
   'rpx-${env}': [
 

@@ -337,7 +337,7 @@ bootWithCCD {
     environment "RSE_LIB_CLEAN_BOOT", false
   }
 
-  authMode = uk.gov.hmcts.rse.AuthMode.AAT
+  authMode = uk.gov.hmcts.rse.AuthMode.Local
   // TODO: update when we have db connections and authorised services
   environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_gw,ccd_gateway,ccd_data,ccd_next_hearing_date_updater")
   environment("RSE_LIB_S2S_PORT", 4502)
