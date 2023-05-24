@@ -4,8 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -17,11 +19,29 @@ public class StatusHistoryRepositoryTest {
 
     @Autowired
     private StatusHistoryRepository historyRepository;
+    @Autowired
+    private SittingRecordRepository recordRepository;
 
     @Test
     void shouldSaveStatusHistory() {
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId("recorded")
+            .regionId("1")
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .personalCode("001")
+            .contractTypeId(2L)
+            .am(true)
+            .judgeRoleTypeId("HighCourt")
+            .createdDateTime(LocalDateTime.now())
+            .createdByUserId("jp-recorder")
+            .build();
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId("recorded")
+            .sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
@@ -34,8 +54,24 @@ public class StatusHistoryRepositoryTest {
 
     @Test
     void shouldUpdateStatusHistoryWhenRecordIsPresent() {
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId("recorded")
+            .regionId("1")
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .personalCode("001")
+            .contractTypeId(2L)
+            .am(true)
+            .judgeRoleTypeId("HighCourt")
+            .createdDateTime(LocalDateTime.now())
+            .createdByUserId("jp-recorder")
+            .build();
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId("recorded")
+            .sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
@@ -63,8 +99,24 @@ public class StatusHistoryRepositoryTest {
 
     @Test
     void shouldDeleteSelectedHistory() {
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId("recorded")
+            .regionId("1")
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .personalCode("001")
+            .contractTypeId(2L)
+            .am(true)
+            .judgeRoleTypeId("HighCourt")
+            .createdDateTime(LocalDateTime.now())
+            .createdByUserId("jp-recorder")
+            .build();
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId("recorded")
+            .sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
