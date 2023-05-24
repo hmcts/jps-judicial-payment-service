@@ -1,0 +1,56 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/refdata/case-worker/profile/search-by-id?id=08763527-646c-4dc4-8d82-0c3c2ddc7198"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "first_name": "Jane",
+      "last_name": "White",
+      "email_id": "string",
+      "case_worker_id": "08763527-646c-4dc4-8d82-0c3c2ddc7198",
+      "services": [
+        {
+          "service": "string",
+          "service_code": "string"
+        }
+      ],
+      "region": "string",
+      "region_id": 0,
+      "roles": [
+        {
+          "role_id": "string",
+          "created_time": "2023-05-24T11:20:32.015Z",
+          "last_updated_time": "2023-05-24T11:20:32.015Z",
+          "role": "string",
+          "is_primary": true
+        }
+      ],
+      "task_supervisor": true,
+      "case_allocator": true,
+      "suspended": true,
+      "staff_admin": true,
+      "base_locations": [
+        {
+          "created_time": "2023-05-24T11:20:32.015Z",
+          "last_updated_time": "2023-05-24T11:20:32.015Z",
+          "location_id": 0,
+          "location": "string",
+          "is_primary": true
+        }
+      ],
+      "user_type": "string",
+      "skills": [
+        {
+          "skill_id": 0,
+          "description": "string"
+        }
+      ],
+      "up_idam_status": "string"
+    }
+  }
+}

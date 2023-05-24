@@ -13,3 +13,15 @@ idam:
     url: http://localhost:${wiremock.server.port:5000}
   s2s-auth:
     url: http://localhost:${wiremock.server.port:5000}/s2s
+
+location:
+  api:
+    url: http://localhost:${wiremock.server.port:5000}
+
+judicialUsers:
+  api:
+    url: http://localhost:${wiremock.server.port:5000}
+
+caseworker:
+  api:
+    url: http://localhost:${wiremock.server.port:5000}

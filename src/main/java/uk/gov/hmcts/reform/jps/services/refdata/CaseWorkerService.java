@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.services.refdata;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
+@Slf4j
 public class CaseWorkerService {
     private final CaseWorkerClient caseWorkerClient;
 
@@ -48,14 +50,18 @@ public class CaseWorkerService {
                                       Function<SittingRecord, String> caseWorkerId,
                                       BiConsumer<CaseWorkerApiResponse, SittingRecord> caseWorkerUpdate) {
         sittingRecords.forEach(sittingRecord -> {
+            try {
                 if (Objects.nonNull(caseWorkerId.apply(sittingRecord))) {
                     CaseWorkerApiResponse caseWorkerApiResponse = caseWorkerResponse.apply(
-                         caseWorkerId.apply(sittingRecord)
-                     );
+                        caseWorkerId.apply(sittingRecord)
+                    );
                     caseWorkerUpdate.accept(caseWorkerApiResponse, sittingRecord);
                 }
+            } catch (RuntimeException e) {
+                log.error("Caseworker {} lookup error {}",
+                        caseWorkerId.apply(sittingRecord),
+                        e.getMessage());
             }
-        );
+        });
     }
-
 }

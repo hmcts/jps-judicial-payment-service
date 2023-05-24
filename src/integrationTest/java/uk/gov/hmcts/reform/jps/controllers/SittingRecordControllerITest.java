@@ -1,17 +1,13 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
@@ -29,24 +25,15 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 
 
-@SpringBootTest
-@AutoConfigureMockMvc
-class SittingRecordControllerITest {
+class SittingRecordControllerITest extends BaseTest {
+    @Autowired
     private MockMvc mockMvc;
 
     @Autowired
     private ObjectMapper objectMapper;
 
     @Autowired
-    private WebApplicationContext wac;
-
-    @Autowired
     private SittingRecordRepository recordRepository;
-
-    @BeforeEach
-    void setUp() {
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
@@ -101,17 +88,17 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value("recorded"),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].regionName").value("Sutton Social Security and Child Support Tribunal"),
                 jsonPath("$.sittingRecords[0].epimsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
-                jsonPath("$.sittingRecords[0].personalName").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].createdByUserId").value("jp-recorder"),
-                jsonPath("$.sittingRecords[0].createdByUserName").isEmpty(),
+                jsonPath("$.sittingRecords[0].createdByUserId").value("08763527-646c-4dc4-8d82-0c3c2ddc7198"),
+                jsonPath("$.sittingRecords[0].createdByUserName").value("Jane White"),
                 jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
                 jsonPath("$.sittingRecords[0].changeByUserId").isEmpty(),
                 jsonPath("$.sittingRecords[0].changeByUserName").isEmpty()

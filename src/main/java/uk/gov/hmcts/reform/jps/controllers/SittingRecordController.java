@@ -66,11 +66,7 @@ public class SittingRecordController {
             );
             regionService.setRegionDetails(hmctsServiceCode, sittingRecords);
             judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
-            /**
-             * uncomment this once caseworker ref data is available
-             * caseWorkerService.setCaseWorkerDetails(sittingRecords);
-             */
-
+            caseWorkerService.setCaseWorkerDetails(sittingRecords);
         }
 
         return ok(SittingRecordSearchResponse.builder()
