@@ -26,7 +26,6 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 
 
-@ActiveProfiles("itest")
 class SittingRecordControllerITest extends BaseTest {
     @Autowired
     private MockMvc mockMvc;

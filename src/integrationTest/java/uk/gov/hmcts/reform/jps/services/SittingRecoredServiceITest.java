@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,9 +25,7 @@ import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
-@AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@DataJpaTest
-class SittingRecoredServiceITest {
+class SittingRecoredServiceITest extends BaseTest {
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
     public static final String CONTRACT_TYPE_ID = "contractTypeId";
@@ -38,6 +38,7 @@ class SittingRecoredServiceITest {
 
     @BeforeEach
     void beforeEach() {
+        recordRepository.deleteAll();
         sittingRecordService = new SittingRecordService(recordRepository);
     }
 
@@ -106,7 +107,7 @@ class SittingRecoredServiceITest {
             .contractTypeId(contractTypeId)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
+            .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .createdByUserId(USER_ID)
             .build();
     }
