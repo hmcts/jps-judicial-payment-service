@@ -43,4 +43,7 @@ public class StatusHistory {
     @Column(name = "change_by_user_id")
     private String changeByUserId;
 
+    @Column(name = "change_by_name")
+    private String changeByName;
+
 }

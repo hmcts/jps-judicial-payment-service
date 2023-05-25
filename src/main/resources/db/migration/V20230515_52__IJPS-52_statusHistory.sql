@@ -4,7 +4,8 @@ CREATE TABLE public.status_history (
     sitting_record_id bigserial not null,
     status_id varchar(255) not null,
     change_date_time timestamp not null,
-    change_by_user_id varchar(255) not null
+    change_by_user_id varchar(255) not null,
+    change_by_name varchar(255) not null
 );
 
 ALTER TABLE ONLY public.status_history
