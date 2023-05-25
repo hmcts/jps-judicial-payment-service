@@ -91,4 +91,69 @@ class CaseWorkerServiceTest {
             );
 
     }
+
+    @Test
+    void setCaseWorkerNameWhenCaseWorkerDetailsNotFoundInOneOfTheRecords() {
+        List<SittingRecord> sittingRecords = List.of(
+            SittingRecord.builder()
+                .createdByUserId("1")
+                .changeByUserId("11")
+                .build(),
+            SittingRecord.builder()
+                .createdByUserId("2")
+                .changeByUserId("22")
+                .build(),
+            SittingRecord.builder()
+                .createdByUserId("3")
+                .build()
+        );
+
+        when(caseWorkerClient.getCaseWorkerDetails(anyString()))
+            .thenAnswer(invocation -> {
+                String value = invocation.getArgument(0, String.class);
+                if ("1".equals(value)) {
+                    return CaseWorkerApiResponse.builder()
+                        .caseWorkerId("1")
+                        .firstName("Single")
+                        .lastName("One")
+                        .build();
+                } else if ("11".equals(value)) {
+                    throw new RuntimeException("404");
+                } else if ("2".equals(value)) {
+                    return CaseWorkerApiResponse.builder()
+                        .caseWorkerId("2")
+                        .firstName("Single")
+                        .lastName("Two")
+                        .build();
+                } else if ("22".equals(value)) {
+                    return CaseWorkerApiResponse.builder()
+                        .caseWorkerId("22")
+                        .firstName("Double")
+                        .lastName("Two")
+                        .build();
+                }
+                return CaseWorkerApiResponse.builder()
+                    .caseWorkerId("3")
+                    .firstName("Single")
+                    .lastName("Three")
+                    .build();
+            });
+
+
+        caseWorkerService.setCaseWorkerDetails(sittingRecords);
+
+        assertThat(sittingRecords)
+            .extracting(
+                "createdByUserId",
+                "createdByUserName",
+                "changeByUserId",
+                "changeByUserName"
+            )
+            .containsExactlyInAnyOrder(
+                tuple("1", "Single One", "11", null),
+                tuple("2", "Single Two", "22", "Double Two"),
+                tuple("3", "Single Three", null, null)
+            );
+
+    }
 }
