@@ -1,6 +1,6 @@
 package uk.gov.hmcts.reform.jps.repository;
 
-import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -19,16 +19,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 class StatusHistoryRepositoryTest {
 
     @Autowired
-    private static StatusHistoryRepository historyRepository;
+    private StatusHistoryRepository historyRepository;
     @Autowired
-    private static SittingRecordRepository recordRepository;
+    private SittingRecordRepository recordRepository;
 
-    private static SittingRecord persistedSittingRecord;
+    private SittingRecord persistedSittingRecord;
 
-    private static StatusHistory persistedStatusHistory;
+    private StatusHistory persistedStatusHistory;
 
-    @BeforeAll
-    static void setUp() {
+    private StatusHistory statusHistory;
+
+    @BeforeEach
+    public void setUp() {
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
             .statusId("recorded")
@@ -42,26 +44,19 @@ class StatusHistoryRepositoryTest {
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
-        persistedSittingRecord = recordRepository.save(sittingRecord);
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
-        StatusHistory statusHistory = StatusHistory.builder()
+        statusHistory = StatusHistory.builder()
             .statusId("recorded")
             .sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .build();
-
         persistedStatusHistory = historyRepository.save(statusHistory);
     }
 
     @Test
     void shouldSaveStatusHistory() {
-        StatusHistory statusHistory = StatusHistory.builder()
-            .statusId("recorded")
-            .sittingRecordId(persistedSittingRecord)
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId("jp-recorder")
-            .build();
 
         assertThat(persistedStatusHistory).isNotNull();
         assertThat(persistedStatusHistory.getId()).isNotNull();
