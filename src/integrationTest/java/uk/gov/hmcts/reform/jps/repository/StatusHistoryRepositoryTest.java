@@ -23,7 +23,10 @@ class StatusHistoryRepositoryTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
+    private SittingRecord persistedSittingRecord;
+
     private StatusHistory persistedStatusHistory;
+
     private StatusHistory statusHistory;
 
     @BeforeEach
@@ -50,11 +53,12 @@ class StatusHistoryRepositoryTest {
             .changeByUserId("jp-recorder")
             .changeByName("John Smith")
             .build();
-         persistedStatusHistory = historyRepository.save(statusHistory);
+        persistedStatusHistory = historyRepository.save(statusHistory);
     }
 
     @Test
     void shouldSaveStatusHistory() {
+
         assertThat(persistedStatusHistory).isNotNull();
         assertThat(persistedStatusHistory.getId()).isNotNull();
         assertThat(persistedStatusHistory).isEqualTo(statusHistory);
@@ -62,6 +66,7 @@ class StatusHistoryRepositoryTest {
 
     @Test
     void shouldUpdateStatusHistoryWhenRecordIsPresent() {
+
         Optional<StatusHistory> optionalSettingHistoryToUpdate = historyRepository
             .findById(persistedStatusHistory.getId());
         assertThat(optionalSettingHistoryToUpdate).isPresent();
@@ -83,6 +88,7 @@ class StatusHistoryRepositoryTest {
 
     @Test
     void shouldDeleteSelectedHistory() {
+
         Optional<StatusHistory> optionalSettingHistoryToUpdate = historyRepository
             .findById(persistedStatusHistory.getId());
         assertThat(optionalSettingHistoryToUpdate).isPresent();
