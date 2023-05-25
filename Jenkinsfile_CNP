@@ -29,8 +29,11 @@ def secrets = [
 
   ],
   'jps-${env}': [
-
-
+    secret('mc-idam-client-secret', 'JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET'),
+    secret('idam-jps-recorder-username', 'JPS_RECORDER_USERNAME'),
+    secret('idam-jps-recorder-password', 'JPS_RECORDER_PASSWORD'),
+    secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
+    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD')
   ],
   's2s-${env}': [
 
@@ -45,6 +48,12 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
    envVariable: envVar
   ]
 }
+
+//----------------
+// vars needed for functional tests
+env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
+//----------------
 
 withPipeline(type, product, component) {
   enableDbMigration('jps')
