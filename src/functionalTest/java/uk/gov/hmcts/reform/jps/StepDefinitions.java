@@ -7,32 +7,14 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import org.hamcrest.Matchers;
+import uk.gov.hmcts.reform.hmc.jp.functional.resources.APIResources;
 import uk.gov.hmcts.reform.jps.config.PropertiesReader;
 import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
-
-import io.restassured.builder.RequestSpecBuilder;
-import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
-import org.hamcrest.Matchers;
-import uk.gov.hmcts.reform.hmc.jp.functional.resources.APIResources;
-
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-
-import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
-import static  org.hamcrest.Matchers.*;
-
 import static org.springframework.http.HttpStatus.*;
 
 public class StepDefinitions {
@@ -63,6 +45,21 @@ public class StepDefinitions {
         }
     }
 
+    @Given("a sitting record is created")
+    public void a_sitting_record_is_created() {
+
+    }
+
+    @Given("a sitting record is created by a different user")
+    public void a_sitting_record_is_created_by_a_different_user() {
+
+    }
+
+    @Given("a sitting record is created ans its status is not {string}")
+    public void a_sitting_record_is_created_ans_its_status_is_not(String string) {
+
+    }
+
     @When("a request is prepared with appropriate values")
     public void requestIsPreparedWithAppropriateValues() {
 
@@ -89,10 +86,25 @@ public class StepDefinitions {
         given = given.header("ServiceAuthorization", s2sToken);
     }
 
+    @When("a request is missing the S2S token")
+    public void a_request_is_missing_the_s2s_token() {
+        request = new RequestSpecBuilder().setBaseUri("http://localhost:3000").setContentType(
+            ContentType.JSON).build();
+        given = given().log().all().spec(request);
+    }
+
     @When("a call is submitted to the {string} endpoint using a {string} request")
     public void callIsSubmittedToTheEndpoint(String resource, String method) {
 
         response = given.when().get("/test");
+        APIResources resourceAPI = APIResources.valueOf(resource);
+
+        if (method.equalsIgnoreCase("POST"))
+            response = given.when().post(resourceAPI.getResource());
+        else if (method.equalsIgnoreCase("GET"))
+            response = given.when().get(resourceAPI.getResource());
+        else if (method.equalsIgnoreCase("DELETE"))
+            response = given.when().delete(resourceAPI.getResource());
     }
 
     @Then("a {string} response is received with a {string} status code")
@@ -105,7 +117,9 @@ public class StepDefinitions {
                 assertThat(response.getStatusCode()).isEqualTo(OK.value());
             }
         } else {
-            if (responseCode.equalsIgnoreCase("401 Unauthorised")) {
+            if (responseCode.equalsIgnoreCase("400 Bad Request")) {
+                assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST.value());
+            } else if (responseCode.equalsIgnoreCase("401 Unauthorised")) {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
             } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
@@ -113,102 +127,13 @@ public class StepDefinitions {
         }
     }
 
-    @Given("a record exists in fee table for the supplied hmctsServiceCode in the request along judgeRoleTypeId and sittingDate present in request where validFrom <= sittingDate")
-    public void a_record_exists_in_fee_table_for_the_supplied_hmcts_service_code_in_the_request_along_judge_role_type_id_and_sitting_date_present_in_request_where_valid_from_sitting_date() {
-        // Write code to insert in the db first
-    }
-
-    @When("a request is prepared with appropriate values")
-    public void a_request_is_prepared_with_appropriate_values() {
-        request = new RequestSpecBuilder().setBaseUri("http://localhost:3000").setContentType(
-            ContentType.JSON).build();
-        given = given().log().all().spec(request);
-    }
-
-    @When("a request is missing the S2S token")
-    public void a_request_is_missing_the_s2s_token() {
-        request = new RequestSpecBuilder().setBaseUri("http://localhost:3000").setContentType(
-            ContentType.JSON).build();
-        given = given().log().all().spec(request);
-    }
-
     @When("the request contains the {string} as {string}")
-    public void the_request_contains_the_as(String pathParam, String value) {
+    public void theRequestContainsTheAs(String pathParam, String value) {
         given = given().log().all().pathParam(pathParam,value).spec(request);
     }
 
-    @When("a call is submitted to the {string} endpoint using a {string} request")
-    public void a_call_is_submitted_to_the_get_fee_endpoint(String resource, String method) {
-        APIResources resourceAPI = APIResources.valueOf(resource);
-
-        if (method.equalsIgnoreCase("POST"))
-            response = given.when().post(resourceAPI.getResource());
-        else if (method.equalsIgnoreCase("GET"))
-            response = given.when().get(resourceAPI.getResource());
-        else if (method.equalsIgnoreCase("DELETE"))
-            response = given.when().delete(resourceAPI.getResource());
-    }
-
-    @When("the request contains the additional header {string} as {string}")
-    public void the_request_contains_the_additional_header_as(String header, String value) {
-        given.header(header,value);
-    }
-
-    @When("the request body contains the {string} as {string}")
-    public void the_request_body_contains_the_as(String field, String value) {
-        given.body(field, ObjectMapperType.valueOf(value));
-    }
-
-    @When("the request body contains the {string} as in {string}")
-    public void the_request_body_contains_the(String description, String fileName) throws IOException {
-
-        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/"+fileName));
-
-        String body = new String(b);
-        given.body(body).then().log().all();
-    }
-
-    @Then("the response contains a new feeId")
-    public void the_response_contains_a_new_fee_id() {
-        response.then().assertThat().body("feeId", notNullValue());
-    }
-
-    @Then("the response has all the fields returned with correct values")
-    public void the_response_has_all_the_fields_returned_with_correct_values() {
-        response.then().assertThat().body("hmctsServiceCode",equalTo("<hmctsServiceCode>"))
-            .body("feeId",equalTo("<feeId>"))
-            .body("feeDescription",equalTo("<feeDescription>"))
-            .body("judgeRoleTypeId",equalTo("<judgeRoleTypeId>"))
-            .body("standardFee",equalTo(1234))
-            .body("londonWeightedFee",equalTo(6869));
-    }
-
-    @Then("the response contains {string} as {string}")
-    public void the_response_contains_as(String attribute, String value) {
-        response.then().assertThat().body(attribute,equalTo(value));
-    }
-
     @Then("the response is empty")
-    public void the_response_is_empty() {
+    public void theResponseIsEmpty() {
         response.then().assertThat().body("isEmpty()", Matchers.is(true));
-    }
-
-    @Then("a {string} response is received with a {string} status code")
-    public void a_response_is_received_with_a_status_code(String responseType, String responseCode) {
-
-        response.then().log().all().extract().response().asString();
-
-        if (responseType.equalsIgnoreCase("positive")) {
-            if (responseCode.equalsIgnoreCase("200 OK"))
-                assertThat(response.getStatusCode()).isEqualTo(OK.value());
-        }
-        else {
-            if (responseCode.equalsIgnoreCase("400 Bad Request"))
-                assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST.value());
-            else if (responseCode.equalsIgnoreCase("401 Unauthorised"))
-                assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
-            else if (responseCode.equalsIgnoreCase("403 Forbidden"))
-                assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
-        }
     }
 }
