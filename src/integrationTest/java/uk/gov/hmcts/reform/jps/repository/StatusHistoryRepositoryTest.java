@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.jps.repository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
@@ -23,6 +24,9 @@ class StatusHistoryRepositoryTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
+    @Value("${wiremock.server.port}")
+    protected Integer wiremockPort;
+
     private SittingRecord persistedSittingRecord;
 
     private StatusHistory persistedStatusHistory;
@@ -31,6 +35,8 @@ class StatusHistoryRepositoryTest {
 
     @BeforeEach
     public void setUp() {
+        final String hostUrl = "http://localhost:" + wiremockPort;
+
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
             .statusId("recorded")
