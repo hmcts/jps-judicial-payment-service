@@ -49,6 +49,25 @@ You should get a response similar to this:
   {"status":"UP","diskSpace":{"status":"UP","total":249644974080,"free":137188298752,"threshold":10485760}}
 ```
 
+
+### Recreating the users
+If you want to recreate the users run the following commands 
+NOTE: the prune command will remove all volumes not just cftLib
+```bash
+docker container stop $(docker container ls -a -q)
+docker system prune -a -f --volumes
+./gradlew bootWithCCD
+```
+you then may see this error
+```bash
+ ERROR [restartedMain] org.springframework.boot.SpringApplicationorg.springframework.beans.factory.BeanCreationException: Error creating bean with name 'cftLibConfig': Invocation of init method failed; nested exception is java.lang.IllegalStateException: Could not find a valid Docker environment. Please see logs and check configuration
+ ```
+ to solve this run 
+```bash
+sudo ln -s $HOME/.docker/run/docker.sock /var/run/docker.sock
+./gradlew bootWithCCD
+```
+
 ### Alternative running the application
 
 Create the image of the application by executing the following command:
