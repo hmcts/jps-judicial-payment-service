@@ -6,7 +6,11 @@
     },
     {
       "fieldName": "pageSize",
-      "message": "Page size can't be less than 1"
+      "message": "Page size is mandatory"
+    },
+    {
+      "fieldName": "offset",
+      "message": "Offset is mandatory"
     },
     {
       "fieldName": "dateRangeFrom",
