@@ -24,10 +24,12 @@ import javax.validation.constraints.Positive;
 @SuppressWarnings("serial")
 public class SittingRecordSearchRequest implements Serializable {
     @Positive(message = "Page size can't be less than 1")
-    private final int pageSize;
+    @NotNull(message = "Page size is mandatory")
+    private final Integer pageSize;
 
     @Min(value = 0, message = "Offset can't be less than 0")
-    private final int offset;
+    @NotNull(message = "Offset is mandatory")
+    private final Integer offset;
 
     @NotBlank(message = "Region Id is mandatory")
     private final String regionId;
