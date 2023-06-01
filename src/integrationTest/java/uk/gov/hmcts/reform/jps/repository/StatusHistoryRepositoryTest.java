@@ -53,6 +53,7 @@ class StatusHistoryRepositoryTest {
             .sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
+            .changeByName("John Doe")
             .build();
         persistedStatusHistory = historyRepository.save(statusHistory);
     }
