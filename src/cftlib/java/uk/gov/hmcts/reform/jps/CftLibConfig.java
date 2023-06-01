@@ -11,9 +11,10 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CftLibConfig.class);
 
-    private static final String ROLE_PUBLISHER = "jp-publisher";
-    private static final String ROLE_SUBMITTER = "jp-submitter";
-    private static final String ROLE_RECORDER = "jp-recorder";
+    private static final String ROLE_PUBLISHER = "jps-publisher";
+    private static final String ROLE_SUBMITTER = "jps-submitter";
+    private static final String ROLE_RECORDER = "jps-recorder";
+    private static final String ROLE_ADMIN = "jps-admin";
     private static final String ROLE_CCD_IMPORT = "ccd-import";
 
     @Override
@@ -23,10 +24,11 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
 
     private void createIdamUsers(CFTLib lib) {
         LOGGER.info("About to create Idam users......................");
-        lib.createIdamUser("ccd.docker.default@hmcts.net", ROLE_CCD_IMPORT);
-        lib.createIdamUser("auto.test.cnp@gmail.com", ROLE_SUBMITTER);
-        lib.createIdamUser("next.hearing.date.admin@gmail.com", ROLE_PUBLISHER);
-        lib.createIdamUser("master.caseworker@gmail.com", ROLE_RECORDER);
+        lib.createIdamUser("jps-invalid-role@gmail.com", ROLE_CCD_IMPORT);
+        lib.createIdamUser("jps-submitter-role@gmail.com", ROLE_SUBMITTER);
+        lib.createIdamUser("jps-publisher-role@gmail.com", ROLE_PUBLISHER);
+        lib.createIdamUser("jps-recorder-role@gmail.com", ROLE_RECORDER);
+        lib.createIdamUser("jps-admin-role@gmail.com", ROLE_ADMIN);
         LOGGER.info("Finished creating Idam users......................");
     }
 }
