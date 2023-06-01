@@ -59,8 +59,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                 predicates.add(criteriaBuilder.equal(sittingRecord.get("pm"), true));
             } else if (duration.get().equals(AM)) {
                 predicates.add(criteriaBuilder.equal(sittingRecord.get("am"), true));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get("pm"), false));
             } else if (duration.get().equals(PM)) {
                 predicates.add(criteriaBuilder.equal(sittingRecord.get("pm"), true));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get("am"), false));
             }
         }
 
@@ -94,9 +96,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                    )));
 
                                 if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
-                                    criteriaQuery.orderBy(criteriaBuilder.asc(sittingRecord.get("createdDateTime")));
+                                    criteriaQuery.orderBy(criteriaBuilder.asc(sittingRecord.get("sittingDate")));
                                 } else {
-                                    criteriaQuery.orderBy(criteriaBuilder.desc(sittingRecord.get("createdDateTime")));
+                                    criteriaQuery.orderBy(criteriaBuilder.desc(sittingRecord.get("sittingDate")));
                                 }
                             }
                             );

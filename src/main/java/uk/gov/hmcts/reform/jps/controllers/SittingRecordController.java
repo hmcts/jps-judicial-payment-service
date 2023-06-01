@@ -64,9 +64,12 @@ public class SittingRecordController {
                 sittingRecordSearchRequest,
                 hmctsServiceCode
             );
-            regionService.setRegionDetails(hmctsServiceCode, sittingRecords);
-            judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
-            caseWorkerService.setCaseWorkerDetails(sittingRecords);
+
+            if (!sittingRecords.isEmpty()) {
+                regionService.setRegionDetails(hmctsServiceCode, sittingRecords);
+                judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
+                caseWorkerService.setCaseWorkerDetails(sittingRecords);
+            }
         }
 
         return ok(SittingRecordSearchResponse.builder()

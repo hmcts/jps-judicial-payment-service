@@ -26,11 +26,13 @@ import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -178,5 +180,41 @@ class SittingRecordControllerTest {
         //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
+    }
+
+    @Test
+    void shouldReturnResponseWithSittingRecordsCountButNoSittingRecordsForRequestedOffset() throws Exception {
+        when(sittingRecordService.getTotalRecordCount(
+            isA(SittingRecordSearchRequest.class),
+            eq(SSCS)
+        ))
+            .thenReturn(2);
+        List<SittingRecord> sittingRecords = Collections.emptyList();
+        when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
+            .thenReturn(sittingRecords
+            );
+
+        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+                                                      "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
+                                                      SSCS
+                                                  )
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson)
+            ).andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andReturn();
+
+        SittingRecordSearchResponse sittingRecordSearchResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsByteArray(),
+            SittingRecordSearchResponse.class
+        );
+        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
+        assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
+        verify(regionService, never()).setRegionDetails(SSCS, sittingRecords);
+        verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
+        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
+
     }
 }
