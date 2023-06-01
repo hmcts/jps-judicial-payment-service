@@ -2,14 +2,13 @@ package uk.gov.hmcts.reform.jps.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.test.context.ActiveProfiles;
+
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -17,12 +16,13 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@ExtendWith(SpringExtension.class)
+@DataJpaTest
+@ActiveProfiles("itest")
 class StatusHistoryRepositoryTest {
 
     @Autowired
     private StatusHistoryRepository historyRepository;
+
     @Autowired
     private SittingRecordRepository recordRepository;
 
@@ -61,7 +61,6 @@ class StatusHistoryRepositoryTest {
 
     @Test
     void shouldSaveStatusHistory() {
-
         assertThat(persistedStatusHistory).isNotNull();
         assertThat(persistedStatusHistory.getId()).isNotNull();
         assertThat(persistedStatusHistory).isEqualTo(statusHistory);
@@ -69,7 +68,6 @@ class StatusHistoryRepositoryTest {
 
     @Test
     void shouldUpdateStatusHistoryWhenRecordIsPresent() {
-
         Optional<StatusHistory> optionalSettingHistoryToUpdate = historyRepository
             .findById(persistedStatusHistory.getId());
         assertThat(optionalSettingHistoryToUpdate).isPresent();
@@ -84,7 +82,7 @@ class StatusHistoryRepositoryTest {
     }
 
     @Test
-    void shouldReturnEmptyWhenHistorydNotFound() {
+    void shouldReturnEmptyWhenHistoryNotFound() {
         Optional<StatusHistory> optionalSettingHistoryToUpdate = historyRepository.findById(100L);
         assertThat(optionalSettingHistoryToUpdate).isEmpty();
     }
