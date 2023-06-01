@@ -92,17 +92,17 @@ class SittingRecoredServiceITest extends BaseTest {
             .orElseThrow();
     }
 
-    private  SittingRecord getSittingRecord(long contractTypeId) {
+    private  SittingRecord getSittingRecord(long counter) {
         StatusId recorded = StatusId.RECORDED;
         SittingRecord.SittingRecordBuilder builder = SittingRecord.builder();
         return builder
-            .sittingDate(LocalDate.now().minusDays(2))
+            .sittingDate(LocalDate.now().minusDays(counter))
             .statusId(recorded.name())
             .regionId("1")
             .epimsId(EPIM_ID)
             .hmctsServiceId(SSC_ID)
             .personalCode("001")
-            .contractTypeId(contractTypeId)
+            .contractTypeId(counter)
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
@@ -143,7 +143,7 @@ class SittingRecoredServiceITest extends BaseTest {
     }
 
     private void createMultipleRecords(int count) {
-        for (long i = 1; i <= count; i++) {
+        for (long i = count; i > 0; i--) {
             SittingRecord sittingRecord = getSittingRecord(i);
             SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
             assertThat(persistedSittingRecord).isNotNull();
@@ -152,9 +152,10 @@ class SittingRecoredServiceITest extends BaseTest {
 
     @Test
     void shouldReturnOffset10RecordsOnwardsInAscendingOrder() {
+        int recordCount = 25;
         String reasonId = "1";
 
-        createMultipleRecords(25);
+        createMultipleRecords(recordCount);
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(5)
@@ -162,7 +163,7 @@ class SittingRecoredServiceITest extends BaseTest {
             .regionId(reasonId)
             .epimsId(EPIM_ID)
             .dateOrder(ASCENDING)
-            .dateRangeFrom(LocalDate.now().minusDays(4))
+            .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
             .build();
 
@@ -187,9 +188,10 @@ class SittingRecoredServiceITest extends BaseTest {
 
     @Test
     void shouldReturnLast2RecordsWhenSortOrderIsDecending() {
+        int recordCount = 22;
         String reasonId = "1";
 
-        createMultipleRecords(22);
+        createMultipleRecords(recordCount);
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(5)
@@ -197,7 +199,7 @@ class SittingRecoredServiceITest extends BaseTest {
             .regionId(reasonId)
             .epimsId(EPIM_ID)
             .dateOrder(DESCENDING)
-            .dateRangeFrom(LocalDate.now().minusDays(4))
+            .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
             .build();
 
@@ -212,16 +214,17 @@ class SittingRecoredServiceITest extends BaseTest {
             .as("Extracting unique value by user")
             .extracting(CONTRACT_TYPE_ID, CREATED_BY_USER_ID)
             .contains(
-                tuple(2L, USER_ID),
-                tuple(1L, USER_ID)
+                tuple(21L, USER_ID),
+                tuple(22L, USER_ID)
             );
     }
 
     @Test
     void shouldReturnTotalRecordCounts() {
+        int recordCount = 25;
         String reasonId = "1";
 
-        createMultipleRecords(25);
+        createMultipleRecords(recordCount);
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(5)
@@ -229,7 +232,7 @@ class SittingRecoredServiceITest extends BaseTest {
             .regionId(reasonId)
             .epimsId(EPIM_ID)
             .dateOrder(ASCENDING)
-            .dateRangeFrom(LocalDate.now().minusDays(4))
+            .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
             .build();
 
