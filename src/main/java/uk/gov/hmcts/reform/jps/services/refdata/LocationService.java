@@ -26,7 +26,7 @@ public class LocationService {
                 serviceCourtInfo,
                 sittingRecord.getRegionId()
             );
-            sittingRecord.setRegionName(courtVenue.map(CourtVenue::getSiteName)
+            sittingRecord.setRegionName(courtVenue.map(CourtVenue::getRegion)
                                             .orElse("N/A"));
         });
     }
