@@ -31,11 +31,13 @@ class LocationServiceTest {
             .courtVenues(List.of(
                 CourtVenue.builder()
                     .regionId("1")
-                    .siteName("one")
+                    .siteName("one details")
+                    .region("one")
                     .build(),
                 CourtVenue.builder()
                     .regionId("2")
-                    .siteName("two")
+                    .siteName("two details")
+                    .region("two")
                     .build()
             ))
             .build();
