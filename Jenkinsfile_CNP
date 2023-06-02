@@ -51,8 +51,8 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 
 //----------------
 // vars needed for functional tests
-env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
-env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
+// env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+// env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
 //----------------
 
 withPipeline(type, product, component) {
