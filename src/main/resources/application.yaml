@@ -16,6 +16,8 @@ springdoc:
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+  main:
+    allow-bean-definition-overriding: true
   config:
     import: "optional:configtree:/mnt/secrets/jps/"
   application:
@@ -47,9 +49,6 @@ spring:
   flyway:
     out-of-order: true
     ignore-missing-migrations: true
-
-  main:
-    allow-bean-definition-overriding: true
   security:
     oauth2:
       client:
@@ -76,6 +75,10 @@ idam:
     secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
     # same for all environments - not used in jps but configured as idam mandates for token generation
     redirect_uri: http://jps-judicial-payment-service/oauth2redirect
+  jps:
+    system:
+      username: ${IDAM_JPS_SYSTEM_USERNAME:jps-system@gmail.com}
+      password: ${IDAM_JPS_SYSTEM_PASSWORD:}
 
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
@@ -100,3 +103,15 @@ dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
   runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
+
+location:
+  api:
+    url: ${LOCATION_API_URL:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API_URL:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+caseworker:
+  api:
+    url: ${CASEWORKER_API_URL:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}

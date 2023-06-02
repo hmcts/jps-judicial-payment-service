@@ -190,12 +190,14 @@ project.tasks['check'].dependsOn integration
 
 def coverageExclusionList = [
   '**uk/gov/hmcts/reform/jps/expection/*.*',
-  '**uk/gov/hmcts/reform/jps/config/*.*',
+  '**uk/gov/hmcts/reform/jps/config/**/*',
   '**uk/gov/hmcts/reform/jps/domain/*.*',
   "src/main/java/uk/gov/hmcts/reform/jps/Application.java",
   "**/config/SecurityConfiguration.java",
-  "**/controllers/TestController.java"
-
+  "**/controllers/TestController.java",
+  "**uk/gov/hmcts/reform/jps/model/**/*",
+  "**uk/gov/hmcts/reform/jps/refdata/**/*",
+  "**uk/gov/hmcts/reform/jps/validator/*.*"
 ]
 
 sonar {
@@ -256,8 +258,6 @@ dependencies {
   implementation group: 'org.springframework.security', name: 'spring-security-oauth2-jose'
   implementation group: 'org.springframework.security', name: 'spring-security-config'
 
-  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '3.1.7'
-
   implementation group: 'org.springdoc', name: 'springdoc-openapi-ui', version: '1.7.0', {
     exclude group: 'org.yaml', module: 'snakeyaml'
   }
@@ -278,7 +278,16 @@ dependencies {
   implementation group: 'org.mapstruct', name: 'mapstruct', version: versions.mapstruct
   implementation group: 'org.postgresql', name: 'postgresql', version: versions.postgresql
 
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-openfeign', version: '3.1.7'
+  implementation group: 'org.springframework.cloud', name: 'spring-cloud-openfeign-core', version: '3.1.7'
+  implementation group: 'io.github.openfeign', name: 'feign-core', version: '12.1'
+  implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '12.1'
+
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
+  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
+
   testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0'
+
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {

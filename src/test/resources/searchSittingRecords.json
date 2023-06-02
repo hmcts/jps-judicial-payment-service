@@ -1,0 +1,10 @@
+{
+  "pageSize":10,
+  "offset" :0,
+  "regionId" : "1",
+  "epimsId" : "123",
+  "dateRangeFrom" : "2023-04-11",
+  "dateRangeTo" : "2023-12-13",
+  "dateOrder" : "ASCENDING",
+  "duration" : "AM"
+}

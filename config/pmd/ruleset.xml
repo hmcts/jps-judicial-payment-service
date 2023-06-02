@@ -73,5 +73,10 @@
       <property name="maxfields" value="25" />
     </properties>
   </rule>
-
+  <rule ref="category/java/bestpractices.xml/JUnitAssertionsShouldIncludeMessage">
+    <properties>
+      <!-- suppress for AssertJ assertThat method -->
+      <property name="violationSuppressXPath" value=".[@Image='assertThat'][../following-sibling::PrimarySuffix[1][@ArgumentCount=1]]" />
+    </properties>
+  </rule>
 </ruleset>
