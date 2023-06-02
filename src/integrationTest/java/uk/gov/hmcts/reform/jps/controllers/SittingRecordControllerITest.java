@@ -88,7 +88,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value("recorded"),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").value("Sutton Social Security and Child Support Tribunal"),
+                jsonPath("$.sittingRecords[0].regionName").value("London"),
                 jsonPath("$.sittingRecords[0].epimsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
