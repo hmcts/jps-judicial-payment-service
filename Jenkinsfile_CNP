@@ -1,5 +1,9 @@
-#!groovy
-import uk.gov.hmcts.contino.AppPipelineDsl
+#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
+import uk.gov.hmcts.contino.GradleBuilder
+@Library("Infrastructure")
+
+import uk.gov.hmcts.contino.GradleBuilder
+
 properties(
   [
     [
@@ -9,10 +13,6 @@ properties(
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
   ]
 )
-
-@Library("Infrastructure")
-
-import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "jps"
@@ -33,7 +33,10 @@ def secrets = [
     secret('idam-jps-recorder-username', 'JPS_RECORDER_USERNAME'),
     secret('idam-jps-recorder-password', 'JPS_RECORDER_PASSWORD'),
     secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
-    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD')
+    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD'),
+    secret('idam-jps-invalid-password', 'JUDICIAL_PAYMENT_SERVICE_DB_USERNAME'),
+    secret('idam-jps-invalid-password', 'JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD')
+
   ],
   's2s-${env}': [
 
@@ -65,6 +68,11 @@ withPipeline(type, product, component) {
   before('functionalTest:preview') {
     env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
+    env.JUDICIAL_PAYMENT_SERVICE_DB_HOST = "{{ .Release.Name }}-postgresql"
+    env.JUDICIAL_PAYMENT_SERVICE_DB_NAME = "{{ .Values.postgresql.auth.database}}"
+    env.JUDICIAL_PAYMENT_SERVICE_DB_USERNAME = "{{ .Values.postgresql.auth.username}}"
+    env.JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD = "{{ .Values.postgresql.auth.password}}"
+    env.JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS = "?stringtype=unspecified"
   }
 
   before('functionalTest:aat') {
