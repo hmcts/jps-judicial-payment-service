@@ -1,18 +1,18 @@
-#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
-import uk.gov.hmcts.contino.GradleBuilder
-@Library("Infrastructure")
-
-import uk.gov.hmcts.contino.GradleBuilder
-
-properties(
-  [
-    [
+#!groovy
+ import uk.gov.hmcts.contino.AppPipelineDsl
+ properties(
+   [
+     [
       $class       : 'GithubProjectProperty',
       projectUrlStr: 'https://github.com/hmcts/jps-judicial-payment-service'
     ],
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
-  ]
-)
+   ]
+ )
+
+ @Library("Infrastructure")
+
+ import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "jps"
@@ -33,10 +33,7 @@ def secrets = [
     secret('idam-jps-recorder-username', 'JPS_RECORDER_USERNAME'),
     secret('idam-jps-recorder-password', 'JPS_RECORDER_PASSWORD'),
     secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
-    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD'),
-    secret('idam-jps-invalid-password', 'JUDICIAL_PAYMENT_SERVICE_DB_USERNAME'),
-    secret('idam-jps-invalid-password', 'JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD')
-
+    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD')
   ],
   's2s-${env}': [
 
