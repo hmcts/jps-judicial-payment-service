@@ -1,6 +1,9 @@
 {
+  "hmctsServiceCode": "<hmctsServiceCode>",
+  "feeId": "<feeId>",
   "feeDescription": "<feeDescription>",
   "judgeRoleTypeId": "<judgeRoleTypeId>",
-  "londonWeightedFee": 6987,
+  "standardFee": 1234,
+  "londonWeightedFee": 6869,
   "<effectiveFrom>": "<effectiveFrom>"
 }

@@ -1,13 +1,8 @@
 {
-  "pageSize": "<pageSize>",
-  "offset": "<offset>",
-  "dateOrder": "<dateOrder>",
-  "epimmsId": "<epimmsId>",
-  "createdByUserId": "<createdByUserId>",
-  "personalCode": "<personalCode>",
-  "judgeRoleTypeId": "<judgeRoleTypeId>",
-  "duration": "<duration>",
-  "dateRangeFrom": "<dateRangeFrom>",
-  "dateRangeTo": "<dateRangeTo>",
-  "statusIds": ["<statusId>"]
+  "pageSize": "1",
+  "offset": "0",
+  "dateOrder": "ASCENDING",
+  "epimsId": "1234",
+  "dateRangeFrom": "2023-05-10",
+  "dateRangeTo": "2023-05-12"
 }

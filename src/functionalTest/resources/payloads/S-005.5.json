@@ -1,13 +1,8 @@
 {
-  "offset": "<offset>",
-  "dateOrder": "<dateOrder>",
-  "regionId": "<regionId>",
-  "epimmsId": "<epimmsId>",
-  "createdByUserId": "<createdByUserId>",
-  "personalCode": "<personalCode>",
-  "judgeRoleTypeId": "<judgeRoleTypeId>",
-  "duration": "<duration>",
-  "dateRangeFrom": "<dateRangeFrom>",
-  "dateRangeTo": "<dateRangeTo>",
-  "statusIds": ["<statusId>"]
+  "offset": "0",
+  "dateOrder": "ASCENDING",
+  "regionId": "1",
+  "epimsId": "1234",
+  "dateRangeFrom": "2023-05-10",
+  "dateRangeTo": "2023-05-12"
 }
