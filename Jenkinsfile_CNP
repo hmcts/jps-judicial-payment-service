@@ -1,4 +1,4 @@
-#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
+#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
 import uk.gov.hmcts.contino.GradleBuilder
 @Library("Infrastructure")
 
@@ -67,14 +67,8 @@ withPipeline(type, product, component) {
 
   before('functionalTest:preview') {
     script {
-      def javaValues = values.java
       env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
       env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_HOST = "${javaValues.environment.JUDICIAL_PAYMENT_SERVICE_DB_HOST}"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_NAME = "${javaValues.environment.JUDICIAL_PAYMENT_SERVICE_DB_NAME}"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_USERNAME = "${javaValues.environment.JUDICIAL_PAYMENT_SERVICE_DB_USERNAME}"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD = "${javaValues.environment.JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD}"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS = "${javaValues.environment.JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS}"
     }
   }
 
