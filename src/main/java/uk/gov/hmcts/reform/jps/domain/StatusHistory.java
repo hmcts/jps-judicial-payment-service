@@ -29,9 +29,9 @@ public class StatusHistory {
     @Column(name = "status_history_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sitting_record_id")
-    private SittingRecord sittingRecordId;
+    //@ManyToOne(fetch = FetchType.EAGER)
+    //@JoinColumn(name = "sitting_record_id")
+    //private SittingRecord sittingRecordId;
 
     @Column(name = "status_id")
     private String statusId;

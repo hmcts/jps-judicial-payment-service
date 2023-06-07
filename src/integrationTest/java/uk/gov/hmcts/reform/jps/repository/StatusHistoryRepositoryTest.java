@@ -50,7 +50,7 @@ class StatusHistoryRepositoryTest {
 
         statusHistory = StatusHistory.builder()
             .statusId("recorded")
-            .sittingRecordId(persistedSittingRecord)
+            //.sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .changeByName("John Doe")
