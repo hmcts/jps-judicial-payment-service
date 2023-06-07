@@ -1,4 +1,4 @@
-CREATE TABLE public.status_history (
+create table public.status_history (
     status_history_id bigserial constraint pk_status_history primary key,
     sitting_record_id bigint not null,
     status_id varchar(255) not null,
