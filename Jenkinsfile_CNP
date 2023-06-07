@@ -63,16 +63,8 @@ withPipeline(type, product, component) {
   }
 
   before('functionalTest:preview') {
-    script {
-      env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
-      env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_HOST = "10.0.152.126"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_PORT = "5432"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_NAME = "javadatabase"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_USERNAME = "javapostgres"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD = "javapassword"
-      env.JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS = "?stringtype=unspecified"
-    }
+    env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+    env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
   }
 
   before('functionalTest:aat') {
