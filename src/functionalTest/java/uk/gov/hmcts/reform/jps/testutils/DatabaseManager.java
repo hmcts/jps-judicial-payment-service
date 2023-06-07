@@ -50,6 +50,7 @@ public class DatabaseManager {
             System.out.println("this is the username: " + dbUsername);
             System.out.println("this is the password: " + dbPassword);
             System.out.println("Error inserting data: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
