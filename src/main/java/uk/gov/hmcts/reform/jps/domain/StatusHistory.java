@@ -13,7 +13,6 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Builder
@@ -30,8 +29,8 @@ public class StatusHistory {
     private Long id;
 
     //@ManyToOne(fetch = FetchType.EAGER)
-    //@JoinColumn(name = "sitting_record_id")
-    //private SittingRecord sittingRecordId;
+    @JoinColumn(name = "sitting_record_id")
+    private String sittingRecordId;
 
     @Column(name = "status_id")
     private String statusId;
