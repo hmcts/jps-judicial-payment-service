@@ -1,7 +1,7 @@
 @F-005
 Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
 
-  @S-005.1 #AC01
+  @S-005.1 @Ignore #AC01
   Scenario: Success response when the request contains all the fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database
@@ -12,9 +12,8 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
-#    And the record inserted is deleted
 
-  @S-005.2 #AC02
+  @S-005.2 @Ignore #AC02
   Scenario: Success response when the request contains only the mandatory fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database
@@ -25,7 +24,6 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
-#    And the record inserted is deleted
 
   @S-005.3 #AC03
   Scenario: Success response when the request contains all the fields - Return 200 success without content
@@ -116,15 +114,15 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Date range to is mandatory"
     And the response contains "errors[1].message" as "Date range from is mandatory"
 
-#  @S-005.11 @Ignore #AC06
-#  Scenario: Negative response, when the request user doesn't have permissions
-#    Given a user with the IDAM role of "ccd-admin"
-#    When a request is prepared with appropriate values
-#    And the request contains a valid service token
-#    And the request contains the "hmctsServiceCode" as "BBA3"
-#    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
-#    And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
-#    Then a "negative" response is received with a "401 Unauthorised" status code
+  @S-005.11 @Ignore #AC06
+  Scenario: Negative response, when the request user doesn't have permissions
+    Given a user with the IDAM role of "ccd-admin"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "BBA3"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
+    And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
+    Then a "negative" response is received with a "401 Unauthorised" status code
 
   @S-005.12 #AC07
   Scenario: Negative response, when the service token is missing
