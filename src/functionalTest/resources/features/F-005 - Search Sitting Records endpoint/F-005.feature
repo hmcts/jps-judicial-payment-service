@@ -12,7 +12,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
-#    And the record inserted is deleted
+    And the record inserted is deleted
 
   @S-005.2 #AC02
   Scenario: Success response when the request contains only the mandatory fields - Return 200 success with content
@@ -25,7 +25,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
-#    And the record inserted is deleted
+    And the record inserted is deleted
 
   @S-005.3 #AC03
   Scenario: Success response when the request contains all the fields - Return 200 success without content
