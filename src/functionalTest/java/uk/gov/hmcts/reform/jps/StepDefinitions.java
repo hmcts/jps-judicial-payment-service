@@ -10,15 +10,12 @@ import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.jps.config.APIResources;
 import uk.gov.hmcts.reform.jps.config.PropertiesReader;
-import uk.gov.hmcts.reform.jps.testutils.DatabaseManager;
 import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.sql.Date;
-import java.sql.Timestamp;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -42,7 +39,6 @@ public class StepDefinitions {
     String accessToken;
 
     ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
-    DatabaseManager manager = new DatabaseManager();
 
     @Given("a user with the IDAM role of {string}")
     public void userWithTheIdamRoleOf(String role) {
@@ -57,10 +53,7 @@ public class StepDefinitions {
 
     @Given("a record for the given hmctsServiceCode exists in the database")
     public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() {
-        manager.insertSittingRecord(1, Date.valueOf("2023-05-11"), "RECORDED", "1",
-                                    "1234", "BBA3", "4918178", 1,
-                                    "judge", true, true, Timestamp.valueOf("2023-05-11 16:02:50"),
-                                    "a9ab7f4b-7e0c-49d4-8ed3-75b54d421cdc");
+        // POST call needs to be added here
     }
 
     @When("a request is prepared with appropriate values")
@@ -157,11 +150,5 @@ public class StepDefinitions {
     @Then("the {string} is {int}")
     public void theAttributeIs(String attribute, Integer value) {
         response.then().assertThat().body(attribute,equalTo(value));
-    }
-
-    @Then("the record inserted is deleted")
-    public void theRecordInsertedIsDeleted() {
-        int sittingRecordIdToDelete = 1;
-        manager.deleteData(sittingRecordIdToDelete);
     }
 }
