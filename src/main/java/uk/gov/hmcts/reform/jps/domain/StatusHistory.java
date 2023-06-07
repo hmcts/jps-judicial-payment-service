@@ -12,7 +12,6 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Builder
@@ -30,7 +29,7 @@ public class StatusHistory {
 
     //@ManyToOne(fetch = FetchType.EAGER)
     @Column(name = "sitting_record_id")
-    private String sittingRecordId;
+    private Long sittingRecordId;
 
     @Column(name = "status_id")
     private String statusId;
