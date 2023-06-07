@@ -47,6 +47,8 @@ public class DatabaseManager {
             System.out.println("Data inserted successfully.");
         } catch (SQLException e) {
             System.out.println("this is the URL: " + dbUrl);
+            System.out.println("this is the username: " + dbUsername);
+            System.out.println("this is the password: " + dbPassword);
             System.out.println("Error inserting data: " + e.getMessage());
         }
     }
