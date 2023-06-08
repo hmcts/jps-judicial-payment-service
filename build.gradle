@@ -295,6 +295,11 @@ dependencies {
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
 
+  testImplementation group: 'org.springframework.security', name: 'spring-security-test', {
+    exclude group: 'junit', module: 'junit'
+    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+  }
+
   implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.11.1'
 
   implementation (group: 'org.glassfish.web', name: 'el-impl', version: '2.2.1-b05') {
@@ -344,7 +349,7 @@ bootWithCCD {
     environment "RSE_LIB_CLEAN_BOOT", false
   }
 
-  authMode = uk.gov.hmcts.rse.AuthMode.Local
+  authMode = uk.gov.hmcts.rse.AuthMode.AAT
   // TODO: update when we have db connections and authorised services
   environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_gw,ccd_gateway,ccd_data,ccd_next_hearing_date_updater")
   environment("RSE_LIB_S2S_PORT", 4502)

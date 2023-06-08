@@ -4,20 +4,26 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
 @Data
+@ToString
 @Entity
 @Table(name = "sitting_record")
 public class SittingRecord {
@@ -55,6 +61,11 @@ public class SittingRecord {
 
     private boolean pm;
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "sittingRecord",
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private final List<StatusHistory> statusHistories = new ArrayList<>();
+
     @Column(name = "created_date_time")
     private LocalDateTime createdDateTime;
 
@@ -66,4 +77,9 @@ public class SittingRecord {
 
     @Column(name = "change_by_user_id")
     private String changeByUserId;
+
+    public void addStatusHistory(StatusHistory statusHistory) {
+        this.statusHistories.add(statusHistory);
+        statusHistory.setSittingRecord(this);
+    }
 }

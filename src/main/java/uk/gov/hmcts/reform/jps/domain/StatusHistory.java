@@ -31,7 +31,7 @@ public class StatusHistory {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "sitting_record_id")
-    private SittingRecord sittingRecordId;
+    private SittingRecord sittingRecord;
 
     @Column(name = "status_id")
     private String statusId;

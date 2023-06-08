@@ -25,8 +25,6 @@ class StatusHistoryRepositoryTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
-    private SittingRecord persistedSittingRecord;
-
     private StatusHistory persistedStatusHistory;
 
     private StatusHistory statusHistory;
@@ -46,16 +44,17 @@ class StatusHistoryRepositoryTest {
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
         statusHistory = StatusHistory.builder()
             .statusId("recorded")
-            .sittingRecordId(persistedSittingRecord)
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .changeByName("John Doe")
             .build();
-        persistedStatusHistory = historyRepository.save(statusHistory);
+
+        sittingRecord.addStatusHistory(statusHistory);
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        persistedStatusHistory = persistedSittingRecord.getStatusHistories().get(0);
     }
 
     @Test

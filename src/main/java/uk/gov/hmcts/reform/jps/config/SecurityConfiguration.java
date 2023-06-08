@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -25,6 +26,9 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(
+    prePostEnabled = true
+)
 public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Value("${spring.security.oauth2.client.provider.oidc.issuer-uri}")
@@ -72,8 +76,16 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .formLogin().disable()
             .logout().disable()
             .authorizeRequests()
-            .anyRequest()
-            .authenticated()
+                .mvcMatchers("/**")
+                    .hasAnyAuthority("",
+                                     "jps-recorder",
+                                     "jps-submitter",
+                                     "jps-publisher",
+                                     "jps-JOH-admin",
+                                     "jps-admin"
+                                     )
+                .anyRequest()
+                    .authenticated()
             .and()
             .oauth2ResourceServer()
             .jwt()

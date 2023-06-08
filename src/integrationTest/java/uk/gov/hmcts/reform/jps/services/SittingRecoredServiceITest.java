@@ -1,14 +1,20 @@
 package uk.gov.hmcts.reform.jps.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -16,8 +22,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.time.LocalDate.of;
+import static java.time.Month.APRIL;
+import static java.time.Month.MARCH;
+import static java.time.Month.MAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
+import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
@@ -29,21 +41,25 @@ class SittingRecoredServiceITest extends BaseTest {
     public static final String CONTRACT_TYPE_ID = "contractTypeId";
     public static final String CREATED_BY_USER_ID = "createdByUserId";
     @Autowired
-    private SittingRecordRepository recordRepository;
+    private SittingRecordRepository sittingRecordRepository;
+    @Autowired
+    private StatusHistoryRepository statusHistoryRepository;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
 
     @BeforeEach
     void beforeEach() {
-        recordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(recordRepository);
+        sittingRecordRepository.deleteAll();
+        sittingRecordService = new SittingRecordService(sittingRecordRepository);
     }
 
     @Test
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
         SittingRecord sittingRecord = getSittingRecord(2);
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
@@ -114,7 +130,7 @@ class SittingRecoredServiceITest extends BaseTest {
     @Test
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
         SittingRecord sittingRecord = getSittingRecord(2);
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
@@ -145,7 +161,7 @@ class SittingRecoredServiceITest extends BaseTest {
     private void createMultipleRecords(int count) {
         for (long i = count; i > 0; i--) {
             SittingRecord sittingRecord = getSittingRecord(i);
-            SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+            SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
             assertThat(persistedSittingRecord).isNotNull();
         }
     }
@@ -243,5 +259,41 @@ class SittingRecoredServiceITest extends BaseTest {
 
         assertThat(totalRecordCount)
             .isEqualTo(25);
+    }
+
+    @Test
+    void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+        recordSittingRecordRequest.getRecordedSittingRecords()
+            .forEach(sittingRecordRequest -> sittingRecordRequest.setRegionId("1"));
+
+        sittingRecordService.saveSittingRecords(SSC_ID, recordSittingRecordRequest);
+        List<SittingRecord> savedSittingRecords = sittingRecordRepository.findAll();
+
+        assertThat(savedSittingRecords)
+            .extracting("sittingDate","regionId",  "epimsId", "personalCode", "judgeRoleTypeId", "contractTypeId",
+                        "am", "pm", "statusId", "hmctsServiceId")
+            .contains(
+                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true, "RECORDED", "ssc_id"),
+                tuple(of(2023, APRIL,10), "1", "852649", "4918178", "Judge", 1L, true, false, "RECORDED", "ssc_id"),
+                tuple(of(2023, MARCH,9), "1", "852649", "4918178", "Judge", 1L, true, true, "RECORDED", "ssc_id")
+            );
+
+        List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
+        assertThat(statusHistories)
+            .extracting("statusId", "changeByUserId", "changeByName")
+            .contains(
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
+            );
+
+        assertThat(statusHistories)
+            .allMatch(statusHistory -> statusHistory.getChangeDateTime().toLocalDate().isEqual(LocalDate.now())
+            && statusHistory.getChangeDateTime().isBefore(LocalDateTime.now()));
     }
 }

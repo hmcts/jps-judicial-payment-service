@@ -3,11 +3,18 @@ package uk.gov.hmcts.reform.jps.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
+import javax.transaction.Transactional;
 
 import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
@@ -50,11 +57,45 @@ public class SittingRecordService {
 
     }
 
+
     public int getTotalRecordCount(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
 
         return sittingRecordRepository.totalRecords(recordSearchRequest,
                                                     hmctsServiceCode);
+    }
+
+    @Transactional
+    public void saveSittingRecords(String hmctsServiceCode,
+                                   RecordSittingRecordRequest recordSittingRecordRequest) {
+        recordSittingRecordRequest.getRecordedSittingRecords()
+            .forEach(recordSittingRecord -> {
+                uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
+                    uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                        .sittingDate(recordSittingRecord.getSittingDate())
+                        .statusId(StatusId.RECORDED.name())
+                        .regionId(recordSittingRecord.getRegionId())
+                        .epimsId(recordSittingRecord.getEpimsId())
+                        .hmctsServiceId(hmctsServiceCode)
+                        .personalCode(recordSittingRecord.getPersonalCode())
+                        .contractTypeId(recordSittingRecord.getContractTypeId())
+                        .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
+                        .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                                .map(DurationBoolean::getAm).orElse(false))
+                        .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                                .map(DurationBoolean::getPm).orElse(false))
+                        .build();
+
+                StatusHistory statusHistory = StatusHistory.builder()
+                    .statusId(StatusId.RECORDED.name())
+                    .changeDateTime(LocalDateTime.now())
+                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
+                    .changeByName(recordSittingRecordRequest.getRecordedByName())
+                    .build();
+
+                sittingRecord.addStatusHistory(statusHistory);
+                sittingRecordRepository.save(sittingRecord);
+            });
     }
 }

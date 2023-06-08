@@ -1,0 +1,16 @@
+{
+  "errors": [
+    {
+      "fieldName": "recordedByName",
+      "message": "Recorded By Name is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords",
+      "message": "Insufficient sitting Records"
+    },
+    {
+      "fieldName": "recordedByIdamId",
+      "message": "Recorded By Idam Id is mandatory"
+    }
+  ]
+}

@@ -44,7 +44,10 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        order_inserts: true
+        order_updates: true
         jdbc:
+          batch_size: 5
           time_zone: UTC
   flyway:
     out-of-order: true

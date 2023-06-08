@@ -1,0 +1,64 @@
+{
+  "errors": [
+    {
+      "fieldName": "recordedSittingRecords[0].sittingDate",
+      "message": "Sitting date is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[0].personalCode",
+      "message": "Personal code is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[0].epimsId",
+      "message": "Epims Id is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[0].contractTypeId",
+      "message": "Contract Type Id  is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[0].judgeRoleTypeId",
+      "message": "Judge Role Type Id is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[1].epimsId",
+      "message": "Epims Id is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[1].sittingDate",
+      "message": "Sitting date is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[1].personalCode",
+      "message": "Personal code is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[1].judgeRoleTypeId",
+      "message": "Judge Role Type Id is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[1].contractTypeId",
+      "message": "Contract Type Id  is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[2].durationBoolean",
+      "message": "AM/PM/Full Day is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[2].epimsId",
+      "message": "Epims Id is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[2].personalCode",
+      "message": "Personal code is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[2].judgeRoleTypeId",
+      "message": "Judge Role Type Id is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[2].contractTypeId",
+      "message": "Contract Type Id  is mandatory"
+    }
+  ]
+}
