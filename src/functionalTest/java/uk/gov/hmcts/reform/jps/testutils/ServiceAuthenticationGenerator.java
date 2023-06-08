@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.jps.testutils;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import uk.gov.hmcts.reform.jps.config.TestVariables;
 
 import java.util.Map;
 
@@ -10,7 +9,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpHeaders.CONTENT_TYPE;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
-public class ServiceAuthenticationGenerator  extends TestVariables {
+public class ServiceAuthenticationGenerator {
 
     PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
     String s2sUrl = propertiesReader.getProperty("idam.s2s-auth.url");
