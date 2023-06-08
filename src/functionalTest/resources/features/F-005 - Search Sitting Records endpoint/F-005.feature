@@ -1,4 +1,4 @@
-@F-005
+@F-005 @Functional
 Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
 
   @S-005.1 @Ignore #AC01

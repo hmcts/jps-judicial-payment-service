@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.jps.config;
 
-public enum APIResources {
+public enum Endpoints {
 
     Test("/test"),
-    FeeEndpoint("/fee/{hmctsServiceCode}"),
     SearchSittingRecordsEndpoint("/sitting-records/searchSittingRecords/{hmctsServiceCode}");
     public String resource;
 
-    APIResources(String resource) {
+    Endpoints(String resource) {
         this.resource = resource;
     }
 

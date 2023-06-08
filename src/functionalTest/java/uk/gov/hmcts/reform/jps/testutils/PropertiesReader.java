@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.jps.config;
+package uk.gov.hmcts.reform.jps.testutils;
 
 import java.io.FileInputStream;
 import java.io.IOException;

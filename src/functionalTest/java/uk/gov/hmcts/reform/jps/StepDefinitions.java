@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -8,8 +9,8 @@ import io.restassured.http.ContentType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
-import uk.gov.hmcts.reform.jps.config.APIResources;
-import uk.gov.hmcts.reform.jps.config.PropertiesReader;
+import uk.gov.hmcts.reform.jps.config.Endpoints;
+import uk.gov.hmcts.reform.jps.config.TestVariables;
 import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
 import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
@@ -24,30 +25,40 @@ import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-public class StepDefinitions {
-
-    PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
-    String testUrl = propertiesReader.getProperty("test-url");
-    String recorderUsername = propertiesReader.getProperty("idam.recorder.username");
-    String recorderPassword = propertiesReader.getProperty("idam.recorder.password");
-    String invalidUsername = propertiesReader.getProperty("idam.invalid.username");
-    String invalidPassword = propertiesReader.getProperty("idam.invalid.password");
+public class StepDefinitions extends TestVariables {
 
     RequestSpecification request;
     RequestSpecification given;
     Response response;
-    String accessToken;
 
-    ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+    private static String accessToken;
+    private static String recorderAccessToken;
+    private static String invalidAccessToken;
+    private static String validS2sToken;
+    private static String invalidS2sToken;
+    private static boolean isSetupExecuted = false;
+
+    @Before
+    public void setup() {
+        if (!isSetupExecuted) {
+            IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
+            ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+
+            recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+            invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+            validS2sToken = serviceAuthenticationGenerator.generate();
+            invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
+
+            isSetupExecuted = true;
+        }
+    }
 
     @Given("a user with the IDAM role of {string}")
     public void userWithTheIdamRoleOf(String role) {
-        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-
         if (role.equalsIgnoreCase("jps-recorder")) {
-            accessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+            accessToken  = recorderAccessToken;
         } else if (role.equalsIgnoreCase("ccd-import")) {
-            accessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+            accessToken  = invalidAccessToken;
         }
     }
 
@@ -67,34 +78,17 @@ public class StepDefinitions {
 
     @When("the request contains a valid service token")
     public void theRequestContainsValidServiceToken() {
-        String s2sToken = serviceAuthenticationGenerator.generate();
-        request = request.request().header("ServiceAuthorization", s2sToken);
-        //given = given.header("ServiceAuthorization", s2sToken).log().all().spec(request);
+        request = request.request().header("ServiceAuthorization", validS2sToken);
     }
 
     @When("the request contains an invalid service token")
     public void theRequestContainsInvalidServiceToken() {
-        String s2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
-        request = request.request().header("ServiceAuthorization", s2sToken);
-        // given = given.header("ServiceAuthorization", s2sToken);
+        request = request.request().header("ServiceAuthorization", invalidS2sToken);
     }
 
     @When("the request contains the {string} as {string}")
     public void theRequestContainsTheAs(String pathParam, String value) {
-        given = given().log().all().pathParam(pathParam,value).spec(request);
-    }
-
-    @When("a call is submitted to the {string} endpoint using a {string} request")
-    public void callIsSubmittedToTheEndpoint(String resource, String method) {
-        APIResources resourceAPI = APIResources.valueOf(resource);
-
-        if (method.equalsIgnoreCase("POST")) {
-            response = given.when().post(resourceAPI.getResource());
-        } else if (method.equalsIgnoreCase("GET")) {
-            response = given.when().get(resourceAPI.getResource());
-        } else if (method.equalsIgnoreCase("DELETE")) {
-            response = given.when().delete(resourceAPI.getResource());
-        }
+        given = request.pathParam(pathParam,value);
     }
 
     @When("the request body contains the {string} as in {string}")
@@ -103,6 +97,21 @@ public class StepDefinitions {
 
         String body = new String(b);
         given.body(body);
+    }
+
+    @When("a call is submitted to the {string} endpoint using a {string} request")
+    public void callIsSubmittedToTheEndpoint(String resource, String method) {
+        given = given().log().all().spec(request);
+
+        Endpoints resourceAPI = Endpoints.valueOf(resource);
+
+        if (method.equalsIgnoreCase("POST")) {
+            response = given.when().post(resourceAPI.getResource());
+        } else if (method.equalsIgnoreCase("GET")) {
+            response = given.when().get(resourceAPI.getResource());
+        } else if (method.equalsIgnoreCase("DELETE")) {
+            response = given.when().delete(resourceAPI.getResource());
+        }
     }
 
     @Then("a {string} response is received with a {string} status code")
