@@ -62,12 +62,12 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
   }
 
-  before('functionalTest:preview') {
+  before('smokeTest:preview') {
     env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
   }
 
-  before('functionalTest:aat') {
+  before('smokeTest:aat') {
     env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
   }
