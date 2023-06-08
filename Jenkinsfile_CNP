@@ -71,6 +71,14 @@ withPipeline(type, product, component) {
     env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
   }
+  
+  afterAlways('smokeTest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Smoke Tests/**/*'
+  }
+
+  afterAlways('smokeTest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Smoke Tests/**/*'
+  }
 
   afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Functional Tests/**/*'
