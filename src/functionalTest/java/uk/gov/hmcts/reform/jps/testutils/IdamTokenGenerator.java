@@ -28,7 +28,7 @@ public class IdamTokenGenerator {
     }
 
     public String authenticateUser(String username, String password) {
-        int maxRetries = 3;
+        int maxRetries = 10;
         int retryCount = 0;
 
         while (retryCount < maxRetries) {
