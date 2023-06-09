@@ -212,9 +212,8 @@ class SittingRecordServiceTest {
                 tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
         );
 
-        assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> m.getChangeDateTime().toLocalDate().isEqual(LocalDate.now())
-                && m.getChangeDateTime().isBefore(now()));
-
+        assertThat(sittingRecords).describedAs("Created date assertion")
+            .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 }

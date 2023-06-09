@@ -292,8 +292,7 @@ class SittingRecoredServiceITest extends BaseTest {
                 tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
             );
 
-        assertThat(statusHistories)
-            .allMatch(statusHistory -> statusHistory.getChangeDateTime().toLocalDate().isEqual(LocalDate.now())
-            && statusHistory.getChangeDateTime().isBefore(LocalDateTime.now()));
+        assertThat(statusHistories).describedAs("Created date assertion")
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 }
