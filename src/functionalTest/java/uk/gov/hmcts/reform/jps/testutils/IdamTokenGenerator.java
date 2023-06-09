@@ -56,6 +56,9 @@ public class IdamTokenGenerator {
                 e.printStackTrace();
                 Thread.sleep(100);
                 System.out.println("The error that occurred during authentication attempt: " + e.getMessage());
+                System.out.println( "this is the clientId=" + clientId + " this is the clientSecret=" + clientSecret +
+                                    "this is the redirectUri=" + redirectUri + "this is the username=" + username +
+                                        "this is the password=" + password);
                 retryCount++;
             }
         }
