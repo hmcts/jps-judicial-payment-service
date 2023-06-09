@@ -136,7 +136,7 @@ task functional(type: Test) {
       ]
     }
   }
-  finalizedBy {
+/*  finalizedBy {
     generateCucumberReports {
       doLast{
         delete "${rootDir}/Report for Functional Tests/"
@@ -146,7 +146,7 @@ task functional(type: Test) {
 
       }
     }
-  }
+  }*/
 }
 
 cucumberReports {
