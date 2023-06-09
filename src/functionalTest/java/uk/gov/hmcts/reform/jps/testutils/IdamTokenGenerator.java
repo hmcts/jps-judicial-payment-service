@@ -53,6 +53,7 @@ public class IdamTokenGenerator {
 
                 return "Bearer " + tokenExchangeResponse.getAccessToken();
             } catch (Exception e) {
+                System.out.println("The error that occurred during authentication attempt: " + e.getMessage());
                 retryCount++;
             }
         }
