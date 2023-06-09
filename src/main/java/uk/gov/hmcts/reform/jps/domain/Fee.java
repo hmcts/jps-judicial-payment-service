@@ -6,15 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 @Builder
@@ -30,9 +27,8 @@ public class Fee {
     @Column(name = "fee_record_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "sitting_record_id")
-    private SittingRecord sittingRecordId;
+    @Column(name = "hmcts_service_id")
+    private String hmctsServiceId;
 
     @Column(name = "fee_id")
     private String feeId;
