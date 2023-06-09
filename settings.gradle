@@ -6,4 +6,4 @@ pluginManagement {
     }
   }
 }
-rootProject.name = 'hmc-judicial-payment-service'
+rootProject.name = 'jps-judicial-payment-service'

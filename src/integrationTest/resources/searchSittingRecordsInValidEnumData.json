@@ -1,0 +1,9 @@
+{
+  "pageSize":1,
+  "offset" :1,
+  "regionId" : "2",
+  "epimsId" : "23",
+  "dateRangeFrom" : "2007-12-11",
+  "dateRangeTo" : "2007-12-13",
+  "dateOrder" : "ascending"
+}

@@ -12,36 +12,106 @@ management:
         include: health, info, prometheus
 
 springdoc:
-  packagesToScan: uk.gov.hmcts.reform.hmc.jp.controllers
+  packagesToScan: uk.gov.hmcts.reform.jps.controllers
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+  main:
+    allow-bean-definition-overriding: true
   config:
-    import: "optional:configtree:/mnt/secrets/hmc/"
+    import: "optional:configtree:/mnt/secrets/jps/"
   application:
     name: Judicial Payment Service
-#  datasource:
-#    driver-class-name: org.postgresql.Driver
-#    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}${DB_OPTIONS:}
-#    username: ${DB_USER_NAME}
-#    password: ${DB_PASSWORD}
-#    properties:
-#      charSet: UTF-8
-#    hikari:
-#      minimumIdle: 2
-#      maximumPoolSize: 10
-#      idleTimeout: 10000
-#      poolName: {to-be-defined}HikariCP
-#      maxLifetime: 7200000
-#      connectionTimeout: 30000
-#  jpa:
-#    properties:
-#      hibernate:
-#        jdbc:
-#          lob:
-#            # silence the 'wall-of-text' - unnecessary exception throw about blob types
-#            non_contextual_creation: true
+    jackson:
+      property-naming-strategy: SNAKE_CASE
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://${JUDICIAL_PAYMENT_SERVICE_DB_HOST:localhost}:${JUDICIAL_PAYMENT_SERVICE_DB_PORT:6432}/${JUDICIAL_PAYMENT_SERVICE_DB_NAME:jps}${JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS:?ssl=disable}
+    username: ${JUDICIAL_PAYMENT_SERVICE_DB_USERNAME:postgres}
+    password: ${JUDICIAL_PAYMENT_SERVICE_DB_PASSWORD:postgres}
+    type: com.zaxxer.hikari.HikariDataSource
+    hikari:
+      minimumIdle: 2
+      maximumPoolSize: 10
+      idleTimeout: 10000
+      poolName: JPSHikariCP
+      maxLifetime: 7200000
+      connectionTimeout: 30000
+  jpa:
+    database: postgresql
+    show-sql: false
+    hibernate:
+      ddl-auto: none
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    out-of-order: true
+    ignore-missing-migrations: true
+  security:
+    oauth2:
+      client:
+        provider:
+          oidc:
+            issuer-uri: ${IDAM_OIDC_URL:http://localhost:5000}/o
+        registration:
+          oidc:
+            client-id: internal
+            client-secret: internal
 
-azure:
-  application-insights:
-    instrumentation-key: ${hmc.AppInsightsInstrumentationKey:00000000-0000-0000-0000-000000000000}
+idam:
+  api:
+    url: ${IDAM_API_URL:http://localhost:5000}
+  s2s-auth:
+    microservice: jps_judicial_payment_service
+    totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:AAAAAAAAAAAAAAAA}
+    url: ${S2S_URL:http://localhost:8489}
+  s2s-authorised:
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
+  client:
+    id: jps_judicial_payment_service
+    scope: openid roles profile
+    secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
+    # same for all environments - not used in jps but configured as idam mandates for token generation
+    redirect_uri: http://jps-judicial-payment-service/oauth2redirect
+  jps:
+    system:
+      username: ${IDAM_JPS_SYSTEM_USERNAME:jps-system@gmail.com}
+      password: ${IDAM_JPS_SYSTEM_PASSWORD:}
+
+oidc:
+  issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
+
+http:
+  client:
+    max:
+      total: ${HTTP_CLIENT_MAX_TOTAL:100}
+      client_per_route: ${HTTP_CLIENT_MAX_CLIENT_PER_ROUTE:20}
+    seconds:
+      idle:
+        connection: ${HTTP_CLIENT_SECONDS_IDLE_CONNECTION:120}
+    validate:
+      after:
+        inactivity: ${HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY:2000}
+    connection:
+      timeout: ${HTTP_CLIENT_CONNECTION_TIMEOUT:30000}
+    read:
+      timeout: ${HTTP_CLIENT_READ_TIMEOUT:60000}
+
+dbMigration:
+  # When true, the app will run DB migration on startup.
+  # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
+  runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
+
+location:
+  api:
+    url: ${LOCATION_API_URL:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API_URL:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+caseworker:
+  api:
+    url: ${CASEWORKER_API_URL:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
