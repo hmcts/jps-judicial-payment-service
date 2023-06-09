@@ -72,9 +72,11 @@ withPipeline(type, product, component) {
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
   }
 
-  afterAlways('functionalTest:preview') {
-    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Functional Tests/**/*'
-  }
+
+  //afterAlways('functionalTest:preview') {
+    //steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Functional Tests/**/*'
+  //}
+
 
   afterAlways('functionalTest:aat') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Functional Tests/**/*'
