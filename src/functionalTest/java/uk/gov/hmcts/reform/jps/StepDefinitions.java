@@ -39,7 +39,7 @@ public class StepDefinitions extends TestVariables {
     private static boolean isSetupExecuted = false;
 
     @Before
-    public void setup() {
+    public void setup() throws InterruptedException {
         if (!isSetupExecuted) {
             IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
             ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
