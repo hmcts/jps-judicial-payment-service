@@ -186,7 +186,6 @@ task functional(type: Test) {
         new File("${rootDir}/Report for Functional Tests").mkdirs()
         file("${rootDir}/target/cucumber-html-reports").renameTo(file("${rootDir}/Report for Functional Tests"))
         logger.quiet("Functional test report moved to ---> file://${buildDir}/Report for Functional Tests/overview-features.html")
-
       }
     }
   }
