@@ -27,7 +27,7 @@ public class IdamTokenGenerator {
             .target(IdamApi.class, idamApiUrl);
     }
 
-    public String authenticateUser(String username, String password) {
+    public String authenticateUser(String username, String password) throws InterruptedException {
         int maxRetries = 10;
         int retryCount = 0;
 
@@ -53,6 +53,8 @@ public class IdamTokenGenerator {
 
                 return "Bearer " + tokenExchangeResponse.getAccessToken();
             } catch (Exception e) {
+                e.printStackTrace();
+                Thread.sleep(100);
                 System.out.println("The error that occurred during authentication attempt: " + e.getMessage());
                 retryCount++;
             }
