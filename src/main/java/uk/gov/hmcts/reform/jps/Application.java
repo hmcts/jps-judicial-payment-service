@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @OpenAPIDefinition
-@EnableJpaRepositories(basePackages={"uk.gov.hmcts.reform.jps"})
+@EnableJpaRepositories(basePackages = {"uk.gov.hmcts.reform.jps"})
 @EnableTransactionManagement
 @EnableFeignClients(basePackages = {
     "uk.gov.hmcts.reform.jps.refdata.location.client",
