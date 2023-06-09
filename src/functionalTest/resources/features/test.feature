@@ -1,4 +1,4 @@
-@feature @Ignore
+@feature
 Feature: testing framework
 
   Scenario: User with valid role submits request on /test POST endpoint
