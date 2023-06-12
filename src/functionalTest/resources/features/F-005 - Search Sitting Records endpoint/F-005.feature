@@ -125,7 +125,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "401 Unauthorised" status code
 
   @S-005.12 #AC07
-  Scenario: Negative response, when the service token is missing
+  Scenario: Negative response, when the service token is invalid
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
     And the request contains an invalid service token
