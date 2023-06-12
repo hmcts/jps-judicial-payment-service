@@ -122,6 +122,9 @@ task functional(type: Test) {
   classpath = sourceSets.functionalTest.runtimeClasspath
 
   dependsOn assemble, testClasses
+
+  inputs.property("timestamp", System.currentTimeMillis())
+
   doFirst {
     generateCucumberReports.enabled = true
     javaexec {
@@ -183,6 +186,7 @@ jacocoTestReport {
     xml.outputLocation = file("${project.buildDir}/reports/jacoco/test/jacocoTestReport.xml")
   }
 }
+
 
 project.tasks['sonarqube'].dependsOn jacocoTestReport
 project.tasks['check'].dependsOn integration
@@ -296,6 +300,10 @@ dependencies {
   }
 
   implementation group: 'io.cucumber', name: 'cucumber-java', version: '7.11.1'
+  testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.11.1'
+  testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+  testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.36.0'
+  testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.6'
 
   implementation (group: 'org.glassfish.web', name: 'el-impl', version: '2.2.1-b05') {
     exclude group: 'javax.el', module: 'el-api'
@@ -344,7 +352,7 @@ bootWithCCD {
     environment "RSE_LIB_CLEAN_BOOT", false
   }
 
-  authMode = uk.gov.hmcts.rse.AuthMode.Local
+  authMode = uk.gov.hmcts.rse.AuthMode.AAT
   // TODO: update when we have db connections and authorised services
   environment("DATA_STORE_S2S_AUTHORISED_SERVICES", "ccd_gw,ccd_gateway,ccd_data,ccd_next_hearing_date_updater")
   environment("RSE_LIB_S2S_PORT", 4502)
