@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
@@ -53,7 +52,7 @@ public class SittingRecordService {
                          .changeDateTime(sittingRecord.getChangeDateTime())
                          .changeByUserId(sittingRecord.getChangeByUserId())
                          .build())
-            .collect(toList());
+            .toList();
 
     }
 
@@ -87,9 +86,11 @@ public class SittingRecordService {
                                 .map(DurationBoolean::getPm).orElse(false))
                         .build();
 
+                recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.RECORDED.name())
-                    .changeDateTime(LocalDateTime.now())
+                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
                     .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
                     .build();

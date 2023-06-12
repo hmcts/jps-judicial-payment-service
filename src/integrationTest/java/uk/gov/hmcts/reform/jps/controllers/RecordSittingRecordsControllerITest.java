@@ -12,7 +12,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
+
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -40,11 +44,53 @@ public class RecordSittingRecordsControllerITest {
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestJson))
+        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpectAll(
+                status().isCreated(),
+                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
+                jsonPath("$.errorRecords[0].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[0].postedRecord.am").isEmpty(),
+                jsonPath("$.errorRecords[0].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
+
+                jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
+                jsonPath("$.errorRecords[1].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[1].postedRecord.pm").isEmpty(),
+                jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[1].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
+
+                jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
+                jsonPath("$.errorRecords[2].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[2].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
+            ).andReturn();
+
+        RecordSittingRecordResponse recordSittingRecordResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsByteArray(),
+            RecordSittingRecordResponse.class
+        );
+
+        assertThat(recordSittingRecordResponse.getErrorRecords()).describedAs("Created date assertion")
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getCreatedDateTime()));
     }
 
     @Test

@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.List.of;
-import static java.util.stream.Collectors.toUnmodifiableList;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.badRequest;
@@ -49,7 +48,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
                 .getFieldErrors()
                 .stream()
                 .map(err -> new FieldError(err.getField(), err.getDefaultMessage()))
-                .collect(toUnmodifiableList());
+                .toList();
 
         ModelValidationError error = new ModelValidationError(fieldErrors);
 
