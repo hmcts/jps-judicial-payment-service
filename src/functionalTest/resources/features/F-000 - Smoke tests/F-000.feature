@@ -1,4 +1,4 @@
-@feature @Smoke
+@feature @Functional
 Feature: F-000 - Scenarios for the /Test endpoint - Smoke tests
 
   @F-000.1
