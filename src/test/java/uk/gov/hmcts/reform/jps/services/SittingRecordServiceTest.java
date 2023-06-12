@@ -200,8 +200,8 @@ class SittingRecordServiceTest {
                                               "personalCode", "contractTypeId", "judgeRoleTypeId", "am", "pm")
                 .contains(
                     tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
-                    tuple(of(2023, Month.APRIL, 10), "RECORDED", "517400", "test", "4918178", 1L, "Judge", true, false),
-                    tuple(of(2023, Month.MARCH, 9), "RECORDED", "517400", "test", "4918178", 1L, "Judge", true, true)
+                    tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
+                    tuple(of(2023, Month.MARCH, 9), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, true)
         );
 
         assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
