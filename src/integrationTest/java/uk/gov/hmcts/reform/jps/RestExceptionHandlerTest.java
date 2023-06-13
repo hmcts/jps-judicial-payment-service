@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false)
 @ImportAutoConfiguration(TestIdamConfiguration.class)
-public class RestExceptionHandlerTest extends BaseTest {
+public class RestExceptionHandlerTest extends Base {
 
     public static String ERROR_PATH_ERROR = "$.errors";
     public static String ERROR_PATH_STATUS = "$.status";
@@ -56,7 +56,7 @@ public class RestExceptionHandlerTest extends BaseTest {
         Request request = Request.create(Request.HttpMethod.GET, "url",
             new HashMap<>(), null, new RequestTemplate());
         Mockito.doThrow(new FeignException.NotFound(testExceptionMessage, request, null, null))
-            .when(service).getHearing();
+            .when(service).getUserRoles();
 
         ResultActions result =  this.mockMvc.perform(get("/test")
             .contentType(MediaType.APPLICATION_JSON));
@@ -71,7 +71,7 @@ public class RestExceptionHandlerTest extends BaseTest {
     void shouldHandleResourceNotFoundException() throws Exception {
 
         // WHEN
-        Mockito.doThrow(new ResourceNotFoundException(testExceptionMessage)).when(service).getHearing();
+        Mockito.doThrow(new ResourceNotFoundException(testExceptionMessage)).when(service).getUserRoles();
 
         ResultActions result =  this.mockMvc.perform(get("/test")
             .contentType(MediaType.APPLICATION_JSON));
@@ -84,7 +84,7 @@ public class RestExceptionHandlerTest extends BaseTest {
     @Test
     void shouldHandleServiceException() throws Exception {
         // WHEN
-        Mockito.doThrow(new ServiceException(testExceptionMessage)).when(service).getHearing();
+        Mockito.doThrow(new ServiceException(testExceptionMessage)).when(service).getUserRoles();
 
         ResultActions result =  this.mockMvc.perform(get("/test")
             .contentType(MediaType.APPLICATION_JSON));
@@ -98,7 +98,7 @@ public class RestExceptionHandlerTest extends BaseTest {
     @Test
     void shouldHandleUnauthorisedException() throws Exception {
         // WHEN
-        Mockito.doThrow(new UnauthorisedException(testExceptionMessage)).when(service).getHearing();
+        Mockito.doThrow(new UnauthorisedException(testExceptionMessage)).when(service).getUserRoles();
 
         ResultActions result =  this.mockMvc.perform(get("/test")
             .contentType(MediaType.APPLICATION_JSON));
