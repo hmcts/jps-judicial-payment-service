@@ -6,7 +6,7 @@
     },
     {
       "fieldName": "recordedSittingRecords",
-      "message": "Insufficient sitting Records"
+      "message": "006 Insufficient sitting Records"
     },
     {
       "fieldName": "recordedByIdamId",

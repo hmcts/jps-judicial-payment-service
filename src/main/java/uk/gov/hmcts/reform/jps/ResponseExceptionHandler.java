@@ -15,6 +15,7 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
+import uk.gov.hmcts.reform.jps.exceptions.UnknowValueException;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.List.of;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.badRequest;
 
@@ -86,11 +86,22 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(InvalidLocationException.class)
     protected ResponseEntity<Object> handleInvalidLocationExceptionException(InvalidLocationException exception) {
-        return ResponseEntity.status(BAD_REQUEST).body(exception.getMessage());
+        ModelValidationError error = new ModelValidationError(
+            of(new FieldError("invalidLocation", exception.getMessage()))
+        );
+        return badRequest().body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException() {
         return ResponseEntity.status(UNAUTHORIZED).build();
+    }
+
+    @ExceptionHandler(UnknowValueException.class)
+    protected ResponseEntity<Object> handleUnknowValueException(UnknowValueException exception) {
+        ModelValidationError error = new ModelValidationError(
+            of(new FieldError(exception.field, exception.getMessage()))
+        );
+        return badRequest().body(error);
     }
 }

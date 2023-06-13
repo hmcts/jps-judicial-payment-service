@@ -8,7 +8,8 @@
       "personalCode": "4918178",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
-      "pm": true
+      "pm": true,
+      "am": false
     },
     {
       "sittingDate": "2023-04-10",
@@ -16,7 +17,8 @@
       "personalCode": "4918178",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
-      "am": true
+      "am": true,
+      "pm": false
     },
     {
       "sittingDate": "2023-03-09",

@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
+import uk.gov.hmcts.reform.jps.controllers.util.Utility;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -49,8 +49,7 @@ public class SittingRecordController {
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
         @Valid @RequestBody SittingRecordSearchRequest sittingRecordSearchRequest) {
 
-        String hmctsServiceCode = requestHmctsServiceCode
-            .orElseThrow(() -> new MissingPathVariableException("hmctsServiceCode is mandatory"));
+        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
 
         final int totalRecordCount = sittingRecordService.getTotalRecordCount(
             sittingRecordSearchRequest,

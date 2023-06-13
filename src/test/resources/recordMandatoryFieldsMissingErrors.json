@@ -59,6 +59,14 @@
     {
       "fieldName": "recordedSittingRecords[2].contractTypeId",
       "message": "Contract Type Id  is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[1].durationBoolean",
+      "message": "AM/PM/Full Day is mandatory"
+    },
+    {
+      "fieldName": "recordedSittingRecords[0].durationBoolean",
+      "message": "AM/PM/Full Day is mandatory"
     }
   ]
 }
