@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import uk.gov.hmcts.reform.jps.exceptions.ApiError;
 import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
-import uk.gov.hmcts.reform.jps.exceptions.UnknowValueException;
-import uk.gov.hmcts.reform.jps.exceptions.ApiError;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.exceptions.ServiceException;
 import uk.gov.hmcts.reform.jps.exceptions.UnauthorisedException;
+import uk.gov.hmcts.reform.jps.exceptions.UnknowValueException;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
