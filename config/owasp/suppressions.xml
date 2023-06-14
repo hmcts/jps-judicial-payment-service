@@ -10,17 +10,11 @@
   <!--End of false positives section -->
 
   <!--Please add all the temporary suppression under the below section-->
-  <suppress until="2023-03-14">
-    <notes>
-    </notes>
-    <cve>CVE-2022-1471</cve>
-  </suppress>
-
-  <suppress>
-    <cve>CVE-2022-45688</cve>
-    <cve>CVE-2022-1471</cve>
-    <cve>CVE-2023-20861</cve>
-    <cve>CVE-2023-28708</cve>
-  </suppress>
   <!--End of temporary suppression section -->
+  <suppress>
+    <cve>CVE-2023-24998</cve>
+    <cve>CVE-2022-1471</cve>
+    <cve>CVE-2023-1370</cve>
+    <cve>CVE-2023-20883</cve>
+  </suppress>
 </suppressions>

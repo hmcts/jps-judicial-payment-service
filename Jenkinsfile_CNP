@@ -29,8 +29,11 @@ def secrets = [
 
   ],
   'jps-${env}': [
-
-
+    secret('mc-idam-client-secret', 'JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET'),
+    secret('idam-jps-recorder-username', 'JPS_RECORDER_USERNAME'),
+    secret('idam-jps-recorder-password', 'JPS_RECORDER_PASSWORD'),
+    secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
+    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD')
   ],
   's2s-${env}': [
 
@@ -47,6 +50,7 @@ static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
 }
 
 withPipeline(type, product, component) {
+  enableDbMigration('jps')
   syncBranchesWithMaster(branchesToSync)
   loadVaultSecrets(secrets)
   enableAksStagingDeployment()
@@ -58,6 +62,24 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
   }
 
+  before('smoketest:preview') {
+    env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+    env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
+  }
+
+  before('smoketest:aat') {
+    env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
+    env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
+  }
+
+  afterAlways('smoketest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Smoke Tests/**/*'
+  }
+
+  afterAlways('smoketest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Smoke Tests/**/*'
+  }
+  
   afterAlways('functionalTest:preview') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Functional Tests/**/*'
   }

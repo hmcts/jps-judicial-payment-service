@@ -1,0 +1,56 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/refdata/judicial/users"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": [
+      {
+        "sidam_id": "string",
+        "object_id": "string",
+        "known_as": "Joe",
+        "surname": "Bloggs",
+        "full_name": "Joe Bloggs",
+        "post_nominals": "Commander",
+        "email_id": "7009458EMP-@ejudiciary.net",
+        "personal_code": "4923421",
+        "appointments": [
+          {
+            "base_location_id": "string",
+            "epimms_id": "string",
+            "court_name": "string",
+            "cft_region_id": "string",
+            "cft_region": "string",
+            "location_id": "string",
+            "location": "string",
+            "is_principal_appointment": "string",
+            "appointment": "string",
+            "appointment_type": "string",
+            "service_code": "string",
+            "roles": [
+              "string"
+            ],
+            "start_date": "string",
+            "end_date": "string"
+          }
+        ],
+        "authorisations": [
+          {
+            "jurisdiction": "string",
+            "ticket_description": "string",
+            "ticket_code": "string",
+            "service_codes": [
+              "string"
+            ],
+            "start_date": "string",
+            "end_date": "string"
+          }
+        ]
+      }
+    ]
+  }
+}

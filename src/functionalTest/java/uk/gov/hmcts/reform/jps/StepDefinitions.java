@@ -10,7 +10,10 @@ import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
-import uk.gov.hmcts.reform.hmc.jp.functional.resources.APIResources;
+import uk.gov.hmcts.reform.jps.config.Endpoints;
+import uk.gov.hmcts.reform.jps.config.TestVariables;
+import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,74 +21,103 @@ import java.nio.file.Paths;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static  org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.equalTo;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
-import static org.springframework.http.HttpStatus.*;
-
-public class StepDefinitions {
+public class StepDefinitions extends TestVariables {
 
     RequestSpecification request;
     RequestSpecification given;
     Response response;
 
-    @Given("a user with the IDAM role of {string}")
-    public void a_user_with_the_idam_role_of(String string) {
-        System.out.println(string);
+    private static String accessToken;
+    private static String recorderAccessToken;
+    private static String invalidAccessToken;
+    private static String validS2sToken;
+    private static String invalidS2sToken;
+    private static boolean isSetupExecuted = false;
+
+    @Before
+    public void setup() throws InterruptedException {
+        if (!isSetupExecuted) {
+            IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
+            ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+
+            recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+            invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+            validS2sToken = serviceAuthenticationGenerator.generate();
+            invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
+
+            isSetupExecuted = true;
+        }
     }
 
-    @Given("a record exists in fee table for the supplied hmctsServiceCode in the request along judgeRoleTypeId and sittingDate present in request where validFrom <= sittingDate")
-    public void a_record_exists_in_fee_table_for_the_supplied_hmcts_service_code_in_the_request_along_judge_role_type_id_and_sitting_date_present_in_request_where_valid_from_sitting_date() {
-        // Write code to insert in the db first
+    @Given("a user with the IDAM role of {string}")
+    public void userWithTheIdamRoleOf(String role) {
+        if (role.equalsIgnoreCase("jps-recorder")) {
+            accessToken  = recorderAccessToken;
+        } else if (role.equalsIgnoreCase("ccd-import")) {
+            accessToken  = invalidAccessToken;
+        }
+    }
+
+    @Given("a record for the given hmctsServiceCode exists in the database")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() {
+        // POST call needs to be added here
     }
 
     @When("a request is prepared with appropriate values")
-    public void a_request_is_prepared_with_appropriate_values() {
-        request = new RequestSpecBuilder().setBaseUri("http://localhost:3000").setContentType(
-            ContentType.JSON).build();
-        given = given().log().all().spec(request);
+    public void requestIsPreparedWithAppropriateValues() {
+        request = new RequestSpecBuilder()
+            .setBaseUri(testUrl)
+            .setContentType(ContentType.JSON)
+            .addHeader("Authorization", accessToken)
+            .build();
     }
 
-    @When("a request is missing the S2S token")
-    public void a_request_is_missing_the_s2s_token() {
-        request = new RequestSpecBuilder().setBaseUri("http://localhost:3000").setContentType(
-            ContentType.JSON).build();
-        given = given().log().all().spec(request);
+    @When("the request contains a valid service token")
+    public void theRequestContainsValidServiceToken() {
+        request = request.request().header("ServiceAuthorization", validS2sToken);
+    }
+
+    @When("the request contains an invalid service token")
+    public void theRequestContainsInvalidServiceToken() {
+        request = request.request().header("ServiceAuthorization", invalidS2sToken);
     }
 
     @When("the request contains the {string} as {string}")
-    public void the_request_contains_the_as(String pathParam, String value) {
-        given = given().log().all().pathParam(pathParam,value).spec(request);
+    public void theRequestContainsTheAs(String pathParam, String value) {
+        given = request.pathParam(pathParam,value);
+    }
+
+    @When("the request body contains the {string} as in {string}")
+    public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
+        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName));
+
+        String body = new String(b);
+        given.body(body);
     }
 
     @When("a call is submitted to the {string} endpoint using a {string} request")
-    public void a_call_is_submitted_to_the_get_fee_endpoint(String resource, String method) {
-        APIResources resourceAPI = APIResources.valueOf(resource);
+    public void callIsSubmittedToTheEndpoint(String resource, String method) {
+        given = given().log().all().spec(request);
 
-        if (method.equalsIgnoreCase("POST"))
+        Endpoints resourceAPI = Endpoints.valueOf(resource);
+
+        if (method.equalsIgnoreCase("POST")) {
             response = given.when().post(resourceAPI.getResource());
-        else if (method.equalsIgnoreCase("GET"))
+        } else if (method.equalsIgnoreCase("GET")) {
             response = given.when().get(resourceAPI.getResource());
-        else if (method.equalsIgnoreCase("DELETE"))
+        } else if (method.equalsIgnoreCase("DELETE")) {
             response = given.when().delete(resourceAPI.getResource());
-    }
-
-    @When("the request contains the additional header {string} as {string}")
-    public void the_request_contains_the_additional_header_as(String header, String value) {
-        given.header(header,value);
+        }
     }
 
     @When("the request body contains the {string} as {string}")
     public void the_request_body_contains_the_as(String field, String value) {
         given.body(field, ObjectMapperType.valueOf(value));
-    }
-
-    @When("the request body contains the {string} as in {string}")
-    public void the_request_body_contains_the(String description, String fileName) throws IOException {
-
-        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/"+fileName));
-
-        String body = new String(b);
-        given.body(body).then().log().all();
     }
 
     @Then("the response contains a new feeId")
@@ -114,21 +146,49 @@ public class StepDefinitions {
     }
 
     @Then("a {string} response is received with a {string} status code")
-    public void a_response_is_received_with_a_status_code(String responseType, String responseCode) {
-
+    public void responseIsReceivedWithStatusCode(String responseType, String responseCode) {
         response.then().log().all().extract().response().asString();
 
         if (responseType.equalsIgnoreCase("positive")) {
-            if (responseCode.equalsIgnoreCase("200 OK"))
+            if (responseCode.equalsIgnoreCase("200 OK")) {
                 assertThat(response.getStatusCode()).isEqualTo(OK.value());
-        }
-        else {
-            if (responseCode.equalsIgnoreCase("400 Bad Request"))
-                assertThat(response.getStatusCode()).isEqualTo(BAD_REQUEST.value());
-            else if (responseCode.equalsIgnoreCase("401 Unauthorised"))
+            }
+        } else {
+            if (responseCode.equalsIgnoreCase("401 Unauthorised")) {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
-            else if (responseCode.equalsIgnoreCase("403 Forbidden"))
+            } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
+            }
         }
+    }
+
+    @Then("the response returns the matching sitting records")
+    public void theResponseReturnsTheMatchingSittingRecords() {
+        response.then().assertThat()
+            .body("recordCount",equalTo(1))
+            .body("sittingRecords[0].sittingDate",equalTo("2023-05-11"))
+            .body("sittingRecords[0].statusId",equalTo("RECORDED"))
+            .body("sittingRecords[0].regionId",equalTo("1"))
+            .body("sittingRecords[0].regionName",equalTo("London"))
+            .body("sittingRecords[0].epimsId",equalTo("1234"))
+            .body("sittingRecords[0].hmctsServiceId",equalTo("BBA3"))
+            .body("sittingRecords[0].personalCode",equalTo("4918178"))
+            .body("sittingRecords[0].personalName",equalTo("Joe Bloggs"))
+            .body("sittingRecords[0].contractTypeId",equalTo(1))
+            .body("sittingRecords[0].judgeRoleTypeId",equalTo("judge"))
+            .body("sittingRecords[0].am",equalTo("AM"))
+            .body("sittingRecords[0].pm",equalTo("PM"))
+            .body("sittingRecords[0].createdDateTime",equalTo("2023-05-11T17:02:50.000Z"))
+            .body("sittingRecords[0].createdByUserId",equalTo("a9ab7f4b-7e0c-49d4-8ed3-75b54d421cdc"));
+    }
+
+    @Then("the response contains {string} as {string}")
+    public void theResponseContainsAs(String attribute, String value) {
+        response.then().assertThat().body(attribute,Matchers.equalTo(value));
+    }
+
+    @Then("the {string} is {int}")
+    public void theAttributeIs(String attribute, Integer value) {
+        response.then().assertThat().body(attribute,equalTo(value));
     }
 }
