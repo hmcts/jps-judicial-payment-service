@@ -70,8 +70,7 @@ class SittingRecordControllerTest {
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
-                                                      "/sitting-records/searchSittingRecords",
-                                                      SSCS
+                                                      "/sitting-records/searchSittingRecords"
                                                   )
                                                   .contentType(MediaType.APPLICATION_JSON)
                                                   .content(requestJson)
@@ -106,7 +105,7 @@ class SittingRecordControllerTest {
         );
 
         ModelValidationError expectedErrors = objectMapper.readValue(
-            getResource("mandatoryFieldError.json"),
+            getResource("searchMandatoryFieldError.json"),
             ModelValidationError.class
         );
 
@@ -175,7 +174,7 @@ class SittingRecordControllerTest {
             SittingRecordSearchResponse.class
         );
 
-        verify(regionService).setRegionDetails(SSCS, sittingRecords);
+        verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
         //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
@@ -212,7 +211,7 @@ class SittingRecordControllerTest {
         );
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
-        verify(regionService, never()).setRegionDetails(SSCS, sittingRecords);
+        verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
         //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
 

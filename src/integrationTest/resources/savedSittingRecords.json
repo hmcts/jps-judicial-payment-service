@@ -1,0 +1,40 @@
+[
+  {
+    "id": 1,
+    "sittingDate": "2023-05-11",
+    "regionId": "1",
+    "epimsId": "852649",
+    "personalCode": "4918178",
+    "judgeRoleTypeId": "Judge",
+    "contractTypeId": 1,
+    "pm": true,
+    "statusId": "RECORDED",
+    "hmctsServiceId": "ssc_id"
+  },
+  {
+    "id": 2,
+    "sittingDate": "2023-04-10",
+    "regionId": "1",
+    "epimsId": "517400",
+    "personalCode": "4918178",
+    "judgeRoleTypeId": "Judge",
+    "contractTypeId": 1,
+    "am": true,
+    "statusId": "RECORDED",
+    "hmctsServiceId": "ssc_id"
+  },
+  {
+    "id": 3,
+    "sittingDate": "2023-03-09",
+    "regionId": "1",
+    "epimsId": "517400",
+    "personalCode": "4918178",
+    "judgeRoleTypeId": "Judge",
+    "contractTypeId": 1,
+    "am": true,
+    "pm": true,
+    "statusId": "RECORDED",
+    "hmctsServiceId": "ssc_id"
+  }
+]
+

@@ -5,6 +5,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
+import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.refdata.location.model.LocationApiResponse;
@@ -13,6 +15,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,8 +58,8 @@ class LocationServiceTest {
         when(locationServiceClient.getCourtVenue("serviceCode"))
             .thenReturn(locationApiResponse);
 
-        locationService.setRegionDetails("serviceCode",
-                                         sittingRecords);
+        locationService.setRegionName("serviceCode",
+                                      sittingRecords);
 
         assertThat(sittingRecords)
             .extracting("regionId", "regionName")
@@ -65,5 +68,73 @@ class LocationServiceTest {
                 tuple("1", "one"),
                 tuple("3", "N/A")
             );
+    }
+
+    @Test
+    void shouldSetRegionIdWhenRegionDetailsFound() {
+        LocationApiResponse locationApiResponse = LocationApiResponse.builder()
+            .serviceCode("serviceCode")
+            .courtVenues(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build(),
+                CourtVenue.builder()
+                    .epimmsId("2")
+                    .regionId("2")
+                    .siteName("two")
+                    .build()
+            ))
+            .build();
+        List<SittingRecordRequest> sittingRecordRequest = List.of(
+            SittingRecordRequest.builder()
+                .epimsId("2")
+                .build(),
+            SittingRecordRequest.builder()
+                .epimsId("1")
+                .build()
+        );
+
+        when(locationServiceClient.getCourtVenue("serviceCode"))
+            .thenReturn(locationApiResponse);
+
+        locationService.setRegionId("serviceCode",
+                                    sittingRecordRequest);
+
+        assertThat(sittingRecordRequest)
+            .extracting("regionId", "epimsId")
+            .contains(
+                tuple("2", "2"),
+                tuple("1", "1")
+            );
+    }
+
+
+    @Test
+    void shouldThrowInvalidLocationExceptionWhenRegionDetailsNotFound() {
+        LocationApiResponse locationApiResponse = LocationApiResponse.builder()
+            .serviceCode("serviceCode")
+            .courtVenues(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build()
+            ))
+            .build();
+        List<SittingRecordRequest> sittingRecords = List.of(
+            SittingRecordRequest.builder()
+                .epimsId("3")
+                .build()
+        );
+
+        when(locationServiceClient.getCourtVenue("serviceCode"))
+            .thenReturn(locationApiResponse);
+
+        assertThatThrownBy(() -> locationService.setRegionId("serviceCode",
+                                                             sittingRecords))
+            .isInstanceOf(InvalidLocationException.class)
+            .hasMessage("invalid location");
     }
 }

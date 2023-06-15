@@ -1,25 +1,41 @@
 package uk.gov.hmcts.reform.jps.services;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
+import static java.time.LocalDate.of;
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
+import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
@@ -28,14 +44,23 @@ class SittingRecordServiceTest {
 
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
-    private static final LocalDateTime CURRENT_DATE_TIME = LocalDateTime.now();
-
+    private static final LocalDateTime CURRENT_DATE_TIME = now();
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @InjectMocks
     private SittingRecordService sittingRecordService;
+
+    @Captor
+    private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
+
+    @BeforeEach
+    void setUp() {
+        objectMapper.registerModule(new JavaTimeModule());
+    }
 
     @Test
     void shouldReturnTotalRecordCount() {
@@ -156,5 +181,39 @@ class SittingRecordServiceTest {
                 .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
                 .build())
             .collect(Collectors.toList());
+    }
+
+    @Test
+    void shouldSaveSittingRecordsWhenRequestIsValid() throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+        sittingRecordService.saveSittingRecords("test",
+                                                recordSittingRecordRequest);
+        verify(sittingRecordRepository, times(3))
+            .save(sittingRecordArgumentCaptor.capture());
+
+        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
+        assertThat(sittingRecords).extracting("sittingDate", "statusId", "epimsId", "hmctsServiceId",
+                                              "personalCode", "contractTypeId", "judgeRoleTypeId", "am", "pm")
+                .contains(
+                    tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
+                    tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
+                    tuple(of(2023, Month.MARCH, 9), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, true)
+        );
+
+        assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
+            .extracting("statusId", "changeByUserId", "changeByName")
+            .contains(
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
+        );
+
+        assertThat(sittingRecords).describedAs("Created date assertion")
+            .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 }

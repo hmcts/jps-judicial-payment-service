@@ -14,7 +14,6 @@ import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -65,8 +64,6 @@ class SittingRecordControllerITest extends BaseTest {
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("08763527-646c-4dc4-8d82-0c3c2ddc7198")
             .build();
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
@@ -96,9 +93,9 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
-                jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].createdByUserId").value("08763527-646c-4dc4-8d82-0c3c2ddc7198"),
-                jsonPath("$.sittingRecords[0].createdByUserName").value("Jane White"),
+                jsonPath("$.sittingRecords[0].createdDateTime").isEmpty(),
+                jsonPath("$.sittingRecords[0].createdByUserId").isEmpty(),
+                jsonPath("$.sittingRecords[0].createdByUserName").isEmpty(),
                 jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
                 jsonPath("$.sittingRecords[0].changeByUserId").isEmpty(),
                 jsonPath("$.sittingRecords[0].changeByUserName").isEmpty()
