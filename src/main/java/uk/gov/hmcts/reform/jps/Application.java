@@ -4,9 +4,11 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 @SpringBootApplication
 @OpenAPIDefinition
+@EnableTransactionManagement
 @EnableFeignClients(basePackages = {
     "uk.gov.hmcts.reform.jps.refdata.location.client",
     "uk.gov.hmcts.reform.jps.refdata.judicial.client",

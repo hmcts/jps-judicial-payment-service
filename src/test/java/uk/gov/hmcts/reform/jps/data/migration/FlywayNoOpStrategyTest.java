@@ -12,7 +12,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.autoconfigure.flyway.FlywayMigrationStrategy;
-import uk.gov.hmcts.reform.jps.expection.PendingMigrationScriptException;
+import uk.gov.hmcts.reform.jps.exceptions.PendingMigrationScriptException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;

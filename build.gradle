@@ -219,7 +219,7 @@ project.tasks['check'].dependsOn integration
 
 
 def coverageExclusionList = [
-  '**uk/gov/hmcts/reform/jps/expection/*.*',
+  '**uk/gov/hmcts/reform/jps/exceptions/*.*',
   '**uk/gov/hmcts/reform/jps/config/**/*',
   '**uk/gov/hmcts/reform/jps/domain/*.*',
   "src/main/java/uk/gov/hmcts/reform/jps/Application.java",
@@ -227,7 +227,8 @@ def coverageExclusionList = [
   "**/controllers/TestController.java",
   "**uk/gov/hmcts/reform/jps/model/**/*",
   "**uk/gov/hmcts/reform/jps/refdata/**/*",
-  "**uk/gov/hmcts/reform/jps/validator/*.*"
+  "**uk/gov/hmcts/reform/jps/validator/*.*",
+  "**uk/gov/hmcts/reform/jps/ResponseExceptionHandler.java"
 ]
 
 sonar {
@@ -321,6 +322,11 @@ dependencies {
   testImplementation(platform('org.junit:junit-bom:5.9.2'))
   testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine'
   testImplementation group: 'org.springframework.boot', name: 'spring-boot-starter-test', {
+    exclude group: 'junit', module: 'junit'
+    exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+  }
+
+  testImplementation group: 'org.springframework.security', name: 'spring-security-test', {
     exclude group: 'junit', module: 'junit'
     exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
   }
