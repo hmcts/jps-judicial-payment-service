@@ -8,7 +8,7 @@
       "personalCode": "4918178",
       "contractTypeId": "2",
       "judgeRoleTypeId": "Judge",
-      "am": false,
+      "am": true,
       "pm": true,
       "replaceDuplicate": false
     }

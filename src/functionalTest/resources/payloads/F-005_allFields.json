@@ -3,12 +3,11 @@
   "offset": "0",
   "dateOrder": "ASCENDING",
   "regionId": "1",
-  "epimsId": "1234",
-  "createdByUserId": "a9ab7f4b-7e0c-49d4-8ed3-75b54d421cdc",
+  "epimsId": "229786",
   "personalCode": "4918178",
-  "judgeRoleTypeId": "judge",
+  "judgeRoleTypeId": "Judge",
   "duration": "FULL_DAY",
-  "dateRangeFrom": "2023-05-10",
+  "dateRangeFrom": "2023-03-10",
   "dateRangeTo": "2023-05-12",
   "statusIds": "RECORDED"
 }

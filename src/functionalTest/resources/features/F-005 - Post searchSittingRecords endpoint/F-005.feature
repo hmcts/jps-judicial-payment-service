@@ -7,8 +7,8 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And a record for the given hmctsServiceCode exists in the database
     When a request is prepared with appropriate values
     And the request contains a valid service token
-    And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-005_allFields.json"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
@@ -20,7 +20,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload with only the mandatory fields" as in "S-005.2.json"
+    And the request body contains the "payload matching data from existing record" as in "S-005.2.json"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records

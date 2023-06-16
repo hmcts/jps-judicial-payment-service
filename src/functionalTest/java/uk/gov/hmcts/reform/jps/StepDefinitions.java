@@ -1,9 +1,10 @@
 package uk.gov.hmcts.reform.jps;
 
+import io.cucumber.java.Before;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
-
+import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
@@ -22,6 +23,8 @@ import java.nio.file.Paths;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
@@ -32,20 +35,17 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification given;
     Response response;
 
-    private static String accessToken;
-    private static String recorderAccessToken;
-    private static String invalidAccessToken;
-    private static String validS2sToken;
-    private static String invalidS2sToken;
     private static boolean isSetupExecuted = false;
 
     @Before
     public void setup() throws InterruptedException {
         if (!isSetupExecuted) {
-            IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-            ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+            final IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
+            final ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
 
             recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+            submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
+            publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
             invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
             validS2sToken = serviceAuthenticationGenerator.generate();
             invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
@@ -58,14 +58,28 @@ public class StepDefinitions extends TestVariables {
     public void userWithTheIdamRoleOf(String role) {
         if (role.equalsIgnoreCase("jps-recorder")) {
             accessToken  = recorderAccessToken;
+        } else if (role.equalsIgnoreCase("jps-submitter")) {
+            accessToken  = submitterAccessToken;
+        } else if (role.equalsIgnoreCase("jps-publisher")) {
+            accessToken  = publisherAccessToken;
         } else if (role.equalsIgnoreCase("ccd-import")) {
             accessToken  = invalidAccessToken;
         }
     }
 
     @Given("a record for the given hmctsServiceCode exists in the database")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() {
-        // POST call needs to be added here
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-004_allFields.json")));
+        body = body.replace("2023-04-10", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        given().header("Content-Type","application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/recordSittingRecords/ABA5")
+            .then().log().all().assertThat().statusCode(201);
     }
 
     @When("a request is prepared with appropriate values")
@@ -94,9 +108,12 @@ public class StepDefinitions extends TestVariables {
 
     @When("the request body contains the {string} as in {string}")
     public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
-        byte[] b = Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName));
+        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName)));
+        if (description.equalsIgnoreCase("payload matching data from existing record")) {
+            body = body.replace("2023-03-10", randomDate);
+            body = body.replace("2023-05-12", randomDate);
+        }
 
-        String body = new String(b);
         given.body(body);
     }
 
@@ -120,11 +137,6 @@ public class StepDefinitions extends TestVariables {
         given.body(field, ObjectMapperType.valueOf(value));
     }
 
-    @Then("the response contains a new feeId")
-    public void the_response_contains_a_new_fee_id() {
-        response.then().assertThat().body("feeId", notNullValue());
-    }
-
     @Then("the response has all the fields returned with correct values")
     public void the_response_has_all_the_fields_returned_with_correct_values() {
         response.then().assertThat().body("hmctsServiceCode",equalTo("<hmctsServiceCode>"))
@@ -133,11 +145,6 @@ public class StepDefinitions extends TestVariables {
             .body("judgeRoleTypeId",equalTo("<judgeRoleTypeId>"))
             .body("standardFee",equalTo(1234))
             .body("londonWeightedFee",equalTo(6869));
-    }
-
-    @Then("the response contains {string} as {string}")
-    public void the_response_contains_as(String attribute, String value) {
-        response.then().assertThat().body(attribute,equalTo(value));
     }
 
     @Then("the response is empty")
@@ -152,6 +159,8 @@ public class StepDefinitions extends TestVariables {
         if (responseType.equalsIgnoreCase("positive")) {
             if (responseCode.equalsIgnoreCase("200 OK")) {
                 assertThat(response.getStatusCode()).isEqualTo(OK.value());
+            } else if (responseCode.equalsIgnoreCase("201 Created")) {
+                assertThat(response.getStatusCode()).isEqualTo(CREATED.value());
             }
         } else {
             if (responseCode.equalsIgnoreCase("401 Unauthorised")) {
@@ -166,25 +175,28 @@ public class StepDefinitions extends TestVariables {
     public void theResponseReturnsTheMatchingSittingRecords() {
         response.then().assertThat()
             .body("recordCount",equalTo(1))
-            .body("sittingRecords[0].sittingDate",equalTo("2023-05-11"))
+            .body("sittingRecords[0].sittingDate",equalTo(randomDate))
             .body("sittingRecords[0].statusId",equalTo("RECORDED"))
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
-            .body("sittingRecords[0].epimsId",equalTo("1234"))
-            .body("sittingRecords[0].hmctsServiceId",equalTo("BBA3"))
+            .body("sittingRecords[0].epimsId",equalTo("229786"))
+            .body("sittingRecords[0].hmctsServiceId",equalTo("ABA5"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
             .body("sittingRecords[0].personalName",equalTo("Joe Bloggs"))
-            .body("sittingRecords[0].contractTypeId",equalTo(1))
-            .body("sittingRecords[0].judgeRoleTypeId",equalTo("judge"))
+            .body("sittingRecords[0].contractTypeId",equalTo(2))
+            .body("sittingRecords[0].judgeRoleTypeId",equalTo("Judge"))
             .body("sittingRecords[0].am",equalTo("AM"))
-            .body("sittingRecords[0].pm",equalTo("PM"))
-            .body("sittingRecords[0].createdDateTime",equalTo("2023-05-11T17:02:50.000Z"))
-            .body("sittingRecords[0].createdByUserId",equalTo("a9ab7f4b-7e0c-49d4-8ed3-75b54d421cdc"));
+            .body("sittingRecords[0].pm",equalTo("PM"));
     }
 
     @Then("the response contains {string} as {string}")
     public void theResponseContainsAs(String attribute, String value) {
         response.then().assertThat().body(attribute,Matchers.equalTo(value));
+    }
+
+    @Then("the response contains {int} {string}")
+    public void theResponseContains(Integer expectedSize, String array) {
+        response.then().assertThat().body(array,hasSize(expectedSize));
     }
 
     @Then("the {string} is {int}")
