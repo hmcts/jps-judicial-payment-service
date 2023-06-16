@@ -1,4 +1,3 @@
-.gradle
 /build/
 !gradle/wrapper/gradle-wrapper.jar
 *.class
@@ -23,3 +22,5 @@ bin/main/application.yaml
 
 applicationinsights-agent-*.jar
 *.log
+/Report for Functional Tests/
+/Report for Smoke Tests/
