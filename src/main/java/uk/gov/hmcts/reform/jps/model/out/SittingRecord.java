@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,10 +16,10 @@ import java.time.LocalDateTime;
 public class SittingRecord {
     private long sittingRecordId;
     private LocalDate sittingDate;
-    private String statusId;
+    private StatusId statusId;
     private String regionId;
     private String regionName;
-    private String epimsId;
+    private String epimmsId;
     private String hmctsServiceId;
     private String personalCode;
     private String personalName;

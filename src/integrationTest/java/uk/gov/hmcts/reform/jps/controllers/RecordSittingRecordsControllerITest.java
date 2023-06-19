@@ -26,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -51,7 +53,7 @@ public class RecordSittingRecordsControllerITest {
             .andExpectAll(
                 status().isCreated(),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
-                jsonPath("$.errorRecords[0].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
                 jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
@@ -62,7 +64,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
-                jsonPath("$.errorRecords[1].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
                 jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
@@ -73,13 +75,78 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
-                jsonPath("$.errorRecords[2].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
                 jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
+            ).andReturn();
+
+        RecordSittingRecordResponse recordSittingRecordResponse = objectMapper.readValue(
+            mvcResult.getResponse().getContentAsByteArray(),
+            RecordSittingRecordResponse.class
+        );
+
+        assertThat(recordSittingRecordResponse.getErrorRecords()).describedAs("Created date assertion")
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getCreatedDateTime()));
+    }
+
+
+    @Test
+    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+
+        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(
+                status().isCreated());
+
+        //recordSittingRecordsDuplicateRecords.json
+        requestJson = Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);
+
+        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(
+                status().isBadRequest(),
+                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
+                jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
+                jsonPath("$.errorRecords[0].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
+                jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
+
+                jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
+                jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Test"),
+                jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
+                jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
+                jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
+
+                jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
+                jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[2].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
             ).andReturn();

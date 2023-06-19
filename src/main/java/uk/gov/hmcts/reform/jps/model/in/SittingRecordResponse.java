@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.model.in;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -11,10 +12,13 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 @Data
 @Builder
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@JsonInclude(NON_NULL)
 @SuppressWarnings("serial")
 public class SittingRecordResponse implements Serializable {
     private final SittingRecordRequest postedRecord;

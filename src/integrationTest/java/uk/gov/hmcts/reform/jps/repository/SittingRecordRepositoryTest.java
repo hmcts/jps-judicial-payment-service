@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -25,9 +26,9 @@ class SittingRecordRepositoryTest {
     void shouldSaveSittingRecord() {
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
+            .statusId(RECORDED)
             .regionId("1")
-            .epimsId("123")
+            .epimmsId("123")
             .hmctsServiceId("ssc_id")
             .personalCode("001")
             .contractTypeId(2L)
@@ -47,9 +48,9 @@ class SittingRecordRepositoryTest {
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
+            .statusId(RECORDED)
             .regionId("1")
-            .epimsId("123")
+            .epimmsId("123")
             .hmctsServiceId("ssc_id")
             .personalCode("001")
             .contractTypeId(2L)
@@ -84,9 +85,9 @@ class SittingRecordRepositoryTest {
     void shouldDeleteSelectedRecord() {
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
+            .statusId(RECORDED)
             .regionId("1")
-            .epimsId("123")
+            .epimmsId("123")
             .hmctsServiceId("ssc_id")
             .personalCode("001")
             .contractTypeId(2L)

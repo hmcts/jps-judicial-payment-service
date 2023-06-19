@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.controllers.util.Utility;
+import uk.gov.hmcts.reform.jps.model.ErrorCode;
+import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordResponse;
@@ -22,6 +25,8 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
 import static org.springframework.http.ResponseEntity.status;
@@ -50,30 +55,65 @@ public class RecordSittingRecordsController {
 
         String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
 
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
         regionService.setRegionId(hmctsServiceCode,
-                                  recordSittingRecordRequest.getRecordedSittingRecords());
+                                  sittingRecordWrappers);
 
-        sittingRecordService.saveSittingRecords(hmctsServiceCode,
-                                                recordSittingRecordRequest
-                                                );
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
-        return status(HttpStatus.CREATED)
-            .body(RecordSittingRecordResponse.builder()
-                    .errorRecords(generateRecordSittingRecordResponse(recordSittingRecordRequest))
-                    .build()
+        Optional<ErrorCode> errorCodeCheck = sittingRecordWrappers.stream()
+            .map(SittingRecordWrapper::getErrorCode)
+            .filter(errorCode -> errorCode != VALID)
+            .findAny();
+
+        if (errorCodeCheck.isPresent()) {
+            return status(HttpStatus.BAD_REQUEST)
+                .body(RecordSittingRecordResponse.builder()
+                          .errorRecords(generateResponse(sittingRecordWrappers,
+                                                         errorCode -> errorCode,
+                                                         SittingRecordWrapper::getCreatedByName,
+                                                         statusId -> statusId
+                          ))
+                          .build()
+                );
+        } else {
+            sittingRecordService.saveSittingRecords(hmctsServiceCode,
+                                                    sittingRecordWrappers,
+                                                    recordSittingRecordRequest.getRecordedByName(),
+                                                    recordSittingRecordRequest.getRecordedByIdamId()
             );
+
+            return status(HttpStatus.CREATED)
+                .body(RecordSittingRecordResponse.builder()
+                          .errorRecords(generateResponse(sittingRecordWrappers,
+                                                         errorCode -> VALID,
+                                                         sittingRecordWrapper ->
+                                                             recordSittingRecordRequest.getRecordedByName(),
+                                                         statusId -> RECORDED
+                          ))
+                          .build()
+                );
+        }
     }
 
-    private List<SittingRecordResponse> generateRecordSittingRecordResponse(
-        RecordSittingRecordRequest recordSittingRecordRequest) {
-        return recordSittingRecordRequest.getRecordedSittingRecords().stream()
-            .map(request ->
+    private List<SittingRecordResponse> generateResponse(
+        List<SittingRecordWrapper> sittingRecordWrappers,
+        UnaryOperator<ErrorCode> errorCodeOperator,
+        Function<SittingRecordWrapper, String> getName,
+        UnaryOperator<StatusId> statusIdOperation
+    ) {
+        return sittingRecordWrappers.stream()
+            .map(sittingRecordWrapper ->
                      SittingRecordResponse.builder()
-                         .postedRecord(request)
-                         .errorCode(VALID)
-                         .createdByName(recordSittingRecordRequest.getRecordedByName())
-                         .createdDateTime(request.getCreatedDateTime())
-                         .statusId(RECORDED)
+                         .postedRecord(sittingRecordWrapper.getSittingRecordRequest())
+                         .errorCode(errorCodeOperator.apply(sittingRecordWrapper.getErrorCode()))
+                         .createdByName(getName.apply(sittingRecordWrapper))
+                         .createdDateTime(sittingRecordWrapper.getCreatedDateTime())
+                         .statusId(statusIdOperation.apply(sittingRecordWrapper.getStatusId()))
                          .build()
             ).toList();
     }

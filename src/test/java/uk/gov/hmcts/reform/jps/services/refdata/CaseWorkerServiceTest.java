@@ -41,7 +41,7 @@ class CaseWorkerServiceTest {
 
         when(caseWorkerClient.getCaseWorkerDetails(anyString()))
             .thenAnswer(invocation -> {
-                String value = invocation.getArgument(0, String.class);
+                String value = invocation.getArgument(0);
                 if ("1".equals(value)) {
                     return CaseWorkerApiResponse.builder()
                         .caseWorkerId("1")

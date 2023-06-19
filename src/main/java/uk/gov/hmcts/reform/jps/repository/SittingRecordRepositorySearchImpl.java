@@ -37,7 +37,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
         predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
+        predicates.add(criteriaBuilder.equal(sittingRecord.get("epimmsId"), recordSearchRequest.getEpimmsId()));
         predicates.add(criteriaBuilder.between(sittingRecord.get("sittingDate"),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
@@ -49,7 +49,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("judgeRoleTypeId"), value)));
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
-            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("statusId"), value.name())));
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("statusId"), value)));
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 

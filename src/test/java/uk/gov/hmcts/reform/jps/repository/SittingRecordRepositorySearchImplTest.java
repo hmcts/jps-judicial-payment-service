@@ -36,7 +36,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 @ExtendWith(MockitoExtension.class)
 class SittingRecordRepositorySearchImplTest {
 
-    public static final String EPIMS_ID = "epimsId";
+    public static final String EPIMS_ID = "epimmsId";
     private static final int OFF_SET = 5;
     private static final int PAGE_SIZE = 10;
     public static final String HMCTS_SERVICE_ID = "hmctsServiceId";
@@ -88,7 +88,7 @@ class SittingRecordRepositorySearchImplTest {
         setPredicate(EPIMS_ID, EPIMS_ID);
         setPredicate(PERSONAL_CODE, PERSONAL_CODE);
         setPredicate(JUDGE_ROLE_TYPE_ID, JUDGE_ROLE_TYPE_ID);
-        setPredicate(STATUS_ID, RECORDED.name());
+        setPredicate(STATUS_ID, RECORDED);
         setPredicate(AM, true);
         setPredicate(PM, true);
         setPredicate(CREATED_BY_USER_ID, CREATED_BY_USER_ID);
@@ -101,7 +101,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .offset(5)
                                                .pageSize(10)
                                                .regionId(REGION_ID)
-                                               .epimsId(EPIMS_ID)
+                                               .epimmsId(EPIMS_ID)
                                                .dateOrder(DateOrder.ASCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
@@ -130,7 +130,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CREATED_BY_USER_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }
@@ -172,7 +172,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .offset(5)
                                                .pageSize(10)
                                                .regionId(REGION_ID)
-                                               .epimsId(EPIMS_ID)
+                                               .epimmsId(EPIMS_ID)
                                                .dateOrder(DateOrder.DESCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
@@ -218,7 +218,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .offset(5)
                                                .pageSize(10)
                                                .regionId(REGION_ID)
-                                               .epimsId(EPIMS_ID)
+                                               .epimmsId(EPIMS_ID)
                                                .dateOrder(DateOrder.DESCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
@@ -267,7 +267,7 @@ class SittingRecordRepositorySearchImplTest {
         setPredicate(EPIMS_ID, EPIMS_ID);
         setPredicate(PERSONAL_CODE, PERSONAL_CODE);
         setPredicate(JUDGE_ROLE_TYPE_ID, JUDGE_ROLE_TYPE_ID);
-        setPredicate(STATUS_ID, RECORDED.name());
+        setPredicate(STATUS_ID, RECORDED);
         setPredicate(AM, true);
         setPredicate(PM, true);
         setPredicate(CREATED_BY_USER_ID, CREATED_BY_USER_ID);
@@ -278,7 +278,7 @@ class SittingRecordRepositorySearchImplTest {
                 .offset(5)
                 .pageSize(10)
                 .regionId(REGION_ID)
-                .epimsId(EPIMS_ID)
+                .epimmsId(EPIMS_ID)
                 .dateOrder(DateOrder.ASCENDING)
                 .dateRangeFrom(LocalDate.now().minusDays(2))
                 .dateRangeTo(LocalDate.now())
@@ -305,7 +305,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CREATED_BY_USER_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }

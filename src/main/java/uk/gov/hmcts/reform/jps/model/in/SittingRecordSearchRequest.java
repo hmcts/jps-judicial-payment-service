@@ -34,8 +34,8 @@ public class SittingRecordSearchRequest implements Serializable {
     @NotBlank(message = "Region Id is mandatory")
     private final String regionId;
 
-    @NotBlank(message = "Epims Id is mandatory")
-    private final String epimsId;
+    @NotBlank(message = "Epimms Id is mandatory")
+    private final String epimmsId;
 
     @EnumNamePattern(regexp = "ASCENDING|DESCENDING", message = "Expected value ascending|descending")
     @NotNull(message = "Date order is mandatory")

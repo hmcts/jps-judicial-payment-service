@@ -22,6 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 
 class SittingRecordControllerITest extends BaseTest {
@@ -56,9 +57,9 @@ class SittingRecordControllerITest extends BaseTest {
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
+            .statusId(RECORDED)
             .regionId("1")
-            .epimsId("123")
+            .epimmsId("123")
             .hmctsServiceId("BBA3")
             .personalCode("4923421")
             .contractTypeId(2L)
@@ -83,10 +84,10 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.recordCount").value("1"),
                 jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].statusId").value("recorded"),
+                jsonPath("$.sittingRecords[0].statusId").value("RECORDED"),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value("London"),
-                jsonPath("$.sittingRecords[0].epimsId").value("123"),
+                jsonPath("$.sittingRecords[0].epimmsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),

@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
-import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
+import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.refdata.location.model.LocationApiResponse;
@@ -37,20 +37,20 @@ public class LocationService {
     }
 
     public void setRegionId(String hmctsServiceCode,
-                            List<SittingRecordRequest> recordedSittingRecords) {
+                            List<SittingRecordWrapper> recordedSittingWrappers) {
         LocationApiResponse serviceCourtInfo = regionServiceClient.getCourtVenue(hmctsServiceCode);
-        setRegionId(recordedSittingRecords, serviceCourtInfo);
+        setRegionId(recordedSittingWrappers, serviceCourtInfo);
     }
 
-    private void setRegionId(List<SittingRecordRequest> recordedSittingRecords,
+    private void setRegionId(List<SittingRecordWrapper> recordedSittingWrappers,
                              LocationApiResponse serviceCourtInfo) {
-        recordedSittingRecords.forEach(sittingRecordRequest -> {
+        recordedSittingWrappers.forEach(sittingRecordWrapper -> {
             Optional<CourtVenue> courtVenue = getCourtVenue(
                 serviceCourtInfo,
-                sittingRecordRequest.getEpimsId(),
-                (court, epimsId) -> court.getEpimmsId().equals(epimsId)
+                sittingRecordWrapper.getSittingRecordRequest().getEpimmsId(),
+                (court, epimmsId) -> court.getEpimmsId().equals(epimmsId)
             );
-            sittingRecordRequest.setRegionId(courtVenue.map(CourtVenue::getRegionId)
+            sittingRecordWrapper.setRegionId(courtVenue.map(CourtVenue::getRegionId)
                                                  .orElseThrow(InvalidLocationException::new));
         });
     }

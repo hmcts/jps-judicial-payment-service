@@ -8,7 +8,9 @@ public enum ErrorCode {
     INVALID_JUDGE_ROLE_TYPE_ID("invalidJudgeRoleTypeId"),
     DUPLICATE_RECORD("duplicateRecord"),
     INVALID_LOCATION("invalidLocation"),
-    UN_KNOWN_JOH("unknownJoH");
+    UN_KNOWN_JOH("unknownJoH"),
+    POTENTIAL_DUPLICATE_RECORD("potentialDuplicateRecord"),
+    INVALID_DUPLICATE_RECORD("invalidDuplicateRecord");
 
     final String value;
 

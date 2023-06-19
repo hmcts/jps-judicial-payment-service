@@ -21,8 +21,8 @@
       "message": "Date order is mandatory"
     },
     {
-      "fieldName": "epimsId",
-      "message": "Epims Id is mandatory"
+      "fieldName": "epimmsId",
+      "message": "Epimms Id is mandatory"
     },
     {
       "fieldName": "regionId",
