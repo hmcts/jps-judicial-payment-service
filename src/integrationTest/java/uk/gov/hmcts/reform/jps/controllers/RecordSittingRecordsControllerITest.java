@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -15,6 +16,7 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
+import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDateTime;
 
@@ -41,6 +43,14 @@ public class RecordSittingRecordsControllerITest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private SittingRecordRepository sittingRecordRepository;
+
+    @BeforeEach
+    void beforeEach() {
+        sittingRecordRepository.deleteAll();
+    }
 
     @Test
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
