@@ -35,12 +35,6 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification given;
     Response response;
 
-    private static String accessToken;
-    private static String recorderAccessToken;
-    private static String invalidAccessToken;
-    private static String validS2sToken;
-    private static String invalidS2sToken;
-
     private static boolean isSetupExecuted = false;
 
     @Before
@@ -49,7 +43,7 @@ public class StepDefinitions extends TestVariables {
 
             IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
             recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
-            submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
+            //submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
             publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
             invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
 
