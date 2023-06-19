@@ -89,7 +89,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the request body contains the "payload missing epimmsId" as in "S-005.8.json"
     And a call is submitted to the "SearchSittingRecordsEndpoint" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
-    And the response contains "errors[0].message" as "Epims Id is mandatory"
+    And the response contains "errors[0].message" as "Epimms Id is mandatory"
 
   @S-005.9 #AC05
   Scenario: Negative response, when the request payload is missing dateOrder
