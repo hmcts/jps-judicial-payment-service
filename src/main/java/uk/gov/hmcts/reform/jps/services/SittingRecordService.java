@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
@@ -151,8 +150,7 @@ public class SittingRecordService {
                 sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
             } else {
                 SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
-                if (Objects.nonNull(sittingRecordRequest.getReplaceDuplicate())
-                    && sittingRecordRequest.getReplaceDuplicate()) {
+                if (Boolean.TRUE.equals(sittingRecordRequest.getReplaceDuplicate())) {
                     sittingRecordWrapper.setToDelete();
                 } else {
                     sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
