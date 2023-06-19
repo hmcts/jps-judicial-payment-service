@@ -24,3 +24,4 @@ applicationinsights-agent-*.jar
 *.log
 /Report for Functional Tests/
 /Report for Smoke Tests/
+/target/

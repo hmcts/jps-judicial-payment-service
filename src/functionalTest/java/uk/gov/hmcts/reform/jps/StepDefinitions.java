@@ -40,13 +40,14 @@ public class StepDefinitions extends TestVariables {
     @Before
     public void setup() throws InterruptedException {
         if (!isSetupExecuted) {
-            final IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-            final ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
 
+            IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
             recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
             submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
             publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
             invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+
+            ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
             validS2sToken = serviceAuthenticationGenerator.generate();
             invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
 
