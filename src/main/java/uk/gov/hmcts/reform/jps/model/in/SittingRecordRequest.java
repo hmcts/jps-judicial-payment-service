@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
@@ -19,6 +20,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @Data
 @Builder(toBuilder = true)
 @JsonInclude(NON_NULL)
+@NoArgsConstructor(force = true)
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @SuppressWarnings("serial")
 public class SittingRecordRequest implements Serializable {
