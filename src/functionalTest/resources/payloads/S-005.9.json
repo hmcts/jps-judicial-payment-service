@@ -2,7 +2,7 @@
   "pageSize": "1",
   "offset": "0",
   "regionId": "1",
-  "epimsId": "1234",
+  "epimmsId": "1234",
   "dateRangeFrom": "2023-05-10",
   "dateRangeTo": "2023-05-12"
 }
