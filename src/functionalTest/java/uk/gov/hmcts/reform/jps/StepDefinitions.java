@@ -139,7 +139,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0].statusId",equalTo("RECORDED"))
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
-            .body("sittingRecords[0].epimsId",equalTo("1234"))
+            .body("sittingRecords[0].epimmsId",equalTo("1234"))
             .body("sittingRecords[0].hmctsServiceId",equalTo("BBA3"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
             .body("sittingRecords[0].personalName",equalTo("Joe Bloggs"))
