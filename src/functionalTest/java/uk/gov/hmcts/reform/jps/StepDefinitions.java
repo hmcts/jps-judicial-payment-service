@@ -43,7 +43,7 @@ public class StepDefinitions extends TestVariables {
 
             IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
             recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
-            //submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
+            submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
             publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
             invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
 
