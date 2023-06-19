@@ -35,6 +35,12 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification given;
     Response response;
 
+    private static String accessToken;
+    private static String recorderAccessToken;
+    private static String invalidAccessToken;
+    private static String validS2sToken;
+    private static String invalidS2sToken;
+
     private static boolean isSetupExecuted = false;
 
     @Before
