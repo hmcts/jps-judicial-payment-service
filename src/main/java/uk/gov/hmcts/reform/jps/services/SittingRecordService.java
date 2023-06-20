@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
+import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
@@ -136,6 +137,16 @@ public class SittingRecordService {
                     && sittingRecordDuplicateCheckFields.getAm()
                     .equals(sittingRecordRequest.getDurationBoolean().getAm())) {
                     checkRecordedSittingRecords(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+                } else if (((TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
+                        && TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
+                        && (sittingRecordRequest.getDurationBoolean().getPm()
+                            || sittingRecordRequest.getDurationBoolean().getAm()))
+                    || ((sittingRecordRequest.getDurationBoolean().getPm()
+                        && sittingRecordRequest.getDurationBoolean().getAm())
+                        && (TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
+                            || TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
+                    )) {
+                    sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
                 }
             }
         });
@@ -150,7 +161,7 @@ public class SittingRecordService {
                 sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
             } else {
                 SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
-                if (Boolean.TRUE.equals(sittingRecordRequest.getReplaceDuplicate())) {
+                if (TRUE.equals(sittingRecordRequest.getReplaceDuplicate())) {
                     sittingRecordWrapper.setToDelete();
                 } else {
                     sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);

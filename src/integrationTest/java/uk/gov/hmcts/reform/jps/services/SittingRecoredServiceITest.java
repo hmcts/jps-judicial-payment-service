@@ -532,6 +532,46 @@ class SittingRecoredServiceITest extends BaseTest {
                 .isBefore(sittingRecordWrapper.getCreatedDateTime()));
     }
 
+    @Test
+    void shouldSetInvalidDuplicateRecordWhenDurationDontMatch() throws IOException {
+        recordSittingRecords("recordSittingRecords.json");
+
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(sittingRecordRequest -> {
+                    boolean am;
+                    if (sittingRecordRequest.getDurationBoolean().getAm()
+                        && sittingRecordRequest.getDurationBoolean().getPm()) {
+                        am = false;
+                    } else {
+                        am = !sittingRecordRequest.getDurationBoolean().getAm();
+                    }
+
+                    return new SittingRecordWrapper(sittingRecordRequest.toBuilder()
+                                                        .durationBoolean(
+                                                            new DurationBoolean(am,
+                                                                                sittingRecordRequest
+                                                                                    .getDurationBoolean()
+                                                                                    .getPm()))
+                                                        .build());
+
+                })
+                .toList();
+
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        assertThat(sittingRecordWrappers)
+            .extracting("errorCode", "createdByName", "statusId")
+            .contains(tuple(INVALID_DUPLICATE_RECORD, null, null),
+                      tuple(INVALID_DUPLICATE_RECORD, null, null),
+                      tuple(VALID, null, null)
+            );
+    }
 
     private List<SittingRecordWrapper> recordSittingRecords(String jsonRequest) throws IOException {
         String requestJson = Resources.toString(getResource(jsonRequest), UTF_8);

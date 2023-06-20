@@ -54,6 +54,7 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
@@ -306,6 +307,46 @@ class SittingRecordServiceTest {
                                                     sittingRecordRequest.getDurationBoolean().getAm(),
                                                     sittingRecordRequest.getDurationBoolean().getPm(),
                                                     "Tester"),
+                assertions,
+                "recordSittingRecordsPotentialDuplicate.json"
+        );
+    }
+
+    @Test
+    void shouldSetInvalidDuplicateRecordWhenDurationDontMatch() throws IOException {
+        Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
+            assertThat(sittingRecordWrappers)
+                .extracting("errorCode", "createdByName", "statusId")
+                .contains(
+                    tuple(INVALID_DUPLICATE_RECORD, null, null),
+                    tuple(INVALID_DUPLICATE_RECORD, null, null),
+                    tuple(VALID, null, null)
+                );
+
+            verify(sittingRecordRepository, times(3))
+                .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+                    isA(LocalDate.class),
+                    isA(String.class),
+                    isA(String.class),
+                    eq(DELETED)
+                );
+        };
+
+        execute(sittingRecordRequest -> {
+            boolean am;
+            if (sittingRecordRequest.getDurationBoolean().getAm()
+                && sittingRecordRequest.getDurationBoolean().getPm()) {
+                am = false;
+            } else {
+                am = !sittingRecordRequest.getDurationBoolean().getAm();
+            }
+            return getDbRecord(sittingRecordRequest.getSittingDate(),
+                                                    sittingRecordRequest.getEpimmsId(),
+                                                    sittingRecordRequest.getPersonalCode(),
+                                                    am,
+                                                    sittingRecordRequest.getDurationBoolean().getPm(),
+                                                    sittingRecordRequest.getJudgeRoleTypeId());
+            },
                 assertions,
                 "recordSittingRecordsPotentialDuplicate.json"
         );
