@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.jps.config;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import uk.gov.hmcts.reform.jps.testutils.PropertiesReader;
+import uk.gov.hmcts.reform.jps.testutils.RandomDateGenerator;
 
 @SuppressWarnings("HideUtilityClassConstructor")
 public class TestVariables {
@@ -15,6 +17,15 @@ public class TestVariables {
     protected static final String adminPassword;
     protected static final String invalidUsername;
     protected static final String invalidPassword;
+    protected static String accessToken;
+    protected static String recorderAccessToken;
+    protected static String submitterAccessToken;
+    protected static String publisherAccessToken;
+    protected static String invalidAccessToken;
+    protected static String validS2sToken;
+    protected static String invalidS2sToken;
+    protected static String judgeRoleTypeId = RandomStringUtils.randomAlphabetic(10);
+    protected static String randomDate = RandomDateGenerator.generateRandomDate().toString();
 
     static {
         PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
