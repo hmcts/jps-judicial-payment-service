@@ -99,4 +99,48 @@ public class SittingRecordService {
                 sittingRecordRepository.save(sittingRecord);
             });
     }
+
+    @Transactional
+    public void deleteSittingRecords(Long sittingRecordId) {
+        recordSittingRecordRequest.getRecordedSittingRecords()
+            .forEach(recordSittingRecord -> {
+                uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
+                    uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                        .sittingDate(recordSittingRecord.getSittingDate())
+                        .statusId(StatusId.DELETED.name())
+                        .regionId(recordSittingRecord.getRegionId())
+                        .epimsId(recordSittingRecord.getEpimsId())
+                        .hmctsServiceId(hmctsServiceCode)
+                        .personalCode(recordSittingRecord.getPersonalCode())
+                        .contractTypeId(recordSittingRecord.getContractTypeId())
+                        .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
+                        .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                                .map(DurationBoolean::getAm).orElse(false))
+                        .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                                .map(DurationBoolean::getPm).orElse(false))
+                        .build();
+
+                recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+
+                StatusHistory statusHistory = StatusHistory.builder()
+                    .statusId(StatusId.DELETED.name())
+                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
+                    .changeByName(recordSittingRecordRequest.getRecordedByName())
+                    .build();
+
+                sittingRecord.addStatusHistory(statusHistory);
+                sittingRecordRepository.save(sittingRecord);
+            });
+    }
+
+    private SittingRecord getSittingRecord(Long sittingRecordId) {
+        Optional<SittingRecord> sittingRecordOptional = sittingRecordRepository.findById(sittingRecordId);
+
+        if (sittingRecordOptional.isEmpty()) {
+            throw new sittingRecordyNotFoundException(sittingRecordId, HEARING_ACTUALS_ID_NOT_FOUND);
+        }
+        return sittingRecordOptional.get();
+    }
+}
 }
