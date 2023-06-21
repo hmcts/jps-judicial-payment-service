@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
 
-import static java.util.stream.Collectors.toList;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
@@ -35,28 +34,22 @@ public class SittingRecordService {
         );
         String notSet = null;
         return dbSittingRecords.stream()
-            .map(sittingRecord ->
-                     SittingRecord.builder()
-                         .sittingRecordId(sittingRecord.getId())
-                         .sittingDate(sittingRecord.getSittingDate())
-                         .statusId(sittingRecord.getStatusId())
-                         .regionId(sittingRecord.getRegionId())
-                         .epimsId(sittingRecord.getEpimsId())
-                         .hmctsServiceId(sittingRecord.getHmctsServiceId())
-                         .personalCode(sittingRecord.getPersonalCode())
-                         .contractTypeId(sittingRecord.getContractTypeId())
-                         .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
-                         .am(sittingRecord.isAm() ? AM.name() : notSet)
-                         .pm(sittingRecord.isPm() ? PM.name() : notSet)
-                         .createdDateTime(sittingRecord.getCreatedDateTime())
-                         .createdByUserId(sittingRecord.getCreatedByUserId())
-                         .changeDateTime(sittingRecord.getChangeDateTime())
-                         .changeByUserId(sittingRecord.getChangeByUserId())
-                         .build())
-            .collect(toList());
-
+            .map(sittingRecord -> SittingRecord.builder()
+                    .sittingRecordId(sittingRecord.getId())
+                    .sittingDate(sittingRecord.getSittingDate())
+                    .statusId(sittingRecord.getStatusId())
+                    .regionId(sittingRecord.getRegionId())
+                    .epimsId(sittingRecord.getEpimsId())
+                    .hmctsServiceId(sittingRecord.getHmctsServiceId())
+                    .personalCode(sittingRecord.getPersonalCode())
+                    .contractTypeId(sittingRecord.getContractTypeId())
+                    .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
+                    .am(sittingRecord.isAm() ? AM.name() : notSet)
+                    .pm(sittingRecord.isPm() ? PM.name() : notSet)
+                    .statusHistories(sittingRecord.getStatusHistories())
+                    .build())
+            .toList();
     }
-
 
     public int getTotalRecordCount(
         SittingRecordSearchRequest recordSearchRequest,
