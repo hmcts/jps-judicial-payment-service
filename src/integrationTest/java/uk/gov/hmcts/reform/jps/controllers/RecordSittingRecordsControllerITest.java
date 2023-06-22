@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.jps.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -52,16 +54,19 @@ public class RecordSittingRecordsControllerITest {
         sittingRecordRepository.deleteAll();
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200",
+        "recordSittingRecords.json,201"})
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
-    void shouldRecordSittingRecordsWhenAllDataIsPresent() throws Exception {
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+    void shouldRecordSittingRecordsWhenAllDataIsPresent(String fileName,
+                                                        int responseCode) throws Exception {
+        String requestJson = Resources.toString(getResource(fileName), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
                                                   .content(requestJson))
             .andDo(print())
             .andExpectAll(
-                status().isCreated(),
+                jsonPath("$.message").value("success"),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
@@ -96,6 +101,8 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
             ).andReturn();
 
+        assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
+
         RecordSittingRecordResponse recordSittingRecordResponse = objectMapper.readValue(
             mvcResult.getResponse().getContentAsByteArray(),
             RecordSittingRecordResponse.class
@@ -118,7 +125,6 @@ public class RecordSittingRecordsControllerITest {
             .andExpectAll(
                 status().isCreated());
 
-        //recordSittingRecordsDuplicateRecords.json
         requestJson = Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);
 
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -127,6 +133,7 @@ public class RecordSittingRecordsControllerITest {
             .andDo(print())
             .andExpectAll(
                 status().isBadRequest(),
+                jsonPath("$.message").value("008 could not insert"),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),

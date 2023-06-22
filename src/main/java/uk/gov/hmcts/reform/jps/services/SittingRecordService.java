@@ -111,7 +111,9 @@ public class SittingRecordService {
                 sittingRecord.addStatusHistory(statusHistory);
                 sittingRecordRepository.save(sittingRecord);
 
-                //TODO: DELETE IJPS-49
+                if (TRUE.equals(recordSittingRecord.getReplaceDuplicate())) {
+                    //TODO: DELETE IJPS-49
+                }
             });
     }
 
@@ -146,7 +148,13 @@ public class SittingRecordService {
                         && (TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
                             || TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
                     )) {
-                    sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
+                    if (sittingRecordDuplicateCheckFields.getStatusId() == StatusId.RECORDED) {
+                        sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+                        updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+                    } else if (sittingRecordDuplicateCheckFields.getStatusId() != DELETED) {
+                        sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
+                        updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+                    }
                 }
             }
         });
@@ -162,27 +170,36 @@ public class SittingRecordService {
             } else {
                 SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
                 if (TRUE.equals(sittingRecordRequest.getReplaceDuplicate())) {
-                    sittingRecordWrapper.setToDelete();
+                    sittingRecordWrapper.setErrorCode(VALID);
                 } else {
                     sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
                 }
             }
 
             if (sittingRecordWrapper.getErrorCode() != VALID) {
-                Sort.TypedSort<StatusHistory> sort = Sort.sort(StatusHistory.class);
-                Optional<StatusHistory> lastStatusHistory = statusHistoryRepository.findFirstBySittingRecord(
-                    uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-                        .id(sittingRecordDuplicateCheckFields.getId())
-                        .build(),
-                    sort.by(StatusHistory::getId).descending()
-                );
-
-                lastStatusHistory.ifPresent(lastStatusHistoryRecorded -> {
-                    sittingRecordWrapper.setCreatedByName(lastStatusHistoryRecorded.getChangeByName());
-                    sittingRecordWrapper.setCreatedDateTime(lastStatusHistoryRecorded.getChangeDateTime());
-                    sittingRecordWrapper.setStatusId(lastStatusHistoryRecorded.getStatusId());
-                });
+                updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
             }
+        } else if (sittingRecordDuplicateCheckFields.getStatusId() != DELETED) {
+            sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
+            updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
         }
+    }
+
+    private void updateFromStatusHistory(SittingRecordWrapper sittingRecordWrapper,
+                                         SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
+                                             checkFields) {
+        Sort.TypedSort<StatusHistory> sort = Sort.sort(StatusHistory.class);
+        Optional<StatusHistory> lastStatusHistory = statusHistoryRepository.findFirstBySittingRecord(
+            uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                .id(checkFields.getId())
+                .build(),
+            sort.by(StatusHistory::getId).descending()
+        );
+
+        lastStatusHistory.ifPresent(lastStatusHistoryRecorded -> {
+            sittingRecordWrapper.setCreatedByName(lastStatusHistoryRecorded.getChangeByName());
+            sittingRecordWrapper.setCreatedDateTime(lastStatusHistoryRecorded.getChangeDateTime());
+            sittingRecordWrapper.setStatusId(lastStatusHistoryRecorded.getStatusId());
+        });
     }
 }

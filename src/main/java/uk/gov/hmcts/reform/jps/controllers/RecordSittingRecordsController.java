@@ -1,5 +1,10 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,7 +34,13 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.status;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_200;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -45,6 +56,17 @@ public class RecordSittingRecordsController {
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
 
+
+    @Operation(description = "To create a new sitting record")
+    @ApiResponses({
+        @ApiResponse(responseCode = "201",
+            content = @Content(schema = @Schema(implementation = RecordSittingRecordResponse.class)),
+            description = "Successfully created sitting record"),
+        @ApiResponse(responseCode = "200", description = RESPONSE_200),
+        @ApiResponse(responseCode = "400", description = RESPONSE_400),
+        @ApiResponse(responseCode = "401", description = RESPONSE_401),
+        @ApiResponse(responseCode = "403", description = RESPONSE_403)
+    })
     @PostMapping(
         path = {"", "/{hmctsServiceCode}"}
     )
@@ -73,6 +95,7 @@ public class RecordSittingRecordsController {
         if (errorCodeCheck.isPresent()) {
             return status(HttpStatus.BAD_REQUEST)
                 .body(RecordSittingRecordResponse.builder()
+                          .message("008 could not insert")
                           .errorRecords(generateResponse(sittingRecordWrappers,
                                                          errorCode -> errorCode,
                                                          SittingRecordWrapper::getCreatedByName,
@@ -86,9 +109,17 @@ public class RecordSittingRecordsController {
                                                     recordSittingRecordRequest.getRecordedByName(),
                                                     recordSittingRecordRequest.getRecordedByIdamId()
             );
+            HttpStatus httpStatus = sittingRecordWrappers.stream()
+                .filter(wrapper ->
+                            Boolean.TRUE
+                                .equals(wrapper.getSittingRecordRequest().getReplaceDuplicate()))
+                .findAny()
+                .map(SittingRecordWrapper -> OK)
+                .orElse(CREATED);
 
-            return status(HttpStatus.CREATED)
+            return status(httpStatus)
                 .body(RecordSittingRecordResponse.builder()
+                          .message("success")
                           .errorRecords(generateResponse(sittingRecordWrappers,
                                                          errorCode -> VALID,
                                                          sittingRecordWrapper ->

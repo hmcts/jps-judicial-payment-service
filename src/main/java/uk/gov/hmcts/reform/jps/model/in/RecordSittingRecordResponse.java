@@ -15,5 +15,6 @@ import java.util.List;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings("serial")
 public class RecordSittingRecordResponse implements Serializable {
+    private final String message;
     private final List<SittingRecordResponse> errorRecords;
 }

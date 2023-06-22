@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -140,6 +141,14 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleUnknowValueException(UnknowValueException exception) {
         ModelValidationError error = new ModelValidationError(
             of(new FieldError(exception.field, exception.getMessage()))
+        );
+        return badRequest().body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    protected ResponseEntity<Object> handleDataIntegrityViolationException() {
+        ModelValidationError error = new ModelValidationError(
+            of(new FieldError("Bad request", "008 could not insert"))
         );
         return badRequest().body(error);
     }

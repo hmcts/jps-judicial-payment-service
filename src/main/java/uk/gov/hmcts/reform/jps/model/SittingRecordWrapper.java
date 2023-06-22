@@ -24,9 +24,4 @@ public class SittingRecordWrapper {
     private StatusId statusId;
     private boolean delete;
     private String regionId;
-
-    public void setToDelete() {
-        this.delete = true;
-        this.errorCode = VALID;
-    }
 }

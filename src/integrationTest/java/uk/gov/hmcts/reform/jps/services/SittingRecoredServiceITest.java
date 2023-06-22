@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -40,6 +41,7 @@ import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 class SittingRecoredServiceITest extends BaseTest {
     public static final String EPIM_ID = "123";
@@ -326,6 +328,36 @@ class SittingRecoredServiceITest extends BaseTest {
     }
 
     @Test
+    void shouldSetInvalidDuplicateRecordWhenJudgeRoleTypeIdDoesntMatchAndStatusSubmitted() throws IOException {
+        repoRecordSittingRecords("recordSittingRecords.json", SUBMITTED);
+
+        String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        assertThat(sittingRecordWrappers)
+            .extracting("errorCode", "createdByName", "statusId")
+            .contains(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
+                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
+                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED)
+            );
+
+        assertThat(sittingRecordWrappers).describedAs("Created date assertion")
+            .allMatch(sittingRecordWrapper -> LocalDateTime.now().minusMinutes(5)
+                .isBefore(sittingRecordWrapper.getCreatedDateTime()));
+    }
+
+
+    @Test
     void shouldSetValidRecordWhenEpimmsIdDoesntMatch() throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 
@@ -533,7 +565,7 @@ class SittingRecoredServiceITest extends BaseTest {
     }
 
     @Test
-    void shouldSetInvalidDuplicateRecordWhenDurationDontMatch() throws IOException {
+    void shouldSetPotentialDuplicateRecordWhenStatusRecordedDurationIntersect() throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -567,8 +599,49 @@ class SittingRecoredServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(INVALID_DUPLICATE_RECORD, null, null),
-                      tuple(INVALID_DUPLICATE_RECORD, null, null),
+            .contains(tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                      tuple(VALID, null, null)
+            );
+    }
+
+    @Test
+    void shouldSetInvalidDuplicateRecordWhenStatusNotRecordedAndDurationIntersect() throws IOException {
+        repoRecordSittingRecords("recordSittingRecords.json", SUBMITTED);
+
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(sittingRecordRequest -> {
+                    boolean am;
+                    if (sittingRecordRequest.getDurationBoolean().getAm()
+                        && sittingRecordRequest.getDurationBoolean().getPm()) {
+                        am = false;
+                    } else {
+                        am = !sittingRecordRequest.getDurationBoolean().getAm();
+                    }
+
+                    return new SittingRecordWrapper(sittingRecordRequest.toBuilder()
+                                                        .durationBoolean(
+                                                            new DurationBoolean(am,
+                                                                                sittingRecordRequest
+                                                                                    .getDurationBoolean()
+                                                                                    .getPm()))
+                                                        .build());
+
+                })
+                .toList();
+
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        assertThat(sittingRecordWrappers)
+            .extracting("errorCode", "createdByName", "statusId")
+            .contains(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
+                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
                       tuple(VALID, null, null)
             );
     }
@@ -592,6 +665,57 @@ class SittingRecoredServiceITest extends BaseTest {
                                                 sittingRecordWrappers,
                                                 recordSittingRecordRequest.getRecordedByName(),
                                                 recordSittingRecordRequest.getRecordedByIdamId());
+
+        return sittingRecordWrappers;
+    }
+
+    private List<SittingRecordWrapper> repoRecordSittingRecords(String jsonRequest,
+                                                                StatusId statusId) throws IOException {
+        String requestJson = Resources.toString(getResource(jsonRequest), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        sittingRecordWrappers
+            .forEach(sittingRecordWrapper -> sittingRecordWrapper.setRegionId("1"));
+
+        sittingRecordWrappers
+            .forEach(recordSittingRecordWrapper -> {
+                SittingRecordRequest recordSittingRecord = recordSittingRecordWrapper.getSittingRecordRequest();
+                uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
+                    uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                        .sittingDate(recordSittingRecord.getSittingDate())
+                        .statusId(statusId)
+                        .regionId(recordSittingRecordWrapper.getRegionId())
+                        .epimmsId(recordSittingRecord.getEpimmsId())
+                        .hmctsServiceId(SSC_ID)
+                        .personalCode(recordSittingRecord.getPersonalCode())
+                        .contractTypeId(recordSittingRecord.getContractTypeId())
+                        .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
+                        .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                                .map(DurationBoolean::getAm).orElse(false))
+                        .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                                .map(DurationBoolean::getPm).orElse(false))
+                        .build();
+
+                recordSittingRecordWrapper.setCreatedDateTime(LocalDateTime.now());
+
+                StatusHistory statusHistory = StatusHistory.builder()
+                    .statusId(statusId)
+                    .changeDateTime(LocalDateTime.now())
+                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
+                    .changeByName(recordSittingRecordRequest.getRecordedByName())
+                    .build();
+
+                sittingRecord.addStatusHistory(statusHistory);
+                sittingRecordRepository.save(sittingRecord);
+            });
 
         return sittingRecordWrappers;
     }

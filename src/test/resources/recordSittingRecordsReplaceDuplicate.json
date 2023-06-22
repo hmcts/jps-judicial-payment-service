@@ -6,7 +6,7 @@
       "sittingDate": "2023-05-11",
       "epimmsId": "852649",
       "personalCode": "4918178",
-      "judgeRoleTypeId": "Test",
+      "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
       "pm": true,
       "am": false,
@@ -16,21 +16,19 @@
       "sittingDate": "2023-04-10",
       "epimmsId": "852649",
       "personalCode": "4918178",
-      "judgeRoleTypeId": "Test",
+      "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
       "am": true,
-      "pm": false,
-      "replaceDuplicate": true
+      "pm": false
     },
     {
       "sittingDate": "2023-03-09",
       "epimmsId": "852649",
       "personalCode": "4918178",
-      "judgeRoleTypeId": "Test",
+      "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
       "am": true,
-      "pm": true,
-      "replaceDuplicate": true
+      "pm": true
     }
   ]
 }
