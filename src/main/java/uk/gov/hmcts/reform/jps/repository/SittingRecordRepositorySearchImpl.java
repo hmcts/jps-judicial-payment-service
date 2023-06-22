@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.jps.repository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -30,10 +28,10 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 public class SittingRecordRepositorySearchImpl implements SittingRecordRepositorySearch {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordRepositorySearchImpl.class);
-
     @PersistenceContext
     private EntityManager entityManager;
+
+    private static final String SITTING_DATE = "sittingDate";
 
     private <T,V> void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
@@ -47,7 +45,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
         predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
         predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
-        predicates.add(criteriaBuilder.between(sittingRecord.get("sittingDate"),
+        predicates.add(criteriaBuilder.between(sittingRecord.get(SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
 
@@ -81,30 +79,22 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         criteriaQuery.where(criteriaBuilder.and(predicates.toArray(predicatesArray)));
     }
 
-    public Predicate createChangeByUserIdCriteriaPredicate(String value,
-                                                           CriteriaBuilder cb,
-                                                           CriteriaQuery<SittingRecord> cq,
-                                                           Root<SittingRecord> rootSR) {
+    public void addChangeByUserIdCriteria(String value,
+                                          CriteriaBuilder cb,
+                                          CriteriaQuery cq,
+                                          Root<SittingRecord> rootSR) {
 
-        //        @Query("select sh.changeByUserId from SittingRecord sr inner join StatusHistory sh
-        //        on sh.sittingRecord.id = sr.id where sh.id = (select min(sh2.id) from StatusHistory sh2
-        //        where sh2.sittingRecord.id = :id)")
-        //        String findCreatedByUserId(@Param("id") Long id);
+        // @Query("select sh.changeByUserId from SittingRecord sr inner join StatusHistory sh
+        // on sh.sittingRecord.id = sr.id where sh.id = (select min(sh2.id) from StatusHistory sh2
+        // where sh2.sittingRecord.id = :id)")
 
         Join<StatusHistory, SittingRecord> joinStatusHistory =
             rootSR.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
 
-        Predicate predicateCreatedByUser = cb.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID), value);
-
-        Predicate predicateFirstStatusHistory =
-            cb.equal(joinStatusHistory.get(StatusHistory_.ID), cb.min(joinStatusHistory.get(StatusHistory_.ID)));
-
-        Predicate finalPredicate =
-            cb.and(predicateCreatedByUser, predicateFirstStatusHistory);
-
-        LOGGER.debug("finalPredicate:{}", finalPredicate);
-
-        return finalPredicate;
+        cq.groupBy(rootSR.get(SittingRecord_.id), joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
+            .having(cb.min(joinStatusHistory.get(StatusHistory_.ID)).isNotNull(),
+                    cb.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID),
+                             value));
     }
 
     @Override
@@ -124,23 +114,17 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             cq,
             root,
             predicates -> {
-                Optional.ofNullable(recordSearchRequest.getCreatedByUserId())
-                    .ifPresent(value ->
-                                   predicates.add(
-                                       createChangeByUserIdCriteriaPredicate(
-                                           value,
-                                           cb,
-                                           cq,
-                                           root
-                                       )));
-
                 if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
-                    cq.orderBy(cb.asc(root.get("sittingDate")));
+                    cq.orderBy(cb.asc(root.get(SITTING_DATE)));
                 } else {
-                    cq.orderBy(cb.desc(root.get("sittingDate")));
+                    cq.orderBy(cb.desc(root.get(SITTING_DATE)));
                 }
             }
         );
+
+        if (!recordSearchRequest.getCreatedByUserId().isEmpty()) {
+            addChangeByUserIdCriteria(recordSearchRequest.getCreatedByUserId(), cb, cq, root);
+        }
 
         TypedQuery<SittingRecord> typedQuery = entityManager.createQuery(cq)
             .setMaxResults(recordSearchRequest.getPageSize())
@@ -150,9 +134,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     }
 
     @Override
-    public int totalRecords(
-        SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode) {
+    public int totalRecords(SittingRecordSearchRequest recordSearchRequest,
+                            String hmctsServiceCode) {
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -165,13 +148,13 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                             criteriaBuilder,
                             criteriaQuery,
                             sittingRecord,
-                            predicates ->
-                                Optional.ofNullable(recordSearchRequest.getCreatedByUserId())
-                                    .ifPresent(value ->
-                                       predicates.add(criteriaBuilder.equal(
-                                            sittingRecord.get("createdByUserId"),
-                                            value)))
+                            predicates -> {}
         );
+
+        if (!recordSearchRequest.getCreatedByUserId().isEmpty()) {
+            addChangeByUserIdCriteria(recordSearchRequest.getCreatedByUserId(), criteriaBuilder,
+                                      criteriaQuery, sittingRecord);
+        }
 
         return entityManager.createQuery(criteriaQuery).getSingleResult().intValue();
     }
