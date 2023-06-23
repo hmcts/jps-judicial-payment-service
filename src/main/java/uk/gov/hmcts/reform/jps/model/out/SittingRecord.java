@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.Optional;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
+@ToString
 public class SittingRecord {
     private long sittingRecordId;
     private LocalDate sittingDate;

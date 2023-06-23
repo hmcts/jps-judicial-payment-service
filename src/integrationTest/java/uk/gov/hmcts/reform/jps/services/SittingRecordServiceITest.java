@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.jps.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
@@ -28,6 +30,7 @@ import static java.time.Month.MARCH;
 import static java.time.Month.MAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
@@ -43,6 +46,8 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistoryRepository statusHistoryRepository;
     @Autowired
     private ObjectMapper objectMapper;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
 
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
@@ -69,6 +74,7 @@ class SittingRecordServiceITest extends BaseTest {
         SittingRecord sittingRecord = createSittingRecord(2);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
+        statusHistoryRepository.saveAll(sittingRecord.getStatusHistories());
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
@@ -89,6 +95,9 @@ class SittingRecordServiceITest extends BaseTest {
         uk.gov.hmcts.reform.jps.model.out.SittingRecord expected = createSittingRecord(persistedSittingRecord);
 
         assertThat(response).hasSize(1);
+        LOGGER.info("expected:{}", expected);
+        LOGGER.info("response.get(0):{}", response.get(0));
+
         assertThat(expected).isEqualTo(response.get(0));
     }
 
@@ -97,6 +106,7 @@ class SittingRecordServiceITest extends BaseTest {
         SittingRecord sittingRecord = createSittingRecord(2);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
+        statusHistoryRepository.saveAll(sittingRecord.getStatusHistories());
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
@@ -108,7 +118,7 @@ class SittingRecordServiceITest extends BaseTest {
             .dateRangeTo(LocalDate.now())
             .personalCode("001")
             .judgeRoleTypeId("HighCourt")
-            //    .createdByUserId(USER_ID)
+            .createdByUserId(USER_ID)
             .statusId(StatusId.RECORDED)
             .build();
 
@@ -120,7 +130,11 @@ class SittingRecordServiceITest extends BaseTest {
         uk.gov.hmcts.reform.jps.model.out.SittingRecord expected = createSittingRecord(persistedSittingRecord);
 
         assertThat(response).hasSize(1);
-        assertThat(expected).isEqualTo(response.get(0));
+
+        LOGGER.info("expected:{}", expected);
+        LOGGER.info("response.get(0):{}", response.get(0));
+
+        assertSittingRecordEqualsExpected(expected, response.get(0));
     }
 
     @Test
@@ -255,16 +269,40 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
-        int recordCount = 22;
-
         SittingRecord sittingRecord = createSittingRecord(2);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
+
+        StatusHistory statusHistory = createStatusHistoryRecord("SUBMITTED", USER_ID_ALTERNATE, USER_NAME_ALTERNATE);
+        statusHistory.setSittingRecord(sittingRecord);
+        sittingRecord.addStatusHistory(statusHistory);
+        StatusHistory persistedStatusHistory = statusHistoryRepository.save(statusHistory);
+
+        sittingRecord.setStatusId(statusHistory.getStatusId());
+        sittingRecord.setId(persistedSittingRecord.getId());
+        persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
+
+
+        statusHistory = createStatusHistoryRecord("DELETED", USER_ID_ALTERNATE, USER_NAME_ALTERNATE);
+        statusHistory.setSittingRecord(sittingRecord);
+        sittingRecord.addStatusHistory(statusHistory);
+        persistedStatusHistory = statusHistoryRepository.save(statusHistory);
+
+        sittingRecord.setStatusId(statusHistory.getStatusId());
+        sittingRecord.setId(persistedSittingRecord.getId());
+        persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
 
         SittingRecord sittingRecord3 = createSittingRecord(3, USER_ID_ALTERNATE, USER_NAME_ALTERNATE);
         SittingRecord persistedSittingRecord3 = sittingRecordRepository.save(sittingRecord3);
         assertThat(persistedSittingRecord3).isNotNull();
 
+        statusHistory = createStatusHistoryRecord("SUBMITTED", USER_ID, USER_NAME);
+        statusHistory.setSittingRecord(sittingRecord3);
+        sittingRecord.addStatusHistory(statusHistory);
+        StatusHistory persistedStatusHistory3 = statusHistoryRepository.save(statusHistory);
+
+
+        int recordCount = 22;
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
             .offset(0)
@@ -281,12 +319,39 @@ class SittingRecordServiceITest extends BaseTest {
             sittingRecord.getHmctsServiceId()
         );
 
-
         uk.gov.hmcts.reform.jps.model.out.SittingRecord expected = createSittingRecord(persistedSittingRecord);
 
         assertThat(response).hasSize(1);
-        assertThat(expected).isEqualTo(response.get(0));
+
+        LOGGER.info("expected:{}", expected);
+        LOGGER.info("response.get(0):{}", response.get(0));
+
+        assertSittingRecordEqualsExpected(expected, response.get(0));
     }
+
+    private void assertSittingRecordEqualsExpected(uk.gov.hmcts.reform.jps.model.out.SittingRecord expected,
+                                                      uk.gov.hmcts.reform.jps.model.out.SittingRecord actual) {
+        assertThat(expected.getAm()).isEqualTo(actual.getAm());
+        assertThat(expected.getContractTypeId()).isEqualTo(actual.getContractTypeId());
+        assertThat(expected.getEpimsId()).isEqualTo(actual.getEpimsId());
+        assertThat(expected.getHmctsServiceId()).isEqualTo(actual.getHmctsServiceId());
+        assertThat(expected.getJudgeRoleTypeId()).isEqualTo(actual.getJudgeRoleTypeId());
+        assertThat(expected.getPersonalCode()).isEqualTo(actual.getPersonalCode());
+        assertThat(expected.getPersonalName()).isEqualTo(actual.getPersonalName());
+        assertThat(expected.getPm()).isEqualTo(actual.getPm());
+        assertThat(expected.getRegionId()).isEqualTo(actual.getRegionId());
+        assertThat(expected.getRegionName()).isEqualTo(actual.getRegionName());
+        assertThat(expected.getSittingDate()).isEqualTo(actual.getSittingDate());
+        assertThat(expected.getSittingRecordId()).isEqualTo(actual.getSittingRecordId());
+        assertStatusHistoriesEqualsExpected(expected.getStatusHistories(), actual.getStatusHistories());
+        assertThat(expected.getStatusId()).isEqualTo(actual.getStatusId());
+    }
+
+    private void assertStatusHistoriesEqualsExpected(List<StatusHistory> expected, List<StatusHistory> actual) {
+        assertEquals(expected.size(), actual.size());
+        assertEquals(expected.get(0).getId(), actual.get(0).getId());
+    }
+
 
     private uk.gov.hmcts.reform.jps.model.out.SittingRecord createSittingRecord(SittingRecord sittingRecord) {
         String notSet = null;
@@ -303,6 +368,7 @@ class SittingRecordServiceITest extends BaseTest {
                 .judgeRoleTypeId(persistedSittingRecord.getJudgeRoleTypeId())
                 .am(persistedSittingRecord.isAm() ? AM.name() : notSet)
                 .pm(persistedSittingRecord.isPm() ? PM.name() : notSet)
+                .statusHistories(persistedSittingRecord.getStatusHistories())
                 .build())
             .orElseThrow();
     }
@@ -326,6 +392,7 @@ class SittingRecordServiceITest extends BaseTest {
             .judgeRoleTypeId("HighCourt")
             .build();
         StatusHistory statusHistory = createStatusHistoryRecord(sittingRecord.getStatusId(), userId, userName);
+        statusHistory.setSittingRecord(sittingRecord);
         sittingRecord.addStatusHistory(statusHistory);
         return sittingRecord;
     }
@@ -343,6 +410,7 @@ class SittingRecordServiceITest extends BaseTest {
         for (long i = count; i > 0; i--) {
             SittingRecord sittingRecord = createSittingRecord(i);
             SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
+            statusHistoryRepository.saveAll(sittingRecord.getStatusHistories());
             assertThat(persistedSittingRecord).isNotNull();
         }
     }

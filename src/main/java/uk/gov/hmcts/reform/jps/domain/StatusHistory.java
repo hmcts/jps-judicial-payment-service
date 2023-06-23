@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -20,6 +21,7 @@ import javax.persistence.Table;
 @NoArgsConstructor()
 @AllArgsConstructor
 @Data
+@ToString
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {
