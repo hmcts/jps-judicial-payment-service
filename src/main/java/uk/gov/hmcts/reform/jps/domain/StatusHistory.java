@@ -31,6 +31,7 @@ public class StatusHistory {
     @Column(name = "status_history_id")
     private Long id;
 
+    @ToString.Exclude
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "sitting_record_id")
     private SittingRecord sittingRecord;

@@ -33,6 +33,7 @@ public class SittingRecord {
     private String judgeRoleTypeId;
     private String am;
     private String pm;
+    @ToString.Exclude
     private List<StatusHistory> statusHistories;
 
     public String getCreatedByUserId() {
@@ -70,7 +71,7 @@ public class SittingRecord {
                                  statusHistory1.getChangeDateTime())
             );
             Optional<StatusHistory> optionalStatusHistory = statusHistories.stream().findFirst();
-            return optionalStatusHistory.isPresent() ? optionalStatusHistory.get() : null;
+            return optionalStatusHistory.orElse(null);
         }
     }
 
