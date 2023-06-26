@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -25,9 +24,13 @@ import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -107,17 +110,24 @@ class RecordSittingRecordsControllerTest {
             ).andReturn();
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
 
-        verify(sittingRecordService).checkDuplicateRecords(ArgumentMatchers.<SittingRecordWrapper>anyList());
+        verify(sittingRecordService).checkDuplicateRecords(anyList());
         verify(sittingRecordService).saveSittingRecords(eq(TEST_SERVICE),
-                                                        ArgumentMatchers.<SittingRecordWrapper>anyList(),
+                                                        anyList(),
                                                         eq("Recorder"),
                                                         eq("d139a314-eb40-45f4-9e7a-9e13f143cc3a"));
         verify(regionService).setRegionId(eq(TEST_SERVICE),
-                                          ArgumentMatchers.<SittingRecordWrapper>anyList());
+                                          anyList());
     }
 
     @Test
     void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+        doAnswer(invocation -> {
+            List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(0);
+            sittingRecordWrappers.forEach(
+                sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD));
+            return null;
+        }).when(sittingRecordService).checkDuplicateRecords(anyList());
+
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -154,13 +164,13 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name())
             ).andReturn();
 
-        verify(sittingRecordService).checkDuplicateRecords(ArgumentMatchers.<SittingRecordWrapper>anyList());
+        verify(sittingRecordService).checkDuplicateRecords(anyList());
         verify(sittingRecordService, never()).saveSittingRecords(eq(TEST_SERVICE),
-                                                        ArgumentMatchers.<SittingRecordWrapper>anyList(),
+                                                        anyList(),
                                                         eq("Recorder"),
                                                         eq("d139a314-eb40-45f4-9e7a-9e13f143cc3a"));
         verify(regionService).setRegionId(eq(TEST_SERVICE),
-                                          ArgumentMatchers.<SittingRecordWrapper>anyList());
+                                          anyList());
     }
 
     @Test

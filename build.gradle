@@ -314,7 +314,6 @@ dependencies {
 
   implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
-  implementation group: 'io.springfox', name: 'springfox-boot-starter', version: versions.springfoxSwagger
 
   testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0'
   implementation group: 'com.github.hmcts', name: 'service-auth-provider-java-client', version: versions.serviceAuthVersion
@@ -346,8 +345,7 @@ dependencies {
   functionalTestImplementation sourceSets.main.runtimeClasspath
   functionalTestImplementation sourceSets.test.runtimeClasspath
   cftlibImplementation group: 'org.springframework.boot', name: 'spring-boot-devtools'
-  integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock-jre8', version: '2.25.1'
-  integrationTestImplementation group: 'org.springframework.cloud', name: 'spring-cloud-contract-wiremock', version: '2.2.4.RELEASE'
+  integrationTestImplementation group: 'com.github.tomakehurst', name: 'wiremock', version: '2.27.2'
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testcontainers
   integrationTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
