@@ -526,10 +526,10 @@ class SittingRecoredServiceITest extends BaseTest {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         assertThat(sittingRecordWrappers)
-            .extracting("errorCode", "createdByName", "statusId", "delete")
-            .contains(tuple(VALID, null, null, true),
-                      tuple(VALID, null, null, true),
-                      tuple(VALID, null, null, true)
+            .extracting("errorCode", "createdByName", "statusId")
+            .contains(tuple(VALID, null, null),
+                      tuple(VALID, null, null),
+                      tuple(VALID, null, null)
             );
     }
 
