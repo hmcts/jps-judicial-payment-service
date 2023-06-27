@@ -102,25 +102,19 @@ public class SittingRecordService {
 
     @Transactional
     public void deleteSittingRecords(Long sittingRecordId) {
-        recordSittingRecordRequest.getRecordedSittingRecords()
-            .forEach(recordSittingRecord -> {
-                uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
-                    uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-                        .sittingDate(recordSittingRecord.getSittingDate())
-                        .statusId(StatusId.DELETED.name())
-                        .regionId(recordSittingRecord.getRegionId())
-                        .epimsId(recordSittingRecord.getEpimsId())
-                        .hmctsServiceId(hmctsServiceCode)
-                        .personalCode(recordSittingRecord.getPersonalCode())
-                        .contractTypeId(recordSittingRecord.getContractTypeId())
-                        .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
-                        .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getAm).orElse(false))
-                        .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getPm).orElse(false))
-                        .build();
 
-                recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+        if(Idam role = ("Recorder"))(
+            if(sitting_record.status_id = ("recorded"))(
+
+                )
+        )else if(Idam role = ("Submitter"))(
+            if(sitting_record.status_id = ("recorded"))(
+            )
+            )else if(Idam role = ("Admin"))(
+
+            )else(
+                throw new RuntimeException("409");
+            )
 
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
@@ -131,7 +125,7 @@ public class SittingRecordService {
 
                 sittingRecord.addStatusHistory(statusHistory);
                 sittingRecordRepository.save(sittingRecord);
-            });
+
     }
 
     private SittingRecord getSittingRecord(Long sittingRecordId) {
