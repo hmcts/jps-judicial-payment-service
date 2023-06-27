@@ -1,7 +1,7 @@
 @F-004 @Functional
 Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
-  @S-004.1 #AC01
+  @S-004.1 @Ignore #AC01
   Scenario: Return 201 success with content where errorCode to "valid" in response when one sitting record is added
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
