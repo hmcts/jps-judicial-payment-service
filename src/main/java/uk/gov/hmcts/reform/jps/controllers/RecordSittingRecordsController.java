@@ -63,9 +63,9 @@ public class RecordSittingRecordsController {
             content = @Content(schema = @Schema(implementation = RecordSittingRecordResponse.class)),
             description = "Successfully created sitting record"),
         @ApiResponse(responseCode = "200", description = RESPONSE_200),
-        @ApiResponse(responseCode = "400", description = RESPONSE_400),
-        @ApiResponse(responseCode = "401", description = RESPONSE_401),
-        @ApiResponse(responseCode = "403", description = RESPONSE_403)
+        @ApiResponse(responseCode = "400", description = RESPONSE_400, content = @Content),
+        @ApiResponse(responseCode = "401", description = RESPONSE_401, content = @Content),
+        @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
     })
     @PostMapping(
         path = {"", "/{hmctsServiceCode}"}
