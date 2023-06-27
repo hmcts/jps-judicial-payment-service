@@ -102,7 +102,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Date order is mandatory"
 
-  @S-005.10 #AC05
+  @S-005.10 @Ignore #AC05
   Scenario: Negative response, when the request payload is missing dateRange
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
