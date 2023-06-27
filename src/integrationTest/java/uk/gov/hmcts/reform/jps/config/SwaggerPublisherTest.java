@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = {
         // NB: hide testing-support endpoint from Swagger Publish
-        "jps.endpoints.testing-support.enabled=true"
+        "jps.endpoints.testing-support.enabled=false"
     }
 )
 @AutoConfigureMockMvc(addFilters = false)
@@ -47,7 +47,7 @@ class SwaggerPublisherTest extends BaseTest {
             .getResponse()
             .getContentAsByteArray();
 
-        try (OutputStream outputStream = Files.newOutputStream(Paths.get("/tmp/swagger-specs.json"))) {
+        try (OutputStream outputStream = Files.newOutputStream(Paths.get("/tmp/openapi-specs.json"))) {
             outputStream.write(specs);
         }
 
