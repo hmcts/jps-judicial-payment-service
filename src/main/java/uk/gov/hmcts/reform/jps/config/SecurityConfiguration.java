@@ -41,10 +41,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
     private static final String[] AUTH_ALLOWED_LIST = {
-        "/swagger-resources/**",
+        "/swagger",
+        "/swagger-ui.html",
         "/swagger-ui/**",
-        "/webjars/**",
-        "/v2/api-docs",
+        "/v3/api-docs/**",
         "/health",
         "/health/liveness",
         "/health/readiness",
