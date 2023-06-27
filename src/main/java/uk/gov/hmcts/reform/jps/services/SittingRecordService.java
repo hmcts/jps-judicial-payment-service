@@ -145,14 +145,18 @@ public class SittingRecordService {
         });
     }
 
-    private boolean isMatchingDuration(SittingRecordRequest sittingRecordRequest, SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields) {
+    private boolean isMatchingDuration(SittingRecordRequest sittingRecordRequest,
+                                       SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
+                                           sittingRecordDuplicateCheckFields) {
         return sittingRecordDuplicateCheckFields.getPm()
             .equals(sittingRecordRequest.getDurationBoolean().getPm())
             && sittingRecordDuplicateCheckFields.getAm()
             .equals(sittingRecordRequest.getDurationBoolean().getAm());
     }
 
-    private boolean isOverlappingDuration(SittingRecordRequest sittingRecordRequest, SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields) {
+    private boolean isOverlappingDuration(SittingRecordRequest sittingRecordRequest,
+                                          SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
+                                              sittingRecordDuplicateCheckFields) {
         return ((TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
             && TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
             && (sittingRecordRequest.getDurationBoolean().getPm()
@@ -161,10 +165,12 @@ public class SittingRecordService {
             && sittingRecordRequest.getDurationBoolean().getAm())
             && (TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
             || TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
-        );
+            );
     }
 
-    private boolean isDuplicate(SittingRecordRequest sittingRecordRequest, SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields) {
+    private boolean isDuplicate(SittingRecordRequest sittingRecordRequest,
+                                SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
+                                    sittingRecordDuplicateCheckFields) {
         return sittingRecordDuplicateCheckFields.getEpimmsId().equals(sittingRecordRequest.getEpimmsId())
             && sittingRecordDuplicateCheckFields.getSittingDate().isEqual(sittingRecordRequest.getSittingDate())
             && sittingRecordDuplicateCheckFields.getPersonalCode()
@@ -198,11 +204,11 @@ public class SittingRecordService {
 
     private void updateFromStatusHistory(SittingRecordWrapper sittingRecordWrapper,
                                          SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
-                                             checkFields) {
+                                             sittingRecordDuplicateCheckFields) {
         Sort.TypedSort<StatusHistory> sort = Sort.sort(StatusHistory.class);
         Optional<StatusHistory> lastStatusHistory = statusHistoryRepository.findFirstBySittingRecord(
             uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-                .id(checkFields.getId())
+                .id(sittingRecordDuplicateCheckFields.getId())
                 .build(),
             sort.by(StatusHistory::getId).descending()
         );
