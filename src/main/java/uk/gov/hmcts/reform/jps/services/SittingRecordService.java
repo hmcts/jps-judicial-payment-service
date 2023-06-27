@@ -130,34 +130,45 @@ public class SittingRecordService {
             sittingRecordRequest.getPersonalCode(),
             DELETED
         ).forEach(sittingRecordDuplicateCheckFields -> {
-            if (sittingRecordDuplicateCheckFields.getEpimmsId().equals(sittingRecordRequest.getEpimmsId())
-                    && sittingRecordDuplicateCheckFields.getSittingDate().isEqual(sittingRecordRequest.getSittingDate())
-                    && sittingRecordDuplicateCheckFields.getPersonalCode()
-                        .equals(sittingRecordRequest.getPersonalCode())) {
-                if (sittingRecordDuplicateCheckFields.getPm()
-                    .equals(sittingRecordRequest.getDurationBoolean().getPm())
-                    && sittingRecordDuplicateCheckFields.getAm()
-                    .equals(sittingRecordRequest.getDurationBoolean().getAm())) {
+            if (isDuplicate(sittingRecordRequest, sittingRecordDuplicateCheckFields)) {
+                if (isMatchingDuration(sittingRecordRequest, sittingRecordDuplicateCheckFields)) {
                     checkRecordedSittingRecords(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
-                } else if (((TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
-                        && TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
-                        && (sittingRecordRequest.getDurationBoolean().getPm()
-                            || sittingRecordRequest.getDurationBoolean().getAm()))
-                    || ((sittingRecordRequest.getDurationBoolean().getPm()
-                        && sittingRecordRequest.getDurationBoolean().getAm())
-                        && (TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
-                            || TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
-                    )) {
+                } else if (isOverlappingDuration(sittingRecordRequest, sittingRecordDuplicateCheckFields)) {
                     if (sittingRecordDuplicateCheckFields.getStatusId() == StatusId.RECORDED) {
                         sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
-                        updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
                     } else if (sittingRecordDuplicateCheckFields.getStatusId() != DELETED) {
                         sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
-                        updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
                     }
+                    updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
                 }
             }
         });
+    }
+
+    private boolean isMatchingDuration(SittingRecordRequest sittingRecordRequest, SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields) {
+        return sittingRecordDuplicateCheckFields.getPm()
+            .equals(sittingRecordRequest.getDurationBoolean().getPm())
+            && sittingRecordDuplicateCheckFields.getAm()
+            .equals(sittingRecordRequest.getDurationBoolean().getAm());
+    }
+
+    private boolean isOverlappingDuration(SittingRecordRequest sittingRecordRequest, SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields) {
+        return ((TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
+            && TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
+            && (sittingRecordRequest.getDurationBoolean().getPm()
+            || sittingRecordRequest.getDurationBoolean().getAm()))
+            || ((sittingRecordRequest.getDurationBoolean().getPm()
+            && sittingRecordRequest.getDurationBoolean().getAm())
+            && (TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
+            || TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
+        );
+    }
+
+    private boolean isDuplicate(SittingRecordRequest sittingRecordRequest, SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields) {
+        return sittingRecordDuplicateCheckFields.getEpimmsId().equals(sittingRecordRequest.getEpimmsId())
+            && sittingRecordDuplicateCheckFields.getSittingDate().isEqual(sittingRecordRequest.getSittingDate())
+            && sittingRecordDuplicateCheckFields.getPersonalCode()
+            .equals(sittingRecordRequest.getPersonalCode());
     }
 
     private void checkRecordedSittingRecords(SittingRecordWrapper sittingRecordWrapper,
