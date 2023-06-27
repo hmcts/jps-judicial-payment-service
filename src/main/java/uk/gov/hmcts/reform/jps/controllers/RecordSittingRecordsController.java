@@ -4,7 +4,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,15 +57,14 @@ public class RecordSittingRecordsController {
 
 
     @Operation(description = "To create a new sitting record")
-    @ApiResponses({
-        @ApiResponse(responseCode = "201",
-            content = @Content(schema = @Schema(implementation = RecordSittingRecordResponse.class)),
-            description = "Successfully created sitting record"),
-        @ApiResponse(responseCode = "200", description = RESPONSE_200),
-        @ApiResponse(responseCode = "400", description = RESPONSE_400, content = @Content),
-        @ApiResponse(responseCode = "401", description = RESPONSE_401, content = @Content),
-        @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
-    })
+    @ApiResponse(responseCode = "201",
+        content = @Content(schema = @Schema(implementation = RecordSittingRecordResponse.class)),
+        description = "Successfully created sitting record")
+    @ApiResponse(responseCode = "200", description = RESPONSE_200)
+    @ApiResponse(responseCode = "400", description = RESPONSE_400, content = @Content)
+    @ApiResponse(responseCode = "401", description = RESPONSE_401, content = @Content)
+    @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
+
     @PostMapping(
         path = {"", "/{hmctsServiceCode}"}
     )
@@ -114,7 +112,7 @@ public class RecordSittingRecordsController {
                             Boolean.TRUE
                                 .equals(wrapper.getSittingRecordRequest().getReplaceDuplicate()))
                 .findAny()
-                .map(SittingRecordWrapper -> OK)
+                .map(sittingRecordWrapper -> OK)
                 .orElse(CREATED);
 
             return status(httpStatus)
