@@ -49,7 +49,7 @@ public class SittingRecordService {
                     .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                     .am(sittingRecord.isAm() ? AM.name() : null)
                     .pm(sittingRecord.isPm() ? PM.name() : null)
-                    .statusHistories(sittingRecord.getStatusHistories().stream().toList())
+                    .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                     .build())
             .toList();
     }

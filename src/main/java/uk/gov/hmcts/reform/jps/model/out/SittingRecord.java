@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -57,20 +58,22 @@ public class SittingRecord {
     }
 
     public StatusHistory getFirstStatusHistory() {
-        Collections.sort(statusHistories, Comparator.comparing(StatusHistory::getId));
-        Optional<StatusHistory> optStatHistory = statusHistories.stream().findFirst();
+        List<StatusHistory> statusHistoriesCopy = new ArrayList<>(statusHistories.stream().toList());
+        Collections.sort(statusHistoriesCopy, Comparator.comparing(StatusHistory::getId));
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
         return optStatHistory.isPresent() ? optStatHistory.get() : null;
     }
 
     public StatusHistory getLatestStatusHistory() {
+        List<StatusHistory> statusHistoriesCopy = new ArrayList<>(statusHistories).stream().toList();
         if (null == statusHistories) {
             return null;
         } else {
-            Collections.sort(statusHistories,
-                             (statusHistory1, statusHistory2) -> statusHistory2.getChangeDateTime().compareTo(
-                                 statusHistory1.getChangeDateTime())
+            Collections.sort(statusHistoriesCopy,
+                             (statusHistory1, statusHistory2) -> statusHistory2.getId().compareTo(
+                                 statusHistory1.getId())
             );
-            Optional<StatusHistory> optionalStatusHistory = statusHistories.stream().findFirst();
+            Optional<StatusHistory> optionalStatusHistory = statusHistoriesCopy.stream().findFirst();
             return optionalStatusHistory.orElse(null);
         }
     }
