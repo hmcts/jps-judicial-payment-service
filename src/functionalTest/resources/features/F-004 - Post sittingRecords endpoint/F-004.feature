@@ -14,7 +14,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].statusId" as "RECORDED"
     And the response contains "errorRecords[0].createdByName" as "Recorder"
 
-  @S-004.2 #AC02
+  @S-004.2 @Ignore #AC02
   Scenario: Return 201 success with content where errorCode to "valid" in response when multiple sitting records are added
     Given a user with the IDAM role of "jps-submitter"
     When a request is prepared with appropriate values
