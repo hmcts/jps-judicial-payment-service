@@ -193,20 +193,27 @@ class SittingRecordServiceITest extends BaseTest {
         LOGGER.debug("response[0].statusHistories: {}", response.get(0).getStatusHistories());
         LOGGER.debug("response[1].statusHistories: {}", response.get(1).getStatusHistories());
 
-         //assertThat(response)
-         //   .as("Extracting unique value")
-         //   .extracting(SittingRecord_.CONTRACT_TYPE_ID)
-         //   .contains(
-         //       tuple(21L),
-         //       tuple(22L)
-         //   );
+        assertThat(response)
+            .as("Extracting unique value by status")
+            .extracting(SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.STATUS_ID)
+            .contains(
+                tuple(21L, STATUS_ID_FIXED),
+                tuple(22L, STATUS_ID_FIXED)
+            );
 
-        //assertThat(response.get(0).getStatusHistories())
-        //    .as("Extracting change by user")
-        //    .extracting(StatusHistory_.CHANGE_BY_USER_ID)
-        //    .contains(
-        //        tuple(USER_ID)
-        //    );
+        assertThat(response.get(0).getStatusHistories())
+            .as("Extracting change by user")
+            .extracting(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.STATUS_ID)
+            .contains(
+                tuple(USER_ID, STATUS_ID_FIXED)
+            );
+
+        assertThat(response.get(1).getStatusHistories())
+            .as("Extracting change by user")
+            .extracting(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.STATUS_ID)
+            .contains(
+                tuple(USER_ID, STATUS_ID_FIXED)
+            );
     }
 
     @Test
