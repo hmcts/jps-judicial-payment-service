@@ -149,10 +149,11 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                           CriteriaQuery criteriaQuery,
                                           Root<SittingRecord> sittingRecord) {
 
-        Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
-            sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
+
 
         if (null != recordSearchRequest.getCreatedByUserId() && !recordSearchRequest.getCreatedByUserId().isEmpty()) {
+            Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
+                sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
 
             criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
                                   joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
@@ -163,14 +164,14 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
             LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id and selected created by user");
 
-        } else {
-
-            criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID))
-                .having(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.ID),
-                                              joinStatusHistory.get(StatusHistory_.SITTING_RECORD))); // ??
-            LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id");
         }
-
+        //else {
+        //
+        //    criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID))
+        //        .having(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.ID),
+        //                                      joinStatusHistory.get(StatusHistory_.SITTING_RECORD))); // ??
+        //    LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id");
+        //}
 
     }
 
