@@ -94,18 +94,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             }
         }
 
-        if (null == recordSearchRequest.getCreatedByUserId() || recordSearchRequest.getCreatedByUserId().isEmpty()) {
-            Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
-                sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
-
-            predicates.add(criteriaBuilder.equal(
-                sittingRecord.get(SittingRecord_.ID),
-                joinStatusHistory.get(StatusHistory_.ID)
-            ));
-        }
-
         predicateConsumer.accept(predicates);
-
 
 
         Predicate[] predicatesArray = new Predicate[predicates.size()];

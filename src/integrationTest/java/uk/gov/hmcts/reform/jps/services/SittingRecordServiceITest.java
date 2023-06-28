@@ -52,6 +52,8 @@ class SittingRecordServiceITest extends BaseTest {
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
     public static final String CONTRACT_TYPE_ID = "contractTypeId";
+    public static final String CHANGE_BY_USER_ID = "changeByUserId";
+    public static final String STATUS = "statusId";
     public static final String CREATED_BY_USER_ID = "createdByUserId";
 
     private SittingRecordService sittingRecordService;
@@ -190,23 +192,27 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(response).hasSize(2);
         LOGGER.debug("response: {}", response);
-        LOGGER.debug("response[0].statusHistories: {}", response.get(0).getStatusHistories());
-        LOGGER.debug("response[1].statusHistories: {}", response.get(1).getStatusHistories());
+        assertThat(response)
+            .as("Extracting unique value by status")
+            .extracting(CONTRACT_TYPE_ID, STATUS)
+            .contains(
+                tuple(21L, STATUS_ID_FIXED),
+                tuple(22L, STATUS_ID_FIXED)
+            );
 
-         //assertThat(response)
-         //   .as("Extracting unique value")
-         //   .extracting(SittingRecord_.CONTRACT_TYPE_ID)
-         //   .contains(
-         //       tuple(21L),
-         //       tuple(22L)
-         //   );
+        assertThat(response.get(0).getStatusHistories())
+            .as("Extracting change by user")
+            .extracting(CHANGE_BY_USER_ID, STATUS)
+            .contains(
+                tuple(USER_ID, STATUS_ID_FIXED)
+            );
 
-        //assertThat(response.get(0).getStatusHistories())
-        //    .as("Extracting change by user")
-        //    .extracting(StatusHistory_.CHANGE_BY_USER_ID)
-        //    .contains(
-        //        tuple(USER_ID)
-        //    );
+        assertThat(response.get(1).getStatusHistories())
+            .as("Extracting change by user")
+            .extracting(CHANGE_BY_USER_ID, STATUS)
+            .contains(
+                tuple(USER_ID, STATUS_ID_FIXED)
+            );
     }
 
     @Test
