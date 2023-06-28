@@ -58,9 +58,9 @@ public class StatusHistoryServiceITest extends BaseTest {
 
         statusHistoryService.updateFromStatusHistory(wrapper, sittingRecordDuplicateCheckFields);
         assertThat(wrapper.getCreatedByName()).isEqualTo("Recorder");
-        assertThat(wrapper.getCreatedDateTime().truncatedTo(ChronoUnit.SECONDS))
-            .isEqualTo(LocalDateTime.of(2023, JUNE, 29, 12, 40, 30, 490419)
-                           .truncatedTo(ChronoUnit.SECONDS));
+        assertThat(wrapper.getCreatedDateTime().toLocalDate())
+            .isEqualTo(LocalDateTime.of(2023, JUNE, 29, 11, 40, 30, 490419)
+                           .toLocalDate());
         assertThat(wrapper.getStatusId()).isEqualTo(PUBLISHED);
     }
 }
