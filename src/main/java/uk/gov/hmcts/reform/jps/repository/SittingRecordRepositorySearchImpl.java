@@ -1,5 +1,7 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory_;
@@ -27,6 +29,8 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 public class SittingRecordRepositorySearchImpl implements SittingRecordRepositorySearch {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordRepositorySearchImpl.class);
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -40,25 +44,40 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         Root<V> sittingRecord,
         Consumer<List<Predicate>> predicateConsumer) {
 
+        LOGGER.debug("updateCriteriaQuery(?): ...");
+
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
+        LOGGER.debug("hmctsServiceId: {}", hmctsServiceCode);
         predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
+        LOGGER.debug("regionId: {}", recordSearchRequest.getRegionId());
         predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
+        LOGGER.debug("epimsId: {}", recordSearchRequest.getEpimsId());
         predicates.add(criteriaBuilder.between(sittingRecord.get(SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
+        LOGGER.debug("dateRange: {} - {}", recordSearchRequest.getDateRangeFrom(), recordSearchRequest.getDateRangeTo());
 
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get(SittingRecord_.PERSONAL_CODE), value)));
+        if (Optional.ofNullable(recordSearchRequest.getPersonalCode()).isPresent()) {
+            LOGGER.debug("{}: {}", SittingRecord_.PERSONAL_CODE, recordSearchRequest.getPersonalCode());
+        }
 
         Optional.ofNullable(recordSearchRequest.getJudgeRoleTypeId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get(SittingRecord_.JUDGE_ROLE_TYPE_ID), value)));
+        if (Optional.ofNullable(recordSearchRequest.getJudgeRoleTypeId()).isPresent()) {
+            LOGGER.debug("{}: {}", SittingRecord_.JUDGE_ROLE_TYPE_ID, recordSearchRequest.getJudgeRoleTypeId());
+        }
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get("statusId"), value.name())));
+        if (Optional.ofNullable(recordSearchRequest.getStatusId()).isPresent()) {
+            LOGGER.debug("{}: {}", SittingRecord_.STATUS_ID, recordSearchRequest.getStatusId());
+        }
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
@@ -75,7 +94,19 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             }
         }
 
+        if (null == recordSearchRequest.getCreatedByUserId() || recordSearchRequest.getCreatedByUserId().isEmpty()) {
+            Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
+                sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
+
+            predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.ID),
+                joinStatusHistory.get(StatusHistory_.ID)
+            ));
+        }
+
         predicateConsumer.accept(predicates);
+
+
 
         Predicate[] predicatesArray = new Predicate[predicates.size()];
         criteriaQuery.where(criteriaBuilder.and(predicates.toArray(predicatesArray)));
@@ -85,6 +116,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     public List<SittingRecord> find(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
+        LOGGER.debug("find(?): ...");
 
         // create the outer query
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -99,8 +131,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             root,
             predicates -> {
                 if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
+                    LOGGER.debug("DateOrder: {}", DateOrder.ASCENDING);
                     cq.orderBy(cb.asc(root.get(SITTING_DATE)));
                 } else {
+                    LOGGER.debug("DateOrder: {}", DateOrder.DESCENDING);
                     cq.orderBy(cb.desc(root.get(SITTING_DATE)));
                 }
             }
@@ -118,6 +152,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     @Override
     public int totalRecords(SittingRecordSearchRequest recordSearchRequest,
                             String hmctsServiceCode) {
+        LOGGER.debug("totalRecords(?): ...");
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -152,10 +187,13 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                           CriteriaQuery cq,
                                           Root<SittingRecord> rootSR) {
 
+        LOGGER.debug("addChangeByUserIdCriteria((?): ...");
 
         // @Query("select sh.changeByUserId from SittingRecord sr inner join StatusHistory sh
         // on sh.sittingRecord.id = sr.id where sh.id = (select min(sh2.id) from StatusHistory sh2
         // where sh2.sittingRecord.id = :id)")
+
+        LOGGER.debug("Change By UserId: {}", value);
 
         Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
             rootSR.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
@@ -165,6 +203,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             .having(cb.equal(cb.min(joinStatusHistory.get(StatusHistory_.ID)),
                              joinStatusHistory.get(StatusHistory_.ID)),
                     cb.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID), value));
+
+        LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id");
 
     }
 
