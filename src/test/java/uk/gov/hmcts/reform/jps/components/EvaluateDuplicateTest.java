@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
@@ -14,7 +16,9 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
@@ -68,8 +72,13 @@ class EvaluateDuplicateTest extends BaseEvaluateDuplicate {
         verify(duplicateChecker).evaluate(any(), any());
     }
 
-    @Test
-    void shouldNotInvokeNextDuplicateCheckerWhenDuplicateCheckFieldsDontMatch() throws IOException {
+    @ParameterizedTest
+    @CsvSource({"2000, null, null", "null, now, null", "null, null, 404" })
+    void shouldNotInvokeNextDuplicateCheckerWhenDuplicateCheckFieldsDontMatch(
+        String epimmsId,
+        String sittingDate,
+        String personalId
+    ) throws IOException {
         String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
@@ -85,15 +94,16 @@ class EvaluateDuplicateTest extends BaseEvaluateDuplicate {
         SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
         SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
             = getDbRecord(
-                sittingRecordRequest.getSittingDate(),
-                "2000",
-                sittingRecordRequest.getPersonalCode(),
-                sittingRecordRequest.getDurationBoolean().getAm(),
-                sittingRecordRequest.getDurationBoolean().getPm(),
-                "Tester",
-                RECORDED
+            Objects.nonNull(sittingDate) ? LocalDate.now() : sittingRecordRequest.getSittingDate(),
+            Objects.nonNull(epimmsId) ? epimmsId : sittingRecordRequest.getEpimmsId(),
+            Objects.nonNull(personalId) ? personalId : sittingRecordRequest.getPersonalCode(),
+            sittingRecordRequest.getDurationBoolean().getAm(),
+            sittingRecordRequest.getDurationBoolean().getPm(),
+            "Tester",
+            RECORDED
             );
         evaluateDuplicate.evaluate(sittingRecordWrappers.get(0), sittingRecordDuplicateCheckFields);
         verify(duplicateChecker, never()).evaluate(any(), any());
     }
+
 }

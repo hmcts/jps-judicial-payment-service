@@ -26,6 +26,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
@@ -187,6 +188,43 @@ class EvaluateMatchingDurationTest extends BaseEvaluateDuplicate {
 
         verify(statusHistoryService).updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
     }
+
+    @Test
+    void shouldSetValidWhenRecordStatusIsDeleted() throws IOException {
+        String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
+
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            sittingRecordRequest.getEpimmsId(),
+            sittingRecordRequest.getPersonalCode(),
+            sittingRecordRequest.getDurationBoolean().getAm(),
+            sittingRecordRequest.getDurationBoolean().getPm(),
+            "Tester",
+            DELETED
+        );
+        SittingRecordWrapper sittingRecordWrapper = sittingRecordWrappers.get(0);
+        evaluateMatchingDuration.evaluate(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+
+        assertThat(sittingRecordWrapper.getErrorCode())
+            .isEqualTo(VALID);
+
+        verify(statusHistoryService, never())
+            .updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+    }
+
 
     @Test
     void shouldNInvokeNextDuplicateCheckerWhenDurationDontMatch() throws IOException {

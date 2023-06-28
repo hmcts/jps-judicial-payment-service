@@ -8,7 +8,6 @@ import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -23,6 +22,7 @@ import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 
 @Service
@@ -98,7 +98,7 @@ public class SittingRecordService {
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
                     uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
                         .sittingDate(recordSittingRecord.getSittingDate())
-                        .statusId(StatusId.RECORDED)
+                        .statusId(RECORDED)
                         .regionId(recordSittingRecordWrapper.getRegionId())
                         .epimmsId(recordSittingRecord.getEpimmsId())
                         .hmctsServiceId(hmctsServiceCode)
@@ -114,7 +114,7 @@ public class SittingRecordService {
                 recordSittingRecordWrapper.setCreatedDateTime(LocalDateTime.now());
 
                 StatusHistory statusHistory = StatusHistory.builder()
-                    .statusId(StatusId.RECORDED)
+                    .statusId(RECORDED)
                     .changeDateTime(LocalDateTime.now())
                     .changeByUserId(recordedByIdamId)
                     .changeByName(recordedByName)

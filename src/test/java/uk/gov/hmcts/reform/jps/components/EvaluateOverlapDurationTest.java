@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.jps.components;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -22,15 +23,16 @@ import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @ExtendWith(MockitoExtension.class)
 class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
-
-    @Mock
-    private DuplicateChecker duplicateChecker;
 
     @Mock
     private StatusHistoryService statusHistoryService;
@@ -43,7 +45,6 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
         evaluateOverlapDuration = new EvaluateOverlapDuration(statusHistoryService);
-        evaluateOverlapDuration.next(duplicateChecker);
     }
 
     @ParameterizedTest
@@ -218,5 +219,61 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
             .isEqualTo(errorCode);
 
         verify(statusHistoryService).updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+    }
+
+    @Test
+    void shouldNotUpdateErrorCodeWhenRecordDurationIsFalseInDb() throws IOException {
+        String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
+        SittingRecordRequest intersectingPmRequest = sittingRecordRequest.toBuilder()
+            .durationBoolean(new DurationBoolean(false, false))
+            .build();
+
+        List<SittingRecordWrapper> sittingRecordWrappers = List.of(SittingRecordWrapper.builder()
+                                                                       .sittingRecordRequest(intersectingPmRequest)
+                                                                       .build());
+
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
+            = getDbRecord(
+                sittingRecordRequest.getSittingDate(),
+                sittingRecordRequest.getEpimmsId(),
+                sittingRecordRequest.getPersonalCode(),
+                sittingRecordRequest.getDurationBoolean().getAm(),
+                sittingRecordRequest.getDurationBoolean().getPm(),
+                sittingRecordRequest.getJudgeRoleTypeId(),
+                RECORDED
+            );
+
+        SittingRecordWrapper sittingRecordWrapper = sittingRecordWrappers.get(0);
+        evaluateOverlapDuration.evaluate(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+
+        assertThat(sittingRecordWrapper.getErrorCode())
+            .isEqualTo(VALID);
+
+        verify(statusHistoryService, never())
+            .updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+    }
+
+
+    @Test
+    void shouldThrowUnsupportedOperationExceptionWhenNextInvoked() {
+        assertThatThrownBy(() -> evaluateOverlapDuration.next(new DuplicateChecker() {
+            @Override
+            public void next(DuplicateChecker duplicateChecker) {
+
+            }
+
+            @Override
+            public void evaluate(SittingRecordWrapper sittingRecordWrapper,
+                                 SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields fields) {
+
+            }
+        }))
+            .isInstanceOf(UnsupportedOperationException.class);
     }
 }
