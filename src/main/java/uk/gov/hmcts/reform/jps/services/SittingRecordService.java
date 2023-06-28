@@ -103,19 +103,8 @@ public class SittingRecordService {
     @Transactional
     public void deleteSittingRecords(Long sittingRecordId) {
 
-        if(Idam role = ("Recorder"))(
-            if(sitting_record.status_id = ("recorded"))(
-
-                )
-        )else if(Idam role = ("Submitter"))(
-            if(sitting_record.status_id = ("recorded"))(
-            )
-            )else if(Idam role = ("Admin"))(
-
-            )else(
-                throw new RuntimeException("409");
-            )
-
+        if(Idam role = ("Recorder")){
+            if (sitting_record.status_id == ("recorded")) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
@@ -125,6 +114,41 @@ public class SittingRecordService {
 
                 sittingRecord.addStatusHistory(statusHistory);
                 sittingRecordRepository.save(sittingRecord);
+        } else {
+                throw new RuntimeException("409");
+            }
+        } else if (Idam role == ("Submitter")){
+            if (sitting_record.status_id = ("recorded")) {
+                StatusHistory statusHistory = StatusHistory.builder()
+                    .statusId(StatusId.DELETED.name())
+                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
+                    .changeByName(recordSittingRecordRequest.getRecordedByName())
+                    .build();
+
+                sittingRecord.addStatusHistory(statusHistory);
+                sittingRecordRepository.save(sittingRecord);
+            } else {
+                throw new RuntimeException("409");
+            }
+        } else if(Idam role == ("Admin")){
+            if(sitting_record.status_id = ("submitted")) {
+                StatusHistory statusHistory = StatusHistory.builder()
+                    .statusId(StatusId.DELETED.name())
+                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
+                    .changeByName(recordSittingRecordRequest.getRecordedByName())
+                    .build();
+
+                sittingRecord.addStatusHistory(statusHistory);
+                sittingRecordRepository.save(sittingRecord);
+            } else {
+                throw new RuntimeException("409");
+            }
+            } else {
+            throw new RuntimeException("409");
+        }
+
 
     }
 
