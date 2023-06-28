@@ -3,7 +3,9 @@ package uk.gov.hmcts.reform.jps.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
@@ -24,6 +26,7 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 @Service
 public class SittingRecordService {
     private final SittingRecordRepository sittingRecordRepository;
+    private final SecurityUtils securityUtils;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -101,9 +104,9 @@ public class SittingRecordService {
     }
 
     @Transactional
-    public void deleteSittingRecords(Long sittingRecordId, RecordSittingRecordRequest recordSittingRecordRequest) {
+    public void deleteSittingRecord(Long sittingRecordId) {
 
-        SittingRecord sittingRecord = getSittingRecord(sittingRecordId);
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = getSittingRecord(sittingRecordId);
         recordSittingRecordRequest.getRecordedSittingRecords();
 
         if(recordSittingRecordRequest.getRecordedByIdamId().equals("jps-recorder")) {
@@ -155,11 +158,11 @@ public class SittingRecordService {
 
     }
 
-    private SittingRecord getSittingRecord(Long sittingRecordId) {
-        Optional<SittingRecord> sittingRecordOptional = sittingRecordRepository.findById(sittingRecordId);
+    private uk.gov.hmcts.reform.jps.domain.SittingRecord getSittingRecord(Long sittingRecordId) {
+        Optional<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordOptional = sittingRecordRepository.findById(sittingRecordId);
 
         if (sittingRecordOptional.isEmpty()) {
-            throw new sittingRecordNotFoundException(sittingRecordId, SITTING_RECORD_ID_NOT_FOUND);
+            throw new ResourceNotFoundException(sittingRecordId, SITTING_RECORD_ID_NOT_FOUND);
         }
         return sittingRecordOptional.get();
     }

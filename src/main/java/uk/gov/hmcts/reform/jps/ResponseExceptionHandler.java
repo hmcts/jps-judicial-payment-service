@@ -108,6 +108,11 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return toResponseEntity(HttpStatus.UNAUTHORIZED, ex.getMessage());
     }
 
+    @ExceptionHandler(UnauthorisedException.class)
+    protected ResponseEntity<Object> ConflictException(UnauthorisedException ex) {
+        log.debug("BadRequestException:{}", ex.getLocalizedMessage());
+        return toResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
+    }
     @ExceptionHandler(FeignException.class)
     public ResponseEntity<Object> handleFeignStatusException(FeignException ex) {
         String errorMessage = ex.responseBody()
