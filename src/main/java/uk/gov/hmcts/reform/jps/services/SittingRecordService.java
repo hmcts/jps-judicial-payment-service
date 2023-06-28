@@ -110,7 +110,7 @@ public class SittingRecordService {
             if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
-                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changeDateTime(LocalDateTime.now())
                     .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
                     .build();
@@ -124,7 +124,7 @@ public class SittingRecordService {
             if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
-                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changeDateTime(LocalDateTime.now())
                     .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
                     .build();
@@ -138,7 +138,7 @@ public class SittingRecordService {
             if(sittingRecord.getStatusId().equals(StatusId.SUBMITTED)) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
-                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changeDateTime(LocalDateTime.now())
                     .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
                     .build();
