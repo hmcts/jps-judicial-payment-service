@@ -262,7 +262,8 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
     @Test
     void shouldThrowUnsupportedOperationExceptionWhenNextInvoked() {
-        assertThatThrownBy(() -> evaluateOverlapDuration.next(new EvaluateDuplicate()))
+        EvaluateDuplicate evaluateDuplicate = new EvaluateDuplicate();
+        assertThatThrownBy(() -> evaluateOverlapDuration.next(evaluateDuplicate))
             .isInstanceOf(UnsupportedOperationException.class);
     }
 }
