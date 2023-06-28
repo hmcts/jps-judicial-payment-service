@@ -6,6 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
+import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
+import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
@@ -53,6 +56,13 @@ class SittingRecoredServiceITest extends BaseTest {
     @Autowired
     private StatusHistoryRepository statusHistoryRepository;
     @Autowired
+    private EvaluateDuplicate evaluateDuplicate;
+    @Autowired
+    private EvaluateMatchingDuration evaluateMatchingDuration;
+    @Autowired
+    private EvaluateOverlapDuration evaluateOverlapDuration;
+
+    @Autowired
     private ObjectMapper objectMapper;
 
     private SittingRecordService sittingRecordService;
@@ -63,7 +73,9 @@ class SittingRecoredServiceITest extends BaseTest {
         sittingRecordRepository.deleteAll();
         sittingRecordService = new SittingRecordService(
             sittingRecordRepository,
-            statusHistoryRepository
+            evaluateDuplicate,
+            evaluateMatchingDuration,
+            evaluateOverlapDuration
         );
     }
 

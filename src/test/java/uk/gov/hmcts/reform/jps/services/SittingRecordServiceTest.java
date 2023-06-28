@@ -12,14 +12,15 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.util.Streamable;
-import org.testcontainers.shaded.com.google.common.base.Function;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
+import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
+import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
+import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields;
-import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -31,11 +32,9 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -44,7 +43,6 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -54,16 +52,11 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
-import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
-import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
-import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
-import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
-import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
-class SittingRecordServiceTest {
+class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
@@ -75,6 +68,13 @@ class SittingRecordServiceTest {
     @Mock
     private StatusHistoryRepository statusHistoryRepository;
 
+    @Mock
+    private EvaluateDuplicate evaluateDuplicate;
+    @Mock
+    private EvaluateMatchingDuration evaluateMatchingDuration;
+    @Mock
+    private EvaluateOverlapDuration evaluateOverlapDuration;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
@@ -82,27 +82,6 @@ class SittingRecordServiceTest {
 
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
-
-    private final Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
-        assertThat(sittingRecordWrappers)
-            .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(VALID, null, null),
-                      tuple(VALID, null, null),
-                      tuple(VALID, null, null));
-
-        verify(sittingRecordRepository, times(3))
-            .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-                isA(LocalDate.class),
-                isA(String.class),
-                isA(String.class),
-                eq(DELETED)
-            );
-
-        verify(statusHistoryRepository, never())
-            .findFirstBySittingRecord(
-                isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class),
-                eq(Sort.sort(StatusHistory.class).by(StatusHistory::getId).descending()));
-    };
 
     @BeforeEach
     void setUp() {
@@ -274,366 +253,60 @@ class SittingRecordServiceTest {
     }
 
     @Test
-    void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatch() throws IOException {
-        Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
-            assertThat(sittingRecordWrappers)
-                .extracting("errorCode", "createdByName", "statusId")
-                .contains(
-                    tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED)
-                );
-
-            assertThat(sittingRecordWrappers).describedAs("Created date assertion")
-                .allMatch(sittingRecordWrapper -> LocalDateTime.now().minusMinutes(5)
-                    .isBefore(sittingRecordWrapper.getCreatedDateTime()));
-
-            verify(sittingRecordRepository, times(3))
-                .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-                    isA(LocalDate.class),
-                    isA(String.class),
-                    isA(String.class),
-                    eq(DELETED)
-                );
-
-            verify(statusHistoryRepository, times(3))
-                .findFirstBySittingRecord(
-                    isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class),
-                    eq(Sort.sort(StatusHistory.class).by(StatusHistory::getId).descending()));
-        };
-
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate(),
-                                                    sittingRecordRequest.getEpimmsId(),
-                                                    sittingRecordRequest.getPersonalCode(),
-                                                    sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    "Tester",
-                                                    RECORDED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetInvalidDuplicateRecordWhenJudgeRoleTypeIdDoesntMatchAndStatusSubmitted() throws IOException {
-        Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
-            assertThat(sittingRecordWrappers)
-                .extracting("errorCode", "createdByName", "statusId")
-                .contains(
-                    tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED)
-                );
-
-            assertThat(sittingRecordWrappers).describedAs("Created date assertion")
-                .allMatch(sittingRecordWrapper -> LocalDateTime.now().minusMinutes(5)
-                    .isBefore(sittingRecordWrapper.getCreatedDateTime()));
-
-            verify(sittingRecordRepository, times(3))
-                .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-                    isA(LocalDate.class),
-                    isA(String.class),
-                    isA(String.class),
-                    eq(DELETED)
-                );
-
-            verify(statusHistoryRepository, times(3))
-                .findFirstBySittingRecord(
-                    isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class),
-                    eq(Sort.sort(StatusHistory.class).by(StatusHistory::getId).descending()));
-        };
-
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate(),
-                                                    sittingRecordRequest.getEpimmsId(),
-                                                    sittingRecordRequest.getPersonalCode(),
-                                                    sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    "Tester",
-                                                    SUBMITTED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetInvalidDuplicateRecordWhenStatusNotRecordedAndDurationIntersect() throws IOException {
-        Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
-            assertThat(sittingRecordWrappers)
-                .extracting("errorCode", "createdByName", "statusId")
-                .contains(
-                    tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(VALID, null, null)
-                );
-
-            verify(sittingRecordRepository, times(3))
-                .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-                    isA(LocalDate.class),
-                    isA(String.class),
-                    isA(String.class),
-                    eq(DELETED)
-                );
-        };
-
-        execute(sittingRecordRequest -> {
-            boolean am;
-            if (sittingRecordRequest.getDurationBoolean().getAm()
-                && sittingRecordRequest.getDurationBoolean().getPm()) {
-                am = false;
-            } else {
-                am = !sittingRecordRequest.getDurationBoolean().getAm();
-            }
-            return getDbRecord(sittingRecordRequest.getSittingDate(),
-                               sittingRecordRequest.getEpimmsId(),
-                               sittingRecordRequest.getPersonalCode(),
-                               am,
-                               sittingRecordRequest.getDurationBoolean().getPm(),
-                               sittingRecordRequest.getJudgeRoleTypeId(),
-                               SUBMITTED
-            );
-            },
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetPotentialDuplicateRecordWhenStatusRecordedDurationIntersect() throws IOException {
-        Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
-            assertThat(sittingRecordWrappers)
-                .extracting("errorCode", "createdByName", "statusId")
-                .contains(
-                    tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                    tuple(VALID, null, null)
-                );
-
-            verify(sittingRecordRepository, times(3))
-                .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-                    isA(LocalDate.class),
-                    isA(String.class),
-                    isA(String.class),
-                    eq(DELETED)
-                );
-        };
-
-        execute(sittingRecordRequest -> {
-            boolean am;
-            if (sittingRecordRequest.getDurationBoolean().getAm()
-                && sittingRecordRequest.getDurationBoolean().getPm()) {
-                am = false;
-            } else {
-                am = !sittingRecordRequest.getDurationBoolean().getAm();
-            }
-            return getDbRecord(sittingRecordRequest.getSittingDate(),
-                               sittingRecordRequest.getEpimmsId(),
-                               sittingRecordRequest.getPersonalCode(),
-                               am,
-                               sittingRecordRequest.getDurationBoolean().getPm(),
-                               sittingRecordRequest.getJudgeRoleTypeId(),
-                               RECORDED
-            );
-            },
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetValidWhenEpimmsIdDoentMatch() throws IOException {
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate(),
-                                                    "Test",
-                                                    sittingRecordRequest.getPersonalCode(),
-                                                    sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    sittingRecordRequest.getJudgeRoleTypeId(), RECORDED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetValidWhenPersonalCodeDontMatch() throws IOException {
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate(),
-                                                    sittingRecordRequest.getEpimmsId(),
-                                                    "tester",
-                                                    sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    sittingRecordRequest.getJudgeRoleTypeId(),
-                                                    RECORDED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetValidRecordWhenDurationDontMatch() throws IOException {
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate(),
-                                                    sittingRecordRequest.getEpimmsId(),
-                                                    sittingRecordRequest.getPersonalCode(),
-                                                    !sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    !sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    sittingRecordRequest.getJudgeRoleTypeId(),
-                                                    RECORDED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetValidRecordWhenSittingDateDontMatch() throws IOException {
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate().minusDays(100),
-                                                    sittingRecordRequest.getEpimmsId(),
-                                                    sittingRecordRequest.getPersonalCode(),
-                                                    sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    sittingRecordRequest.getJudgeRoleTypeId(),
-                                                    RECORDED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicate.json"
-        );
-    }
-
-    @Test
-    void shouldSetValidRecordWhenJudgeRoleTypeIdDoesntMatchWithReplaceDuplicateSetToTrue() throws IOException {
-
-        Consumer<List<SittingRecordWrapper>> assertions = sittingRecordWrappers -> {
-            assertThat(sittingRecordWrappers)
-                .extracting("errorCode", "createdByName", "statusId")
-                .contains(tuple(VALID, null, null),
-                          tuple(VALID, null, null),
-                          tuple(VALID, null, null)
-                );
-
-            verify(sittingRecordRepository, times(3))
-                .findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-                    isA(LocalDate.class),
-                    isA(String.class),
-                    isA(String.class),
-                    eq(DELETED)
-                );
-
-            verify(statusHistoryRepository, never())
-                .findFirstBySittingRecord(
-                    isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class),
-                    eq(Sort.sort(StatusHistory.class).by(StatusHistory::getId).descending()));
-        };
-
-        execute(sittingRecordRequest -> getDbRecord(sittingRecordRequest.getSittingDate(),
-                                                    sittingRecordRequest.getEpimmsId(),
-                                                    sittingRecordRequest.getPersonalCode(),
-                                                    sittingRecordRequest.getDurationBoolean().getAm(),
-                                                    sittingRecordRequest.getDurationBoolean().getPm(),
-                                                    "test",
-                                                    RECORDED
-                ),
-                assertions,
-                "recordSittingRecordsPotentialDuplicateReplaceDuplicate.json"
-        );
-
-    }
-
-    void execute(Function<SittingRecordRequest, SittingRecordDuplicateCheckFields> getDbRecord,
-                 Consumer<List<SittingRecordWrapper>> assertions, String resourceName) throws IOException {
-
-        String requestJson = Resources.toString(getResource(resourceName), UTF_8);
+    void shouldInvokeDuplicateCheckerWhenMatchingRecordsFoundInDb() throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
             RecordSittingRecordRequest.class
         );
 
-        List<SittingRecordDuplicateCheckFields> dbSittingRecordDuplicateCheckFields = getDbRecord(
-            recordSittingRecordRequest,
-            getDbRecord
+        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            sittingRecordRequest.getEpimmsId(),
+            sittingRecordRequest.getPersonalCode(),
+            sittingRecordRequest.getDurationBoolean().getAm(),
+            sittingRecordRequest.getDurationBoolean().getPm(),
+            "Tester",
+            RECORDED
         );
 
         when(sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
             any(), any(), any(), any())
-        ).thenReturn(Streamable.of(dbSittingRecordDuplicateCheckFields));
-
-        when(statusHistoryRepository.findFirstBySittingRecord(any(), any()))
-            .thenReturn(Optional.of(StatusHistory.builder()
-                                        .changeByName("Recorder")
-                                        .changeDateTime(LocalDateTime.now().minusSeconds(30))
-                                        .statusId(RECORDED)
-                                        .build()));
+        ).thenReturn(Streamable.of(List.of(sittingRecordDuplicateCheckFields)));
 
         List<SittingRecordWrapper> sittingRecordWrappers =
             recordSittingRecordRequest.getRecordedSittingRecords().stream()
                 .map(SittingRecordWrapper::new)
                 .toList();
 
-        sittingRecordWrappers
-            .forEach(sittingRecordRequest -> sittingRecordRequest.setRegionId("1"));
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        verify(evaluateDuplicate, times(3)).evaluate(any(), any());
+    }
+
+    @Test
+    void shouldNotInvokeDuplicateCheckerWhenNoMatchingRecordsFoundInDb() throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordDuplicateCheckFields> dbSittingRecordDuplicateCheckFields = Collections.emptyList();
+
+        when(sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+            any(), any(), any(), any())
+        ).thenReturn(Streamable.of(dbSittingRecordDuplicateCheckFields));
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
 
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
-        assertions.accept(sittingRecordWrappers);
-    }
-
-    private List<SittingRecordDuplicateCheckFields> getDbRecord(
-        RecordSittingRecordRequest recordSittingRecordRequest,
-        Function<SittingRecordRequest, SittingRecordDuplicateCheckFields> getSittingRecordFromDb) {
-
-        return recordSittingRecordRequest.getRecordedSittingRecords().stream()
-            .map(getSittingRecordFromDb::apply)
-            .toList();
-    }
-
-    private SittingRecordDuplicateCheckFields getDbRecord(LocalDate sittingDate,
-                                                          String epimmsId,
-                                                          String personalCode,
-                                                          Boolean am,
-                                                          Boolean pm,
-                                                          String judgeRoleTypeId,
-                                                          final StatusId statusId) {
-        return new SittingRecordDuplicateCheckFields() {
-
-            @Override
-            public Long getId() {
-                return new Random().nextLong();
-            }
-
-            @Override
-            public LocalDate getSittingDate() {
-                return sittingDate;
-            }
-
-            @Override
-            public String getEpimmsId() {
-                return epimmsId;
-            }
-
-            @Override
-            public String getPersonalCode() {
-                return personalCode;
-            }
-
-            @Override
-            public Boolean getAm() {
-                return am;
-            }
-
-            @Override
-            public Boolean getPm() {
-                return pm;
-            }
-
-            @Override
-            public StatusId getStatusId() {
-                return statusId;
-            }
-
-            @Override
-            public String getJudgeRoleTypeId() {
-                return judgeRoleTypeId;
-            }
-        };
+        verify(evaluateDuplicate, never()).evaluate(any(), any());
     }
 }
