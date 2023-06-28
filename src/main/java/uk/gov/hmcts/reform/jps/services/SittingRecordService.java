@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -90,7 +91,6 @@ public class SittingRecordService {
                         .build();
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
-
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.RECORDED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
@@ -107,64 +107,57 @@ public class SittingRecordService {
     public void deleteSittingRecord(Long sittingRecordId) {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = getSittingRecord(sittingRecordId);
-        recordSittingRecordRequest.getRecordedSittingRecords();
-
-        if(recordSittingRecordRequest.getRecordedByIdamId().equals("jps-recorder")) {
+        if(securityUtils.getUserInfo().getRoles().equals("jps-recorder")) {
             if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
-                StatusHistory statusHistory = StatusHistory.builder()
-                    .statusId(StatusId.DELETED.name())
-                    .changeDateTime(LocalDateTime.now())
-                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
-                    .changeByName(recordSittingRecordRequest.getRecordedByName())
-                    .build();
+                if(securityUtils.getUserInfo().getUid().equals(sittingRecord.getChangeByUserId())) {
+                    returnDeletedRecord(sittingRecord);
 
-                sittingRecord.addStatusHistory(statusHistory);
-                sittingRecordRepository.save(sittingRecord);
+                } else {
+                    throw new ResourceNotFoundException("User IDAM ID does not match the oldest Changed by IDAM ID ");
+
+                }
         } else {
-                throw new RuntimeException("409");
+                throw new ConflictException("Sitting Record Status ID is in wrong state");
             }
-        } else if (recordSittingRecordRequest.getRecordedByIdamId().equals("jps-submitter")) {
+        } else if (securityUtils.getUserInfo().getRoles().equals("jps-submitter")) {
             if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
-                StatusHistory statusHistory = StatusHistory.builder()
-                    .statusId(StatusId.DELETED.name())
-                    .changeDateTime(LocalDateTime.now())
-                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
-                    .changeByName(recordSittingRecordRequest.getRecordedByName())
-                    .build();
+                returnDeletedRecord(sittingRecord);
 
-                sittingRecord.addStatusHistory(statusHistory);
-                sittingRecordRepository.save(sittingRecord);
             } else {
-                throw new RuntimeException("409");
+                throw new ConflictException("Sitting Record Status ID is in wrong state");
             }
-        } else if(recordSittingRecordRequest.getRecordedByIdamId().equals("jps-admin")) {
+        } else if(securityUtils.getUserInfo().getRoles().equals("jps-admin")) {
             if(sittingRecord.getStatusId().equals(StatusId.SUBMITTED)) {
-                StatusHistory statusHistory = StatusHistory.builder()
-                    .statusId(StatusId.DELETED.name())
-                    .changeDateTime(LocalDateTime.now())
-                    .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
-                    .changeByName(recordSittingRecordRequest.getRecordedByName())
-                    .build();
+                returnDeletedRecord(sittingRecord);
 
-                sittingRecord.addStatusHistory(statusHistory);
-                sittingRecordRepository.save(sittingRecord);
             } else {
-                throw new RuntimeException("409");
+                throw new ConflictException("Sitting Record Status ID is in wrong state");
             }
             } else {
-            throw new RuntimeException("409");
+            throw new ConflictException("Incorrect IDAM Role");
         }
 
+    }
 
+    private void returnDeletedRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord){
+        StatusHistory statusHistory = StatusHistory.builder()
+            .statusId(StatusId.DELETED.name())
+            .changeDateTime(LocalDateTime.now())
+            .changeByUserId(securityUtils.getUserInfo().getUid())
+            .changeByName(securityUtils.getUserInfo().getName())
+            .build();
+
+        sittingRecord.addStatusHistory(statusHistory);
+        sittingRecordRepository.save(sittingRecord);
     }
 
     private uk.gov.hmcts.reform.jps.domain.SittingRecord getSittingRecord(Long sittingRecordId) {
         Optional<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordOptional = sittingRecordRepository.findById(sittingRecordId);
 
         if (sittingRecordOptional.isEmpty()) {
-            throw new ResourceNotFoundException(sittingRecordId, SITTING_RECORD_ID_NOT_FOUND);
+            throw new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND");
         }
         return sittingRecordOptional.get();
     }
 }
-}
+
