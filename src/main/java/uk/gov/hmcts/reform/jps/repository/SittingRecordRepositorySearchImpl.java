@@ -56,7 +56,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         predicates.add(criteriaBuilder.between(sittingRecord.get(SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
-        LOGGER.debug("dateRange: {} - {}", recordSearchRequest.getDateRangeFrom(), recordSearchRequest.getDateRangeTo());
+        LOGGER.debug("dateRange: {} - {}", recordSearchRequest.getDateRangeFrom(),
+                     recordSearchRequest.getDateRangeTo());
 
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
