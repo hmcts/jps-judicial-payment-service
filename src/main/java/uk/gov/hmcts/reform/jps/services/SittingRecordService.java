@@ -101,10 +101,13 @@ public class SittingRecordService {
     }
 
     @Transactional
-    public void deleteSittingRecords(Long sittingRecordId) {
+    public void deleteSittingRecords(Long sittingRecordId, RecordSittingRecordRequest recordSittingRecordRequest) {
 
-        if(Idam role = ("Recorder")){
-            if (sitting_record.status_id == ("recorded")) {
+        SittingRecord sittingRecord = getSittingRecord(sittingRecordId);
+        recordSittingRecordRequest.getRecordedSittingRecords()
+
+        if(recordSittingRecordRequest.getRecordedByIdamId().equals("jps-recorder")) {
+            if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
@@ -117,8 +120,8 @@ public class SittingRecordService {
         } else {
                 throw new RuntimeException("409");
             }
-        } else if (Idam role == ("Submitter")){
-            if (sitting_record.status_id = ("recorded")) {
+        } else if (recordSittingRecordRequest.getRecordedByIdamId().equals("jps-submitter")) {
+            if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
@@ -131,8 +134,8 @@ public class SittingRecordService {
             } else {
                 throw new RuntimeException("409");
             }
-        } else if(Idam role == ("Admin")){
-            if(sitting_record.status_id = ("submitted")) {
+        } else if(recordSittingRecordRequest.getRecordedByIdamId().equals("jps-admin")) {
+            if(sittingRecord.getStatusId().equals(StatusId.SUBMITTED)) {
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.DELETED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
@@ -156,7 +159,7 @@ public class SittingRecordService {
         Optional<SittingRecord> sittingRecordOptional = sittingRecordRepository.findById(sittingRecordId);
 
         if (sittingRecordOptional.isEmpty()) {
-            throw new sittingRecordyNotFoundException(sittingRecordId, HEARING_ACTUALS_ID_NOT_FOUND);
+            throw new sittingRecordNotFoundException(sittingRecordId, SITTING_RECORD_ID_NOT_FOUND);
         }
         return sittingRecordOptional.get();
     }
