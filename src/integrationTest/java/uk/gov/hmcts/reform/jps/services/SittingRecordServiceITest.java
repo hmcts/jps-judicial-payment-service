@@ -67,6 +67,11 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
     private static final String STATUS_ID_FIXED = "RECORDED";
 
+    private static final String REGION_ID_FIXED = "1";
+    private static final String EPIMS_ID_FIXED = "852649";
+    private static final String PERSONAL_CODE_FIXED = "4918178";
+    private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
+
     @BeforeEach
     void beforeEach() {
         sittingRecordRepository.deleteAll();
@@ -192,9 +197,12 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(response).hasSize(2);
         LOGGER.debug("response: {}", response);
+        LOGGER.debug("response[0].statusHistories: {}", response.get(0).getStatusHistories());
+        LOGGER.debug("response[1].statusHistories: {}", response.get(1).getStatusHistories());
+
         assertThat(response)
             .as("Extracting unique value by status")
-            .extracting(CONTRACT_TYPE_ID, STATUS)
+            .extracting(SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.STATUS_ID)
             .contains(
                 tuple(21L, STATUS_ID_FIXED),
                 tuple(22L, STATUS_ID_FIXED)
@@ -202,14 +210,14 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(response.get(0).getStatusHistories())
             .as("Extracting change by user")
-            .extracting(CHANGE_BY_USER_ID, STATUS)
+            .extracting(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.STATUS_ID)
             .contains(
                 tuple(USER_ID, STATUS_ID_FIXED)
             );
 
         assertThat(response.get(1).getStatusHistories())
             .as("Extracting change by user")
-            .extracting(CHANGE_BY_USER_ID, STATUS)
+            .extracting(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.STATUS_ID)
             .contains(
                 tuple(USER_ID, STATUS_ID_FIXED)
             );
@@ -259,9 +267,12 @@ class SittingRecordServiceITest extends BaseTest {
                         "am", "pm", "statusId", "hmctsServiceId"
             )
             .contains(
-                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true, STATUS_ID_FIXED, SSC_ID),
-                tuple(of(2023, APRIL, 10), "1", "852649", "4918178", "Judge", 1L, true, false, STATUS_ID_FIXED, SSC_ID),
-                tuple(of(2023, MARCH, 9), "1", "852649", "4918178", "Judge", 1L, true, true, STATUS_ID_FIXED, SSC_ID)
+                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, SSC_ID),
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, SSC_ID),
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, SSC_ID)
             );
 
         List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
@@ -385,13 +396,12 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     private StatusHistory createStatusHistory(String statusId, String userId, String userName) {
-        StatusHistory statusHistory = StatusHistory.builder()
+        return StatusHistory.builder()
             .statusId(statusId)
             .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByUserId(userId)
             .changeByName(userName)
             .build();
-        return statusHistory;
     }
 
     private void createMultipleRecords(int count) {

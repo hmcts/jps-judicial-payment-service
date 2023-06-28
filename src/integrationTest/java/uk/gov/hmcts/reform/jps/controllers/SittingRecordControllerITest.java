@@ -34,9 +34,11 @@ class SittingRecordControllerITest extends BaseTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
+    private static final String SEARCH_SITTING_RECORDS_JSON = "searchSittingRecords.json";
+
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
@@ -71,7 +73,7 @@ class SittingRecordControllerITest extends BaseTest {
         assertThat(persistedSittingRecord.getId()).isNotNull();
         assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
 
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "BBA3")
@@ -102,7 +104,7 @@ class SittingRecordControllerITest extends BaseTest {
 
     @Test
     void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords")
