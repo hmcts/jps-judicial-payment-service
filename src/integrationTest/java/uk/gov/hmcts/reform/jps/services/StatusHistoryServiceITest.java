@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static java.time.Month.JUNE;
