@@ -104,7 +104,7 @@ public class SittingRecordService {
     public void deleteSittingRecords(Long sittingRecordId, RecordSittingRecordRequest recordSittingRecordRequest) {
 
         SittingRecord sittingRecord = getSittingRecord(sittingRecordId);
-        recordSittingRecordRequest.getRecordedSittingRecords()
+        recordSittingRecordRequest.getRecordedSittingRecords();
 
         if(recordSittingRecordRequest.getRecordedByIdamId().equals("jps-recorder")) {
             if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
