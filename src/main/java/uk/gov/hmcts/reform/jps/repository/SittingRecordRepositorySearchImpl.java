@@ -34,51 +34,34 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     @PersistenceContext
     private EntityManager entityManager;
 
-    private static final String SITTING_DATE = "sittingDate";
-
-    private <T,V> void updateCriteriaQuery(
+    @SuppressWarnings("unchecked")
+    private void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
         CriteriaBuilder criteriaBuilder,
-        CriteriaQuery<T> criteriaQuery,
-        Root<V> sittingRecord,
+        CriteriaQuery criteriaQuery,
+        Root<SittingRecord> sittingRecord,
         Consumer<List<Predicate>> predicateConsumer) {
-
-        LOGGER.debug("updateCriteriaQuery(?): ...");
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
-        LOGGER.debug("hmctsServiceId: {}", hmctsServiceCode);
         predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
-        LOGGER.debug("regionId: {}", recordSearchRequest.getRegionId());
         predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
-        LOGGER.debug("epimsId: {}", recordSearchRequest.getEpimsId());
-        predicates.add(criteriaBuilder.between(sittingRecord.get(SITTING_DATE),
+        predicates.add(criteriaBuilder.between(sittingRecord.get(SittingRecord_.SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
-        LOGGER.debug("dateRange: {} - {}", recordSearchRequest.getDateRangeFrom(),
-                     recordSearchRequest.getDateRangeTo());
 
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get(SittingRecord_.PERSONAL_CODE), value)));
-        if (Optional.ofNullable(recordSearchRequest.getPersonalCode()).isPresent()) {
-            LOGGER.debug("{}: {}", SittingRecord_.PERSONAL_CODE, recordSearchRequest.getPersonalCode());
-        }
 
         Optional.ofNullable(recordSearchRequest.getJudgeRoleTypeId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get(SittingRecord_.JUDGE_ROLE_TYPE_ID), value)));
-        if (Optional.ofNullable(recordSearchRequest.getJudgeRoleTypeId()).isPresent()) {
-            LOGGER.debug("{}: {}", SittingRecord_.JUDGE_ROLE_TYPE_ID, recordSearchRequest.getJudgeRoleTypeId());
-        }
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get("statusId"), value.name())));
-        if (Optional.ofNullable(recordSearchRequest.getStatusId()).isPresent()) {
-            LOGGER.debug("{}: {}", SittingRecord_.STATUS_ID, recordSearchRequest.getStatusId());
-        }
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
@@ -95,19 +78,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             }
         }
 
-        if (null == recordSearchRequest.getCreatedByUserId() || recordSearchRequest.getCreatedByUserId().isEmpty()) {
-            Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
-                sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
-
-            predicates.add(criteriaBuilder.equal(
-                sittingRecord.get(SittingRecord_.ID),
-                joinStatusHistory.get(StatusHistory_.ID)
-            ));
-        }
+        addJoinCriteria(recordSearchRequest, criteriaBuilder, criteriaQuery,sittingRecord);
 
         predicateConsumer.accept(predicates);
-
-
 
         Predicate[] predicatesArray = new Predicate[predicates.size()];
         criteriaQuery.where(criteriaBuilder.and(predicates.toArray(predicatesArray)));
@@ -133,15 +106,13 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             predicates -> {
                 if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
                     LOGGER.debug("DateOrder: {}", DateOrder.ASCENDING);
-                    cq.orderBy(cb.asc(root.get(SITTING_DATE)));
+                    cq.orderBy(cb.asc(root.get(SittingRecord_.SITTING_DATE)));
                 } else {
                     LOGGER.debug("DateOrder: {}", DateOrder.DESCENDING);
-                    cq.orderBy(cb.desc(root.get(SITTING_DATE)));
+                    cq.orderBy(cb.desc(root.get(SittingRecord_.SITTING_DATE)));
                 }
             }
         );
-
-        checkUserIdSelection(recordSearchRequest, cb, cq, root);
 
         TypedQuery<SittingRecord> typedQuery = entityManager.createQuery(cq)
             .setMaxResults(recordSearchRequest.getPageSize())
@@ -169,43 +140,37 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                             predicates -> { }
         );
 
-        checkUserIdSelection(recordSearchRequest, criteriaBuilder, criteriaQuery, sittingRecord);
-
         return entityManager.createQuery(criteriaQuery).getSingleResult().intValue();
     }
 
-    public void checkUserIdSelection(SittingRecordSearchRequest recordSearchRequest, CriteriaBuilder cb,
-                                        CriteriaQuery cq, Root<SittingRecord> root) {
-
-        if (null != recordSearchRequest.getCreatedByUserId() && !recordSearchRequest.getCreatedByUserId().isEmpty()) {
-            addChangeByUserIdCriteria(recordSearchRequest.getCreatedByUserId(), cb, cq, root);
-        }
-    }
-
     @SuppressWarnings("unchecked")
-    public void addChangeByUserIdCriteria(String value,
-                                          CriteriaBuilder cb,
-                                          CriteriaQuery cq,
-                                          Root<SittingRecord> rootSR) {
-
-        LOGGER.debug("addChangeByUserIdCriteria((?): ...");
-
-        // @Query("select sh.changeByUserId from SittingRecord sr inner join StatusHistory sh
-        // on sh.sittingRecord.id = sr.id where sh.id = (select min(sh2.id) from StatusHistory sh2
-        // where sh2.sittingRecord.id = :id)")
-
-        LOGGER.debug("Change By UserId: {}", value);
+    public void addJoinCriteria(SittingRecordSearchRequest recordSearchRequest,
+                                          CriteriaBuilder criteriaBuilder,
+                                          CriteriaQuery criteriaQuery,
+                                          Root<SittingRecord> sittingRecord) {
 
         Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
-            rootSR.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
+            sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
 
-        cq.groupBy(rootSR.get(SittingRecord_.id), joinStatusHistory.get(StatusHistory_.ID),
-                   joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
-            .having(cb.equal(cb.min(joinStatusHistory.get(StatusHistory_.ID)),
-                             joinStatusHistory.get(StatusHistory_.ID)),
-                    cb.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID), value));
+        if (null != recordSearchRequest.getCreatedByUserId() && !recordSearchRequest.getCreatedByUserId().isEmpty()) {
 
-        LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id");
+            criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
+                                  joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
+                .having(criteriaBuilder.equal(criteriaBuilder.min(joinStatusHistory.get(StatusHistory_.ID)),
+                                              joinStatusHistory.get(StatusHistory_.ID)),
+                        criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID),
+                                              recordSearchRequest.getCreatedByUserId()));
+
+            LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id and selected created by user");
+
+        } else {
+
+            criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID))
+                .having(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.ID),
+                                              joinStatusHistory.get(StatusHistory_.SITTING_RECORD))); // ??
+            LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id");
+        }
+
 
     }
 
