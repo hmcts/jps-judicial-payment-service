@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -64,6 +66,8 @@ class SittingRecordControllerTest {
     private JudicialUserDetailsService judicialUserDetailsService;
     @MockBean
     private CaseWorkerService caseWorkerService;
+
+    private static final String RECORDED = "RECORDED";
 
 
     @Test
@@ -143,15 +147,34 @@ class SittingRecordControllerTest {
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        ))
-            .thenReturn(2);
+        )).thenReturn(2);
+
+        SittingRecord sittingRecord1 = SittingRecord.builder()
+            .sittingRecordId(1)
+            .statusId(RECORDED)
+            .build();
+        StatusHistory statusHistory1 = StatusHistory.builder()
+            .statusId(RECORDED)
+            .changeByUserId("11233")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Jason Bourne")
+            .build();
+        sittingRecord1.setStatusHistories(List.of(statusHistory1));
+
+        SittingRecord sittingRecord2 = SittingRecord.builder()
+            .sittingRecordId(2)
+            .statusId(RECORDED)
+            .build();
+        StatusHistory statusHistory2 = StatusHistory.builder()
+            .statusId(RECORDED)
+            .changeByUserId("11244")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Matt Murdock")
+            .build();
+        sittingRecord2.setStatusHistories(List.of(statusHistory2));
+
         List<SittingRecord> sittingRecords = List.of(
-            SittingRecord.builder()
-                .sittingRecordId(1)
-                .build(),
-            SittingRecord.builder()
-                .sittingRecordId(12)
-                .build()
+            sittingRecord1, sittingRecord2
         );
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords
@@ -188,6 +211,7 @@ class SittingRecordControllerTest {
             eq(SSCS)
         ))
             .thenReturn(2);
+
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords

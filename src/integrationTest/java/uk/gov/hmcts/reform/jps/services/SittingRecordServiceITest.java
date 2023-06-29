@@ -51,11 +51,6 @@ class SittingRecordServiceITest extends BaseTest {
 
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
-    public static final String CONTRACT_TYPE_ID = "contractTypeId";
-    public static final String CHANGE_BY_USER_ID = "changeByUserId";
-    public static final String STATUS = "statusId";
-    public static final String CREATED_BY_USER_ID = "createdByUserId";
-
     private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
@@ -66,7 +61,6 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String USER_NAME_FIXED = "Recorder";
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
     private static final String STATUS_ID_FIXED = "RECORDED";
-
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMS_ID_FIXED = "852649";
     private static final String PERSONAL_CODE_FIXED = "4918178";
@@ -162,7 +156,7 @@ class SittingRecordServiceITest extends BaseTest {
         assertThat(response).hasSize(5);
 
         assertThat(response)
-            .extracting(CONTRACT_TYPE_ID, CREATED_BY_USER_ID)
+            .extracting(SittingRecord_.CONTRACT_TYPE_ID, StatusHistory_.CHANGE_BY_USER_ID)
             .contains(
                 tuple(11L, USER_ID),
                 tuple(12L, USER_ID),
@@ -171,7 +165,6 @@ class SittingRecordServiceITest extends BaseTest {
                 tuple(15L, USER_ID)
             );
     }
-
 
     @Test
     void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
@@ -263,8 +256,10 @@ class SittingRecordServiceITest extends BaseTest {
         List<SittingRecord> savedSittingRecords = sittingRecordRepository.findAll();
 
         assertThat(savedSittingRecords)
-            .extracting("sittingDate", "regionId", "epimsId", "personalCode", "judgeRoleTypeId", CONTRACT_TYPE_ID,
-                        "am", "pm", "statusId", "hmctsServiceId"
+            .extracting(SittingRecord_.SITTING_DATE, SittingRecord_.REGION_ID, SittingRecord_.EPIMS_ID,
+                        SittingRecord_.PERSONAL_CODE, SittingRecord_.JUDGE_ROLE_TYPE_ID,
+                        SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM,
+                        SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
                 tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
@@ -277,7 +272,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
         assertThat(statusHistories)
-            .extracting("statusId", "changeByUserId", "changeByName")
+            .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.CHANGE_BY_NAME)
             .contains(
                 tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
                 tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
@@ -298,12 +293,10 @@ class SittingRecordServiceITest extends BaseTest {
         StatusHistory statusHistorySubmitted1 = createStatusHistory("SUBMITTED", USER_ID_ALTERNATE,
                                                                     USER_NAME_ALTERNATE);
         sittingRecord.addStatusHistory(statusHistorySubmitted1);
-        LOGGER.debug("statusHistorySubmitted1:{}", statusHistorySubmitted1);
 
         StatusHistory statusHistoryDeleted1 = createStatusHistory("DELETED", USER_ID_ALTERNATE,
                                                                  USER_NAME_ALTERNATE);
         sittingRecord.addStatusHistory(statusHistoryDeleted1);
-        LOGGER.debug("statusHistoryDeleted1:{}", statusHistoryDeleted1);
 
         SittingRecord sittingRecord2 = createAndSaveSittingRecord(STATUS_ID_FIXED,2L, USER_ID_2, USER_NAME_2);
         assertThat(sittingRecord2).isNotNull();
@@ -318,7 +311,6 @@ class SittingRecordServiceITest extends BaseTest {
 
         StatusHistory statusHistorySubmitted3 = createStatusHistory("SUBMITTED", USER_ID, USER_NAME);
         sittingRecord3.addStatusHistory(statusHistorySubmitted3);
-        LOGGER.debug("statusHistorySubmitted3:{}", statusHistorySubmitted3);
 
         int recordCount = 22;
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
@@ -344,7 +336,6 @@ class SittingRecordServiceITest extends BaseTest {
 
         LOGGER.debug("expected:{}", sittingRecord);
         LOGGER.debug("actual:{}", actual);
-
 
         assertSittingRecordEqualsExpected(sittingRecord, actual);
         assertStatusHistoriesEqualsExpected(statusHistoryCreated1, actual.getStatusHistories().get(0));
