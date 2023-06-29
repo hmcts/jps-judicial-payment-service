@@ -44,9 +44,11 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         Consumer<List<Predicate>> predicateConsumer) {
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.REGION_ID),
+                                             recordSearchRequest.getRegionId()));
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.EPIMS_ID),
+                                             recordSearchRequest.getEpimsId()));
         predicates.add(criteriaBuilder.between(sittingRecord.get(SittingRecord_.SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
@@ -124,7 +126,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     @Override
     public int totalRecords(SittingRecordSearchRequest recordSearchRequest,
                             String hmctsServiceCode) {
-        LOGGER.debug("totalRecords(?): ...");
 
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -149,11 +150,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                           CriteriaQuery criteriaQuery,
                                           Root<SittingRecord> sittingRecord) {
 
-
-
         if (null != recordSearchRequest.getCreatedByUserId() && !recordSearchRequest.getCreatedByUserId().isEmpty()) {
-            Join<Object, Object> joinStatusHistory = (Join<Object, Object>)
-                sittingRecord.fetch(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
+            Join<Object, Object> joinStatusHistory =
+                sittingRecord.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
 
             criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
                                   joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
@@ -165,13 +164,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id and selected created by user");
 
         }
-        //else {
-        //
-        //    criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID))
-        //        .having(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.ID),
-        //                                      joinStatusHistory.get(StatusHistory_.SITTING_RECORD))); // ??
-        //    LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id");
-        //}
 
     }
 

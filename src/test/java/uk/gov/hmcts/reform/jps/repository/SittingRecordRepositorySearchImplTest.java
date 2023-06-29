@@ -22,6 +22,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Root;
 
@@ -53,11 +55,15 @@ class SittingRecordRepositorySearchImplTest {
     @Mock
     private Root<SittingRecord> sittingRecord;
     @Mock
+    private Join<Object, Object> joinStatusHistory;
+    @Mock
     private TypedQuery<SittingRecord> typedQuery;
     @Mock
     private TypedQuery<Long> longTypedQuery;
     @Mock
     SingularAttributePath<String> attributePath;
+    @Mock
+    SingularAttributePath<Long> idPath;
     @Mock
     OrderImpl orderImpl;
     @Captor
@@ -79,8 +85,6 @@ class SittingRecordRepositorySearchImplTest {
         setPredicate(SittingRecord_.AM, true);
         setPredicate(SittingRecord_.PM, true);
         setPredicate(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.CHANGE_BY_USER_ID);
-
-        setPredicate(SittingRecord_.STATUS_HISTORIES, SittingRecord_.STATUS_HISTORIES);
 
         when(orderImpl.isAscending()).thenReturn(true);
         when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
@@ -171,7 +175,6 @@ class SittingRecordRepositorySearchImplTest {
         setPredicate(SittingRecord_.EPIMS_ID, SittingRecord_.EPIMS_ID);
         setPredicate(SittingRecord_.PM, true);
 
-        when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class)))
             .thenReturn(mock(ComparisonPredicate.class));
 
@@ -222,6 +225,10 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class)))
             .thenReturn(mock(ComparisonPredicate.class));
+        when(sittingRecord.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER))
+            .thenReturn(joinStatusHistory);
+        when(joinStatusHistory.<Long>get(StatusHistory_.ID)).thenReturn(idPath);
+        //when(joinStatusHistory.<String>get(StatusHistory_.CHANGE_BY_USER_ID)).thenReturn("12345");
 
         setPredicate(SittingRecord_.HMCTS_SERVICE_ID, SSCS);
         setPredicate(SittingRecord_.REGION_ID, SittingRecord_.REGION_ID);
@@ -231,7 +238,7 @@ class SittingRecordRepositorySearchImplTest {
         setPredicate(SittingRecord_.STATUS_ID, RECORDED.name());
         setPredicate(SittingRecord_.AM, true);
         setPredicate(SittingRecord_.PM, true);
-        setPredicate(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.CHANGE_BY_USER_ID);
+        //setPredicate(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.CHANGE_BY_USER_ID);
 
         int totalRecords = sittingRecordRepositorySearch.totalRecords(
             SittingRecordSearchRequest.builder()
@@ -280,6 +287,7 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class)))
             .thenReturn(mock(ComparisonPredicate.class));
 
+        setPredicate(SittingRecord_.ID, SittingRecord_.ID);
         setPredicate(SittingRecord_.HMCTS_SERVICE_ID, SSCS);
         setPredicate(SittingRecord_.REGION_ID, SittingRecord_.REGION_ID);
         setPredicate(SittingRecord_.EPIMS_ID, SittingRecord_.EPIMS_ID);
@@ -328,15 +336,16 @@ class SittingRecordRepositorySearchImplTest {
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(SittingRecord.class)).thenReturn(criteriaQuery);
         when(criteriaQuery.from(SittingRecord.class)).thenReturn(sittingRecord);
+        //when(criteriaQuery..from(SittingRecord.class)).thenReturn(sittingRecord);
+
         when(entityManager.createQuery(criteriaQuery)).thenReturn(typedQuery);
         when(typedQuery.setMaxResults(PAGE_SIZE)).thenReturn(typedQuery);
         when(typedQuery.setFirstResult(OFF_SET)).thenReturn(typedQuery);
-        //when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
     }
 
     private <T> void setPredicate(String key, T value) {
-        //when(sittingRecord.<String>get(key)).thenReturn(attributePath);
-        //when(criteriaBuilder.equal(attributePath, value)).thenReturn(mock(ComparisonPredicate.class));
+        when(sittingRecord.<String>get(key)).thenReturn(attributePath);
+        when(criteriaBuilder.equal(attributePath, value)).thenReturn(mock(ComparisonPredicate.class));
     }
 
 }
