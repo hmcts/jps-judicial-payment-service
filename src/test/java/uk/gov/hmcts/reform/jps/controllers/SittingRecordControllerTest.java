@@ -17,13 +17,13 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
-import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -64,11 +64,6 @@ class SittingRecordControllerTest {
     private LocationService regionService;
     @MockBean
     private JudicialUserDetailsService judicialUserDetailsService;
-    @MockBean
-    private CaseWorkerService caseWorkerService;
-
-    private static final String RECORDED = "RECORDED";
-
 
     @Test
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
@@ -151,10 +146,10 @@ class SittingRecordControllerTest {
 
         SittingRecord sittingRecord1 = SittingRecord.builder()
             .sittingRecordId(1)
-            .statusId(RECORDED)
+            .statusId(StatusId.RECORDED.name())
             .build();
         StatusHistory statusHistory1 = StatusHistory.builder()
-            .statusId(RECORDED)
+            .statusId(StatusId.RECORDED.name())
             .changeByUserId("11233")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Jason Bourne")
@@ -163,10 +158,10 @@ class SittingRecordControllerTest {
 
         SittingRecord sittingRecord2 = SittingRecord.builder()
             .sittingRecordId(2)
-            .statusId(RECORDED)
+            .statusId(StatusId.RECORDED.name())
             .build();
         StatusHistory statusHistory2 = StatusHistory.builder()
-            .statusId(RECORDED)
+            .statusId(StatusId.RECORDED.name())
             .changeByUserId("11244")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Matt Murdock")
@@ -199,7 +194,6 @@ class SittingRecordControllerTest {
 
         verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
     }
@@ -237,7 +231,5 @@ class SittingRecordControllerTest {
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
-
     }
 }
