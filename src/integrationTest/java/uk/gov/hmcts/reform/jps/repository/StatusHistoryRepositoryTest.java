@@ -38,7 +38,7 @@ class StatusHistoryRepositoryTest {
             .epimsId("123")
             .hmctsServiceId("ssc_id")
             .personalCode("001")
-            .contractTypeId(2L)
+            .contractTypeId("2L")
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now())

@@ -118,7 +118,7 @@ class SittingRecoredServiceITest extends BaseTest {
             .epimsId(EPIM_ID)
             .hmctsServiceId(SSC_ID)
             .personalCode("001")
-            .contractTypeId(counter)
+            .contractTypeId(Long.toString(counter))
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
@@ -193,11 +193,11 @@ class SittingRecoredServiceITest extends BaseTest {
         assertThat(response)
             .extracting(CONTRACT_TYPE_ID, CREATED_BY_USER_ID)
             .contains(
-                tuple(11L, USER_ID),
-                tuple(12L, USER_ID),
-                tuple(13L, USER_ID),
-                tuple(14L, USER_ID),
-                tuple(15L, USER_ID)
+                tuple("11", USER_ID),
+                tuple("12", USER_ID),
+                tuple("13", USER_ID),
+                tuple("14", USER_ID),
+                tuple("15", USER_ID)
             );
     }
 
@@ -230,8 +230,8 @@ class SittingRecoredServiceITest extends BaseTest {
             .as("Extracting unique value by user")
             .extracting(CONTRACT_TYPE_ID, CREATED_BY_USER_ID)
             .contains(
-                tuple(21L, USER_ID),
-                tuple(22L, USER_ID)
+                tuple("21", USER_ID),
+                tuple("22", USER_ID)
             );
     }
 
@@ -278,9 +278,12 @@ class SittingRecoredServiceITest extends BaseTest {
             .extracting("sittingDate","regionId",  "epimsId", "personalCode", "judgeRoleTypeId", "contractTypeId",
                         "am", "pm", "statusId", "hmctsServiceId")
             .contains(
-                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true, "RECORDED", "ssc_id"),
-                tuple(of(2023, APRIL,10), "1", "852649", "4918178", "Judge", 1L, true, false, "RECORDED", "ssc_id"),
-                tuple(of(2023, MARCH,9), "1", "852649", "4918178", "Judge", 1L, true, true, "RECORDED", "ssc_id")
+                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", "1L", false, true,
+                      "RECORDED", "ssc_id"),
+                tuple(of(2023, APRIL,10), "1", "852649", "4918178", "Judge", "1L", true, false,
+                      "RECORDED", "ssc_id"),
+                tuple(of(2023, MARCH,9), "1", "852649", "4918178", "Judge", "1L", true, true,
+                      "RECORDED", "ssc_id")
             );
 
         List<StatusHistory> statusHistories = statusHistoryRepository.findAll();

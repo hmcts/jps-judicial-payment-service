@@ -61,7 +61,7 @@ class SittingRecordControllerITest extends BaseTest {
             .epimsId("123")
             .hmctsServiceId("BBA3")
             .personalCode("4923421")
-            .contractTypeId(2L)
+            .contractTypeId("2L")
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .build();

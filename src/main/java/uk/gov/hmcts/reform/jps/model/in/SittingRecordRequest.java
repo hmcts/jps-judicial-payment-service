@@ -35,7 +35,7 @@ public class SittingRecordRequest implements Serializable {
     private final String personalCode;
 
     @NotNull(message = "Contract Type Id  is mandatory")
-    private final Long contractTypeId;
+    private final String contractTypeId;
 
     @NotBlank(message = "Judge Role Type Id is mandatory")
     private final String judgeRoleTypeId;

@@ -6,7 +6,7 @@
     "epimsId": "852649",
     "personalCode": "4918178",
     "judgeRoleTypeId": "Judge",
-    "contractTypeId": 1,
+    "contractTypeId": "1L",
     "pm": true,
     "statusId": "RECORDED",
     "hmctsServiceId": "ssc_id"
@@ -18,7 +18,7 @@
     "epimsId": "517400",
     "personalCode": "4918178",
     "judgeRoleTypeId": "Judge",
-    "contractTypeId": 1,
+    "contractTypeId": "1L",
     "am": true,
     "statusId": "RECORDED",
     "hmctsServiceId": "ssc_id"
@@ -30,7 +30,7 @@
     "epimsId": "517400",
     "personalCode": "4918178",
     "judgeRoleTypeId": "Judge",
-    "contractTypeId": 1,
+    "contractTypeId": "1L",
     "am": true,
     "pm": true,
     "statusId": "RECORDED",

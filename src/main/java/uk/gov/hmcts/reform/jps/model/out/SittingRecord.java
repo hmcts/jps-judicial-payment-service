@@ -22,7 +22,7 @@ public class SittingRecord {
     private String hmctsServiceId;
     private String personalCode;
     private String personalName;
-    private Long contractTypeId;
+    private String contractTypeId;
     private String judgeRoleTypeId;
     private String am;
     private String pm;

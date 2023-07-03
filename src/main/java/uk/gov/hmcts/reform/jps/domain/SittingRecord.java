@@ -52,7 +52,7 @@ public class SittingRecord {
     private String personalCode;
 
     @Column(name = "contract_type_id")
-    private Long contractTypeId;
+    private String contractTypeId;
 
     @Column(name = "judge_role_type_id")
     private String judgeRoleTypeId;
