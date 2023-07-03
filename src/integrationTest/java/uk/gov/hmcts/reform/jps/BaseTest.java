@@ -42,6 +42,11 @@ public class BaseTest {
     @Mock
     protected Authentication authentication;
 
+    public static final String DELETE_SITTING_RECORD_STATUS_HISTORY
+        = "classpath:sql/delete_sitting_record_status_history.sql";
+    public static final String ADD_SITTING_RECORD_STATUS_HISTORY
+        = "classpath:sql/add_sitting_record_status_history.sql";
+
     @BeforeEach
     void init() {
         final String hostUrl = "http://localhost:" + wiremockPort;

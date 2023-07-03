@@ -28,6 +28,10 @@ import javax.persistence.Table;
 @Table(name = "sitting_record")
 public class SittingRecord {
 
+    public SittingRecord(Long id) {
+        this.id = id;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sitting_record_ID")

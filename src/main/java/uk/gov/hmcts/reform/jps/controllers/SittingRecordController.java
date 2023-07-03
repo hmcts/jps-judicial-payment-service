@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +34,6 @@ import static org.springframework.http.ResponseEntity.ok;
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class SittingRecordController {
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
