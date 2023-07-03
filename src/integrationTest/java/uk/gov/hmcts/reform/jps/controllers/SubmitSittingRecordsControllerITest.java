@@ -42,6 +42,7 @@ class SubmitSittingRecordsControllerITest {
                             .content(requestJson))
             .andDo(print())
             .andExpectAll(
+                status().isOk(),
                 jsonPath("$.recordsSubmitted").value(1)
             );
     }
