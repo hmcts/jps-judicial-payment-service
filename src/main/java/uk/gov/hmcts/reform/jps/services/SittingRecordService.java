@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
 import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
@@ -10,19 +11,20 @@ import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 
 @Service
@@ -31,16 +33,19 @@ public class SittingRecordService {
     private final EvaluateDuplicate evaluateDuplicate;
     private final EvaluateMatchingDuration evaluateMatchingDuration;
     private final EvaluateOverlapDuration evaluateOverlapDuration;
+    private final StatusHistoryService statusHistoryService;
 
     @Autowired
     public SittingRecordService(SittingRecordRepository sittingRecordRepository,
                                 EvaluateDuplicate evaluateDuplicate,
                                 EvaluateMatchingDuration evaluateMatchingDuration,
-                                EvaluateOverlapDuration evaluateOverlapDuration) {
+                                EvaluateOverlapDuration evaluateOverlapDuration,
+                                StatusHistoryService statusHistoryService) {
         this.sittingRecordRepository = sittingRecordRepository;
         this.evaluateDuplicate = evaluateDuplicate;
         this.evaluateMatchingDuration = evaluateMatchingDuration;
         this.evaluateOverlapDuration = evaluateOverlapDuration;
+        this.statusHistoryService = statusHistoryService;
 
         this.evaluateDuplicate.next(this.evaluateMatchingDuration);
         this.evaluateMatchingDuration.next(this.evaluateOverlapDuration);
@@ -145,5 +150,27 @@ public class SittingRecordService {
                                                      evaluateDuplicate
                                                          .evaluate(sittingRecordWrapper,
                                                                    sittingRecordDuplicateCheckFields));
+    }
+
+
+    @Transactional
+    public int submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                    String hmctsServiceCode) {
+
+        List<Long> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        );
+
+        recordsToSubmit.forEach(sittingRecordId -> {
+            statusHistoryService.insertRecord(sittingRecordId,
+                                              SUBMITTED,
+                                              submitSittingRecordRequest.getSubmittedByIdamId(),
+                                              submitSittingRecordRequest.getSubmittedByName());
+
+            sittingRecordRepository.updateToSubmitted(sittingRecordId);
+        });
+
+        return recordsToSubmit.size();
     }
 }

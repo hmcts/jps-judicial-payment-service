@@ -24,9 +24,9 @@ import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -43,6 +43,8 @@ import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -53,6 +55,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
@@ -66,7 +69,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     private SittingRecordRepository sittingRecordRepository;
 
     @Mock
-    private StatusHistoryRepository statusHistoryRepository;
+    private StatusHistoryService statusHistoryService;
 
     @Mock
     private EvaluateDuplicate evaluateDuplicate;
@@ -82,6 +85,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Long> sittingRecordIdCaptor;
 
     @BeforeEach
     void setUp() {
@@ -308,5 +313,79 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         verify(evaluateDuplicate, never()).evaluate(any(), any());
+    }
+
+    @Test
+    void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+        String hmctsServiceCode = "BBA3";
+        List<Long> sittingRecordIds = List.of(1L, 100L, 200L);
+        SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
+            .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .submittedByName("submitter")
+            .regionId("4")
+            .dateRangeFrom(LocalDate.parse("2023-05-11"))
+            .dateRangeTo(LocalDate.parse("2023-05-11"))
+            .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .build();
+
+        when(sittingRecordRepository.findRecordsToSubmit(eq(submitSittingRecordRequest),
+                                                         eq(hmctsServiceCode)))
+            .thenReturn(sittingRecordIds);
+
+        int countSubmitted = sittingRecordService.submitSittingRecords(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        );
+        verify(statusHistoryService, times(3))
+            .insertRecord(sittingRecordIdCaptor.capture(),
+                          eq(SUBMITTED),
+                          eq(submitSittingRecordRequest.getSubmittedByIdamId()),
+                          eq(submitSittingRecordRequest.getSubmittedByName()));
+
+        assertThat(countSubmitted)
+            .isEqualTo(3);
+
+        assertThat(sittingRecordIdCaptor.getAllValues())
+            .containsAll(sittingRecordIds);
+
+        verify(sittingRecordRepository, times(3))
+            .updateToSubmitted(sittingRecordIdCaptor.capture());
+
+        assertThat(sittingRecordIdCaptor.getAllValues())
+            .containsAll(sittingRecordIds);
+
+    }
+
+    @Test
+    void shouldReturnZeroRecordsSubmittedWhenNoRecordFound() {
+        String hmctsServiceCode = "BBA3";
+        SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
+            .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .submittedByName("submitter")
+            .regionId("4")
+            .dateRangeFrom(LocalDate.parse("2023-05-11"))
+            .dateRangeTo(LocalDate.parse("2023-05-11"))
+            .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .build();
+
+        when(sittingRecordRepository.findRecordsToSubmit(eq(submitSittingRecordRequest),
+                                                         eq(hmctsServiceCode)))
+            .thenReturn(Collections.emptyList());
+
+        int countSubmitted = sittingRecordService.submitSittingRecords(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        );
+        verify(statusHistoryService, never())
+            .insertRecord(anyLong(),
+                          eq(SUBMITTED),
+                          eq(submitSittingRecordRequest.getSubmittedByIdamId()),
+                          eq(submitSittingRecordRequest.getSubmittedByName()));
+
+        verify(sittingRecordRepository, never())
+            .updateToSubmitted(any());
+
+        assertThat(countSubmitted)
+            .isEqualTo(0);
     }
 }

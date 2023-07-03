@@ -1,9 +1,12 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
@@ -17,6 +20,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
@@ -46,6 +50,7 @@ import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class SittingRecoredServiceITest extends BaseTest {
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
@@ -61,6 +66,8 @@ class SittingRecoredServiceITest extends BaseTest {
     private EvaluateMatchingDuration evaluateMatchingDuration;
     @Autowired
     private EvaluateOverlapDuration evaluateOverlapDuration;
+    @Autowired
+    private StatusHistoryService statusHistoryService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -70,13 +77,18 @@ class SittingRecoredServiceITest extends BaseTest {
 
     @BeforeEach
     void beforeEach() {
-        sittingRecordRepository.deleteAll();
         sittingRecordService = new SittingRecordService(
             sittingRecordRepository,
             evaluateDuplicate,
             evaluateMatchingDuration,
-            evaluateOverlapDuration
+            evaluateOverlapDuration,
+            statusHistoryService
         );
+    }
+
+    @AfterEach
+    void afterEach() {
+        sittingRecordRepository.deleteAll();
     }
 
     @Test
@@ -730,5 +742,26 @@ class SittingRecoredServiceITest extends BaseTest {
             });
 
         return sittingRecordWrappers;
+    }
+
+    @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+        SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
+            .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .submittedByName("submitter")
+            .regionId("4")
+            .dateRangeFrom(LocalDate.parse("2023-05-11"))
+            .dateRangeTo(LocalDate.parse("2023-05-11"))
+            .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .build();
+
+
+        int countSubmitted = sittingRecordService.submitSittingRecords(
+            submitSittingRecordRequest,
+            "BBA3"
+        );
+        assertThat(countSubmitted)
+            .isEqualTo(1);
     }
 }

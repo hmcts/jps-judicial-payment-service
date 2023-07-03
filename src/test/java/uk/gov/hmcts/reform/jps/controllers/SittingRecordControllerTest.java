@@ -213,7 +213,5 @@ class SittingRecordControllerTest {
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
-
     }
 }
