@@ -40,7 +40,6 @@ public class StatusHistoryServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldUpdateWithStatusHistoryWhenDbRecordPresent() {
-
         List<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> dbRecord
             = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
             LocalDate.of(2023, Month.MAY, 11),
@@ -49,12 +48,10 @@ public class StatusHistoryServiceITest extends BaseTest {
             DELETED
         ).stream().toList();
 
-
         SittingRecordWrapper wrapper = SittingRecordWrapper.builder().build();
 
         SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
             sittingRecordDuplicateCheckFields = dbRecord.get(0);
-
 
         statusHistoryService.updateFromStatusHistory(wrapper, sittingRecordDuplicateCheckFields);
         assertThat(wrapper.getCreatedByName()).isEqualTo("Recorder");
