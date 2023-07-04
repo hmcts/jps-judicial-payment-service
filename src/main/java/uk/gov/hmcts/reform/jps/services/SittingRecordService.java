@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.jps.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.reform.jps.controllers.util.Utility;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
@@ -17,10 +19,13 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
+
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
@@ -77,7 +82,7 @@ public class SittingRecordService {
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
                     uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
                         .sittingDate(recordSittingRecord.getSittingDate())
-                        .statusId(StatusId.RECORDED.name())
+                        .statusId(RECORDED.name())
                         .regionId(recordSittingRecord.getRegionId())
                         .epimsId(recordSittingRecord.getEpimsId())
                         .hmctsServiceId(hmctsServiceCode)
@@ -92,7 +97,7 @@ public class SittingRecordService {
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
                 StatusHistory statusHistory = StatusHistory.builder()
-                    .statusId(StatusId.RECORDED.name())
+                    .statusId(RECORDED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
                     .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
@@ -105,41 +110,46 @@ public class SittingRecordService {
 
     @Transactional
     public void deleteSittingRecord(Long sittingRecordId) {
+        Utility.validateRolesAllowed(securityUtils.getUserInfo().getRoles(),
+                                     List.of("jps-recorder",
+                                             "jps-submitter",
+                                             "jps-admin"));
 
-        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = getSittingRecord(sittingRecordId);
-        if(securityUtils.getUserInfo().getRoles().equals("jps-recorder")) {
-            if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
-                if(securityUtils.getUserInfo().getUid().equals(sittingRecord.getChangeByUserId())) {
-                    returnDeletedRecord(sittingRecord);
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+            = sittingRecordRepository.findById(sittingRecordId)
+            .orElseThrow(() -> new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"));
 
-                } else {
-                    throw new ResourceNotFoundException("User IDAM ID does not match the oldest Changed by IDAM ID ");
-
-                }
-        } else {
-                throw new ConflictException("Sitting Record Status ID is in wrong state");
-            }
-        } else if (securityUtils.getUserInfo().getRoles().equals("jps-submitter")) {
-            if (sittingRecord.getStatusId().equals(StatusId.RECORDED)) {
-                returnDeletedRecord(sittingRecord);
-
-            } else {
-                throw new ConflictException("Sitting Record Status ID is in wrong state");
-            }
-        } else if(securityUtils.getUserInfo().getRoles().equals("jps-admin")) {
-            if(sittingRecord.getStatusId().equals(StatusId.SUBMITTED)) {
-                returnDeletedRecord(sittingRecord);
-
-            } else {
-                throw new ConflictException("Sitting Record Status ID is in wrong state");
-            }
-            } else {
-            throw new ConflictException("Incorrect IDAM Role");
+        if(securityUtils.getUserInfo().getRoles().contains("jps-recorder"))
+            recorderDelete(sittingRecord);
+        else if (securityUtils.getUserInfo().getRoles().contains("jps-submitter")) {
+            deleteSittingRecord(sittingRecord, RECORDED);
+        } else if(securityUtils.getUserInfo().getRoles().contains("jps-admin")) {
+            deleteSittingRecord(sittingRecord, SUBMITTED);
         }
-
     }
 
-    private void returnDeletedRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord){
+    private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        if (sittingRecord.getStatusId().equals(RECORDED.name())) {
+            if(securityUtils.getUserInfo().getUid().equals(sittingRecord.getChangeByUserId())) {
+                deleteSittingRecord(sittingRecord);
+            } else {
+                throw new ResourceNotFoundException("User IDAM ID does not match the oldest Changed by IDAM ID ");
+            }
+        } else {
+            throw new ConflictException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
+    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
+                                     StatusId recorded) {
+        if (sittingRecord.getStatusId().equals(recorded.name())) {
+            deleteSittingRecord(sittingRecord);
+        } else {
+            throw new ConflictException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
+    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord){
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(StatusId.DELETED.name())
             .changeDateTime(LocalDateTime.now())
@@ -148,16 +158,7 @@ public class SittingRecordService {
             .build();
 
         sittingRecord.addStatusHistory(statusHistory);
+        sittingRecord.setStatusId(DELETED.name());
         sittingRecordRepository.save(sittingRecord);
     }
-
-    private uk.gov.hmcts.reform.jps.domain.SittingRecord getSittingRecord(Long sittingRecordId) {
-        Optional<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordOptional = sittingRecordRepository.findById(sittingRecordId);
-
-        if (sittingRecordOptional.isEmpty()) {
-            throw new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND");
-        }
-        return sittingRecordOptional.get();
-    }
 }
-
