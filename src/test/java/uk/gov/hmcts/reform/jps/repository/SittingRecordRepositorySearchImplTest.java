@@ -390,6 +390,7 @@ class SittingRecordRepositorySearchImplTest {
         setPredicate(PERSONAL_CODE, PERSONAL_CODE);
 
         setPredicate(JUDGE_ROLE_TYPE_ID, JUDGE_ROLE_TYPE_ID);
+        setPredicate(STATUS_ID, RECORDED);
         setPredicate(AM, true);
         setPredicate(PM, true);
 
@@ -425,7 +426,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CREATED_BY_USER_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
+        verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }

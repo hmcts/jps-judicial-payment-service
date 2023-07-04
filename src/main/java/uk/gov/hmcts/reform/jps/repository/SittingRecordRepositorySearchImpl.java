@@ -179,10 +179,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                  recordSearchRequest.getCreatedByUserId()));
             predicates.add(criteriaBuilder.equal(statusHistories.get(StatusHistory_.STATUS_ID),
                                                  RECORDED));
-        } else {
-            predicates.add(criteriaBuilder.equal(sittingRecord.get(STATUS_ID),
-                                                 RECORDED));
         }
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(STATUS_ID),
+                                             RECORDED));
 
         Optional.ofNullable(recordSearchRequest.getEpimmsId())
                 .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get(EPIMMS_ID), value)));
