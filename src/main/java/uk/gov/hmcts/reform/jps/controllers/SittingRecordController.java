@@ -81,7 +81,7 @@ public class SittingRecordController {
     }
 
     @DeleteMapping(
-        path = {"/", "/{sittingRecordId}"}
+        path = {"", "/{sittingRecordId}"}
     )
     @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
     public ResponseEntity<String> deleteSittingRecord(
