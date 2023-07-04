@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +23,9 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
 
 
 @RestController
@@ -31,8 +38,16 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 public class SubmitSittingRecordsController {
     private final SittingRecordService sittingRecordService;
 
+    @Operation(description = "Submit sitting records")
+    @ApiResponse(responseCode = "200",
+        content = @Content(schema = @Schema(implementation = SubmitSittingRecordResponse.class)),
+        description = "Successfully submitted sitting records")
+    @ApiResponse(responseCode = "400", description = RESPONSE_400, content = @Content)
+    @ApiResponse(responseCode = "401", description = RESPONSE_401, content = @Content)
+    @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
+
     @PostMapping(
-        path = {"/", "/{hmctsServiceCode}"}
+        path = {"", "/{hmctsServiceCode}"}
     )
     @PreAuthorize("hasAuthority('jps-submitter')")
     public ResponseEntity<SubmitSittingRecordResponse> submitSittingRecords(
