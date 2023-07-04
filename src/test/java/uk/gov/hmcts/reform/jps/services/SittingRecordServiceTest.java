@@ -328,8 +328,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
             .build();
 
-        when(sittingRecordRepository.findRecordsToSubmit(eq(submitSittingRecordRequest),
-                                                         eq(hmctsServiceCode)))
+        when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
+                                                         hmctsServiceCode))
             .thenReturn(sittingRecordIds);
 
         int countSubmitted = sittingRecordService.submitSittingRecords(
@@ -368,8 +368,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
             .build();
 
-        when(sittingRecordRepository.findRecordsToSubmit(eq(submitSittingRecordRequest),
-                                                         eq(hmctsServiceCode)))
+        when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
+                                                         hmctsServiceCode))
             .thenReturn(Collections.emptyList());
 
         int countSubmitted = sittingRecordService.submitSittingRecords(
@@ -385,7 +385,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         verify(sittingRecordRepository, never())
             .updateToSubmitted(any());
 
-        assertThat(countSubmitted)
-            .isEqualTo(0);
+        assertThat(countSubmitted).isZero();
     }
 }
