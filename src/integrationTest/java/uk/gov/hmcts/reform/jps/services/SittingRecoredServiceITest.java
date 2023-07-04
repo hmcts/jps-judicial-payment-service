@@ -5,8 +5,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
@@ -50,7 +51,8 @@ import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
+@Transactional
+@Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
 class SittingRecoredServiceITest extends BaseTest {
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
@@ -747,6 +749,22 @@ class SittingRecoredServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+
+        List<SittingRecord> sittingRecords = sittingRecordRepository.findAll();
+        SittingRecord sittingRecord = sittingRecords.stream()
+            .filter(record -> record.getRegionId().equals("4"))
+            .findAny()
+            .orElseThrow();
+
+        assertThat(sittingRecord.getStatusId())
+            .isEqualTo(RECORDED);
+
+        List<StatusHistory> statusHistories = sittingRecord.getStatusHistories();
+        assertThat(statusHistories)
+            .hasSize(1)
+            .extracting("statusId")
+            .containsExactly(RECORDED);
+
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
             .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
             .submittedByName("submitter")
@@ -763,5 +781,22 @@ class SittingRecoredServiceITest extends BaseTest {
         );
         assertThat(countSubmitted)
             .isEqualTo(1);
+
+        sittingRecords = sittingRecordRepository.findAll();
+
+        sittingRecord = sittingRecords.stream()
+            .filter(record -> record.getRegionId().equals("4"))
+            .findAny()
+            .orElseThrow();
+
+
+        assertThat(sittingRecord.getStatusId())
+            .isEqualTo(SUBMITTED);
+
+        statusHistories = sittingRecord.getStatusHistories();
+        assertThat(statusHistories)
+            .hasSize(2)
+            .extracting("statusId")
+            .containsExactly(RECORDED, SUBMITTED);
     }
 }
