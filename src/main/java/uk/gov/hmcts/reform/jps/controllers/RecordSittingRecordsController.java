@@ -56,7 +56,7 @@ public class RecordSittingRecordsController {
     private final LocationService regionService;
 
 
-    @Operation(description = "To create a new sitting record")
+    @Operation(description = "Create a new sitting record")
     @ApiResponse(responseCode = "201",
         content = @Content(schema = @Schema(implementation = RecordSittingRecordResponse.class)),
         description = "Successfully created sitting record")
