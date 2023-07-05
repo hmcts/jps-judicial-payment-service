@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -70,43 +69,10 @@ public class SittingRecord {
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
-    public String getCreatedByUserId() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
-    }
-
-    public LocalDateTime getCreatedDateTime() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? getFirstStatusHistory().getChangeDateTime() : null;
-    }
-
-    public String getChangeByUserId() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
-    }
-
-    public LocalDateTime getChangeDateTime() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? getLatestStatusHistory().getChangeDateTime() : null;
-    }
-
     public StatusHistory getFirstStatusHistory() {
         Collections.sort(statusHistories, Comparator.comparing(StatusHistory::getId));
         Optional<StatusHistory> optStatHistory = statusHistories.stream().findFirst();
         return optStatHistory.isPresent() ? optStatHistory.get() : null;
-    }
-
-    public StatusHistory getLatestStatusHistory() {
-        if (null == statusHistories) {
-            return null;
-        } else {
-            Collections.sort(statusHistories,
-                             (statusHistory1, statusHistory2) -> statusHistory2.getChangeDateTime().compareTo(
-                                 statusHistory1.getChangeDateTime())
-            );
-            Optional<StatusHistory> optionalStatusHistory = statusHistories.stream().findFirst();
-            return optionalStatusHistory.isPresent() ? optionalStatusHistory.get() : null;
-        }
     }
 
     public void addStatusHistory(StatusHistory statusHistory) {

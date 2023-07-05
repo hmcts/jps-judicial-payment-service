@@ -94,10 +94,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
-                jsonPath("$.sittingRecords[0].pm").isEmpty(),
-                jsonPath("$.sittingRecords[0].createdDateTime").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isEmpty()
+                jsonPath("$.sittingRecords[0].pm").isEmpty()
             )
             .andReturn();
     }

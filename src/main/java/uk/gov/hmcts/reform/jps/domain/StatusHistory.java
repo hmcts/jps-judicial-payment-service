@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -48,4 +49,29 @@ public class StatusHistory {
     @Column(name = "change_by_name")
     private String changeByName;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof StatusHistory that)) {
+            return false;
+        }
+
+        return (that.getId().equals(this.getId())
+            && that.getStatusId().equals(this.getStatusId())
+            && that.getSittingRecord().getId().equals(this.getSittingRecord().getId())
+            && that.getChangeByUserId().equals(this.getChangeByUserId())
+            && that.getChangeDateTime().equals(this.getChangeDateTime()));
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(
+            17,
+            37
+        ).append(id).append(sittingRecord).append(statusId).append(changeDateTime).append(changeByUserId).append(
+            changeByName).toHashCode();
+    }
 }

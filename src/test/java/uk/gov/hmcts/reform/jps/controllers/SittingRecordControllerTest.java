@@ -32,6 +32,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -51,7 +53,6 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 @AutoConfigureMockMvc(addFilters = false)
 @ImportAutoConfiguration(TestIdamConfiguration.class)
 class SittingRecordControllerTest {
-    private static final String SSCS = "sscs";
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -64,6 +65,8 @@ class SittingRecordControllerTest {
     private LocationService regionService;
     @MockBean
     private JudicialUserDetailsService judicialUserDetailsService;
+
+    private static final String SSCS = "sscs";
 
     @Test
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
@@ -195,7 +198,13 @@ class SittingRecordControllerTest {
         verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
-        assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
+        assertEquals(sittingRecordSearchResponse.getSittingRecords().size(), sittingRecords.size());
+        if (sittingRecordSearchResponse.getSittingRecords().size() > 0) {
+            assertEquals(sittingRecordSearchResponse.getSittingRecords().get(0), sittingRecords.get(0));
+        }
+        if (sittingRecordSearchResponse.getSittingRecords().size() > 1) {
+            assertEquals(sittingRecordSearchResponse.getSittingRecords().get(1), sittingRecords.get(1));
+        }
     }
 
     @Test
@@ -228,7 +237,15 @@ class SittingRecordControllerTest {
             SittingRecordSearchResponse.class
         );
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
-        assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
+        assertEquals(sittingRecordSearchResponse.getSittingRecords().size(), sittingRecords.size());
+        if (sittingRecordSearchResponse.getSittingRecords().size() > 0) {
+            assertTrue(sittingRecordSearchResponse.getSittingRecords().get(0)
+                           .equalsDomainObject(sittingRecords.get(0)));
+        }
+        if (sittingRecordSearchResponse.getSittingRecords().size() > 1) {
+            assertTrue(sittingRecordSearchResponse.getSittingRecords().get(1)
+                           .equalsDomainObject(sittingRecords.get(1)));
+        }
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
     }
