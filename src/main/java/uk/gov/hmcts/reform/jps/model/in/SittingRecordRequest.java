@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.jps.validator.ValidDuration;
 
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -47,4 +48,7 @@ public class SittingRecordRequest implements Serializable {
 
     @JsonIgnore
     private String regionId;
+
+    @JsonIgnore
+    private LocalDateTime createdDateTime;
 }

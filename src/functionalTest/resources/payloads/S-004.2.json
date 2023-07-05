@@ -1,0 +1,36 @@
+{
+  "recordedByIdamId": "d139a314-eb40-45f4-9e7a-9e13f143cc3a",
+  "recordedByName": "Submitter",
+  "recordedSittingRecords": [
+    {
+      "sittingDate": "2023-04-10",
+      "epimsId": "229786",
+      "personalCode": "4918178",
+      "contractTypeId": "2",
+      "judgeRoleTypeId": "Judge",
+      "am": false,
+      "pm": true,
+      "replaceDuplicate": false
+    },
+    {
+      "sittingDate": "2023-04-11",
+      "epimsId": "229786",
+      "personalCode": "4918178",
+      "contractTypeId": "1",
+      "judgeRoleTypeId": "Judge",
+      "am": true,
+      "pm": true,
+      "replaceDuplicate": false
+    },
+    {
+      "sittingDate": "2023-04-12",
+      "epimsId": "229786",
+      "personalCode": "4918178",
+      "contractTypeId": "3",
+      "judgeRoleTypeId": "Judge",
+      "am": true,
+      "pm": false,
+      "replaceDuplicate": true
+    }
+  ]
+}

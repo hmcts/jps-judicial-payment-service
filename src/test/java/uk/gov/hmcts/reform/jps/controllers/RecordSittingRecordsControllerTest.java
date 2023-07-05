@@ -15,6 +15,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
@@ -54,10 +55,44 @@ class RecordSittingRecordsControllerTest {
     void shouldCreateSittingRecordsWhenRequestIsValid() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
-                                                          .contentType(MediaType.APPLICATION_JSON)
-                                                          .content(requestJson))
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
             .andDo(print())
-            .andExpect(status().isCreated());
+            .andExpectAll(
+                status().isCreated(),
+                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
+                jsonPath("$.errorRecords[0].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
+                jsonPath("$.errorRecords[0].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
+
+                jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
+                jsonPath("$.errorRecords[1].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
+                jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[1].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
+
+                jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
+                jsonPath("$.errorRecords[2].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[2].errorCode").value("VALID"),
+                jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
+            ).andReturn();
     }
 
     @Test

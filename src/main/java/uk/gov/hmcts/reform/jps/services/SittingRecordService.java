@@ -85,9 +85,11 @@ public class SittingRecordService {
                                 .map(DurationBoolean::getPm).orElse(false))
                         .build();
 
+                recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.RECORDED.name())
-                    .changeDateTime(LocalDateTime.now())
+                    .changeDateTime(recordSittingRecord.getCreatedDateTime())
                     .changeByUserId(recordSittingRecordRequest.getRecordedByIdamId())
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
                     .build();

@@ -14,7 +14,10 @@ public class DurationValidator implements ConstraintValidator<ValidDuration, Dur
 
     @Override
     public boolean isValid(DurationBoolean durationBoolean, ConstraintValidatorContext context) {
-        return Objects.nonNull(durationBoolean.getPm()) && durationBoolean.getPm()
-            || Objects.nonNull(durationBoolean.getAm()) && durationBoolean.getAm();
+        return (Objects.nonNull(durationBoolean.getPm())
+            && Objects.nonNull(durationBoolean.getAm()))
+            && ((durationBoolean.getPm() && durationBoolean.getAm())
+            || (durationBoolean.getPm() && !durationBoolean.getAm())
+            || (!durationBoolean.getPm() && durationBoolean.getAm()));
     }
 }
