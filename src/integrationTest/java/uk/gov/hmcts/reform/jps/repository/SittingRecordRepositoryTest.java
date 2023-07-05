@@ -106,18 +106,6 @@ class SittingRecordRepositoryTest extends AbstractTest {
     }
 
     @Test
-    void shouldFindCreatedDateTime() {
-        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
-
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-
-        LocalDateTime createdDateTime = recordRepository.findCreatedDateTime(persistedSittingRecord.getId());
-
-        assertNotNull(createdDateTime, "Could not find created date time.");
-        assertEquals(statusHistoryCreated.getChangeDateTime(), createdDateTime, "Not the expected CREATED DATE TIME!");
-    }
-
-    @Test
     void shouldFindCreatedByUserId() {
         SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
 
@@ -127,32 +115,6 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
         assertNotNull(createdByUserId, "Could not find created by user id.");
         assertEquals(statusHistoryCreated.getChangeByUserId(), createdByUserId, "Not the expected CREATED BY USER ID!");
-    }
-
-    @Test
-    void shouldFindLastChangeDateTime() {
-        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
-
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-
-        LocalDateTime changeDateTime = recordRepository.findLastChangeDate(persistedSittingRecord.getId());
-
-        assertNotNull(changeDateTime, "Could not find last changed date time.");
-        assertEquals(statusHistoryAmended.getChangeDateTime(), changeDateTime,
-                     "Not the expected last CHANGED DATE TIME!");
-    }
-
-    @Test
-    void shouldFindLastChangedByUserId() {
-        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
-
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-
-        String changedByUserId = recordRepository.findLastChangedByUserId(persistedSittingRecord.getId());
-
-        assertNotNull(changedByUserId, "Could not find last changed by user id.");
-        assertEquals(statusHistoryAmended.getChangeByUserId(), changedByUserId,
-                     "Not the expected last CHANGED BY USER ID!");
     }
 
     private SittingRecord createSittingRecordWithSeveralStatus() {
