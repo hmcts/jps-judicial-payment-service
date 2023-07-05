@@ -2,9 +2,9 @@ package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.reform.jps.controllers.util.Utility;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
@@ -19,7 +19,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
+import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
@@ -33,6 +33,20 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 public class SittingRecordService {
     private final SittingRecordRepository sittingRecordRepository;
     private final SecurityUtils securityUtils;
+
+    private Consumer<uk.gov.hmcts.reform.jps.domain.SittingRecord>
+    deleteSittingRecord = sittingRecord -> {
+        StatusHistory statusHistory = StatusHistory.builder()
+            .statusId(StatusId.DELETED.name())
+            .changeDateTime(LocalDateTime.now())
+            .changeByUserId(securityUtils.getUserInfo().getUid())
+            .changeByName(securityUtils.getUserInfo().getName())
+            .build();
+
+        sittingRecord.addStatusHistory(statusHistory);
+        sittingRecord.setStatusId(DELETED.name());
+        sittingRecordRepository.save(sittingRecord);
+    } ;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -109,12 +123,8 @@ public class SittingRecordService {
     }
 
     @Transactional
+    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
     public void deleteSittingRecord(Long sittingRecordId) {
-        Utility.validateRolesAllowed(securityUtils.getUserInfo().getRoles(),
-                                     List.of("jps-recorder",
-                                             "jps-submitter",
-                                             "jps-admin"));
-
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = sittingRecordRepository.findById(sittingRecordId)
             .orElseThrow(() -> new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"));
@@ -130,11 +140,14 @@ public class SittingRecordService {
 
     private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         if (sittingRecord.getStatusId().equals(RECORDED.name())) {
-            if(securityUtils.getUserInfo().getUid().equals(sittingRecord.getChangeByUserId())) {
-                deleteSittingRecord(sittingRecord);
-            } else {
-                throw new ResourceNotFoundException("User IDAM ID does not match the oldest Changed by IDAM ID ");
-            }
+            StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
+                .filter(statusHistory -> statusHistory.getStatusId().equals(RECORDED.name()))
+                .filter(statusHistory -> statusHistory.getChangeByUserId().equals(securityUtils.getUserInfo().getUid()))
+                .findAny()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "User IDAM ID does not match the oldest Changed by IDAM ID "));
+
+             deleteSittingRecord(recordedStatusHistory.getSittingRecord());
         } else {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
         }
@@ -142,6 +155,7 @@ public class SittingRecordService {
 
     private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
                                      StatusId recorded) {
+
         if (sittingRecord.getStatusId().equals(recorded.name())) {
             deleteSittingRecord(sittingRecord);
         } else {

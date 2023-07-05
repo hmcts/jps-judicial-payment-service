@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -46,6 +47,8 @@ class SittingRecoredServiceITest extends BaseTest {
     private StatusHistoryRepository statusHistoryRepository;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
@@ -53,7 +56,8 @@ class SittingRecoredServiceITest extends BaseTest {
     @BeforeEach
     void beforeEach() {
         sittingRecordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(sittingRecordRepository);
+        sittingRecordService = new SittingRecordService(sittingRecordRepository,
+                                                        securityUtils);
     }
 
     @Test
