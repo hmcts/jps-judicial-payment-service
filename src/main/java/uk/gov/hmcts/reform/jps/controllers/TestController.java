@@ -27,7 +27,7 @@ public class TestController {
 
     @GetMapping(path = "/test", produces = APPLICATION_JSON_VALUE)
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public ResponseEntity getHearing() {
+    public ResponseEntity getUserRoles() {
         List<String> allowedRoles = Arrays.asList("jps-recorder", "jps-submitter", "jps-publisher", "jps-admin");
         securityUtils.getUserInfo().getRoles().stream()
             .filter(role -> allowedRoles.contains(role)).findFirst()

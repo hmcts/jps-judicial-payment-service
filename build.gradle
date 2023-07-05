@@ -181,7 +181,6 @@ task functional(type: Test) {
         new File("${rootDir}/Report for Functional Tests").mkdirs()
         file("${rootDir}/target/cucumber-html-reports").renameTo(file("${rootDir}/Report for Functional Tests"))
         logger.quiet("Functional test report moved to ---> file://${buildDir}/Report for Functional Tests/overview-features.html")
-
       }
     }
   }
@@ -221,7 +220,7 @@ project.tasks['check'].dependsOn integration
 
 
 def coverageExclusionList = [
-  '**uk/gov/hmcts/reform/jps/expection/*.*',
+  '**uk/gov/hmcts/reform/jps/exceptions/*.*',
   '**uk/gov/hmcts/reform/jps/config/**/*',
   '**uk/gov/hmcts/reform/jps/domain/*.*',
   "src/main/java/uk/gov/hmcts/reform/jps/Application.java",
