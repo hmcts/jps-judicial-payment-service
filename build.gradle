@@ -117,8 +117,8 @@ test {
   failFast = true
 }
 
-task functional(type: Test) {
-  description = "Runs functional tests"
+task smoke(type: Test) {
+  description = "Runs smoke tests"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
 
@@ -131,8 +131,45 @@ task functional(type: Test) {
       args = [
         '--threads', '1',
         '--plugin', "json:${rootDir}/target/cucumber.json",
+        '--plugin', "junit:${buildDir}/test-results/smoke/cucumber.xml",
+        '--tags', '@Smoke',
+        '--glue', 'uk.gov.hmcts.reform.jps', 'src/functionalTest/resources/features'
+      ]
+    }
+  }
+  finalizedBy {
+    generateCucumberReports {
+      doLast{
+        delete "${rootDir}/Report for Smoke Tests/"
+        new File("${rootDir}/Report for Smoke Tests").mkdirs()
+        file("${rootDir}/target/cucumber-html-reports").renameTo(file("${rootDir}/Report for Smoke Tests"))
+        logger.quiet("Smoke test report moved to ---> file://${buildDir}/Report for Smoke Tests/overview-features.html")
+
+      }
+    }
+  }
+}
+
+task functional(type: Test) {
+  description = "Runs functional tests"
+  testClassesDirs = sourceSets.functionalTest.output.classesDirs
+  classpath = sourceSets.functionalTest.runtimeClasspath
+
+  dependsOn assemble, testClasses
+
+  //To force task to run every time
+  inputs.property("timestamp", System.currentTimeMillis())
+
+  doFirst {
+    generateCucumberReports.enabled = true
+    javaexec {
+      main = "io.cucumber.core.cli.Main"
+      classpath += configurations.cucumberRuntime + sourceSets.functionalTest.output
+      args = [
+        '--threads', '1',
+        '--plugin', "json:${rootDir}/target/cucumber.json",
         '--plugin', "junit:${buildDir}/test-results/functional/cucumber.xml",
-        '--tags', '',
+        '--tags', '@Functional and not @Ignore',
         '--glue', 'uk.gov.hmcts.reform.jps', 'src/functionalTest/resources/features'
       ]
     }
@@ -164,12 +201,6 @@ task integration(type: Test) {
   failFast = true
 }
 
-task smoke(type: Test) {
-  description = "Runs Smoke Tests"
-  testClassesDirs = sourceSets.smokeTest.output.classesDirs
-  classpath = sourceSets.smokeTest.runtimeClasspath
-}
-
 checkstyle {
   maxWarnings = 0
   toolVersion = '10.7.0'
@@ -198,7 +229,8 @@ def coverageExclusionList = [
   "**/controllers/TestController.java",
   "**uk/gov/hmcts/reform/jps/model/**/*",
   "**uk/gov/hmcts/reform/jps/refdata/**/*",
-  "**uk/gov/hmcts/reform/jps/validator/*.*"
+  "**uk/gov/hmcts/reform/jps/validator/*.*",
+  "**uk/gov/hmcts/reform/jps/ResponseExceptionHandler.java"
 ]
 
 sonar {
@@ -341,7 +373,6 @@ dependencies {
   testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
   testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-
 }
 
 mainClassName = 'uk.gov.hmcts.reform.jps.Application'
