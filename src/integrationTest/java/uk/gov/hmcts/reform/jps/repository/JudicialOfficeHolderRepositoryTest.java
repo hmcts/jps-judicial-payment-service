@@ -34,7 +34,7 @@ class JudicialOfficeHolderRepositoryTest {
     private StatusHistoryRepository statusHistoryRepository;
 
     private JudicialOfficeHolder judicialOfficeHolder;
-    //private JudicialOfficeHolder persistedJudicialOfficeHolder;
+    private JudicialOfficeHolder persistedJudicialOfficeHolder;
     //private StatusHistory persistedStatusHistory;
     private SittingRecord persistedSittingRecord;
 
