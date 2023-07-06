@@ -35,7 +35,7 @@ import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
-class SittingRecoredServiceITest extends BaseTest {
+class SittingRecordServiceITest extends BaseTest {
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
     public static final String CONTRACT_TYPE_ID = "contractTypeId";
@@ -58,7 +58,7 @@ class SittingRecoredServiceITest extends BaseTest {
 
     @Test
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
-        SittingRecord sittingRecord = getSittingRecord(2);
+        SittingRecord sittingRecord = getSittingRecord(1);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
 
@@ -110,6 +110,10 @@ class SittingRecoredServiceITest extends BaseTest {
 
     private  SittingRecord getSittingRecord(long counter) {
         StatusId recorded = StatusId.RECORDED;
+        StringBuilder personalCode = new StringBuilder("001");
+        if (counter > 1) {
+            personalCode.append(counter);
+        }
         SittingRecord.SittingRecordBuilder builder = SittingRecord.builder();
         return builder
             .sittingDate(LocalDate.now().minusDays(counter))
@@ -117,7 +121,7 @@ class SittingRecoredServiceITest extends BaseTest {
             .regionId("1")
             .epimsId(EPIM_ID)
             .hmctsServiceId(SSC_ID)
-            .personalCode("001")
+            .personalCode(personalCode.toString())
             .contractTypeId(counter)
             .am(true)
             .judgeRoleTypeId("HighCourt")
@@ -126,10 +130,9 @@ class SittingRecoredServiceITest extends BaseTest {
             .build();
     }
 
-
     @Test
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
-        SittingRecord sittingRecord = getSittingRecord(2);
+        SittingRecord sittingRecord = getSittingRecord(1);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
 
@@ -201,9 +204,8 @@ class SittingRecoredServiceITest extends BaseTest {
             );
     }
 
-
     @Test
-    void shouldReturnLast2RecordsWhenSortOrderIsDecending() {
+    void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
         int recordCount = 22;
         String reasonId = "1";
 
@@ -279,8 +281,8 @@ class SittingRecoredServiceITest extends BaseTest {
                         "am", "pm", "statusId", "hmctsServiceId")
             .contains(
                 tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true, "RECORDED", "ssc_id"),
-                tuple(of(2023, APRIL,10), "1", "852649", "4918178", "Judge", 1L, true, false, "RECORDED", "ssc_id"),
-                tuple(of(2023, MARCH,9), "1", "852649", "4918178", "Judge", 1L, true, true, "RECORDED", "ssc_id")
+                tuple(of(2023, APRIL,10), "1", "852649", "4918179", "Judge", 1L, true, false, "RECORDED", "ssc_id"),
+                tuple(of(2023, MARCH,9), "1", "852649", "4918180", "Judge", 1L, true, true, "RECORDED", "ssc_id")
             );
 
         List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
