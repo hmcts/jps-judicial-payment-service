@@ -7,8 +7,4 @@ CREATE TABLE judicial_office_holder (
 ALTER TABLE ONLY public.sitting_record
 ADD CONSTRAINT uc_personal_code UNIQUE (personal_code);
 
-ALTER TABLE ONLY public.judicial_office_holder
-ADD CONSTRAINT fk_joh_sitting_record FOREIGN KEY (personal_code)
-  REFERENCES public.sitting_record(personal_code);
-
 

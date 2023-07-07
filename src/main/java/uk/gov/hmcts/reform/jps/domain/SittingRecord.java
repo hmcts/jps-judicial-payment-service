@@ -66,8 +66,7 @@ public class SittingRecord {
     private boolean pm;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "sittingRecord", orphanRemoval = true, cascade = {CascadeType.ALL})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
     @Column(name = "created_date_time")
