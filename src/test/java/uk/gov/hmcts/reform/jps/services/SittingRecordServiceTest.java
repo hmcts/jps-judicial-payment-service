@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
@@ -21,10 +22,13 @@ import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.io.IOException;
+import java.security.Security;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -36,9 +40,7 @@ import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
@@ -54,6 +56,9 @@ class SittingRecordServiceTest {
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
+
+    @Mock
+    private SecurityUtils securityUtils;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -234,7 +239,8 @@ class SittingRecordServiceTest {
             .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 
-    private SittingRecord deleteTestSetUp() {
+
+    private uk.gov.hmcts.reform.jps.domain.SittingRecord deleteTestSetUp(String changeById, String state) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(RECORDED.name())
             .changeDateTime(LocalDateTime.now())
@@ -242,21 +248,21 @@ class SittingRecordServiceTest {
             .changeByName("John Smith")
             .build();
 
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingRecordId(1)
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+            .id(1L)
             .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(RECORDED.name())
+            .statusId(state)
             .regionId("1")
             .epimsId("epims001")
             .hmctsServiceId("sscs")
             .personalCode("001")
             .contractTypeId(1L)
             .judgeRoleTypeId("HighCourt")
-            .am(AM.name())
-            .pm(PM.name())
+            .am(true)
+            .pm(true)
             .createdByUserId(USER_ID)
             .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-            .changeByUserId(UPDATED_BY_USER_ID)
+            .changeByUserId(changeById)
             .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
             .build();
 
@@ -268,23 +274,30 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldDeleteRecordRecorder() {
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-recorder")).when(securityUtils).getUserInfo().getRoles();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
 
-        SittingRecord sittingRecord = deleteTestSetUp();
+        sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
-        sittingRecord.setChangeByUserId(USER_ID);
-
-        sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
+            StatusHistory::getChangeDateTime));
+        StatusHistory statusHistory = null;
+        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
+            statusHistory = optionalStatusHistory.get();
+        }
 
         assertThat(sittingRecord.getStatusId().equals("DELETED"));
+        assertThat(statusHistory.getStatusId().equals("DELETED"));
 
     }
 
     @Test
     void shouldDeleteRecordSubmitter() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
-        sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+        sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
         assertThat(sittingRecord.getStatusId().equals("DELETED"));
 
@@ -293,11 +306,10 @@ class SittingRecordServiceTest {
     @Test
     void shouldDeleteRecordAdmin() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, SUBMITTED.name());
 
-        sittingRecord.setStatusId(SUBMITTED.name());
 
-        sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+        sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
         assertThat(sittingRecord.getStatusId().equals("DELETED"));
 
@@ -306,10 +318,10 @@ class SittingRecordServiceTest {
     @Test
     void differentRecorderID() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
     }
@@ -318,10 +330,10 @@ class SittingRecordServiceTest {
     @Test
     void incorrectIDAMRole() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
     }
@@ -330,12 +342,10 @@ class SittingRecordServiceTest {
     @Test
     void wrongStateRecorder() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
-
-        sittingRecord.setStatusId(SUBMITTED.name());
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, SUBMITTED.name());
 
         Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
@@ -343,12 +353,10 @@ class SittingRecordServiceTest {
     @Test
     void wrongStateSubmitter() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
-
-        sittingRecord.setStatusId(SUBMITTED.name());
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, SUBMITTED.name());
 
         Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
@@ -356,10 +364,10 @@ class SittingRecordServiceTest {
     @Test
     void wrongStateAdmin() {
 
-        SittingRecord sittingRecord = deleteTestSetUp();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getSittingRecordId());
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }

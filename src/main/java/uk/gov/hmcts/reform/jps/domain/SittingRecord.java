@@ -82,4 +82,9 @@ public class SittingRecord {
         this.statusHistories.add(statusHistory);
         statusHistory.setSittingRecord(this);
     }
+
+    public StatusHistory getLatestStatusHistory() {
+
+
+    }
 }
