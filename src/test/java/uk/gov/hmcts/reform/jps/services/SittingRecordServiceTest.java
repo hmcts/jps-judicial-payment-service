@@ -337,6 +337,14 @@ class SittingRecordServiceTest {
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
+
+        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
+        StatusHistory statusHistory = null;
+        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
+            statusHistory = optionalStatusHistory.get();
+        }
+
+        assertThat(statusHistory.getStatusId().equals("RECORDED"));
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
     }
 
