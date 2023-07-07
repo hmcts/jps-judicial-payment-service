@@ -1,9 +1,8 @@
 package uk.gov.hmcts.reform.jps.repository;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -17,8 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -35,7 +34,6 @@ class JudicialOfficeHolderRepositoryTest {
 
     private JudicialOfficeHolder judicialOfficeHolder;
     private JudicialOfficeHolder persistedJudicialOfficeHolder;
-    //private StatusHistory persistedStatusHistory;
     private SittingRecord persistedSittingRecord;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JudicialOfficeHolderRepositoryTest.class);
@@ -48,7 +46,6 @@ class JudicialOfficeHolderRepositoryTest {
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("ssc_id")
-            .personalCode("001")
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
@@ -63,15 +60,18 @@ class JudicialOfficeHolderRepositoryTest {
         sittingRecord.addStatusHistory(statusHistory);
 
         judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .sittingRecord(sittingRecord)
+            .personalCode("001")
             .build();
-
-        persistedSittingRecord = recordRepository.save(sittingRecord);
-        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
+        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+        judicialOfficeHolder.addSittingRecord(sittingRecord);
         LOGGER.info("judicialOfficeHolder:{}", judicialOfficeHolder);
-
+        LOGGER.info("sittingRecord:{}", sittingRecord);
 
         persistedJudicialOfficeHolder = judicialOfficeHolderRepository.save(judicialOfficeHolder);
+        persistedSittingRecord = recordRepository.save(sittingRecord);
+        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
+
+
         List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
         LOGGER.info("list.size:{}", list);
 
@@ -83,8 +83,8 @@ class JudicialOfficeHolderRepositoryTest {
         List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
 
         assertNotNull(list);
-        assertThat(list.size() > 0);
-        assertEquals( list.get(0).getId(), 1L);
+        assertFalse(list.isEmpty());
+        assertEquals(list.get(0).getId(), 1L);
     }
 
 

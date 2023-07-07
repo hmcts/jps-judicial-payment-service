@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.jps.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -42,7 +43,7 @@ public class SittingRecordService {
                          .regionId(sittingRecord.getRegionId())
                          .epimsId(sittingRecord.getEpimsId())
                          .hmctsServiceId(sittingRecord.getHmctsServiceId())
-                         .personalCode(sittingRecord.getPersonalCode())
+                         .judicialOfficeHolder(sittingRecord.getJudicialOfficeHolder())
                          .contractTypeId(sittingRecord.getContractTypeId())
                          .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                          .am(sittingRecord.isAm() ? AM.name() : notSet)
@@ -70,6 +71,7 @@ public class SittingRecordService {
                                    RecordSittingRecordRequest recordSittingRecordRequest) {
         recordSittingRecordRequest.getRecordedSittingRecords()
             .forEach(recordSittingRecord -> {
+
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
                     uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
                         .sittingDate(recordSittingRecord.getSittingDate())
@@ -77,7 +79,6 @@ public class SittingRecordService {
                         .regionId(recordSittingRecord.getRegionId())
                         .epimsId(recordSittingRecord.getEpimsId())
                         .hmctsServiceId(hmctsServiceCode)
-                        .personalCode(recordSittingRecord.getPersonalCode())
                         .contractTypeId(recordSittingRecord.getContractTypeId())
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
                         .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
@@ -88,6 +89,9 @@ public class SittingRecordService {
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
 
+                JudicialOfficeHolder judicialOfficeHolder =
+                    createJudicialOfficeHolder(recordSittingRecord.getPersonalCode());
+
                 StatusHistory statusHistory = StatusHistory.builder()
                     .statusId(StatusId.RECORDED.name())
                     .changeDateTime(recordSittingRecord.getCreatedDateTime())
@@ -95,8 +99,16 @@ public class SittingRecordService {
                     .changeByName(recordSittingRecordRequest.getRecordedByName())
                     .build();
 
+                sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
                 sittingRecord.addStatusHistory(statusHistory);
                 sittingRecordRepository.save(sittingRecord);
             });
+    }
+
+    private JudicialOfficeHolder createJudicialOfficeHolder(String personalCode) {
+        return JudicialOfficeHolder.builder()
+            .personalCode(personalCode)
+            .build();
+
     }
 }

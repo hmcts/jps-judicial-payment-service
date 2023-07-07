@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
@@ -60,11 +61,15 @@ class SittingRecordControllerITest extends BaseTest {
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("BBA3")
-            .personalCode("4923421")
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .build();
+
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode("4923421")
+            .build();
+        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -87,6 +88,12 @@ class SittingRecordServiceITest extends BaseTest {
     private uk.gov.hmcts.reform.jps.model.out.SittingRecord getSittingRecord(
         SittingRecord sittingRecord) {
         String notSet = null;
+
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode("001")
+            .build();
+        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+
         return Optional.ofNullable(sittingRecord)
             .map(persistedSittingRecord -> uk.gov.hmcts.reform.jps.model.out.SittingRecord.builder()
             .sittingRecordId(persistedSittingRecord.getId())
@@ -95,7 +102,7 @@ class SittingRecordServiceITest extends BaseTest {
             .regionId(persistedSittingRecord.getRegionId())
             .epimsId(persistedSittingRecord.getEpimsId())
             .hmctsServiceId(persistedSittingRecord.getHmctsServiceId())
-            .personalCode(persistedSittingRecord.getPersonalCode())
+            .judicialOfficeHolder(persistedSittingRecord.getJudicialOfficeHolder())
             .contractTypeId(persistedSittingRecord.getContractTypeId())
             .judgeRoleTypeId(persistedSittingRecord.getJudgeRoleTypeId())
             .am(persistedSittingRecord.isAm() ? AM.name() : notSet)
@@ -114,20 +121,26 @@ class SittingRecordServiceITest extends BaseTest {
         if (counter > 1) {
             personalCode.append(counter);
         }
-        SittingRecord.SittingRecordBuilder builder = SittingRecord.builder();
-        return builder
+
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode(personalCode.toString())
+            .build();
+
+        SittingRecord sittingRecord = SittingRecord.builder()
             .sittingDate(LocalDate.now().minusDays(counter))
             .statusId(recorded.name())
             .regionId("1")
             .epimsId(EPIM_ID)
             .hmctsServiceId(SSC_ID)
-            .personalCode(personalCode.toString())
             .contractTypeId(counter)
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .createdByUserId(USER_ID)
             .build();
+        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+
+        return sittingRecord;
     }
 
     @Test

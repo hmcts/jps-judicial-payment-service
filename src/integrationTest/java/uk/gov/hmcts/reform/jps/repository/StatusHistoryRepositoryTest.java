@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
@@ -37,7 +38,6 @@ class StatusHistoryRepositoryTest {
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("ssc_id")
-            .personalCode("001")
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
@@ -45,14 +45,19 @@ class StatusHistoryRepositoryTest {
             .createdByUserId("jp-recorder")
             .build();
 
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode("001")
+            .build();
+        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+
         statusHistory = StatusHistory.builder()
             .statusId("recorded")
             .changeDateTime(LocalDateTime.now())
             .changeByUserId("jp-recorder")
             .changeByName("John Doe")
             .build();
-
         sittingRecord.addStatusHistory(statusHistory);
+
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         persistedStatusHistory = persistedSittingRecord.getStatusHistories().get(0);
     }
