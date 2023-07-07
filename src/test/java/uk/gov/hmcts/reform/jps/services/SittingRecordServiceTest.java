@@ -287,37 +287,51 @@ class SittingRecordServiceTest {
             statusHistory = optionalStatusHistory.get();
         }
 
-        assertThat(sittingRecord.getStatusId().equals("DELETED"));
         assertThat(statusHistory.getStatusId().equals("DELETED"));
 
     }
 
     @Test
     void shouldDeleteRecordSubmitter() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-submitter")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
-        assertThat(sittingRecord.getStatusId().equals("DELETED"));
+        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
+        StatusHistory statusHistory = null;
+        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
+            statusHistory = optionalStatusHistory.get();
+        }
+
+        assertThat(statusHistory.getStatusId().equals("DELETED"));
 
     }
 
     @Test
     void shouldDeleteRecordAdmin() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-admin")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, SUBMITTED.name());
 
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
-        assertThat(sittingRecord.getStatusId().equals("DELETED"));
+        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
+        StatusHistory statusHistory = null;
+        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
+            statusHistory = optionalStatusHistory.get();
+        }
+
+        assertThat(statusHistory.getStatusId().equals("DELETED"));
 
     }
 
     @Test
     void differentRecorderID() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-recorder")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
@@ -329,7 +343,8 @@ class SittingRecordServiceTest {
 
     @Test
     void incorrectIDAMRole() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-publisher")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
