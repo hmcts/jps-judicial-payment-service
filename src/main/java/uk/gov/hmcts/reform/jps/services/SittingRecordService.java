@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -30,12 +31,18 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
+@Slf4j
 public class SittingRecordService {
-    private final SittingRecordRepository sittingRecordRepository;
-    private final SecurityUtils securityUtils;
+
+    @Autowired
+    private SittingRecordRepository sittingRecordRepository;
+
+    @Autowired
+    private SecurityUtils securityUtils;
+
 
     private Consumer<uk.gov.hmcts.reform.jps.domain.SittingRecord>
-    deleteSittingRecord = sittingRecord -> {
+        deleteSittingRecord = sittingRecord -> {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(StatusId.DELETED.name())
             .changeDateTime(LocalDateTime.now())
@@ -46,7 +53,12 @@ public class SittingRecordService {
         sittingRecord.addStatusHistory(statusHistory);
         sittingRecord.setStatusId(DELETED.name());
         sittingRecordRepository.save(sittingRecord);
-    } ;
+    };
+
+    public SittingRecordService(SittingRecordRepository sittingRecordRepository, SecurityUtils securityUtils) {
+        this.sittingRecordRepository = sittingRecordRepository;
+        this.securityUtils = securityUtils;
+    }
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -58,23 +70,23 @@ public class SittingRecordService {
         String notSet = null;
         return dbSittingRecords.stream()
             .map(sittingRecord ->
-                     SittingRecord.builder()
-                         .sittingRecordId(sittingRecord.getId())
-                         .sittingDate(sittingRecord.getSittingDate())
-                         .statusId(sittingRecord.getStatusId())
-                         .regionId(sittingRecord.getRegionId())
-                         .epimsId(sittingRecord.getEpimsId())
-                         .hmctsServiceId(sittingRecord.getHmctsServiceId())
-                         .personalCode(sittingRecord.getPersonalCode())
-                         .contractTypeId(sittingRecord.getContractTypeId())
-                         .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
-                         .am(sittingRecord.isAm() ? AM.name() : notSet)
-                         .pm(sittingRecord.isPm() ? PM.name() : notSet)
-                         .createdDateTime(sittingRecord.getCreatedDateTime())
-                         .createdByUserId(sittingRecord.getCreatedByUserId())
-                         .changeDateTime(sittingRecord.getChangeDateTime())
-                         .changeByUserId(sittingRecord.getChangeByUserId())
-                         .build())
+                SittingRecord.builder()
+                    .sittingRecordId(sittingRecord.getId())
+                    .sittingDate(sittingRecord.getSittingDate())
+                    .statusId(sittingRecord.getStatusId())
+                    .regionId(sittingRecord.getRegionId())
+                    .epimsId(sittingRecord.getEpimsId())
+                    .hmctsServiceId(sittingRecord.getHmctsServiceId())
+                    .personalCode(sittingRecord.getPersonalCode())
+                    .contractTypeId(sittingRecord.getContractTypeId())
+                    .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
+                    .am(sittingRecord.isAm() ? AM.name() : notSet)
+                    .pm(sittingRecord.isPm() ? PM.name() : notSet)
+                    .createdDateTime(sittingRecord.getCreatedDateTime())
+                    .createdByUserId(sittingRecord.getCreatedByUserId())
+                    .changeDateTime(sittingRecord.getChangeDateTime())
+                    .changeByUserId(sittingRecord.getChangeByUserId())
+                    .build())
             .toList();
 
     }
@@ -85,7 +97,7 @@ public class SittingRecordService {
         String hmctsServiceCode) {
 
         return sittingRecordRepository.totalRecords(recordSearchRequest,
-                                                    hmctsServiceCode);
+            hmctsServiceCode);
     }
 
     @Transactional
@@ -104,9 +116,9 @@ public class SittingRecordService {
                         .contractTypeId(recordSittingRecord.getContractTypeId())
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
                         .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getAm).orElse(false))
+                            .map(DurationBoolean::getAm).orElse(false))
                         .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getPm).orElse(false))
+                            .map(DurationBoolean::getPm).orElse(false))
                         .build();
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
@@ -129,11 +141,11 @@ public class SittingRecordService {
             = sittingRecordRepository.findById(sittingRecordId)
             .orElseThrow(() -> new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"));
 
-        if(securityUtils.getUserInfo().getRoles().contains("jps-recorder"))
+        if (securityUtils.getUserInfo().getRoles().contains("jps-recorder"))
             recorderDelete(sittingRecord);
         else if (securityUtils.getUserInfo().getRoles().contains("jps-submitter")) {
             deleteSittingRecord(sittingRecord, RECORDED);
-        } else if(securityUtils.getUserInfo().getRoles().contains("jps-admin")) {
+        } else if (securityUtils.getUserInfo().getRoles().contains("jps-admin")) {
             deleteSittingRecord(sittingRecord, SUBMITTED);
         }
     }
@@ -147,7 +159,7 @@ public class SittingRecordService {
                 .orElseThrow(() -> new ResourceNotFoundException(
                     "User IDAM ID does not match the oldest Changed by IDAM ID "));
 
-             deleteSittingRecord(recordedStatusHistory.getSittingRecord());
+            deleteSittingRecord(recordedStatusHistory.getSittingRecord());
         } else {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
         }
@@ -163,7 +175,7 @@ public class SittingRecordService {
         }
     }
 
-    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord){
+    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(StatusId.DELETED.name())
             .changeDateTime(LocalDateTime.now())
