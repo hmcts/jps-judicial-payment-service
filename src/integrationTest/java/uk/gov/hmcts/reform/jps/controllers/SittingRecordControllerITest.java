@@ -28,7 +28,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -204,7 +203,7 @@ class SittingRecordControllerITest {
       jps-recorder
       jps-submitter
       jps-admin
-      """)
+        """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
     void shouldDeleteSittingRecordWhenSittingRecordPresent(String role) throws Exception {
