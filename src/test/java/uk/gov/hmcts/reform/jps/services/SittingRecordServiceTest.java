@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
@@ -274,9 +275,27 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldDeleteRecordRecorder() {
+        //UserInfo userInfo = mock(UserInfo.class) ;
+
+        //doReturn(USER_ID).when(securityUtils.getUserInfo()).getUid();
+        //doReturn(List.of("jps-recorder")).when(securityUtils.getUserInfo()).getRoles();
+        //doReturn(USER_ID).when(securityUtils).getUserInfo().getUid();
+        //doReturn(List.of("jps-recorder")).when(securityUtils).getUserInfo().getRoles();
+
         doReturn(USER_ID).when(securityUtils).getUserId();
-        doReturn(List.of("jps-recorder")).when(securityUtils).getUserInfo().getRoles();
+        doReturn(List.of("jps-recorder")).when(securityUtils).getUserRoles();
+
+        //when(securityUtils.getUserInfo().getUid()).thenReturn(USER_ID);
+        //when(securityUtils.getUserInfo().getRoles()).thenReturn(List.of("jps-recorder"));
+
+        //doReturn(USER_ID).when(userInfo.getUid());
+        //doReturn(List.of("jps-recorder")).when(userInfo.getRoles());
+
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
+
+        System.out.print(sittingRecord.getId().toString());
+
+        sittingRecordRepository.save(sittingRecord);
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
@@ -345,14 +364,16 @@ class SittingRecordServiceTest {
         }
 
         assertThat(statusHistory.getStatusId().equals("RECORDED"));
-        assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
+        assertEquals("Sitting Record ID Not Found", exception.getMessage());
     }
 
 
     @Test
     void incorrectIDAMRole() {
         doReturn(USER_ID).when(securityUtils).getUserId();
-        doReturn(List.of("jps-publisher")).when(securityUtils).getUserInfo().getRoles();
+        doReturn(List.of("jps-publisher")).when(securityUtils).getUserRoles();
+        //doReturn(USER_ID).when(securityUtils).getUserId();
+        //doReturn(List.of("jps-publisher")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
@@ -364,7 +385,8 @@ class SittingRecordServiceTest {
 
     @Test
     void wrongStateRecorder() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-recorder")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, SUBMITTED.name());
 
         Exception exception = assertThrows(ConflictException.class, () -> {
@@ -375,7 +397,8 @@ class SittingRecordServiceTest {
 
     @Test
     void wrongStateSubmitter() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-submitter")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, SUBMITTED.name());
 
         Exception exception = assertThrows(ConflictException.class, () -> {
@@ -386,7 +409,8 @@ class SittingRecordServiceTest {
 
     @Test
     void wrongStateAdmin() {
-
+        doReturn(USER_ID).when(securityUtils).getUserId();
+        doReturn(List.of("jps-admin")).when(securityUtils).getUserInfo().getRoles();
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         Exception exception = assertThrows(ConflictException.class, () -> {

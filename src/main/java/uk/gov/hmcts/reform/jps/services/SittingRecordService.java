@@ -139,7 +139,7 @@ public class SittingRecordService {
     public void deleteSittingRecord(Long sittingRecordId) {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = sittingRecordRepository.findById(sittingRecordId)
-            .orElseThrow(() -> new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"));
+            .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
 
         if (securityUtils.getUserInfo().getRoles().contains("jps-recorder")) {
             recorderDelete(sittingRecord);
