@@ -36,11 +36,15 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
         predicates.add(criteriaBuilder.between(sittingRecord.get("sittingDate"),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
+
+        Optional.ofNullable(recordSearchRequest.getRegionId())
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), value)));
+
+        Optional.ofNullable(recordSearchRequest.getEpimsId())
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), value)));
 
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("personalCode"), value)));

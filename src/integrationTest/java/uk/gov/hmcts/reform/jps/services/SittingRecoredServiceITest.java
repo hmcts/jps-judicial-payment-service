@@ -65,6 +65,32 @@ class SittingRecoredServiceITest extends BaseTest {
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
             .offset(0)
+            .dateOrder(ASCENDING)
+            .dateRangeFrom(LocalDate.now().minusDays(4))
+            .dateRangeTo(LocalDate.now())
+            .build();
+
+        List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
+            recordSearchRequest,
+            sittingRecord.getHmctsServiceId()
+        );
+
+
+        uk.gov.hmcts.reform.jps.model.out.SittingRecord expected = getSittingRecord(persistedSittingRecord);
+
+        assertThat(response).hasSize(1);
+        assertThat(expected).isEqualTo(response.get(0));
+    }
+
+    @Test
+    void shouldReturnQueriedRecordsMandatoryFieldsSetPlusEpimsAndRegionId() {
+        SittingRecord sittingRecord = getSittingRecord(2);
+        SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
+        assertThat(persistedSittingRecord).isNotNull();
+
+        SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
+            .pageSize(10)
+            .offset(0)
             .regionId(sittingRecord.getRegionId())
             .epimsId(sittingRecord.getEpimsId())
             .dateOrder(ASCENDING)

@@ -13,7 +13,6 @@ import uk.gov.hmcts.reform.jps.validator.EnumNamePattern;
 import java.io.Serializable;
 import java.time.LocalDate;
 import javax.validation.constraints.Min;
-import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 
@@ -31,12 +30,6 @@ public class SittingRecordSearchRequest implements Serializable {
     @NotNull(message = "Offset is mandatory")
     private final Integer offset;
 
-    @NotBlank(message = "Region Id is mandatory")
-    private final String regionId;
-
-    @NotBlank(message = "Epims Id is mandatory")
-    private final String epimsId;
-
     @EnumNamePattern(regexp = "ASCENDING|DESCENDING", message = "Expected value ascending|descending")
     @NotNull(message = "Date order is mandatory")
     private final DateOrder dateOrder;
@@ -48,8 +41,12 @@ public class SittingRecordSearchRequest implements Serializable {
     private final LocalDate dateRangeTo;
 
     //Optional parameters
+    private final String regionId;
+    private final String epimsId;
     private final String personalCode;
     private final String judgeRoleTypeId;
+    private final boolean medicalMembersOnly;
+    private final boolean includeFees;
 
     @EnumNamePattern(regexp = "AM|PM|FULL_DAY", message = "Expected value AM|PM|Full day")
     private final Duration duration;
