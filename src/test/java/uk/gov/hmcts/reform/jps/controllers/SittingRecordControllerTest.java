@@ -147,10 +147,10 @@ class SittingRecordControllerTest {
             .thenReturn(2);
         List<SittingRecord> sittingRecords = List.of(
             SittingRecord.builder()
-                .sittingRecordId(1)
+                .sittingRecordId(1L)
                 .build(),
             SittingRecord.builder()
-                .sittingRecordId(12)
+                .sittingRecordId(12L)
                 .build()
         );
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
@@ -176,7 +176,6 @@ class SittingRecordControllerTest {
 
         verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
     }
@@ -213,7 +212,6 @@ class SittingRecordControllerTest {
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
 
     }
 }
