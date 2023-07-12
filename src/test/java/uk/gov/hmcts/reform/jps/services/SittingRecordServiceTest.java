@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -21,16 +22,14 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 
 import java.io.IOException;
 import java.security.Security;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -55,11 +54,19 @@ class SittingRecordServiceTest {
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
     private static final LocalDateTime CURRENT_DATE_TIME = now();
 
+    private static final Long ID = new Random().nextLong();
+
     @Mock
     private SittingRecordRepository sittingRecordRepository;
 
     @Mock
     private SecurityUtils securityUtils;
+
+    @Mock
+    AuthTokenGenerator authTokenGenerator;
+
+    @Mock
+    IdamRepository idamRepository;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -250,7 +257,7 @@ class SittingRecordServiceTest {
             .build();
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-            .id(1L)
+            .id(ID)
             .sittingDate(LocalDate.now().minusDays(2))
             .statusId(state)
             .regionId("1")
@@ -276,7 +283,7 @@ class SittingRecordServiceTest {
     @Test
     void shouldDeleteRecordRecorder() {
         //UserInfo userInfo = mock(UserInfo.class) ;
-
+        SecurityUtils securityUtils = new SecurityUtils(authTokenGenerator, idamRepository);
         //doReturn(USER_ID).when(securityUtils.getUserInfo()).getUid();
         //doReturn(List.of("jps-recorder")).when(securityUtils.getUserInfo()).getRoles();
         //doReturn(USER_ID).when(securityUtils).getUserInfo().getUid();
@@ -284,7 +291,9 @@ class SittingRecordServiceTest {
 
         doReturn(USER_ID).when(securityUtils).getUserId();
         doReturn(List.of("jps-recorder")).when(securityUtils).getUserRoles();
-
+        System.out.print("security util");
+        System.out.print(securityUtils.getUserId());
+        System.out.print(securityUtils.getUserRoles());
         //when(securityUtils.getUserInfo().getUid()).thenReturn(USER_ID);
         //when(securityUtils.getUserInfo().getRoles()).thenReturn(List.of("jps-recorder"));
 
@@ -293,9 +302,11 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
 
-        System.out.print(sittingRecord.getId().toString());
+        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
-        sittingRecordRepository.save(sittingRecord);
+        System.out.print("post set up");
+        System.out.print(sittingRecord.getStatusId());
+        System.out.print(sittingRecord.getId().toString());
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
