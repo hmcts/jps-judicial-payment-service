@@ -12,7 +12,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
-import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -23,10 +22,8 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 
 import java.io.IOException;
-import java.security.Security;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -256,23 +253,24 @@ class SittingRecordServiceTest {
             .changeByName("John Smith")
             .build();
 
-        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-            .id(ID)
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(state)
-            .regionId("1")
-            .epimsId("epims001")
-            .hmctsServiceId("sscs")
-            .personalCode("001")
-            .contractTypeId(1L)
-            .judgeRoleTypeId("HighCourt")
-            .am(true)
-            .pm(true)
-            .createdByUserId(USER_ID)
-            .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-            .changeByUserId(changeById)
-            .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
-            .build();
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
+            uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                .id(ID)
+                .sittingDate(LocalDate.now().minusDays(2))
+                .statusId(state)
+                .regionId("1")
+                .epimsId("epims001")
+                .hmctsServiceId("sscs")
+                .personalCode("001")
+                .contractTypeId(1L)
+                .judgeRoleTypeId("HighCourt")
+                .am(true)
+                .pm(true)
+                .createdByUserId(USER_ID)
+                .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
+                .changeByUserId(changeById)
+                .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
+                .build();
 
         sittingRecord.addStatusHistory(statusHistory);
 
@@ -281,7 +279,7 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldDeleteRecordRecorder() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-recorder")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-recorder")).uid(USER_ID).build();
         given(securityUtils.getUserInfo()).willReturn(userInfo);
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
@@ -303,9 +301,12 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldDeleteRecordSubmitter() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-submitter")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-submitter")).uid(USER_ID).build();
 
-        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(
+            UPDATED_BY_USER_ID,
+            RECORDED.name()
+        );
 
         Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
         StatusHistory statusHistory = null;
@@ -319,9 +320,12 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldDeleteRecordAdmin() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-admin")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-admin")).uid(USER_ID).build();
 
-        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, SUBMITTED.name());
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(
+            UPDATED_BY_USER_ID,
+            SUBMITTED.name()
+        );
 
         Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
         StatusHistory statusHistory = null;
@@ -335,10 +339,11 @@ class SittingRecordServiceTest {
 
     @Test
     void differentRecorderID() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-recorder")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-recorder")).uid(USER_ID).build();
         given(securityUtils.getUserInfo()).willReturn(userInfo);
 
-        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
+            deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
@@ -358,7 +363,7 @@ class SittingRecordServiceTest {
 
     @Test
     void wrongStateRecorder() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-recorder")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-recorder")).uid(USER_ID).build();
         given(securityUtils.getUserInfo()).willReturn(userInfo);
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, SUBMITTED.name());
@@ -373,7 +378,7 @@ class SittingRecordServiceTest {
 
     @Test
     void wrongStateSubmitter() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-submitter")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-submitter")).uid(USER_ID).build();
         given(securityUtils.getUserInfo()).willReturn(userInfo);
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, SUBMITTED.name());
@@ -388,7 +393,7 @@ class SittingRecordServiceTest {
 
     @Test
     void wrongStateAdmin() {
-        UserInfo userInfo =  UserInfo.builder().roles(List.of("jps-admin")).uid(USER_ID).build();
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-admin")).uid(USER_ID).build();
         given(securityUtils.getUserInfo()).willReturn(userInfo);
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
