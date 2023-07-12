@@ -212,14 +212,14 @@ class SittingRecordControllerITest {
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
         when(userInfo.getUid()).thenReturn("Recorder");
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sitting-records/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecords/{sittingRecordId}", 2))
             .andDo(print())
             .andExpect(status().isOk());
     }
 
     @Test
     void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sitting-records"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
             .andDo(print())
             .andExpectAll(
                 status().isBadRequest(),
@@ -231,7 +231,7 @@ class SittingRecordControllerITest {
 
     @Test
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sitting-records/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
             .andExpectAll(
                 status().isNotFound(),
