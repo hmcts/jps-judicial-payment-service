@@ -230,6 +230,7 @@ class SittingRecordControllerITest {
 
 
     @Test
+    @WithMockUser
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
