@@ -77,7 +77,7 @@ public class RestExceptionHandlerTest extends BaseTest {
             .contentType(MediaType.APPLICATION_JSON));
 
         // THEN
-        assertHttpErrorResponse(result, HttpStatus.FORBIDDEN.value(), testExceptionMessage, "FORBIDDEN");
+        assertHttpErrorResponse(result, HttpStatus.NOT_FOUND.value(), testExceptionMessage, "NOT_FOUND");
     }
 
     @DisplayName("should return correct response when ServiceException is thrown")
