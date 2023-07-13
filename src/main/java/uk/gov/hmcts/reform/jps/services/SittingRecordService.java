@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -12,6 +13,7 @@ import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -32,7 +34,6 @@ public class SittingRecordService {
             recordSearchRequest,
             hmctsServiceCode
         );
-        String notSet = null;
         return dbSittingRecords.stream()
             .map(sittingRecord ->
                      SittingRecord.builder()
@@ -45,8 +46,8 @@ public class SittingRecordService {
                          .personalCode(sittingRecord.getPersonalCode())
                          .contractTypeId(sittingRecord.getContractTypeId())
                          .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
-                         .am(sittingRecord.isAm() ? AM.name() : notSet)
-                         .pm(sittingRecord.isPm() ? PM.name() : notSet)
+                         .am(sittingRecord.isAm() ? AM.name() : null)
+                         .pm(sittingRecord.isPm() ? PM.name() : null)
                          .createdDateTime(sittingRecord.getCreatedDateTime())
                          .createdByUserId(sittingRecord.getCreatedByUserId())
                          .changeDateTime(sittingRecord.getChangeDateTime())
@@ -98,5 +99,15 @@ public class SittingRecordService {
                 sittingRecord.addStatusHistory(statusHistory);
                 sittingRecordRepository.save(sittingRecord);
             });
+    }
+
+    public List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
+        List<RecordingUser> recordingUsers = new ArrayList<>();
+        sittingRecords.forEach(e ->
+            recordingUsers.add(RecordingUser.builder()
+                                   .userId(e.getCreatedByUserId())
+                                   .userName(e.getCreatedByUserName())
+                                   .build()));
+        return recordingUsers.stream().sorted().distinct().toList();
     }
 }

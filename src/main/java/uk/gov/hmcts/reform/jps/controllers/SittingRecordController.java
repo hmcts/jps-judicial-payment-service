@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.controllers.util.Utility;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -57,6 +58,8 @@ public class SittingRecordController {
         );
 
         List<SittingRecord> sittingRecords = emptyList();
+        List<RecordingUser> recordingUsers = emptyList();
+
 
         if (totalRecordCount > 0) {
             sittingRecords = sittingRecordService.getSittingRecords(
@@ -68,11 +71,15 @@ public class SittingRecordController {
                 regionService.setRegionName(hmctsServiceCode, sittingRecords);
                 judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
                 caseWorkerService.setCaseWorkerDetails(sittingRecords);
+
+                recordingUsers =
+                    sittingRecordService.getRecordedUsersFromGivenSittingRecords(sittingRecords);
             }
         }
 
         return ok(SittingRecordSearchResponse.builder()
                       .recordCount(totalRecordCount)
+                      .recordingUsers(recordingUsers)
                       .sittingRecords(sittingRecords)
                       .build());
     }

@@ -16,6 +16,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -26,10 +27,14 @@ import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -64,7 +69,6 @@ class SittingRecordControllerTest {
     private JudicialUserDetailsService judicialUserDetailsService;
     @MockBean
     private CaseWorkerService caseWorkerService;
-
 
     @Test
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
@@ -140,22 +144,18 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
+        List<SittingRecord> sittingRecords = generateSittingRecords();
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
         ))
-            .thenReturn(2);
-        List<SittingRecord> sittingRecords = List.of(
-            SittingRecord.builder()
-                .sittingRecordId(1L)
-                .build(),
-            SittingRecord.builder()
-                .sittingRecordId(12L)
-                .build()
-        );
+            .thenReturn(sittingRecords.size());
+        List<RecordingUser> recordingUsers = getRecordedUsersFromGivenSittingRecords(sittingRecords);
+
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
-            .thenReturn(sittingRecords
-            );
+            .thenReturn(sittingRecords);
+        when(sittingRecordService.getRecordedUsersFromGivenSittingRecords(anyList()))
+            .thenReturn(recordingUsers);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -176,7 +176,7 @@ class SittingRecordControllerTest {
 
         verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
-        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
+        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(sittingRecords.size());
         assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
     }
 
@@ -214,4 +214,68 @@ class SittingRecordControllerTest {
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
 
     }
+
+    private List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
+        List<RecordingUser> recordingUsers = new ArrayList<>();
+        sittingRecords.forEach(e ->
+            recordingUsers.add(RecordingUser.builder()
+                                   .userId(e.getCreatedByUserId())
+                                   .userName(e.getCreatedByUserName())
+                                   .build())
+        );
+        return recordingUsers.stream().sorted().distinct().toList();
+    }
+
+    private List<SittingRecord> generateSittingRecords() {
+        SittingRecord sittingRecord1 = SittingRecord.builder()
+            .sittingRecordId(1L)
+            .personalCode("PC1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .createdByUserId("recorder1")
+            .createdByUserName("Joe Bloggs")
+            .createdDateTime(LocalDateTime.now().minusDays(2))
+            .changeByUserId("recorder2")
+            .changeByUserName("Fred Bloggs")
+            .changeDateTime(LocalDateTime.now().minusHours(36))
+            .build();
+
+        SittingRecord sittingRecord2 = SittingRecord.builder()
+            .sittingRecordId(2L)
+            .personalCode("PC2")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .createdByUserId("recorder1")
+            .createdByUserName("Henry Bloggs")
+            .createdDateTime(LocalDateTime.now().minusDays(2))
+            .changeByUserId("recorder2")
+            .changeByUserName("Tim Bloggs")
+            .changeDateTime(LocalDateTime.now().minusHours(36))
+            .build();
+
+        SittingRecord sittingRecord3 = SittingRecord.builder()
+            .sittingRecordId(3L)
+            .personalCode("PC3")
+            .sittingDate(LocalDate.now().minusDays(1))
+            .createdByUserId("recorder3")
+            .createdByUserName("Charlie Bloggs")
+            .createdDateTime(LocalDateTime.now().minusDays(1))
+            .changeByUserId("recorder4")
+            .changeByUserName("Fred Bloggs")
+            .changeDateTime(LocalDateTime.now().minusHours(20))
+            .build();
+
+        SittingRecord sittingRecord4 = SittingRecord.builder()
+            .sittingRecordId(4L)
+            .personalCode("PC4")
+            .sittingDate(LocalDate.now().minusDays(1))
+            .createdByUserId("recorder3")
+            .createdByUserName("Will Bloggs")
+            .createdDateTime(LocalDateTime.now().minusDays(1))
+            .changeByUserId("recorder4")
+            .changeByUserName("Fred Bloggs")
+            .changeDateTime(LocalDateTime.now().minusHours(20))
+            .build();
+
+        return List.of(sittingRecord1, sittingRecord2, sittingRecord3, sittingRecord4);
+    }
+
 }
