@@ -22,17 +22,26 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 @NoArgsConstructor
 @ToString
 public class SittingRecord {
-    private long sittingRecordId;
+    private Long sittingRecordId;
     private LocalDate sittingDate;
     private String statusId;
     private String regionId;
     private String regionName;
     private String epimsId;
+    private String venueName;
     private String hmctsServiceId;
     private String personalCode;
     private String personalName;
     private Long contractTypeId;
+    private String contractTypeName;
     private String judgeRoleTypeId;
+    private String judgeRoleTypeName;
+    @Builder.Default
+    private Boolean crownServantFlag = false;
+    @Builder.Default
+    private Boolean londonFlag = false;
+    private String payrollId;
+    private String accountCode;
     private String am;
     private String pm;
     @ToString.Exclude

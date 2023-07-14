@@ -17,6 +17,7 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -27,13 +28,16 @@ import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -142,41 +146,18 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
+        List<SittingRecord> sittingRecords = generateSittingRecords();
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        )).thenReturn(2);
+        ))
+            .thenReturn(sittingRecords.size());
+        List<RecordingUser> recordingUsers = getRecordedUsersFromGivenSittingRecords(sittingRecords);
 
-        SittingRecord sittingRecord1 = SittingRecord.builder()
-            .sittingRecordId(1)
-            .statusId(StatusId.RECORDED.name())
-            .build();
-        StatusHistory statusHistory1 = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11233")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Jason Bourne")
-            .build();
-        sittingRecord1.setStatusHistories(List.of(statusHistory1));
-
-        SittingRecord sittingRecord2 = SittingRecord.builder()
-            .sittingRecordId(2)
-            .statusId(StatusId.RECORDED.name())
-            .build();
-        StatusHistory statusHistory2 = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11244")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Matt Murdock")
-            .build();
-        sittingRecord2.setStatusHistories(List.of(statusHistory2));
-
-        List<SittingRecord> sittingRecords = List.of(
-            sittingRecord1, sittingRecord2
-        );
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
-            .thenReturn(sittingRecords
-            );
+            .thenReturn(sittingRecords);
+        when(sittingRecordService.getRecordedUsersFromGivenSittingRecords(anyList()))
+            .thenReturn(recordingUsers);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -197,7 +178,7 @@ class SittingRecordControllerTest {
 
         verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
-        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
+        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(sittingRecords.size());
         assertEquals(sittingRecordSearchResponse.getSittingRecords().size(), sittingRecords.size());
         if (sittingRecordSearchResponse.getSittingRecords().size() > 0) {
             assertEquals(sittingRecordSearchResponse.getSittingRecords().get(0), sittingRecords.get(0));
@@ -248,5 +229,53 @@ class SittingRecordControllerTest {
         }
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
+
     }
+
+    private List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
+        List<RecordingUser> recordingUsers = new ArrayList<>();
+        sittingRecords.forEach(e ->
+            recordingUsers.add(RecordingUser.builder()
+                                   .userId(e.getCreatedByUserId())
+                                   .userName(e.getCreatedByUserName())
+                                   .build())
+        );
+        return recordingUsers.stream().sorted().distinct().toList();
+    }
+
+    private List<SittingRecord> generateSittingRecords() {
+
+        SittingRecord sittingRecord1 = SittingRecord.builder()
+            .sittingRecordId(1L)
+            .personalCode("PC1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .build();
+        StatusHistory statusHistory1 = StatusHistory.builder()
+            .statusId(StatusId.RECORDED.name())
+            .changeByUserId("11233")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Jason Bourne")
+            .build();
+        sittingRecord1.setStatusHistories(List.of(statusHistory1));
+
+        SittingRecord sittingRecord2 = SittingRecord.builder()
+            .sittingRecordId(2L)
+            .personalCode("PC2")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .build();
+        StatusHistory statusHistory2 = StatusHistory.builder()
+            .statusId(StatusId.RECORDED.name())
+            .changeByUserId("11244")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Matt Murdock")
+            .build();
+        sittingRecord2.setStatusHistories(List.of(statusHistory2));
+
+        List<SittingRecord> sittingRecords = List.of(
+            sittingRecord1, sittingRecord2
+        );
+
+        return List.of(sittingRecord1, sittingRecord2, sittingRecord3, sittingRecord4);
+    }
+
 }

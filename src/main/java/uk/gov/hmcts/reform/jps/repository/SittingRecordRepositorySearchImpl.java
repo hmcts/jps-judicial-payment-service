@@ -63,7 +63,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
-                sittingRecord.get("statusId"), value.name())));
+                sittingRecord.get(SittingRecord_.STATUS_ID), value.name())));
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
