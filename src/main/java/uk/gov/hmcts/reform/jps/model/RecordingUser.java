@@ -3,7 +3,8 @@ package uk.gov.hmcts.reform.jps.model;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
-import org.jetbrains.annotations.NotNull;
+
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
