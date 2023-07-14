@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
-import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -15,7 +14,6 @@ import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
@@ -102,13 +100,13 @@ public class SittingRecordService {
             });
     }
 
-    public List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
-        List<RecordingUser> recordingUsers = new ArrayList<>();
-        sittingRecords.forEach(e ->
-            recordingUsers.add(RecordingUser.builder()
-                                   .userId(e.getCreatedByUserId())
-                                   .userName(e.getCreatedByUserName())
-                                   .build()));
-        return recordingUsers.stream().sorted().distinct().toList();
-    }
+    //    public List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
+    //        List<RecordingUser> recordingUsers = new ArrayList<>();
+    //        sittingRecords.forEach(e ->
+    //            recordingUsers.add(RecordingUser.builder()
+    //                                   .userId(e.getCreatedByUserId())
+    //                                   .userName(e.getCreatedByUserName())
+    //                                   .build()));
+    //        return recordingUsers.stream().sorted().distinct().toList();
+    //    }
 }

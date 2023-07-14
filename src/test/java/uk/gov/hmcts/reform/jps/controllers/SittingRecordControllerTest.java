@@ -37,7 +37,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyList;
+//import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -156,8 +156,8 @@ class SittingRecordControllerTest {
 
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
-        when(sittingRecordService.getRecordedUsersFromGivenSittingRecords(anyList()))
-            .thenReturn(recordingUsers);
+        //when(sittingRecordService.getRecordedUsersFromGivenSittingRecords(anyList()))
+        //    .thenReturn(recordingUsers);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -235,10 +235,7 @@ class SittingRecordControllerTest {
     private List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
         List<RecordingUser> recordingUsers = new ArrayList<>();
         sittingRecords.forEach(e ->
-            recordingUsers.add(RecordingUser.builder()
-                                   .userId(e.getCreatedByUserId())
-                                   .userName(e.getCreatedByUserName())
-                                   .build())
+            recordingUsers.add(e.getRecordingUser())
         );
         return recordingUsers.stream().sorted().distinct().toList();
     }
@@ -271,11 +268,7 @@ class SittingRecordControllerTest {
             .build();
         sittingRecord2.setStatusHistories(List.of(statusHistory2));
 
-        List<SittingRecord> sittingRecords = List.of(
-            sittingRecord1, sittingRecord2
-        );
-
-        return List.of(sittingRecord1, sittingRecord2, sittingRecord3, sittingRecord4);
+        return List.of(sittingRecord1, sittingRecord2);
     }
 
 }

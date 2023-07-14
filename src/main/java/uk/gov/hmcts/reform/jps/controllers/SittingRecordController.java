@@ -69,8 +69,9 @@ public class SittingRecordController {
                 regionService.setRegionName(hmctsServiceCode, sittingRecords);
                 judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
 
-                recordingUsers =
-                    sittingRecordService.getRecordedUsersFromGivenSittingRecords(sittingRecords);
+                // TODO: get recording users
+                //recordingUsers =
+                //    sittingRecordService.getRecordedUsersFromGivenSittingRecords(sittingRecords);
             }
         }
 

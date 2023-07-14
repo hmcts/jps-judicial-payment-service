@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import feign.Param;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,14 +11,17 @@ import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -40,7 +44,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     public void setUp() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
         statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
-                                                          JpsRole.ROLE_RECORDER.name(),
+                                                          "john_doe",
                                                           "John Doe",
                                                             sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryCreated);
@@ -122,7 +126,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     void shouldFindLatestStatus() {
 
         statusHistoryAmended = createStatusHistory("amended",
-                                                                 JpsRole.ROLE_RECORDER.name(),
+                                                                 "matt_doe",
                                                                  "Matthew Doe",
                                                                  persistedSittingRecord);
         persistedSittingRecord.addStatusHistory(statusHistoryAmended);
@@ -134,6 +138,30 @@ class StatusHistoryRepositoryTest extends AbstractTest {
             .findStatusHistoryDesc(persistedSittingRecord.getId()).get(0);
         assertNotNull(statusHistoryFound, "Could not find any status history.");
         assertEquals(statusHistoryFound, statusHistoryAmended, "Not the expected AMENDED status history!");
+    }
+
+    @Test
+    void shouldFindRecordUser() {
+        statusHistoryAmended = createStatusHistory("amended",
+                                                   "matt_doe",
+                                                   "Matthew Doe",
+                                                   persistedSittingRecord);
+        persistedSittingRecord.addStatusHistory(statusHistoryAmended);
+        persistedStatusHistoryAmended = historyRepository.save(statusHistoryAmended);
+        persistedSittingRecord = recordRepository.save(persistedSittingRecord);
+        persistedStatusHistoryCreated = persistedSittingRecord.getFirstStatusHistory();
+        String hmctsServiceId = "ssc_id";
+        String regionId = "1";
+        List<String> statusIds = Arrays.asList("recorded");
+        LocalDate startDate = LocalDate.now().minusDays(50);
+        LocalDate endDate = LocalDate.now();
+
+        List<RecordingUser> recordingUsers = historyRepository
+            .findRecordingUsers(hmctsServiceId, regionId,statusIds,startDate, endDate);
+
+        assertFalse(recordingUsers.isEmpty());
+        assertEquals(recordingUsers.size(), 1);
+        assertEquals(recordingUsers.get(0).getUserId(), "john_doe");
     }
 
 }
