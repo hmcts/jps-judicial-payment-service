@@ -65,8 +65,8 @@ public class SittingRecord {
         try {
             StatusHistory statusHistory = getFirstStatusHistory();
             return RecordingUser.builder()
-                .userId(statusHistory.getChangeByUserId())
-                .userName(statusHistory.getChangeByName())
+                .changeByUserId(statusHistory.getChangeByUserId())
+                .changeByUserName(statusHistory.getChangeByName())
                 .build();
         } catch (Exception e) {
             return null;

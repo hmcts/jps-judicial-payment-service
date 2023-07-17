@@ -6,10 +6,17 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import uk.gov.hmcts.reform.jps.model.RecordingUser;
 
 import java.time.LocalDateTime;
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
 
 @Builder
 @NoArgsConstructor()
@@ -19,6 +26,8 @@ import javax.persistence.*;
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {
+
+    public static final String FIND_ALL_RECORDING_USERS = "FIND_ALL_RECORDING_USERS";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

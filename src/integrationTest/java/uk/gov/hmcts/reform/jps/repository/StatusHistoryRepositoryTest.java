@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.jps.repository;
 
-import feign.Param;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +11,6 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,7 +19,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -141,7 +141,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     }
 
     @Test
-    void shouldFindRecordUser() {
+    void shouldFindAllRecordingUsers() {
         statusHistoryAmended = createStatusHistory("amended",
                                                    "matt_doe",
                                                    "Matthew Doe",
@@ -156,12 +156,15 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         LocalDate startDate = LocalDate.now().minusDays(50);
         LocalDate endDate = LocalDate.now();
 
+
         List<RecordingUser> recordingUsers = historyRepository
-            .findRecordingUsers(hmctsServiceId, regionId,statusIds,startDate, endDate);
+            .findRecordingUsers(hmctsServiceId, regionId,statusIds,startDate, endDate)
+            .stream().sorted().toList();
 
         assertFalse(recordingUsers.isEmpty());
         assertEquals(recordingUsers.size(), 1);
-        assertEquals(recordingUsers.get(0).getUserId(), "john_doe");
+        RecordingUser recordingUser = recordingUsers.get(0);
+        assertEquals(recordingUser.getChangeByUserId(), "john_doe");
     }
 
 }
