@@ -34,6 +34,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     void shouldSaveSittingRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
         StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+                                                   LocalDateTime.now(),
                                                    JpsRole.ROLE_RECORDER.name(),
                                                    "John Doe",
                                                    sittingRecord);
@@ -49,6 +50,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
         StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+                                                    LocalDateTime.now(),
                                                    "555",
                                                    "John Doe 555",
                                                    sittingRecord);
@@ -87,6 +89,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     void shouldDeleteSelectedRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
         StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+                                                   LocalDateTime.now(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "John Doe",
                                                    sittingRecord);
@@ -120,17 +123,20 @@ class SittingRecordRepositoryTest extends AbstractTest {
     private SittingRecord createSittingRecordWithSeveralStatus() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
         statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+                                                   LocalDateTime.now(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "John Doe",
                                                    sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryCreated);
         StatusHistory statusHistoryAmended1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   LocalDateTime.now(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "Matthew Doe",
                                                    sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryAmended1);
 
         statusHistoryAmended = createStatusHistory(sittingRecord.getStatusId(),
+                                                   LocalDateTime.now(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "Mark Doe",
                                                    sittingRecord);

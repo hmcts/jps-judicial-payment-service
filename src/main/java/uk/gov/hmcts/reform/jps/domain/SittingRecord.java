@@ -75,6 +75,12 @@ public class SittingRecord {
         return optStatHistory.isPresent() ? optStatHistory.get() : null;
     }
 
+    public StatusHistory getLatestStatusHistory() {
+        Collections.sort(statusHistories, Comparator.comparing(StatusHistory::getId).reversed());
+        Optional<StatusHistory> optStatHistory = statusHistories.stream().findFirst();
+        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+    }
+
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
         statusHistory.setSittingRecord(this);
