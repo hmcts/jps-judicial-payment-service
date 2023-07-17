@@ -148,6 +148,8 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         createBatchTestData();
         createBatchTestData();
         createBatchTestData();
+        List<SittingRecord> sittingRecordsAll = recordRepository.findAll();
+        assertEquals(13, recordRepository.findAll().size());
 
         String hmctsServiceId = "ssc_id";
         String regionId = "1";
@@ -156,16 +158,15 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         LocalDate startDate = LocalDate.now().minusDays(50);
         LocalDate endDate = LocalDate.now();
 
-
         List<RecordingUser> recordingUsers = historyRepository
             .findRecordingUsers(hmctsServiceId, regionId,statusIds,startDate, endDate)
             .stream().sorted().toList();
 
         assertFalse(recordingUsers.isEmpty());
+        assertThat(recordingUsers).doesNotHaveDuplicates();
         assertEquals(recordingUsers.size(), 4);
         recordingUsers.stream().forEach(e ->
             assertTrue(e.getChangeByUserId().contains("john_")));
-
     }
 
     private List<SittingRecord> createBatchTestData() {
