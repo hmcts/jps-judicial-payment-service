@@ -230,9 +230,9 @@ class SittingRecordControllerITest {
 
 
     @Test
-    @WithMockUser
+    @WithMockUser(authorities = {"jps-recorder"})
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
             .andDo(print())
             .andExpectAll(
                 status().isNotFound(),
