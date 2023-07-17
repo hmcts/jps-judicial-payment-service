@@ -21,7 +21,7 @@ public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Lo
 
     @Query("select distinct new uk.gov.hmcts.reform.jps.model.RecordingUser(sh.changeByUserId, sh.changeByName) "
         + "from StatusHistory sh inner join SittingRecord sr "
-        + "on sh.sittingRecord.id = sr.id and sh.statusId='recorded' "
+        + "on sh.sittingRecord.id = sr.id and sh.statusId= 'RECORDED' "
         + "where sr.hmctsServiceId = :hmctsServiceId "
         //+ "and (:regionId is null or sr.regionId= :regionId) "
         + "and sr.regionId= :regionId "

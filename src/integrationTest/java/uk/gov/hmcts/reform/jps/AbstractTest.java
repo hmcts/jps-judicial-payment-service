@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps;
 
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ public class AbstractTest {
     protected SittingRecord createSittingRecord(LocalDate sittingDate) {
         return SittingRecord.builder()
             .sittingDate(sittingDate)
-            .statusId("recorded")
+            .statusId(StatusId.RECORDED.name())
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("ssc_id")
