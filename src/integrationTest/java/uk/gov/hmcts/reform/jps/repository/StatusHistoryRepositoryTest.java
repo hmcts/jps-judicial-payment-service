@@ -186,13 +186,11 @@ class StatusHistoryRepositoryTest extends AbstractTest {
                                                         "matt_smith","Matthew Smith");
         sittingRecords.add(sittingRecord2);
 
-
         SittingRecord sittingRecord3 = createNewSittingRecord(LocalDate.now().minusDays(2),
                                                               "john_jones","John Jones");
         sittingRecord3 = updateSittingRecordToSubmitted(sittingRecord3, LocalDate.now().minusDays(2),
                                                         "matt_jones","Matthew Jones");
         sittingRecords.add(sittingRecord3);
-
 
         SittingRecord sittingRecord4 = createNewSittingRecord(LocalDate.now().minusDays(2),
                                                               "john_james","John James");
@@ -226,7 +224,6 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         return updateSittingRecord(sittingRecord, StatusId.PUBLISHED.name(),
                                    localDate, userId, userName);
     }
-
 
     private SittingRecord updateSittingRecord(SittingRecord sittingRecord, String statusId,
                                                          LocalDate localDate, String userId, String userName) {
