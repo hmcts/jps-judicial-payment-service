@@ -200,23 +200,59 @@ class SittingRecordControllerITest {
     @ParameterizedTest
     @CsvSource(textBlock = """
       # ROLE
-      jps-submitter
-      jps-admin
+      jps-recorder
         """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-submitter"})
-    void shouldDeleteSittingRecordWhenSittingRecordPresent(String role) throws Exception {
+    @WithMockUser(authorities = {"jps-recorder"})
+    void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of(role));
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
-        when(userInfo.getUid()).thenReturn("Recorder");
+        when(userInfo.getName()).thenReturn("Joe Bloggs");
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 3))
+            .andDo(print())
+            .andExpect(status().isOk());
+    }
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # ROLE
+      jps-submitter
+        """)
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @WithMockUser(authorities = {"jps-submitter"})
+    void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter(String role) throws Exception {
+        when(securityUtils.getUserInfo()).thenReturn(userInfo);
+        when(userInfo.getRoles()).thenReturn(List.of(role));
+        when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
+        when(userInfo.getName()).thenReturn("Joe Bloggs");
 
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
             .andExpect(status().isOk());
     }
 
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # ROLE
+      jps-admin
+        """)
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @WithMockUser(authorities = {"jps-admin"})
+    void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin(String role) throws Exception {
+        when(securityUtils.getUserInfo()).thenReturn(userInfo);
+        when(userInfo.getRoles()).thenReturn(List.of(role));
+        when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
+        when(userInfo.getName()).thenReturn("Joe Bloggs");
+
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 4))
+            .andDo(print())
+            .andExpect(status().isOk());
+    }
+
     @Test
+    @WithMockUser(authorities = {"jps-recorder"})
     void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
             .andDo(print())
@@ -235,8 +271,9 @@ class SittingRecordControllerITest {
             .andDo(print())
             .andExpectAll(
                 status().isNotFound(),
-                jsonPath("$.errors[0].fieldName").value("NotFound"),
-                jsonPath("$.errors[0].message").value("Sitting Record ID Not Found")
+                jsonPath("$.status").value("NOT_FOUND"),
+                jsonPath("$.errors").value("Sitting Record ID Not Found")
             );
     }
+
 }

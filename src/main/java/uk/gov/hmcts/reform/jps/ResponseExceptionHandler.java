@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.util.List.of;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.badRequest;
 import static org.springframework.http.ResponseEntity.status;
@@ -93,17 +92,9 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return badRequest().body(error);
     }
 
-//    @ExceptionHandler(ResourceNotFoundException.class)
-//    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
-//        log.error("Resource could not be found: {}", ex.getMessage(), ex);
-//        ModelValidationError error = new ModelValidationError(
-//            of(new FieldError("NotFound", ex.getLocalizedMessage()))
-//        );
-//        return status(NOT_FOUND).body(error);
-//    }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex){
+    public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
         log.debug("Resource could not be found: {}", ex.getLocalizedMessage());
         return toResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
