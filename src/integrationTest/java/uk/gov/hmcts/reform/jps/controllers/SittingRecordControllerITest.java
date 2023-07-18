@@ -200,19 +200,18 @@ class SittingRecordControllerITest {
     @ParameterizedTest
     @CsvSource(textBlock = """
       # ROLE
-      jps-recorder
       jps-submitter
       jps-admin
         """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    @WithMockUser(authorities = {"jps-submitter"})
     void shouldDeleteSittingRecordWhenSittingRecordPresent(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of(role));
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
         when(userInfo.getUid()).thenReturn("Recorder");
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecords/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
             .andExpect(status().isOk());
     }
@@ -237,7 +236,7 @@ class SittingRecordControllerITest {
             .andExpectAll(
                 status().isNotFound(),
                 jsonPath("$.errors[0].fieldName").value("NotFound"),
-                jsonPath("$.errors[0].message").value("SITTING_RECORD_ID_NOT_FOUND")
+                jsonPath("$.errors[0].message").value("Sitting Record ID Not Found")
             );
     }
 }
