@@ -1,7 +1,7 @@
 @F-004 @Functional
 Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
-  @S-004.1 @Ignore #AC01
+  @S-004.1 #AC01
   Scenario: Return 201 success with content where errorCode to "valid" in response when one sitting record is added
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -14,7 +14,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].statusId" as "RECORDED"
     And the response contains "errorRecords[0].createdByName" as "Recorder"
 
-  @S-004.2 @Ignore #AC02
+  @S-004.2 #AC02
   Scenario: Return 201 success with content where errorCode to "valid" in response when multiple sitting records are added
     Given a user with the IDAM role of "jps-submitter"
     When a request is prepared with appropriate values
@@ -193,7 +193,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
   @S-004.18 #AC08
   Scenario: Negative response, return 401 Unauthorised when the request is missing the service token
-    Given a user with the IDAM role of "ccd-import"
+    Given a user with the IDAM role of "ccd-recorder"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "ABA5"
     And the request body contains the "payload with one sitting record" as in "F-004_allFields.json"
@@ -202,7 +202,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
   @S-004.19 #AC09
   Scenario: Negative response, return 403 Forbidden when the request uses an invalid service token
-    Given a user with the IDAM role of "ccd-import"
+    Given a user with the IDAM role of "ccd-recorder"
     When a request is prepared with appropriate values
     And the request contains an invalid service token
     And the request contains the "hmctsServiceCode" as "ABA5"

@@ -4,7 +4,8 @@ public enum Endpoints {
 
     Test("/test"),
     RecordSittingRecords("/recordSittingRecords/{hmctsServiceCode}"),
-    SearchSittingRecords("/sitting-records/searchSittingRecords/{hmctsServiceCode}");
+    SearchSittingRecords("/sitting-records/searchSittingRecords/{hmctsServiceCode}"),
+    SubmitSittingRecords("/submitSittingRecords/{hmctsServiceCode}");
     public String resource;
 
     Endpoints(String resource) {

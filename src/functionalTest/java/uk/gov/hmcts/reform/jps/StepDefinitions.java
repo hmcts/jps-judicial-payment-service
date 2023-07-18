@@ -14,6 +14,7 @@ import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.jps.config.Endpoints;
 import uk.gov.hmcts.reform.jps.config.TestVariables;
 import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.jps.testutils.RandomDateGenerator;
 import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import java.io.IOException;
@@ -70,6 +71,8 @@ public class StepDefinitions extends TestVariables {
 
     @Given("a record for the given hmctsServiceCode exists in the database")
     public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+        randomDate = RandomDateGenerator.generateRandomDate().toString();
+
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-004_allFields.json")));
         body = body.replace("2023-04-10", randomDate);
@@ -110,11 +113,21 @@ public class StepDefinitions extends TestVariables {
     @When("the request body contains the {string} as in {string}")
     public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
         String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName)));
+
         if (description.equalsIgnoreCase("payload matching data from existing record")) {
             body = body.replace("2023-03-10", randomDate);
             body = body.replace("2023-05-12", randomDate);
+        } else if (description.equalsIgnoreCase("payload with one sitting record")) {
+            randomDate = RandomDateGenerator.generateRandomDate().toString();
+            body = body.replace("2023-04-10", randomDate);
+        } else if (description.equalsIgnoreCase("payload with 3 sitting records")) {
+            randomDate = RandomDateGenerator.generateRandomDate().toString();
+            randomDate2 = RandomDateGenerator.generateRandomDate().toString();
+            randomDate3 = RandomDateGenerator.generateRandomDate().toString();
+            body = body.replace("2023-04-10", randomDate);
+            body = body.replace("2023-04-11", randomDate2);
+            body = body.replace("2023-04-12", randomDate3);
         }
-
         given.body(body);
     }
 
