@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
 import uk.gov.hmcts.reform.jps.model.Duration;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 
 import java.util.ArrayList;
@@ -156,8 +157,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
             criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
                                   joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
-                .having(criteriaBuilder.equal(criteriaBuilder.min(joinStatusHistory.get(StatusHistory_.ID)),
-                                              joinStatusHistory.get(StatusHistory_.ID)),
+                .having(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
+                                              StatusId.RECORDED.name()),
                         criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID),
                                               recordSearchRequest.getCreatedByUserId()));
 

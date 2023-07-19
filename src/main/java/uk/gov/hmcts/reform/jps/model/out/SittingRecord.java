@@ -9,9 +9,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
 import java.time.LocalDate;
-import java.util.Comparator;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
@@ -35,21 +34,16 @@ public class SittingRecord {
     private String judgeRoleTypeId;
     private String am;
     private String pm;
+    private LocalDateTime createdDateTime;
+    private String createdByUserId;
+    private String createdByUserName;
+    private LocalDateTime changeDateTime;
+    private String changeByUserId;
+    private String changeByUserName;
+
     @ToString.Exclude
     private List<StatusHistory> statusHistories;
 
-    public String getCreatedByUserId() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
-    }
-
-    public StatusHistory getFirstStatusHistory() {
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId))
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
-    }
 
     @Override
     public int hashCode() {

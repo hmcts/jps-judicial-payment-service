@@ -7,8 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -69,14 +69,78 @@ public class SittingRecord {
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
+    public String getCreatedByUserId() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+    }
+
+    public String getCreatedByUserName() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByName() : null;
+    }
+
+    public LocalDateTime getCreatedDateTime() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+    }
+
+    public String getChangeByUserId() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+    }
+
+    public String getChangeByUserName() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByName() : null;
+    }
+
+    public LocalDateTime getChangeByDateTime() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+    }
+
     public StatusHistory getFirstStatusHistory() {
-        Collections.sort(statusHistories, Comparator.comparing(StatusHistory::getId));
-        Optional<StatusHistory> optStatHistory = statusHistories.stream().findFirst();
+        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
+            .sorted(Comparator.comparingLong(StatusHistory::getId))
+            .toList();
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
         return optStatHistory.isPresent() ? optStatHistory.get() : null;
     }
 
+    public StatusHistory getLatestStatusHistory() {
+        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
+            .sorted(Comparator.comparingLong(StatusHistory::getId).reversed())
+            .toList();
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
+        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+    }
+
+
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
+        this.setStatusId(statusHistory.getStatusId());
         statusHistory.setSittingRecord(this);
+    }
+
+
+    public boolean equalsDomainObject(Object object) {
+        if (object == null) {
+            return false;
+        }
+
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+            = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
+
+        return (sittingRecord.getId() == this.getId()
+            && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
+            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
+            && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
+            && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.getRegionId().equals(this.getRegionId())
+            && sittingRecord.getStatusId().equals(this.getStatusId())
+            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
+            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
     }
 }

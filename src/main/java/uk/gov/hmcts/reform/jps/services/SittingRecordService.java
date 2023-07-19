@@ -49,6 +49,12 @@ public class SittingRecordService {
                     .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                     .am(sittingRecord.isAm() ? AM.name() : null)
                     .pm(sittingRecord.isPm() ? PM.name() : null)
+                    .createdDateTime(sittingRecord.getCreatedDateTime())
+                    .createdByUserId(sittingRecord.getCreatedByUserId())
+                    .createdByUserName(sittingRecord.getCreatedByUserName())
+                    .changeDateTime(sittingRecord.getChangeByDateTime())
+                    .changeByUserId(sittingRecord.getChangeByUserId())
+                    .changeByUserName(sittingRecord.getChangeByUserName())
                     .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                     .build())
             .toList();
@@ -98,4 +104,5 @@ public class SittingRecordService {
                 sittingRecordRepository.save(sittingRecord);
             });
     }
+
 }

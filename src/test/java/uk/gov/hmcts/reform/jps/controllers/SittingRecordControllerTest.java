@@ -147,36 +147,58 @@ class SittingRecordControllerTest {
             eq(SSCS)
         )).thenReturn(2);
 
-        SittingRecord sittingRecord1 = SittingRecord.builder()
-            .sittingRecordId(1)
-            .statusId(StatusId.RECORDED.name())
-            .build();
         StatusHistory statusHistory1 = StatusHistory.builder()
+            .id(1L)
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11233")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Jason Bourne")
             .build();
+        SittingRecord sittingRecord1 = SittingRecord.builder()
+            .sittingRecordId(1L)
+            .statusId(statusHistory1.getStatusId())
+            .createdDateTime(statusHistory1.getChangeDateTime())
+            .createdByUserId(statusHistory1.getChangeByUserId())
+            .createdByUserName(statusHistory1.getChangeByName())
+            .changeDateTime(statusHistory1.getChangeDateTime())
+            .changeByUserId(statusHistory1.getChangeByUserId())
+            .changeByUserName(statusHistory1.getChangeByName())
+            .build();
         sittingRecord1.setStatusHistories(List.of(statusHistory1));
 
-        SittingRecord sittingRecord2 = SittingRecord.builder()
-            .sittingRecordId(2)
-            .statusId(StatusId.RECORDED.name())
-            .build();
         StatusHistory statusHistory2 = StatusHistory.builder()
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11244")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().minusDays(2))
             .changeByName("Matt Murdock")
             .build();
-        sittingRecord2.setStatusHistories(List.of(statusHistory2));
+        StatusHistory statusHistory3 = StatusHistory.builder()
+            .statusId(StatusId.PUBLISHED.name())
+            .changeByUserId("11245")
+            .changeDateTime(LocalDateTime.now().minusDays(1))
+            .changeByName("Peter Parker")
+            .build();
+        StatusHistory statusHistory4 = StatusHistory.builder()
+            .statusId(StatusId.SUBMITTED.name())
+            .changeByUserId("11246")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Stephen Strange")
+            .build();
+        SittingRecord sittingRecord2 = SittingRecord.builder()
+            .sittingRecordId(2L)
+            .statusId(statusHistory4.getStatusId())
+            .createdDateTime(statusHistory2.getChangeDateTime())
+            .createdByUserId(statusHistory2.getChangeByUserId())
+            .createdByUserName(statusHistory2.getChangeByName())
+            .changeDateTime(statusHistory4.getChangeDateTime())
+            .changeByUserId(statusHistory4.getChangeByUserId())
+            .changeByUserName(statusHistory4.getChangeByName())
+            .build();
+        sittingRecord2.setStatusHistories(List.of(statusHistory2,statusHistory3,statusHistory4));
 
-        List<SittingRecord> sittingRecords = List.of(
-            sittingRecord1, sittingRecord2
-        );
+        List<SittingRecord> sittingRecords = List.of(sittingRecord1, sittingRecord2);
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
-            .thenReturn(sittingRecords
-            );
+            .thenReturn(sittingRecords);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
