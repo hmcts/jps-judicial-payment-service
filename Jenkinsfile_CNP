@@ -1,9 +1,5 @@
-#!groovy @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
-import uk.gov.hmcts.contino.GradleBuilder
-@Library("Infrastructure")
-
-import uk.gov.hmcts.contino.GradleBuilder
-
+#!groovy
+import uk.gov.hmcts.contino.AppPipelineDsl
 properties(
   [
     [
@@ -13,6 +9,10 @@ properties(
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
   ]
 )
+
+@Library("Infrastructure")
+
+import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "jps"
