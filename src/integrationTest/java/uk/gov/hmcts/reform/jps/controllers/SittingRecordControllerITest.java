@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -57,6 +58,9 @@ class SittingRecordControllerITest {
 
     @Autowired
     private SittingRecordRepository recordRepository;
+
+    @BeforeEach
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {

@@ -10,6 +10,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -222,14 +223,15 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldDeleteSittingRecordWhenSittingRecordPresent() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sitting-records/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
             .andExpect(status().isOk());
     }
 
     @Test
+    @WithMockUser(authorities = {"jps-recorder"})
     void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sitting-records"))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
             .andDo(print())
             .andExpectAll(
                 status().isBadRequest(),
@@ -240,12 +242,13 @@ class SittingRecordControllerTest {
 
 
     @Test
+    @WithMockUser(authorities = {"jps-recorder"})
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
         doThrow(new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"))
             .when(sittingRecordService)
             .deleteSittingRecord(anyLong());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sitting-records/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
             .andExpectAll(
                 status().isNotFound(),
