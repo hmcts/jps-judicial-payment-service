@@ -68,7 +68,6 @@ class SittingRecordServiceITest extends BaseTest {
     void beforeEach() {
         statusHistoryRepository.deleteAll();
         sittingRecordRepository.deleteAll();
-        statusHistoryRepository.deleteAll();
         sittingRecordService = new SittingRecordService(sittingRecordRepository);
         statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
@@ -96,6 +95,8 @@ class SittingRecordServiceITest extends BaseTest {
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
 
         assertThat(response).hasSize(1);
+        LOGGER.debug("actual:        {}", actual);
+        LOGGER.debug("sittingRecord: {}", sittingRecord);
         assertTrue(actual.equalsDomainObject(sittingRecord));
     }
 
@@ -329,8 +330,8 @@ class SittingRecordServiceITest extends BaseTest {
         assertTrue(actual.equalsDomainObject(sittingRecord));
         StatusHistory statusHistoryCreated1 = sittingRecord.getStatusHistories().get(0);
         LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
-        LOGGER.debug("actual               :{}", actual.getStatusHistories().get(0));
-        assertTrue(statusHistoryCreated1.equals(actual.getStatusHistories().get(0)));
+        LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
+        assertTrue(statusHistoryCreated1.equals(actual.getFirstStatusHistory()));
 
     }
 

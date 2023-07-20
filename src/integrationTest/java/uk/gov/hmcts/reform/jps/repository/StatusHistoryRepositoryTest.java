@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.jps.repository;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -31,6 +33,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("itest")
 class StatusHistoryRepositoryTest extends AbstractTest {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(StatusHistoryRepositoryTest.class);
+
     @Autowired
     private StatusHistoryRepository historyRepository;
     @Autowired
@@ -38,7 +42,6 @@ class StatusHistoryRepositoryTest extends AbstractTest {
 
     private SittingRecord persistedSittingRecord;
     private StatusHistory persistedStatusHistoryRecorded;
-    private StatusHistory persistedStatusHistoryPublished;
     private StatusHistory statusHistoryRecorded;
     private StatusHistory statusHistorySubmitted;
 
@@ -46,7 +49,8 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     public void setUp() {
         historyRepository.deleteAll();
         recordRepository.deleteAll();
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));        statusHistoryRecorded = createStatusHistory(
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        statusHistoryRecorded = createStatusHistory(
             sittingRecord.getStatusId(),
             "john_doe",
             "John Doe",
@@ -171,65 +175,55 @@ class StatusHistoryRepositoryTest extends AbstractTest {
 
     @Test
     void shouldFindAllRecordingUsersForAllCriteriaButNullRegionId() {
-        String hmctsServiceId = SSC_ID;
-        String regionId = null;
         List<String> statusIds = Arrays.asList(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(),
                                                StatusId.SUBMITTED.name()
         );
         LocalDate startDate = LocalDate.now().minusDays(50);
         LocalDate endDate = LocalDate.now();
 
-        shouldFindRecordingUsersGivenCriteria(hmctsServiceId, regionId, statusIds, startDate, endDate);
+        shouldFindRecordingUsersGivenCriteria(SSC_ID, null, statusIds, startDate, endDate);
     }
 
     @Test
     void shouldFindNoRecordingUsersForAllCriteriaButRegionId2() {
-        String hmctsServiceId = SSC_ID;
-        String regionId = "2";
         List<String> statusIds = Arrays.asList(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(),
                                                StatusId.SUBMITTED.name()
         );
         LocalDate startDate = LocalDate.now().minusDays(50);
         LocalDate endDate = LocalDate.now();
 
-        shouldFindNoRecordingUsersGivenCriteria(hmctsServiceId, regionId, statusIds, startDate, endDate);
+        shouldFindNoRecordingUsersGivenCriteria(SSC_ID, "2", statusIds, startDate, endDate);
     }
 
     @Test
     void shouldFindNoRecordingUsersForAllCriteriaButHmctsServiceIdId2() {
-        String hmctsServiceId = "ssc_id2";
-        String regionId = REGION_ID;
         List<String> statusIds = Arrays.asList(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(),
                                                StatusId.SUBMITTED.name()
         );
         LocalDate startDate = LocalDate.now().minusDays(50);
         LocalDate endDate = LocalDate.now();
 
-        shouldFindNoRecordingUsersGivenCriteria(hmctsServiceId, regionId, statusIds, startDate, endDate);
+        shouldFindNoRecordingUsersGivenCriteria("ssc_id2", REGION_ID, statusIds, startDate, endDate);
     }
 
     @Test
     void shouldFindNoRecordingUsersForAllCriteriaButDateRange() {
-        String hmctsServiceId = SSC_ID;
-        String regionId = REGION_ID;
         List<String> statusIds = Arrays.asList(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(),
                                                StatusId.SUBMITTED.name()
         );
         LocalDate startDate = LocalDate.now().minusDays(100);
         LocalDate endDate = LocalDate.now().minusDays(50);
 
-        shouldFindNoRecordingUsersGivenCriteria(hmctsServiceId, regionId, statusIds, startDate, endDate);
+        shouldFindNoRecordingUsersGivenCriteria(SSC_ID, REGION_ID, statusIds, startDate, endDate);
     }
 
     @Test
-    void shouldFindNoRecordingUsersForAllCriteriaButSubmitted() {
-        String hmctsServiceId = SSC_ID;
-        String regionId = REGION_ID;
-        List<String> statusIds = Arrays.asList(StatusId.SUBMITTED.name());
+    void shouldFindNoRecordingUsersForAllCriteriaButDeleted() {
+        List<String> statusIds = Arrays.asList(StatusId.DELETED.name());
         LocalDate startDate = LocalDate.now().minusDays(50);
         LocalDate endDate = LocalDate.now();
 
-        shouldFindNoRecordingUsersGivenCriteria(hmctsServiceId, regionId, statusIds, startDate, endDate);
+        shouldFindNoRecordingUsersGivenCriteria(SSC_ID, REGION_ID, statusIds, startDate, endDate);
     }
 
     private void shouldFindRecordingUsersGivenCriteria(String hmctsServiceId, String regionId, List<String> statusIds,
@@ -243,8 +237,8 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         assertFalse(recordingUsers.isEmpty());
         assertThat(recordingUsers).doesNotHaveDuplicates();
         assertEquals(recordingUsers.size(), 4);
-        recordingUsers.stream().forEach(e ->
-                                            assertTrue(e.getChangeByUserId().contains("john_")));
+        recordingUsers.forEach(e ->
+                       assertTrue(e.getChangeByUserId().contains("john_")));
     }
 
     private void shouldFindNoRecordingUsersGivenCriteria(String hmctsServiceId, String regionId, List<String> statusIds,
@@ -254,6 +248,9 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         List<RecordingUser> recordingUsers = historyRepository
             .findRecordingUsers(hmctsServiceId, regionId, statusIds, startDate, endDate)
             .stream().sorted().toList();
+        recordingUsers.forEach(e ->
+            LOGGER.info("recordingUser:{}:{}", e.getChangeByUserId(), e.getChangeByUserName()));
+
 
         assertTrue(recordingUsers.isEmpty());
     }
@@ -272,35 +269,30 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         SittingRecord sittingRecord = createNewSittingRecord(LocalDate.now().minusDays(2),
                                                              "john_doe", "John Doe"
         );
-        sittingRecord = updateSittingRecordToSubmitted(sittingRecord, LocalDate.now().minusDays(2),
-                                                       "matt_doe", "Matthew Doe"
+        sittingRecord = updateSittingRecordToSubmitted(sittingRecord, "matt_doe", "Matthew Doe"
         );
         sittingRecords.add(sittingRecord);
 
         SittingRecord sittingRecord2 = createNewSittingRecord(LocalDate.now().minusDays(2),
                                                               "john_smith", "John Smith"
         );
-        sittingRecord2 = updateSittingRecordToSubmitted(sittingRecord2, LocalDate.now().minusDays(2),
-                                                        "matt_smith", "Matthew Smith"
+        sittingRecord2 = updateSittingRecordToSubmitted(sittingRecord2, "matt_smith", "Matthew Smith"
         );
-        sittingRecord2 = updateSittingRecordToPublished(sittingRecord2, LocalDate.now().minusDays(2),
-                                                        "matt_smith", "Matthew Smith"
+        sittingRecord2 = updateSittingRecordToPublished(sittingRecord2, "matt_smith", "Matthew Smith"
         );
         sittingRecords.add(sittingRecord2);
 
         SittingRecord sittingRecord3 = createNewSittingRecord(LocalDate.now().minusDays(2),
                                                               "john_jones", "John Jones"
         );
-        sittingRecord3 = updateSittingRecordToSubmitted(sittingRecord3, LocalDate.now().minusDays(2),
-                                                        "matt_jones", "Matthew Jones"
+        sittingRecord3 = updateSittingRecordToSubmitted(sittingRecord3, "matt_jones", "Matthew Jones"
         );
         sittingRecords.add(sittingRecord3);
 
         SittingRecord sittingRecord4 = createNewSittingRecord(LocalDate.now().minusDays(2),
                                                               "john_james", "John James"
         );
-        sittingRecord4 = updateSittingRecordToPublished(sittingRecord4, LocalDate.now().minusDays(2),
-                                                        "steve_james", "Steve James"
+        sittingRecord4 = updateSittingRecordToPublished(sittingRecord4, "steve_james", "Steve James"
         );
         sittingRecords.add(sittingRecord4);
 
@@ -311,35 +303,27 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         SittingRecord sittingRecord = createSittingRecord(localDate);
         StatusHistory statusHistoryCreated1 = createStatusHistory(
             sittingRecord.getStatusId(),
-            LocalDateTime.now(),
             userId,
             userName,
             sittingRecord
         );
         sittingRecord.addStatusHistory(statusHistoryCreated1);
-        SittingRecord persistedSittingRecord1 = recordRepository.save(sittingRecord);
-        return persistedSittingRecord1;
+        return recordRepository.save(sittingRecord);
     }
 
-    private SittingRecord updateSittingRecordToSubmitted(SittingRecord sittingRecord,
-                                                         LocalDate localDate, String userId, String userName) {
-        return updateSittingRecord(sittingRecord, StatusId.SUBMITTED.name(),
-                                   localDate, userId, userName
+    private SittingRecord updateSittingRecordToSubmitted(SittingRecord sittingRecord, String userId, String userName) {
+        return updateSittingRecord(sittingRecord, StatusId.SUBMITTED.name(), userId, userName);
+    }
+
+    private SittingRecord updateSittingRecordToPublished(SittingRecord sittingRecord, String userId, String userName) {
+        return updateSittingRecord(sittingRecord, StatusId.PUBLISHED.name(), userId, userName
         );
     }
 
-    private SittingRecord updateSittingRecordToPublished(SittingRecord sittingRecord,
-                                                         LocalDate localDate, String userId, String userName) {
-        return updateSittingRecord(sittingRecord, StatusId.PUBLISHED.name(),
-                                   localDate, userId, userName
-        );
-    }
-
-    private SittingRecord updateSittingRecord(SittingRecord sittingRecord, String statusId,
-                                              LocalDate localDate, String userId, String userName) {
+    private SittingRecord updateSittingRecord(SittingRecord sittingRecord, String statusId, String userId,
+                                              String userName) {
         StatusHistory statusHistory = createStatusHistory(
             statusId,
-            LocalDateTime.now(),
             userId,
             userName,
             sittingRecord

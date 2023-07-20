@@ -11,7 +11,12 @@ import uk.gov.hmcts.reform.jps.model.RecordingUser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
+
+import static uk.gov.hmcts.reform.jps.model.Duration.AM;
+import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 @Data
 @Builder
@@ -51,6 +56,18 @@ public class SittingRecord {
     @ToString.Exclude
     private List<StatusHistory> statusHistories;
 
+    public String getCreatedByUserId() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+    }
+
+    public StatusHistory getFirstStatusHistory() {
+        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
+            .sorted(Comparator.comparingLong(StatusHistory::getId))
+            .toList();
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
+        return optStatHistory.orElse(null);
+    }
 
     public RecordingUser getRecordingUser() {
         try {
@@ -92,7 +109,7 @@ public class SittingRecord {
             return true;
         }
 
-        return (sittingRecord.getSittingRecordId() == this.getSittingRecordId()
+        return (sittingRecord.getSittingRecordId().equals(this.getSittingRecordId())
             && (null == sittingRecord.getAm() && null == this.getAm()
             || null != sittingRecord.getAm() && sittingRecord.getAm().equals(this.getAm()))
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
@@ -126,10 +143,14 @@ public class SittingRecord {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
-        return (sittingRecord.getId() == this.getSittingRecordId()
+        return (sittingRecord.getId().equals(this.getSittingRecordId())
+            && (null == this.getAm() && !sittingRecord.isAm()
+            || null != this.getAm() && this.getAm().equals(AM.name()) && sittingRecord.isAm())
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
             && sittingRecord.getEpimsId().equals(this.getEpimsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
+            && (null == this.getPm() && !sittingRecord.isPm()
+            || null != this.getPm() && this.getPm().equals(PM.name()) && sittingRecord.isPm())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.getRegionId().equals(this.getRegionId())

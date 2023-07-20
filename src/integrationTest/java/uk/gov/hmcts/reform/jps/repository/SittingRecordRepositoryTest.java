@@ -41,8 +41,6 @@ class SittingRecordRepositoryTest extends AbstractTest {
     @Test
     void shouldSaveSittingRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
-        StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
-                                                   LocalDateTime.now(),
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.name(),
                                                    "John Doe",

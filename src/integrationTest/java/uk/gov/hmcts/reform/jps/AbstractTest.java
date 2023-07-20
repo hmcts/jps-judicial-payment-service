@@ -30,11 +30,11 @@ public class AbstractTest {
             .build();
     }
 
-    protected StatusHistory createStatusHistory(String statusId, LocalDateTime localDateTime, String userId,
+    protected StatusHistory createStatusHistory(String statusId, String userId,
                                                 String userName, SittingRecord sittingRecord) {
         return StatusHistory.builder()
             .statusId(statusId)
-            .changeDateTime(localDateTime)
+            .changeDateTime(LocalDateTime.now())
             .changeByUserId(userId)
             .changeByName(userName)
             .sittingRecord(sittingRecord)
