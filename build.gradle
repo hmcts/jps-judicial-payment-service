@@ -31,7 +31,7 @@ def versions = [
   serviceAuthVersion: '3.1.1',
   tomcatEmbedded  : '9.0.69',
   mapstruct       : '1.5.3.Final',
-  lombok          : '1.18.24',
+  lombok          : '1.18.28',
   flyway          : '9.15.2',
   postgresql      : '42.6.0'
 ]
