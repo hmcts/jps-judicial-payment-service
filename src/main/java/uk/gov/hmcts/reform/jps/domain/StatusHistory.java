@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -34,6 +35,7 @@ public class StatusHistory {
     @Column(name = "status_history_id")
     private Long id;
 
+    @JsonIgnore
     @ToString.Exclude
     @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "sitting_record_id")

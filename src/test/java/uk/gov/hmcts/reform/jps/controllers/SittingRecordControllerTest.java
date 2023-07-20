@@ -37,7 +37,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-//import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -156,8 +155,6 @@ class SittingRecordControllerTest {
 
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
-        //when(sittingRecordService.getRecordedUsersFromGivenSittingRecords(anyList()))
-        //    .thenReturn(recordingUsers);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -229,7 +226,6 @@ class SittingRecordControllerTest {
         }
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
-
     }
 
     private List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
@@ -253,6 +249,7 @@ class SittingRecordControllerTest {
             .changeDateTime(LocalDateTime.now())
             .changeByName("Jason Bourne")
             .build();
+        sittingRecord1.setStatusId(statusHistory1.getStatusId());
         sittingRecord1.setStatusHistories(List.of(statusHistory1));
 
         SittingRecord sittingRecord2 = SittingRecord.builder()
@@ -266,6 +263,7 @@ class SittingRecordControllerTest {
             .changeDateTime(LocalDateTime.now())
             .changeByName("Matt Murdock")
             .build();
+        sittingRecord2.setStatusId(statusHistory2.getStatusId());
         sittingRecord2.setStatusHistories(List.of(statusHistory2));
 
         return List.of(sittingRecord1, sittingRecord2);

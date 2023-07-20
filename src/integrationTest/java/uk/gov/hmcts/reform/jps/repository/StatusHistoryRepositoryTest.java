@@ -40,20 +40,17 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     private StatusHistory persistedStatusHistoryRecorded;
     private StatusHistory persistedStatusHistoryPublished;
     private StatusHistory statusHistoryRecorded;
-    private StatusHistory statusHistoryPublished;
+    private StatusHistory statusHistorySubmitted;
 
     @BeforeEach
     public void setUp() {
         historyRepository.deleteAll();
         recordRepository.deleteAll();
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
-        statusHistoryRecorded = createStatusHistory(
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));        statusHistoryRecorded = createStatusHistory(
             sittingRecord.getStatusId(),
-            LocalDateTime.now(),
             "john_doe",
             "John Doe",
-            sittingRecord
-        );
+            sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded);
         persistedSittingRecord = recordRepository.save(sittingRecord);
         persistedStatusHistoryRecorded = persistedSittingRecord.getStatusHistories().get(0);
@@ -115,43 +112,47 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     @Test
     void shouldFindCreatedStatus() {
 
-        statusHistoryPublished = createStatusHistory(
-            "amended",
-            LocalDateTime.now(),
+        statusHistorySubmitted = createStatusHistory(StatusId.SUBMITTED.name(),
             JpsRole.ROLE_RECORDER.name(),
             "Matthew Doe",
-            persistedSittingRecord
-        );
+            persistedSittingRecord);
+        persistedSittingRecord.addStatusHistory(statusHistorySubmitted);
+        historyRepository.save(statusHistorySubmitted);
+        persistedSittingRecord = recordRepository.save(persistedSittingRecord);
+
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED.name(),
+                                                     JpsRole.ROLE_RECORDER.name(),
+                                                     "Matthew Doe",
+                                                     persistedSittingRecord);
         persistedSittingRecord.addStatusHistory(statusHistoryPublished);
-        persistedStatusHistoryPublished = historyRepository.save(statusHistoryPublished);
+        historyRepository.save(statusHistoryPublished);
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
         persistedStatusHistoryRecorded = persistedSittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryAsc(persistedSittingRecord.getId()).get(0);
         assertNotNull(statusHistoryFound, "Could not find any status history.");
-        assertEquals(statusHistoryFound, statusHistoryRecorded, "Not the expected CREATED status history!");
+        assertEquals(statusHistoryFound, statusHistoryRecorded, "Not the expected " + StatusId.SUBMITTED.name()
+            + " status history!");
     }
 
     @Test
     void shouldFindLatestStatus() {
 
-        statusHistoryPublished = createStatusHistory(
-            StatusId.PUBLISHED.name(),
-            LocalDateTime.now(),
-            "matt_doe",
-            "Matthew Doe",
-            persistedSittingRecord
-        );
-        persistedSittingRecord.addStatusHistory(statusHistoryPublished);
-        persistedStatusHistoryPublished = historyRepository.save(statusHistoryPublished);
+        statusHistorySubmitted = createStatusHistory(StatusId.SUBMITTED.name(),
+                                                     JpsRole.ROLE_RECORDER.name(),
+                                                     "Matthew Doe",
+                                                     persistedSittingRecord);
+        persistedSittingRecord.addStatusHistory(statusHistorySubmitted);
+        historyRepository.save(statusHistorySubmitted);
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
         persistedStatusHistoryRecorded = persistedSittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryDesc(persistedSittingRecord.getId()).get(0);
         assertNotNull(statusHistoryFound, "Could not find any status history.");
-        assertEquals(statusHistoryFound, statusHistoryPublished, "Not the expected AMENDED status history!");
+        assertEquals(statusHistoryFound, statusHistorySubmitted, "Not the expected " + StatusId.SUBMITTED.name()
+            + " status history!");
     }
 
     @Test
@@ -351,6 +352,5 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         assertEquals(statusId, persistedStatusHistory1.getStatusId());
         return persistedSittingRecord;
     }
-
 }
 

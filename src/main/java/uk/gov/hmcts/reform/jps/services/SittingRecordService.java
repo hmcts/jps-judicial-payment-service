@@ -21,7 +21,6 @@ import javax.transaction.Transactional;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
-
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
 public class SittingRecordService {
@@ -50,6 +49,12 @@ public class SittingRecordService {
                     .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                     .am(sittingRecord.isAm() ? AM.name() : null)
                     .pm(sittingRecord.isPm() ? PM.name() : null)
+                    .createdDateTime(sittingRecord.getCreatedDateTime())
+                    .createdByUserId(sittingRecord.getCreatedByUserId())
+                    .createdByUserName(sittingRecord.getCreatedByUserName())
+                    .changeDateTime(sittingRecord.getChangeByDateTime())
+                    .changeByUserId(sittingRecord.getChangeByUserId())
+                    .changeByUserName(sittingRecord.getChangeByUserName())
                     .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                     .build())
             .toList();
@@ -100,13 +105,4 @@ public class SittingRecordService {
             });
     }
 
-    //    public List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
-    //        List<RecordingUser> recordingUsers = new ArrayList<>();
-    //        sittingRecords.forEach(e ->
-    //            recordingUsers.add(RecordingUser.builder()
-    //                                   .userId(e.getCreatedByUserId())
-    //                                   .userName(e.getCreatedByUserName())
-    //                                   .build()));
-    //        return recordingUsers.stream().sorted().distinct().toList();
-    //    }
 }

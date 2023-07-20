@@ -10,8 +10,8 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 public interface SittingRecordRepository extends JpaRepository<SittingRecord, Long>, SittingRecordRepositorySearch {
 
     @Query("select sh.changeByUserId from SittingRecord sr inner join StatusHistory sh "
-        + "on sh.sittingRecord.id = sr.id "
-        + "where sh.id = (select min(sh2.id) from StatusHistory sh2 where sh2.sittingRecord.id = :id)")
+        + "on sh.sittingRecord.id = sr.id and sh.statusId = 'RECORDED' "
+        + "where sh.sittingRecord.id = :id ")
     String findCreatedByUserId(@Param("id") Long id);
 
 }
