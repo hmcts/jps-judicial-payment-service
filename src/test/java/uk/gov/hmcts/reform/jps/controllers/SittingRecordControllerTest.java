@@ -46,7 +46,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 
-@WebMvcTest(controllers = SittingRecordController.class,
+@WebMvcTest(controllers = {SittingRecordController.class, SittingRecordDeleteController.class},
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
             classes = {SecurityConfiguration.class,
                 JwtGrantedAuthoritiesConverter.class})})
@@ -222,6 +222,7 @@ class SittingRecordControllerTest {
     }
 
     @Test
+    @WithMockUser(authorities = {"jps-recorder"})
     void shouldDeleteSittingRecordWhenSittingRecordPresent() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
@@ -248,12 +249,12 @@ class SittingRecordControllerTest {
             .when(sittingRecordService)
             .deleteSittingRecord(anyLong());
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
             .andDo(print())
             .andExpectAll(
                 status().isNotFound(),
-                jsonPath("$.errors[0].fieldName").value("NotFound"),
-                jsonPath("$.errors[0].message").value("SITTING_RECORD_ID_NOT_FOUND")
+                jsonPath("$.status").value("NOT_FOUND"),
+                jsonPath("$.errors").value("SITTING_RECORD_ID_NOT_FOUND")
             );
     }
 }
