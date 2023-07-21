@@ -14,6 +14,7 @@ import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.jps.config.Endpoints;
 import uk.gov.hmcts.reform.jps.config.TestVariables;
 import uk.gov.hmcts.reform.jps.testutils.IdamTokenGenerator;
+import uk.gov.hmcts.reform.jps.testutils.RandomDateGenerator;
 import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 
 import java.io.IOException;
@@ -72,6 +73,8 @@ public class StepDefinitions extends TestVariables {
 
     @Given("a record for the given hmctsServiceCode exists in the database")
     public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+        randomDate = RandomDateGenerator.generateRandomDate().toString();
+
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-004_allFields.json")));
         body = body.replace("2023-04-10", randomDate);
