@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.InitBinder;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.jps.exceptions.ApiError;
+import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
@@ -32,6 +33,7 @@ import java.util.Optional;
 import static java.util.List.of;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 import static org.springframework.http.ResponseEntity.badRequest;
+import static org.springframework.http.ResponseEntity.status;
 
 @ControllerAdvice
 @Slf4j
@@ -91,10 +93,11 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return badRequest().body(error);
     }
 
+
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<Object> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        log.error("Resource could not be found: {}", ex.getMessage(), ex);
-        return toResponseEntity(HttpStatus.FORBIDDEN, ex.getLocalizedMessage());
+        log.debug("Resource could not be found: {}", ex.getLocalizedMessage());
+        return toResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
     @ExceptionHandler(ServiceException.class)
@@ -107,6 +110,12 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleUnauthorisedException(UnauthorisedException ex) {
         log.debug("BadRequestException:{}", ex.getLocalizedMessage());
         return toResponseEntity(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(ConflictException.class)
+    protected ResponseEntity<Object> handleConflictException(ConflictException ex) {
+        log.debug("BadRequestException:{}", ex.getLocalizedMessage());
+        return toResponseEntity(HttpStatus.CONFLICT, ex.getMessage());
     }
 
     @ExceptionHandler(FeignException.class)
@@ -134,7 +143,7 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     protected ResponseEntity<Object> handleAccessDeniedException() {
-        return ResponseEntity.status(UNAUTHORIZED).build();
+        return status(UNAUTHORIZED).build();
     }
 
     @ExceptionHandler(UnknowValueException.class)

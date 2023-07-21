@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
 import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
@@ -64,6 +65,8 @@ class SittingRecoredServiceITest extends BaseTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private SecurityUtils securityUtils;
 
     private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
@@ -75,7 +78,8 @@ class SittingRecoredServiceITest extends BaseTest {
             sittingRecordRepository,
             evaluateDuplicate,
             evaluateMatchingDuration,
-            evaluateOverlapDuration
+            evaluateOverlapDuration,
+            securityUtils
         );
     }
 

@@ -10,7 +10,9 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -65,9 +67,17 @@ public class SittingRecord {
 
     private boolean pm;
 
+    public Optional<StatusHistory> getLatestStatusHistory() {
+
+        Optional<StatusHistory> statusHistory = this.getStatusHistories().stream().max(Comparator.comparing(
+            StatusHistory::getChangeDateTime));
+
+        return statusHistory;
+    }
+
     @ToString.Exclude
     @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
     @Column(name = "created_date_time")
@@ -86,4 +96,5 @@ public class SittingRecord {
         this.statusHistories.add(statusHistory);
         statusHistory.setSittingRecord(this);
     }
+
 }

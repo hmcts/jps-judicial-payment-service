@@ -42,6 +42,7 @@ public class SittingRecordController {
     private final JudicialUserDetailsService judicialUserDetailsService;
     private final CaseWorkerService caseWorkerService;
 
+
     @PostMapping(
         path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
     )
@@ -76,4 +77,5 @@ public class SittingRecordController {
                       .sittingRecords(sittingRecords)
                       .build());
     }
+
 }

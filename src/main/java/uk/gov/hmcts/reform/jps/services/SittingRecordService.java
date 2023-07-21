@@ -1,11 +1,18 @@
 package uk.gov.hmcts.reform.jps.services;
 
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
 import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
+import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
@@ -16,31 +23,47 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
+import java.util.function.Consumer;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 
 @Service
+@Slf4j
 public class SittingRecordService {
+
+
     private final SittingRecordRepository sittingRecordRepository;
     private final EvaluateDuplicate evaluateDuplicate;
     private final EvaluateMatchingDuration evaluateMatchingDuration;
     private final EvaluateOverlapDuration evaluateOverlapDuration;
+    private final SecurityUtils securityUtils;
+
+
+    public SittingRecordService(SittingRecordRepository sittingRecordRepository, SecurityUtils securityUtils) {
+        this.sittingRecordRepository = sittingRecordRepository;
+        this.securityUtils = securityUtils;
+    }
+
 
     @Autowired
     public SittingRecordService(SittingRecordRepository sittingRecordRepository,
                                 EvaluateDuplicate evaluateDuplicate,
                                 EvaluateMatchingDuration evaluateMatchingDuration,
-                                EvaluateOverlapDuration evaluateOverlapDuration) {
+                                EvaluateOverlapDuration evaluateOverlapDuration,
+                                SecurityUtils securityUtils) {
         this.sittingRecordRepository = sittingRecordRepository;
         this.evaluateDuplicate = evaluateDuplicate;
         this.evaluateMatchingDuration = evaluateMatchingDuration;
         this.evaluateOverlapDuration = evaluateOverlapDuration;
+        this.securityUtils = securityUtils;
 
         this.evaluateDuplicate.next(this.evaluateMatchingDuration);
         this.evaluateMatchingDuration.next(this.evaluateOverlapDuration);
@@ -84,7 +107,7 @@ public class SittingRecordService {
         String hmctsServiceCode) {
 
         return sittingRecordRepository.totalRecords(recordSearchRequest,
-                                                    hmctsServiceCode);
+            hmctsServiceCode);
     }
 
     @Transactional
@@ -146,4 +169,59 @@ public class SittingRecordService {
                                                          .evaluate(sittingRecordWrapper,
                                                                    sittingRecordDuplicateCheckFields));
     }
+
+    @Transactional
+    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
+    public void deleteSittingRecord(Long sittingRecordId) {
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+            = sittingRecordRepository.findById(sittingRecordId)
+            .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
+
+        if (securityUtils.getUserInfo().getRoles().contains("jps-recorder")) {
+            recorderDelete(sittingRecord);
+        } else if (securityUtils.getUserInfo().getRoles().contains("jps-submitter")) {
+            deleteSittingRecord(sittingRecord, RECORDED);
+        } else if (securityUtils.getUserInfo().getRoles().contains("jps-admin")) {
+            deleteSittingRecord(sittingRecord, SUBMITTED);
+        }
+    }
+
+    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
+                                     StatusId recorded) {
+
+        if (sittingRecord.getStatusId().equals(recorded)) {
+            deleteSittingRecord(sittingRecord);
+        } else {
+            throw new ConflictException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
+    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        StatusHistory statusHistory = StatusHistory.builder()
+            .statusId(DELETED)
+            .changeDateTime(LocalDateTime.now())
+            .changeByUserId(securityUtils.getUserInfo().getUid())
+            .changeByName(securityUtils.getUserInfo().getName())
+            .build();
+
+        sittingRecord.addStatusHistory(statusHistory);
+        sittingRecord.setStatusId(DELETED);
+        sittingRecordRepository.save(sittingRecord);
+    }
+
+    private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        if (sittingRecord.getStatusId().equals(RECORDED.name())) {
+            StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
+                .filter(statusHistory -> statusHistory.getStatusId().equals(RECORDED.name()))
+                .filter(statusHistory -> statusHistory.getChangeByUserId().equals(securityUtils.getUserInfo().getUid()))
+                .findAny()
+                .orElseThrow(() -> new ResourceNotFoundException(
+                    "User IDAM ID does not match the oldest Changed by IDAM ID "));
+
+            deleteSittingRecord(recordedStatusHistory.getSittingRecord());
+        } else {
+            throw new ConflictException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
 }
