@@ -18,6 +18,7 @@ springdoc:
 spring:
   main:
     allow-bean-definition-overriding: true
+    allow-circular-references: true
   config:
     import: "optional:configtree:/mnt/secrets/jps/"
   application:

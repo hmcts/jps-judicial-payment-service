@@ -4,12 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
-import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
-import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
-import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
-import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
@@ -56,31 +53,18 @@ class SittingRecoredServiceITest extends BaseTest {
     private SittingRecordRepository sittingRecordRepository;
     @Autowired
     private StatusHistoryRepository statusHistoryRepository;
-    @Autowired
-    private EvaluateDuplicate evaluateDuplicate;
-    @Autowired
-    private EvaluateMatchingDuration evaluateMatchingDuration;
-    @Autowired
-    private EvaluateOverlapDuration evaluateOverlapDuration;
+
 
     @Autowired
     private ObjectMapper objectMapper;
-    @Autowired
-    private SecurityUtils securityUtils;
 
+    @Autowired
     private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
 
     @BeforeEach
     void beforeEach() {
         sittingRecordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(
-            sittingRecordRepository,
-            evaluateDuplicate,
-            evaluateMatchingDuration,
-            evaluateOverlapDuration,
-            securityUtils
-        );
     }
 
     @Test
@@ -296,7 +280,7 @@ class SittingRecoredServiceITest extends BaseTest {
             .extracting("sittingDate","regionId",  "epimmsId", "personalCode", "judgeRoleTypeId", "contractTypeId",
                         "am", "pm", "statusId", "hmctsServiceId")
             .contains(
-                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true, RECORDED, "ssc_id"),
+                tuple(of(2023, MAY, 11), "1", "852649", "4918500", "Judge", 1L, false, true, RECORDED, "ssc_id"),
                 tuple(of(2023, APRIL,10), "1", "852649", "4918178", "Judge", 1L, true, false, RECORDED, "ssc_id"),
                 tuple(of(2023, MARCH,9), "1", "852649", "4918178", "Judge", 1L, true, true, RECORDED, "ssc_id")
             );
@@ -315,6 +299,7 @@ class SittingRecoredServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatch() throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 

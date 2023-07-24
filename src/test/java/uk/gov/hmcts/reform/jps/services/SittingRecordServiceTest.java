@@ -9,31 +9,26 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.data.util.Streamable;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
-import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
-import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
-import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields;
-import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
+import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -52,12 +47,12 @@ import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.mockito.ArgumentMatchers.any;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.never;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -65,7 +60,6 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
-import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
@@ -86,17 +80,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     private SecurityUtils securityUtils;
 
     @Mock
-    UserInfo userInfo;
-
-    @Mock
-    private StatusHistoryRepository statusHistoryRepository;
-
-    @Mock
-    private EvaluateDuplicate evaluateDuplicate;
-    @Mock
-    private EvaluateMatchingDuration evaluateMatchingDuration;
-    @Mock
-    private EvaluateOverlapDuration evaluateOverlapDuration;
+    private DuplicateCheckerService duplicateCheckerService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -108,7 +92,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -266,7 +249,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         assertThat(sittingRecords).extracting("sittingDate", "statusId", "epimmsId", "hmctsServiceId",
                                               "personalCode", "contractTypeId", "judgeRoleTypeId", "am", "pm")
                 .contains(
-                    tuple(of(2023, Month.MAY, 11), RECORDED, "852649", "test", "4918178", 1L, "Judge", false, true),
+                    tuple(of(2023, Month.MAY, 11), RECORDED, "852649", "test", "4918500", 1L, "Judge", false, true),
                     tuple(of(2023, Month.APRIL, 10), RECORDED, "852649", "test", "4918178", 1L, "Judge", true, false),
                     tuple(of(2023, Month.MARCH, 9), RECORDED, "852649", "test", "4918178", 1L, "Judge", true, true)
         );
@@ -476,6 +459,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             any(), any(), any(), any())
         ).thenReturn(Streamable.of(List.of(sittingRecordDuplicateCheckFields)));
 
+
         List<SittingRecordWrapper> sittingRecordWrappers =
             recordSittingRecordRequest.getRecordedSittingRecords().stream()
                 .map(SittingRecordWrapper::new)
@@ -483,7 +467,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
-        verify(evaluateDuplicate, times(3)).evaluate(any(), any());
+        verify(duplicateCheckerService, times(3)).evaluate(any(), any());
     }
 
     @Test
@@ -507,6 +491,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
-        verify(evaluateDuplicate, never()).evaluate(any(), any());
+        verify(duplicateCheckerService, never()).evaluate(any(), any());
     }
 }

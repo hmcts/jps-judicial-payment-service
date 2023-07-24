@@ -151,10 +151,10 @@ class SittingRecordControllerTest {
             .thenReturn(2);
         List<SittingRecord> sittingRecords = List.of(
             SittingRecord.builder()
-                .sittingRecordId(1)
+                .sittingRecordId(1L)
                 .build(),
             SittingRecord.builder()
-                .sittingRecordId(12)
+                .sittingRecordId(12L)
                 .build()
         );
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))

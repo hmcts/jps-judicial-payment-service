@@ -25,6 +25,8 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 @SuppressWarnings("serial")
 public class SittingRecordRequest implements Serializable {
 
+    private final Long sittingRecordId;
+
     @NotNull(message = "Sitting date is mandatory")
     private final LocalDate sittingDate;
 

@@ -64,10 +64,11 @@ class RecordSittingRecordsControllerTest {
     private LocationService regionService;
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200",
-        "recordSittingRecords.json,201"})
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
+        "recordSittingRecords.json,201,4918500"})
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
-                                                      int responseCode) throws Exception {
+                                                      int responseCode,
+                                                      String personalCode) throws Exception {
         String requestJson = Resources.toString(getResource(fileName), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -77,7 +78,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.message").value("success"),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value(personalCode),
                 jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
@@ -138,7 +139,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.message").value("008 could not insert"),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918500"),
                 jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),

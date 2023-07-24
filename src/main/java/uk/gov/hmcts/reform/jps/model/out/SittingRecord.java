@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SittingRecord {
-    private long sittingRecordId;
+    private Long sittingRecordId;
     private LocalDate sittingDate;
     private StatusId statusId;
     private String regionId;
