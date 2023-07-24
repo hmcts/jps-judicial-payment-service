@@ -11,7 +11,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @Repository
-public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Long> {
+public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Long>, SittingRecordRepositorySearch {
 
     @Query("select sr from StatusHistory sr where sr.sittingRecord.id=:id ORDER BY sr.id asc")
     List<StatusHistory> findStatusHistoryAsc(@Param("id") Long id);

@@ -8,7 +8,6 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.model.RecordingUser;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -63,24 +62,17 @@ public class SittingRecord {
         return null != statusHistory ? statusHistory.getChangeByUserId() : null;
     }
 
+    @JsonIgnore
     public StatusHistory getFirstStatusHistory() {
+        if (null == statusHistories) {
+            return null;
+        }
+
         List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
             .sorted(Comparator.comparingLong(StatusHistory::getId))
             .toList();
         Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
         return optStatHistory.orElse(null);
-    }
-
-    public RecordingUser getRecordingUser() {
-        try {
-            StatusHistory statusHistory = getFirstStatusHistory();
-            return RecordingUser.builder()
-                .changeByUserId(statusHistory.getChangeByUserId())
-                .changeByUserName(statusHistory.getChangeByName())
-                .build();
-        } catch (Exception e) {
-            return null;
-        }
     }
 
     @Override
@@ -105,7 +97,7 @@ public class SittingRecord {
         SittingRecord sittingRecord
             = (SittingRecord) object;
 
-        return (sittingRecord.getSittingRecordId() == this.getSittingRecordId()
+        return (sittingRecord.getSittingRecordId().equals(this.getSittingRecordId())
 
             && ((null == sittingRecord.getAm() && null == this.getAm())
             || (null != sittingRecord.getAm() && sittingRecord.getAm().equals(this.getAm())))

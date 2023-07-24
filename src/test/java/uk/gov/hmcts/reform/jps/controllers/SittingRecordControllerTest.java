@@ -19,7 +19,6 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -32,13 +31,11 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -149,56 +146,7 @@ class SittingRecordControllerTest {
     @Test
     void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
 
-        StatusHistory statusHistory1 = StatusHistory.builder()
-            .id(1L)
-            .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11233")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Jason Bourne")
-            .build();
-        SittingRecord sittingRecord1 = SittingRecord.builder()
-            .sittingRecordId(1L)
-            .statusId(statusHistory1.getStatusId())
-            .createdDateTime(statusHistory1.getChangeDateTime())
-            .createdByUserId(statusHistory1.getChangeByUserId())
-            .createdByUserName(statusHistory1.getChangeByName())
-            .changeDateTime(statusHistory1.getChangeDateTime())
-            .changeByUserId(statusHistory1.getChangeByUserId())
-            .changeByUserName(statusHistory1.getChangeByName())
-            .build();
-        sittingRecord1.setStatusHistories(List.of(statusHistory1));
-
-        StatusHistory statusHistory2a = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11244")
-            .changeDateTime(LocalDateTime.now().minusDays(2))
-            .changeByName("Matt Murdock")
-            .build();
-        StatusHistory statusHistory2b = StatusHistory.builder()
-            .statusId(StatusId.PUBLISHED.name())
-            .changeByUserId("11245")
-            .changeDateTime(LocalDateTime.now().minusDays(1))
-            .changeByName("Peter Parker")
-            .build();
-        StatusHistory statusHistory2c = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED.name())
-            .changeByUserId("11246")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Stephen Strange")
-            .build();
-        SittingRecord sittingRecord2 = SittingRecord.builder()
-            .sittingRecordId(2L)
-            .statusId(statusHistory2c.getStatusId())
-            .createdDateTime(statusHistory2a.getChangeDateTime())
-            .createdByUserId(statusHistory2a.getChangeByUserId())
-            .createdByUserName(statusHistory2a.getChangeByName())
-            .changeDateTime(statusHistory2c.getChangeDateTime())
-            .changeByUserId(statusHistory2c.getChangeByUserId())
-            .changeByUserName(statusHistory2c.getChangeByName())
-            .build();
-        sittingRecord2.setStatusHistories(List.of(statusHistory2a, statusHistory2b, statusHistory2c));
-
-        List<SittingRecord> sittingRecords = List.of(sittingRecord1, sittingRecord2);
+        List<SittingRecord> sittingRecords = generateSittingRecords();
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
             .thenReturn(sittingRecords.size());
@@ -212,7 +160,8 @@ class SittingRecordControllerTest {
                                                   )
                                                   .contentType(MediaType.APPLICATION_JSON)
                                                   .content(requestJson)
-            ).andDo(print())
+            )
+            .andDo(print())
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
@@ -268,43 +217,92 @@ class SittingRecordControllerTest {
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
     }
 
-    private List<RecordingUser> getRecordedUsersFromGivenSittingRecords(List<SittingRecord> sittingRecords) {
-        List<RecordingUser> recordingUsers = new ArrayList<>();
-        sittingRecords.forEach(e ->
-            recordingUsers.add(e.getRecordingUser())
-        );
-        return recordingUsers.stream().sorted().distinct().toList();
-    }
-
     private List<SittingRecord> generateSittingRecords() {
 
-        SittingRecord sittingRecord1 = SittingRecord.builder()
-            .sittingRecordId(1L)
-            .personalCode("PC1")
-            .sittingDate(LocalDate.now().minusDays(2))
-            .build();
         StatusHistory statusHistory1 = StatusHistory.builder()
+            .id(1L)
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11233")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Jason Bourne")
             .build();
-        sittingRecord1.setStatusId(statusHistory1.getStatusId());
+        SittingRecord sittingRecord1 = SittingRecord.builder()
+            .sittingRecordId(1L)
+            .accountCode("AC1")
+            .am(Boolean.TRUE.toString())
+            .contractTypeId(11222L)
+            .contractTypeName("Contract Type 1")
+            .crownServantFlag(Boolean.TRUE)
+            .epimsId("EP1")
+            .hmctsServiceId("HMCTS1")
+            .judgeRoleTypeId("JR1")
+            .judgeRoleTypeName("Judge Role Type 1")
+            .londonFlag(Boolean.FALSE)
+            .payrollId("PR1")
+            .personalCode("PC1")
+            .personalName("Personal Name")
+            .pm(Boolean.TRUE.toString())
+            .regionId("EC1")
+            .regionName("East Coast US1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId(statusHistory1.getStatusId())
+            .venueName("Venue Name 1")
+            .createdDateTime(LocalDateTime.now().minusDays(300))
+            .createdByUserId("charlie_chaplin")
+            .createdByUserName("Charlie Chaplin")
+            .changeDateTime(LocalDateTime.now().minusDays(270))
+            .changeByUserId("buster_keaton")
+            .changeByUserName("Buster Keaton")
+            .build();
         sittingRecord1.setStatusHistories(List.of(statusHistory1));
 
-        SittingRecord sittingRecord2 = SittingRecord.builder()
-            .sittingRecordId(2L)
-            .personalCode("PC2")
-            .sittingDate(LocalDate.now().minusDays(2))
-            .build();
-        StatusHistory statusHistory2 = StatusHistory.builder()
+        StatusHistory statusHistory2a = StatusHistory.builder()
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11244")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().minusDays(2))
             .changeByName("Matt Murdock")
             .build();
-        sittingRecord2.setStatusId(statusHistory2.getStatusId());
-        sittingRecord2.setStatusHistories(List.of(statusHistory2));
+        StatusHistory statusHistory2b = StatusHistory.builder()
+            .statusId(StatusId.PUBLISHED.name())
+            .changeByUserId("11245")
+            .changeDateTime(LocalDateTime.now().minusDays(1))
+            .changeByName("Peter Parker")
+            .build();
+        StatusHistory statusHistory2c = StatusHistory.builder()
+            .statusId(StatusId.SUBMITTED.name())
+            .changeByUserId("11246")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Stephen Strange")
+            .build();
+        SittingRecord sittingRecord2 = SittingRecord.builder()
+            .sittingRecordId(2L)
+            .accountCode("AC2")
+            .am(Boolean.TRUE.toString())
+            .contractTypeId(11333L)
+            .contractTypeName("Contract Type 2")
+            .crownServantFlag(Boolean.FALSE)
+            .epimsId("EP2")
+            .hmctsServiceId("HMCTS2")
+            .judgeRoleTypeId("JR2")
+            .judgeRoleTypeName("Judge Role Type 2")
+            .londonFlag(Boolean.FALSE)
+            .payrollId("PR2")
+            .personalCode("PC2")
+            .personalName("Personal Name")
+            .pm(Boolean.TRUE.toString())
+            .regionId("EC2")
+            .regionName("East Coast US2")
+            .sittingDate(LocalDate.now().minusDays(1))
+            .statusId(statusHistory2c.getStatusId())
+            .venueName("Venue Name 1")
+            .createdDateTime(LocalDateTime.now().minusDays(300))
+            .createdByUserId("charlie_chaplin")
+            .createdByUserName("Charlie Chaplin")
+            .changeDateTime(LocalDateTime.now().minusDays(270))
+            .changeByUserId("buster_keaton")
+            .changeByUserName("Buster Keaton")
+            .build();
+        sittingRecord2.setStatusHistories(List.of(statusHistory2a, statusHistory2b, statusHistory2c));
 
         return List.of(sittingRecord1, sittingRecord2);
     }
