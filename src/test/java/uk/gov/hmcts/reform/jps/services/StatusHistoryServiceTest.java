@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@ContextConfiguration(classes = {StatusHistoryServiceImpl.class})
+@ContextConfiguration(classes = {StatusHistoryService.class})
 @ExtendWith(SpringExtension.class)
 class StatusHistoryServiceTest {
     @MockBean
@@ -31,10 +31,10 @@ class StatusHistoryServiceTest {
     private StatusHistoryRepository statusHistoryRepository;
 
     @Autowired
-    private StatusHistoryServiceImpl statusHistoryService;
+    private StatusHistoryService statusHistoryService;
 
     /**
-     * Method under test: {@link StatusHistoryServiceImpl#saveStatusHistory(StatusHistory, SittingRecord)}.
+     * Method under test: {@link StatusHistoryService#saveStatusHistory(StatusHistory, SittingRecord)}.
      */
     @Test
     void shouldSaveStatusHistory() {
