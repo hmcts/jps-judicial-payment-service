@@ -62,7 +62,7 @@ public class RecordSittingRecordsControllerITest {
     @ParameterizedTest
     @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
         "recordSittingRecords.json,201,4918500"})
-        @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
     void shouldRecordSittingRecordsWhenAllDataIsPresent(String fileName,
                                                         int responseCode,
