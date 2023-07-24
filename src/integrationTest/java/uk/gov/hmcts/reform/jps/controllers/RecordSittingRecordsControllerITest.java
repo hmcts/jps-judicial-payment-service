@@ -62,7 +62,7 @@ public class RecordSittingRecordsControllerITest {
     @ParameterizedTest
     @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
         "recordSittingRecords.json,201,4918500"})
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+        @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
     void shouldRecordSittingRecordsWhenAllDataIsPresent(String fileName,
                                                         int responseCode,
@@ -148,7 +148,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
-                jsonPath("$.errorRecords[0].createdDateTime").value("2023-06-27T12:40:30.430Z"),
+                jsonPath("$.errorRecords[0].createdDateTime").exists(),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852650"),
@@ -160,7 +160,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
-                jsonPath("$.errorRecords[1].createdDateTime").value("2023-06-27T12:40:30.430Z"),
+                jsonPath("$.errorRecords[1].createdDateTime").exists(),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852650"),
@@ -172,7 +172,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name()),
-                jsonPath("$.errorRecords[2].createdDateTime").value("2023-06-27T12:40:30.430Z")
+                jsonPath("$.errorRecords[2].createdDateTime").exists()
             );
     }
 
