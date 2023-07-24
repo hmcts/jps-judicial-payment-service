@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.model.out;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,9 +10,8 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
 import java.time.LocalDate;
-import java.util.Comparator;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
@@ -35,21 +35,17 @@ public class SittingRecord {
     private String judgeRoleTypeId;
     private String am;
     private String pm;
+    private LocalDateTime createdDateTime;
+    private String createdByUserId;
+    private String createdByUserName;
+    private LocalDateTime changeDateTime;
+    private String changeByUserId;
+    private String changeByUserName;
+
+    @JsonIgnore
     @ToString.Exclude
     private List<StatusHistory> statusHistories;
 
-    public String getCreatedByUserId() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
-    }
-
-    public StatusHistory getFirstStatusHistory() {
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId))
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
-    }
 
     @Override
     public int hashCode() {
@@ -73,36 +69,49 @@ public class SittingRecord {
         SittingRecord sittingRecord
             = (SittingRecord) object;
 
-
-        if (null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()) {
-            return true;
-        }
-
         return (sittingRecord.getSittingRecordId() == this.getSittingRecordId()
-            && (null == sittingRecord.getAm() && null == this.getAm()
-            || null != sittingRecord.getAm() && sittingRecord.getAm().equals(this.getAm()))
-            && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
-            && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
-            && (null != sittingRecord.getPersonalName()
-            && sittingRecord.getPersonalName().equals(this.getPersonalName())
-            || null == sittingRecord.getPersonalName() && null == this.getPersonalName())
-            && (null == sittingRecord.getPm() && null == this.getPm()
+
+            && ((null == sittingRecord.getAm() && null == this.getAm())
+            || (null != sittingRecord.getAm() && sittingRecord.getAm().equals(this.getAm())))
+
+            && ((null == sittingRecord.getContractTypeId() && null == this.getContractTypeId())
+            || (null != sittingRecord.getContractTypeId() && null != this.getContractTypeId()
+            && sittingRecord.getContractTypeId().equals(this.getContractTypeId())))
+
+            && ((null == sittingRecord.getEpimsId() && null == this.getEpimsId())
+            || (null != sittingRecord.getEpimsId() && null != this.getEpimsId()
+            && sittingRecord.getEpimsId().equals(this.getEpimsId())))
+
+            && ((null == sittingRecord.getPersonalCode() && null == this.getPersonalCode())
+            || (null != sittingRecord.getPersonalCode() && null != this.getPersonalCode()
+            && sittingRecord.getPersonalCode().equals(this.getPersonalCode())))
+
+            && ((null == sittingRecord.getPersonalName() && null == this.getPersonalName())
+            || (null != sittingRecord.getPersonalName() && null != this.getPersonalName()
+            && sittingRecord.getPersonalName().equals(this.getPersonalName())))
+
+            && ((null == sittingRecord.getPm() && null == this.getPm())
             || null != sittingRecord.getPm() && sittingRecord.getPm().equals(this.getPm()))
-            && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
-            && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
-            && (null != sittingRecord.getRegionName() && sittingRecord.getRegionName().equals(this.getRegionName())
-            || null == sittingRecord.getRegionName() && null == this.getRegionName())
-            && sittingRecord.getRegionId().equals(this.getRegionId())
-            && sittingRecord.getStatusId().equals(this.getStatusId())
-            && (null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
-            || null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
-            || null == sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && this.getStatusHistories().size() == 0
-            || null == this.getStatusHistories() && null != sittingRecord.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == 0));
+
+            && ((null == sittingRecord.getHmctsServiceId() && null == this.getHmctsServiceId())
+            || (null != sittingRecord.getHmctsServiceId() && null != this.getHmctsServiceId()
+            && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())))
+
+            && ((null == sittingRecord.getJudgeRoleTypeId() && null == this.getJudgeRoleTypeId())
+            || (null != sittingRecord.getJudgeRoleTypeId() && null != this.getJudgeRoleTypeId()
+            && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())))
+
+            && ((null == sittingRecord.getRegionName() && null == this.getRegionName())
+            || (null != sittingRecord.getRegionName() && null != this.getRegionName()
+            && sittingRecord.getRegionName().equals(this.getRegionName())))
+
+            && ((null == sittingRecord.getRegionId() && null == this.getRegionId())
+            || (null != sittingRecord.getRegionId() && null != this.getRegionId()
+            && sittingRecord.getRegionId().equals(this.getRegionId())))
+
+            && ((null == sittingRecord.getStatusId() && null == this.getStatusId())
+            || (null != sittingRecord.getStatusId() && null != this.getStatusId()
+            && sittingRecord.getStatusId().equals(this.getStatusId()))));
     }
 
     public boolean equalsDomainObject(Object object) {

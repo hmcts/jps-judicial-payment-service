@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -27,17 +28,24 @@ class SittingRecordRepositoryTest extends AbstractTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
-    private StatusHistory statusHistoryAmended;
-    private StatusHistory statusHistoryCreated;
+    @Autowired
+    private StatusHistoryRepository historyRepository;
+    private StatusHistory statusHistoryRecorded;
+
+    @BeforeEach
+    void setUp() {
+        recordRepository.deleteAll();
+        historyRepository.deleteAll();
+    }
 
     @Test
     void shouldSaveSittingRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
-        StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.name(),
                                                    "John Doe",
                                                    sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryCreated);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
         assertThat(persistedSittingRecord).isNotNull();
@@ -48,11 +56,11 @@ class SittingRecordRepositoryTest extends AbstractTest {
     @Test
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
-        StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    "555",
                                                    "John Doe 555",
                                                    sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryCreated);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
@@ -64,7 +72,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
 
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.SUBMITTED.name())
             .changeDateTime(LocalDateTime.now())
             .changeByUserId(JpsRole.ROLE_SUBMITTER.getValue())
             .changeByName("John Doe")
@@ -86,11 +94,11 @@ class SittingRecordRepositoryTest extends AbstractTest {
     @Test
     void shouldDeleteSelectedRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
-        StatusHistory statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "John Doe",
                                                    sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryCreated);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
@@ -114,27 +122,28 @@ class SittingRecordRepositoryTest extends AbstractTest {
         String createdByUserId = recordRepository.findCreatedByUserId(persistedSittingRecord.getId());
 
         assertNotNull(createdByUserId, "Could not find created by user id.");
-        assertEquals(statusHistoryCreated.getChangeByUserId(), createdByUserId, "Not the expected CREATED BY USER ID!");
+        assertEquals(statusHistoryRecorded.getChangeByUserId(), createdByUserId,
+                     "Not the expected CREATED BY USER ID!");
     }
 
     private SittingRecord createSittingRecordWithSeveralStatus() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
-        statusHistoryCreated = createStatusHistory(sittingRecord.getStatusId(),
-                                                   JpsRole.ROLE_RECORDER.getValue(),
-                                                   "John Doe",
-                                                   sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryCreated);
-        StatusHistory statusHistoryAmended1 = createStatusHistory(sittingRecord.getStatusId(),
+        statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
+                                                    JpsRole.ROLE_RECORDER.getValue(),
+                                                    "John Doe",
+                                                    sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded);
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(StatusId.SUBMITTED.name(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "Matthew Doe",
                                                    sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryAmended1);
+        sittingRecord.addStatusHistory(statusHistorySubmitted1);
 
-        statusHistoryAmended = createStatusHistory(sittingRecord.getStatusId(),
-                                                   JpsRole.ROLE_RECORDER.getValue(),
-                                                   "Mark Doe",
-                                                   sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryAmended);
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED.name(),
+                                                     JpsRole.ROLE_RECORDER.getValue(),
+                                                     "Mark Doe",
+                                                     sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryPublished);
 
         return sittingRecord;
     }
