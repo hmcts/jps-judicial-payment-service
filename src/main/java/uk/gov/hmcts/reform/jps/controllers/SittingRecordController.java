@@ -16,7 +16,6 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
-import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -40,7 +39,6 @@ public class SittingRecordController {
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
     private final JudicialUserDetailsService judicialUserDetailsService;
-    private final CaseWorkerService caseWorkerService;
 
     @PostMapping(
         path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
@@ -67,7 +65,6 @@ public class SittingRecordController {
             if (!sittingRecords.isEmpty()) {
                 regionService.setRegionName(hmctsServiceCode, sittingRecords);
                 judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
-                caseWorkerService.setCaseWorkerDetails(sittingRecords);
             }
         }
 

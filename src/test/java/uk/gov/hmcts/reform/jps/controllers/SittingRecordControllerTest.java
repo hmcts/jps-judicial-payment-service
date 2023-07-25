@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.jps.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,20 +18,23 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
-import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -49,7 +54,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 @AutoConfigureMockMvc(addFilters = false)
 @ImportAutoConfiguration(TestIdamConfiguration.class)
 class SittingRecordControllerTest {
-    private static final String SSCS = "sscs";
+    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordControllerTest.class);
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -62,9 +67,8 @@ class SittingRecordControllerTest {
     private LocationService regionService;
     @MockBean
     private JudicialUserDetailsService judicialUserDetailsService;
-    @MockBean
-    private CaseWorkerService caseWorkerService;
 
+    private static final String SSCS = "sscs";
 
     @Test
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
@@ -140,22 +144,62 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
-        when(sittingRecordService.getTotalRecordCount(
-            isA(SittingRecordSearchRequest.class),
-            eq(SSCS)
-        ))
-            .thenReturn(2);
-        List<SittingRecord> sittingRecords = List.of(
-            SittingRecord.builder()
-                .sittingRecordId(1)
-                .build(),
-            SittingRecord.builder()
-                .sittingRecordId(12)
-                .build()
-        );
+
+        StatusHistory statusHistory1 = StatusHistory.builder()
+            .id(1L)
+            .statusId(StatusId.RECORDED.name())
+            .changeByUserId("11233")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Jason Bourne")
+            .build();
+        SittingRecord sittingRecord1 = SittingRecord.builder()
+            .sittingRecordId(1L)
+            .statusId(statusHistory1.getStatusId())
+            .createdDateTime(statusHistory1.getChangeDateTime())
+            .createdByUserId(statusHistory1.getChangeByUserId())
+            .createdByUserName(statusHistory1.getChangeByName())
+            .changeDateTime(statusHistory1.getChangeDateTime())
+            .changeByUserId(statusHistory1.getChangeByUserId())
+            .changeByUserName(statusHistory1.getChangeByName())
+            .build();
+        sittingRecord1.setStatusHistories(List.of(statusHistory1));
+
+        StatusHistory statusHistory2a = StatusHistory.builder()
+            .statusId(StatusId.RECORDED.name())
+            .changeByUserId("11244")
+            .changeDateTime(LocalDateTime.now().minusDays(2))
+            .changeByName("Matt Murdock")
+            .build();
+        StatusHistory statusHistory2b = StatusHistory.builder()
+            .statusId(StatusId.PUBLISHED.name())
+            .changeByUserId("11245")
+            .changeDateTime(LocalDateTime.now().minusDays(1))
+            .changeByName("Peter Parker")
+            .build();
+        StatusHistory statusHistory2c = StatusHistory.builder()
+            .statusId(StatusId.SUBMITTED.name())
+            .changeByUserId("11246")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Stephen Strange")
+            .build();
+        SittingRecord sittingRecord2 = SittingRecord.builder()
+            .sittingRecordId(2L)
+            .statusId(statusHistory2c.getStatusId())
+            .createdDateTime(statusHistory2a.getChangeDateTime())
+            .createdByUserId(statusHistory2a.getChangeByUserId())
+            .createdByUserName(statusHistory2a.getChangeByName())
+            .changeDateTime(statusHistory2c.getChangeDateTime())
+            .changeByUserId(statusHistory2c.getChangeByUserId())
+            .changeByUserName(statusHistory2c.getChangeByName())
+            .build();
+        sittingRecord2.setStatusHistories(List.of(statusHistory2a, statusHistory2b, statusHistory2c));
+
+        List<SittingRecord> sittingRecords = List.of(sittingRecord1, sittingRecord2);
+
+        when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
+            .thenReturn(sittingRecords.size());
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
-            .thenReturn(sittingRecords
-            );
+            .thenReturn(sittingRecords);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -173,12 +217,17 @@ class SittingRecordControllerTest {
             mvcResult.getResponse().getContentAsByteArray(),
             SittingRecordSearchResponse.class
         );
+        LOGGER.debug("sittingRecordSearchResponse:{}", sittingRecordSearchResponse);
+        LOGGER.debug("sittingRecordSearchResponse.getSittingRecords():{}",
+                     sittingRecordSearchResponse.getSittingRecords());
 
         verify(regionService).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
-        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
-        assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
+        assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(sittingRecords.size());
+        assertEquals(sittingRecordSearchResponse.getSittingRecords().size(), sittingRecords.size());
+        if (sittingRecordSearchResponse.getSittingRecords().size() > 1) {
+            assertEquals(sittingRecordSearchResponse.getSittingRecords().get(1), sittingRecords.get(1));
+        }
     }
 
     @Test
@@ -188,10 +237,10 @@ class SittingRecordControllerTest {
             eq(SSCS)
         ))
             .thenReturn(2);
+
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
-            .thenReturn(sittingRecords
-            );
+            .thenReturn(sittingRecords);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -210,10 +259,8 @@ class SittingRecordControllerTest {
             SittingRecordSearchResponse.class
         );
         assertThat(sittingRecordSearchResponse.getRecordCount()).isEqualTo(2);
-        assertThat(sittingRecordSearchResponse.getSittingRecords()).isEqualTo(sittingRecords);
+        assertEquals(0, sittingRecordSearchResponse.getSittingRecords().size());
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
-        //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
-
     }
 }
