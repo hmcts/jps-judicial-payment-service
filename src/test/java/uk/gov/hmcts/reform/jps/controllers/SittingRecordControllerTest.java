@@ -19,6 +19,7 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -26,6 +27,7 @@ import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
+import uk.gov.hmcts.reform.jps.services.StatusHistoryService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -36,6 +38,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
@@ -64,6 +69,8 @@ class SittingRecordControllerTest {
     private MockMvc mockMvc;
     @MockBean
     private SittingRecordService sittingRecordService;
+    @MockBean
+    private StatusHistoryService statusHistoryService;
     @MockBean
     private LocationService regionService;
     @MockBean
@@ -147,15 +154,18 @@ class SittingRecordControllerTest {
     void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
 
         List<SittingRecord> sittingRecords = generateSittingRecords();
+        List<RecordingUser> recordingUsers = generateRecordingUsers();
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
             .thenReturn(sittingRecords.size());
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
+        when(statusHistoryService.findRecordingUsers(anyString(), anyString(), anyList(), any(), any()))
+            .thenReturn(recordingUsers);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
-                                                      "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
+                                                 "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
                                                       SSCS
                                                   )
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -188,8 +198,7 @@ class SittingRecordControllerTest {
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        ))
-            .thenReturn(2);
+        )).thenReturn(2);
 
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
@@ -217,17 +226,31 @@ class SittingRecordControllerTest {
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
     }
 
+    private List<RecordingUser> generateRecordingUsers() {
+        RecordingUser recUser1 = RecordingUser.builder()
+            .changeByUserId("10011")
+            .changeByUserName("User One")
+            .build();
+        RecordingUser recUser2 = RecordingUser.builder()
+            .changeByUserId("10022")
+            .changeByUserName("User Two")
+            .build();
+        return List.of(recUser1, recUser2);
+    }
+
     private List<SittingRecord> generateSittingRecords() {
+        long idSittingRecord = 0;
+        long idStatusHistory = 0;
 
         StatusHistory statusHistory1 = StatusHistory.builder()
-            .id(1L)
+            .id(++idStatusHistory)
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11233")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Jason Bourne")
             .build();
         SittingRecord sittingRecord1 = SittingRecord.builder()
-            .sittingRecordId(1L)
+            .sittingRecordId(++idSittingRecord)
             .accountCode("AC1")
             .am(Boolean.TRUE.toString())
             .contractTypeId(11222L)
@@ -257,25 +280,28 @@ class SittingRecordControllerTest {
         sittingRecord1.setStatusHistories(List.of(statusHistory1));
 
         StatusHistory statusHistory2a = StatusHistory.builder()
+            .id(++idStatusHistory)
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11244")
             .changeDateTime(LocalDateTime.now().minusDays(2))
             .changeByName("Matt Murdock")
             .build();
         StatusHistory statusHistory2b = StatusHistory.builder()
+            .id(++idStatusHistory)
             .statusId(StatusId.PUBLISHED.name())
             .changeByUserId("11245")
             .changeDateTime(LocalDateTime.now().minusDays(1))
             .changeByName("Peter Parker")
             .build();
         StatusHistory statusHistory2c = StatusHistory.builder()
+            .id(++idStatusHistory)
             .statusId(StatusId.SUBMITTED.name())
             .changeByUserId("11246")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Stephen Strange")
             .build();
         SittingRecord sittingRecord2 = SittingRecord.builder()
-            .sittingRecordId(2L)
+            .sittingRecordId(++idSittingRecord)
             .accountCode("AC2")
             .am(Boolean.TRUE.toString())
             .contractTypeId(11333L)
