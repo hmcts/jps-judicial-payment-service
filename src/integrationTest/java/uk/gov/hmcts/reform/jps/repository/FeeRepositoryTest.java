@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
-class StatusHistoryRepositoryTest {
+class FeeRepositoryTest {
 
     @Autowired
     private FeeRepository feeRepository;
@@ -58,7 +58,7 @@ class StatusHistoryRepositoryTest {
     }
 
     @Test
-    void shouldDeleteSelectedFeey() {
+    void shouldDeleteSelectedFee() {
 
         Optional<Fee> optionalSettingHistoryToUpdate = feeRepository
             .findById(persistedFee.getId());

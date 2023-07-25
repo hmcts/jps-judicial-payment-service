@@ -1,13 +1,12 @@
 create table public.fee (
                              fee_record_id bigint not null,
                              hmcts_service_id varchar(60) not null,
-                             fee_id varchar(60) not null,
                              judge_role_type_id varchar(60) not null,
                              standard_fee integer not null,
+                             higher_threshold_fee integer,
                              london_weighted_fee integer,
-                             fee_description varchar(120) not null,
                              effective_from timestamp without time zone not null,
-                             pensionable_code integer,
+                             fee_created_date timestamp without time zone not null,
 );
 
 ALTER TABLE ONLY public.fee

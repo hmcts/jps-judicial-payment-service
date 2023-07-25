@@ -29,27 +29,22 @@ public class Fee {
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
 
-    @Column(name = "fee_id")
-    private String feeId;
-
     @Column(name = "judge_role_type_id")
     private String judgeRoleId;
 
     @Column(name = "standard_fee")
     private Integer standardFee;
 
+    @Column(name = "higher_threshold_fee")
+    private Integer higherThresholdFee;
+
     @Column(name = "london_weighted_fee")
     private Integer londonWeightedFee;
-
-    @Column(name = "change_by_name")
-    private String changeByName;
-
-    @Column(name = "fee_description")
-    private String feeDescription;
 
     @Column(name = "effective_from")
     private LocalDate effectiveFrom;
 
-    @Column(name = "pensionable_code")
-    private Integer pensionableCode;
+    @Column(name = "fee_created_date")
+    private LocalDate feeCreatedDate;
+
 }
