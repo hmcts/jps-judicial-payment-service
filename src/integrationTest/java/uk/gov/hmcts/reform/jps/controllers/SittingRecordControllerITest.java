@@ -45,6 +45,10 @@ class SittingRecordControllerITest extends BaseTest {
 
     private static final String SEARCH_SITTING_RECORDS_JSON = "searchSittingRecords.json";
 
+    public static final String SEARCH_URL = "/sitting-records/searchSittingRecords/{hmctsServiceCode}";
+
+    public static final String TO_DATE_CONST = "toDate";
+
     @BeforeEach
     void setUp() {
         historyRepository.deleteAll();
@@ -54,9 +58,9 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
-        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
+        String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
-            .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
+            .perform(post(SEARCH_URL, "2")
               .contentType(MediaType.APPLICATION_JSON)
               .content(updatedRecord))
             .andDo(print())
@@ -71,44 +75,24 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("BBA3")
-            .personalCode("4923421")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .build();
-        StatusHistory statusHistory1 = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11233")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Jason Bourne")
-            .build();
+        SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
+                                                          "HighCourt", "4923421", "1",
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory1 = createStatusHistory("Jason Bourne", "11233",
+                                                           LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
-        StatusHistory statusHistory2 = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED.name())
-            .changeByUserId("11255")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Jackie Chan")
-            .build();
+        StatusHistory statusHistory2 = createStatusHistory("Jackie Chan", "11255",
+                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
-        StatusHistory statusHistory3 = StatusHistory.builder()
-            .statusId(StatusId.PUBLISHED.name())
-            .changeByUserId("11266")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Denzel Washington")
-            .build();
+        StatusHistory statusHistory3 = createStatusHistory("Denzel Washington", "11266",
+                                                           LocalDateTime.now(), StatusId.PUBLISHED.name());
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
         statusHistory3 = historyRepository.save(statusHistory3);
@@ -125,9 +109,9 @@ class SittingRecordControllerITest extends BaseTest {
         assertThat(persistedSittingRecord.equalsDomainObject(sittingRecord));
 
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
-        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
+        String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
-            .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "BBA3")
+            .perform(post(SEARCH_URL, "BBA3")
               .contentType(MediaType.APPLICATION_JSON)
               .content(updatedRecord))
             .andDo(print())
@@ -159,7 +143,7 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
-        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
+        String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords")
                          .contentType(MediaType.APPLICATION_JSON)
@@ -202,7 +186,7 @@ class SittingRecordControllerITest extends BaseTest {
     void shouldReturn400ResponseWhenEnumValuesIncorrect() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsInValidEnumData.json"), UTF_8);
         MvcResult response = mockMvc
-            .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
+            .perform(post(SEARCH_URL, "2")
                          .contentType(MediaType.APPLICATION_JSON)
                          .content(requestJson))
             .andDo(print())
@@ -226,4 +210,30 @@ class SittingRecordControllerITest extends BaseTest {
             .contains("one of the values accepted for Enum class: [ASCENDING, DESCENDING]");
     }
 
+    private SittingRecord createSittingRecord(Long contractTypeId, String epimsId, String hmctsServiceId,
+                                              String judgeRoleTypeId, String personalCode, String regionId,
+                                              String statusId) {
+        return SittingRecord.builder()
+            .am(true)
+            .contractTypeId(contractTypeId)
+            .epimsId(epimsId)
+            .hmctsServiceId(hmctsServiceId)
+            .judgeRoleTypeId(judgeRoleTypeId)
+            .personalCode(personalCode)
+            .pm(false)
+            .regionId(regionId)
+            .sittingDate(LocalDate.now().minusDays(2L))
+            .statusId(statusId)
+            .build();
+    }
+
+    private StatusHistory createStatusHistory(String changeByName, String changeByUserId, LocalDateTime changeDateTime,
+                                              String statusId) {
+        return StatusHistory.builder()
+            .changeByName(changeByName)
+            .changeByUserId(changeByUserId)
+            .changeDateTime(changeDateTime)
+            .statusId(statusId)
+            .build();
+    }
 }
