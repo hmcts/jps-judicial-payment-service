@@ -36,10 +36,10 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_PUBLISHER;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_PUBLISHER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 

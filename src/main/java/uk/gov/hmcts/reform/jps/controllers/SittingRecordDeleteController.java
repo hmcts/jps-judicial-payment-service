@@ -16,9 +16,9 @@ import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 
 
 @RestController

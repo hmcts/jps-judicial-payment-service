@@ -23,11 +23,11 @@ import uk.gov.hmcts.reform.authorisation.filters.ServiceAuthFilter;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_JOH_ADMIN;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_PUBLISHER;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
-import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_JOH_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_PUBLISHER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 
 @Configuration
 @EnableWebSecurity

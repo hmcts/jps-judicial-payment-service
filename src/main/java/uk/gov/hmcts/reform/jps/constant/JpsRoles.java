@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.jps.contants;
+package uk.gov.hmcts.reform.jps.constant;
 
 public interface JpsRoles {
     String JPS_RECORDER = "jps-recorder";
