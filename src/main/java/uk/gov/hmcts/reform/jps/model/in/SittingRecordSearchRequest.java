@@ -45,8 +45,8 @@ public class SittingRecordSearchRequest implements Serializable {
     private final String epimsId;
     private final String personalCode;
     private final String judgeRoleTypeId;
-    private final boolean medicalMembersOnly;
-    private final boolean includeFees;
+    private final Boolean medicalMembersOnly;
+    private final Boolean includeFees;
 
     @EnumNamePattern(regexp = "AM|PM|FULL_DAY", message = "Expected value AM|PM|Full day")
     private final Duration duration;
