@@ -1,5 +1,9 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +20,10 @@ import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
+
 
 @RestController
 @Validated
@@ -27,6 +35,14 @@ import java.util.Optional;
 @Slf4j
 public class SittingRecordDeleteController {
     private final SittingRecordService sittingRecordService;
+
+    @Operation(description = "Delete sitting record")
+    @ApiResponse(responseCode = "200",
+        content = @Content(schema = @Schema(implementation = String.class)),
+        description = "Successfully deleted sitting record")
+    @ApiResponse(responseCode = "400", description = RESPONSE_400, content = @Content)
+    @ApiResponse(responseCode = "401", description = RESPONSE_401, content = @Content)
+    @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @DeleteMapping(
         path = {"", "/{sittingRecordId}"}
