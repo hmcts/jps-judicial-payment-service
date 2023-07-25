@@ -45,6 +45,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 
 @WebMvcTest(controllers = {SittingRecordController.class, SittingRecordDeleteController.class},
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
@@ -202,7 +203,7 @@ class SittingRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldDeleteSittingRecordWhenSittingRecordPresent() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
@@ -210,7 +211,7 @@ class SittingRecordControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
         doThrow(new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"))
             .when(sittingRecordService)
