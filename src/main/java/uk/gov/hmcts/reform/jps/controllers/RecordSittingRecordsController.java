@@ -33,6 +33,8 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
+import static java.util.Objects.nonNull;
+import static java.util.function.Predicate.not;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.status;
@@ -86,6 +88,9 @@ public class RecordSittingRecordsController {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         Optional<ErrorCode> errorCodeCheck = sittingRecordWrappers.stream()
+            .filter(not(sittingRecordWrapper ->
+                            nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
+                                && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()))
             .map(SittingRecordWrapper::getErrorCode)
             .filter(errorCode -> errorCode != VALID)
             .findAny();

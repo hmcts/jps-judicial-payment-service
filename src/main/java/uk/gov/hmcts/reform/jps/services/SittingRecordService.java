@@ -24,8 +24,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Objects.nonNull;
-import static java.util.function.Predicate.not;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
@@ -92,7 +90,7 @@ public class SittingRecordService {
             .forEach(recordSittingRecordWrapper -> {
                 SittingRecordRequest recordSittingRecord = recordSittingRecordWrapper.getSittingRecordRequest();
                 if (TRUE.equals(recordSittingRecord.getReplaceDuplicate())) {
-                    self.deleteSittingRecord(recordSittingRecord.getSittingRecordId());
+                    self.deleteSittingRecord(recordSittingRecordWrapper.getSittingRecordId());
                 }
 
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
@@ -126,10 +124,7 @@ public class SittingRecordService {
     }
 
     public void checkDuplicateRecords(List<SittingRecordWrapper> sittingRecordWrappers) {
-        sittingRecordWrappers.stream()
-            .filter(not(sittingRecordWrapper ->
-                            nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-                                && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()))
+        sittingRecordWrappers
             .forEach(this::checkDuplicateRecords);
     }
 
