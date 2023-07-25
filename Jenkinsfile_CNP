@@ -32,8 +32,14 @@ def secrets = [
     secret('mc-idam-client-secret', 'JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET'),
     secret('idam-jps-recorder-username', 'JPS_RECORDER_USERNAME'),
     secret('idam-jps-recorder-password', 'JPS_RECORDER_PASSWORD'),
+    secret('idam-jps-submitter-username', 'JPS_SUBMITTER_USERNAME'),
+    secret('idam-jps-submitter-password', 'JPS_SUBMITTER_PASSWORD'),
+    secret('idam-jps-publisher-username', 'JPS_PUBLISHER_USERNAME'),
+    secret('idam-jps-publisher-password', 'JPS_PUBLISHER_PASSWORD'),
     secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
-    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD')
+    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD'),
+    secret('idam-jps-joh-admin-username', 'JPS_JOH_ADMIN_USERNAME'),
+    secret('idam-jps-joh-admin-password', 'JPS_JOH_ADMIN_PASSWORD')
   ],
   's2s-${env}': [
 
@@ -62,14 +68,22 @@ withPipeline(type, product, component) {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/reports/checkstyle/*.html'
   }
 
-  before('functionalTest:preview') {
+  before('smoketest:preview') {
     env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
   }
 
-  before('functionalTest:aat') {
+  before('smoketest:aat') {
     env.S2S_URL = "http://rpe-service-auth-provider-aat.service.core-compute-aat.internal"
     env.IDAM_API_URL = "https://idam-api.aat.platform.hmcts.net"
+  }
+
+  afterAlways('smoketest:preview') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Smoke Tests/**/*'
+  }
+
+  afterAlways('smoketest:aat') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Report for Smoke Tests/**/*'
   }
 
   afterAlways('functionalTest:preview') {

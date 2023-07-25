@@ -44,7 +44,10 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        order_inserts: true
+        order_updates: true
         jdbc:
+          batch_size: 5
           time_zone: UTC
   flyway:
     out-of-order: true
@@ -68,7 +71,7 @@ idam:
     totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:AAAAAAAAAAAAAAAA}
     url: ${S2S_URL:http://localhost:8489}
   s2s-authorised:
-    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_judicial_payment_frontend}
   client:
     id: jps_judicial_payment_service
     scope: openid roles profile
