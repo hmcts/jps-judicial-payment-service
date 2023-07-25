@@ -44,7 +44,7 @@ public class SittingRecordController {
 
 
     @PostMapping(
-        path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
+        path = {"/searchSittingRecords/{hmctsServiceCode}"}
     )
     public ResponseEntity<SittingRecordSearchResponse> searchSittingRecords(
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,

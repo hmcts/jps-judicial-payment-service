@@ -38,6 +38,8 @@ import static java.util.function.Predicate.not;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.status;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_200;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
@@ -54,6 +56,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class RecordSittingRecordsController {
+
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
 
@@ -68,9 +71,9 @@ public class RecordSittingRecordsController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @PostMapping(
-        path = {"", "/{hmctsServiceCode}"}
+        path = {"/{hmctsServiceCode}"}
     )
-    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter')")
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
     public ResponseEntity<RecordSittingRecordResponse> recordSittingRecords(
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
         @Valid @RequestBody RecordSittingRecordRequest recordSittingRecordRequest) {

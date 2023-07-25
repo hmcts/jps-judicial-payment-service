@@ -38,6 +38,9 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @SpringBootTest
@@ -133,27 +136,10 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
-        mockMvc
-            .perform(post("/sitting-records/searchSittingRecords")
-                         .contentType(MediaType.APPLICATION_JSON)
-                         .content(updatedRecord))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors[0].fieldName")
-                           .value("PathVariable"))
-            .andExpect(jsonPath("$.errors[0].message")
-                           .value("hmctsServiceCode is mandatory"))
-            .andReturn();
-    }
-
-    @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsWithoutMandatoryFields.json"), UTF_8);
         MvcResult response = mockMvc
-            .perform(post("/sitting-records/searchSittingRecords")
+            .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "BBA3")
                          .contentType(MediaType.APPLICATION_JSON)
                          .content(requestJson))
             .andDo(print())
@@ -208,7 +194,7 @@ class SittingRecordControllerITest {
       jps-recorder
         """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of(role));
@@ -226,7 +212,7 @@ class SittingRecordControllerITest {
       jps-submitter
         """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-submitter"})
+    @WithMockUser(authorities = {JPS_SUBMITTER})
     void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of(role));
@@ -244,7 +230,7 @@ class SittingRecordControllerITest {
       jps-admin
         """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-admin"})
+    @WithMockUser(authorities = {JPS_ADMIN})
     void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of(role));
@@ -257,20 +243,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
-    void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
-            .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                jsonPath("$.errors[0].message").value("sittingRecordId is mandatory")
-            );
-    }
-
-
-    @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
             .andDo(print())

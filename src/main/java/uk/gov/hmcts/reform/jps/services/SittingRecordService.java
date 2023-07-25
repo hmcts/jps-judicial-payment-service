@@ -24,6 +24,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Boolean.TRUE;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
@@ -143,7 +146,7 @@ public class SittingRecordService {
     }
 
     @Transactional
-    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "','" + JPS_ADMIN + "')")
     public void deleteSittingRecord(Long sittingRecordId) {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = sittingRecordRepository.findById(sittingRecordId)

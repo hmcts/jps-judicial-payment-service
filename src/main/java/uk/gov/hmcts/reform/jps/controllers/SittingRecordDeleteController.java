@@ -16,6 +16,10 @@ import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
 import java.util.Optional;
 
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
+
 
 @RestController
 @Validated
@@ -29,9 +33,9 @@ public class SittingRecordDeleteController {
     private final SittingRecordService sittingRecordService;
 
     @DeleteMapping(
-        path = {"", "/{sittingRecordId}"}
+        path = {"/{sittingRecordId}"}
     )
-    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "','" + JPS_ADMIN + "')")
     public ResponseEntity<String> deleteSittingRecord(
         @PathVariable("sittingRecordId") Optional<Long> requestSittingRecordId) {
         Long sittingRecordId = Utility.validateSittingRecordId(requestSittingRecordId);

@@ -36,6 +36,10 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_PUBLISHER;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.contants.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 
@@ -63,7 +67,7 @@ public class RecordSittingRecordsControllerITest {
     @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
         "recordSittingRecords.json,201,4918500"})
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldRecordSittingRecordsWhenAllDataIsPresent(String fileName,
                                                         int responseCode,
                                                         String personalCode) throws Exception {
@@ -127,7 +131,7 @@ public class RecordSittingRecordsControllerITest {
 
     @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
         String requestJson =  Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);
 
@@ -177,7 +181,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-publisher", "jps-admin"})
+    @WithMockUser(authorities = {JPS_PUBLISHER, JPS_ADMIN})
     void shouldReturnUnauthorizedStatusWhenUserIsUnauthorized() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -185,24 +189,6 @@ public class RecordSittingRecordsControllerITest {
                             .content(requestJson))
             .andDo(print())
             .andExpect(status().isUnauthorized());
-    }
-
-    @Test
-    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
-    void shouldReturn400WhenHmctsServiceCode() throws Exception {
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
-                                                  .contentType(MediaType.APPLICATION_JSON)
-                                                  .content(requestJson))
-            .andDo(print())
-            .andExpectAll(status().isBadRequest(),
-                          content().contentType(MediaType.APPLICATION_JSON),
-                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
-            )
-            .andReturn();
-
-        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
     }
 
     @Test
