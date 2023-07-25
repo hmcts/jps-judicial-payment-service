@@ -291,9 +291,30 @@ class SittingRecordServiceTest {
 
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
-        System.out.print("post set up");
-        System.out.print(sittingRecord.getStatusId());
-        System.out.print(sittingRecord.getId().toString());
+        sittingRecordService.deleteSittingRecord(sittingRecord.getId());
+
+        Optional<StatusHistory> optionalStatusHistory
+            = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
+            StatusHistory::getChangeDateTime));
+        StatusHistory statusHistory = null;
+        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
+            statusHistory = optionalStatusHistory.get();
+        }
+
+        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
+
+    }
+
+    @Test
+    void shouldDeleteRecordSubmitter() {
+        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-submitter")).uid(USER_ID).build();
+        given(securityUtils.getUserInfo()).willReturn(userInfo);
+
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(
+            UPDATED_BY_USER_ID, RECORDED.name()
+        );
+
+        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
@@ -305,45 +326,32 @@ class SittingRecordServiceTest {
             statusHistory = optionalStatusHistory.get();
         }
 
-        assertThat(statusHistory.getStatusId().equals("DELETED"));
-
-    }
-
-    @Test
-    void shouldDeleteRecordSubmitter() {
-        UserInfo userInfo = UserInfo.builder().roles(List.of("jps-submitter")).uid(USER_ID).build();
-
-        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(
-            UPDATED_BY_USER_ID,
-            RECORDED.name()
-        );
-
-        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
-
-        assertThat(statusHistory.getStatusId().equals("DELETED"));
+        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
 
     }
 
     @Test
     void shouldDeleteRecordAdmin() {
         UserInfo userInfo = UserInfo.builder().roles(List.of("jps-admin")).uid(USER_ID).build();
+        given(securityUtils.getUserInfo()).willReturn(userInfo);
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(
-            UPDATED_BY_USER_ID,
-            SUBMITTED.name()
+            UPDATED_BY_USER_ID, SUBMITTED.name()
         );
 
-        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
+        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+
+        sittingRecordService.deleteSittingRecord(sittingRecord.getId());
+
+        Optional<StatusHistory> optionalStatusHistory
+            = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
+            StatusHistory::getChangeDateTime));
         StatusHistory statusHistory = null;
         if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
             statusHistory = optionalStatusHistory.get();
         }
 
-        assertThat(statusHistory.getStatusId().equals("DELETED"));
+        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
 
     }
 
@@ -367,7 +375,7 @@ class SittingRecordServiceTest {
             statusHistory = optionalStatusHistory.get();
         }
 
-        assertThat(statusHistory.getStatusId().equals("RECORDED"));
+        assertThat(statusHistory.getStatusId()).isEqualTo("RECORDED");
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
     }
 

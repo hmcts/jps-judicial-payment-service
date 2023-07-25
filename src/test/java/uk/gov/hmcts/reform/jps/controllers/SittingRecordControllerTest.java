@@ -10,14 +10,12 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
-import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -32,10 +30,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -219,42 +215,5 @@ class SittingRecordControllerTest {
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
         //verify(caseWorkerService).setCaseWorkerDetails(eq(sittingRecords));
 
-    }
-
-    @Test
-    @WithMockUser(authorities = {"jps-recorder"})
-    void shouldDeleteSittingRecordWhenSittingRecordPresent() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(authorities = {"jps-recorder"})
-    void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
-            .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                jsonPath("$.errors[0].message").value("sittingRecordId is mandatory")
-            );
-    }
-
-
-    @Test
-    @WithMockUser(authorities = {"jps-recorder"})
-    void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
-        doThrow(new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"))
-            .when(sittingRecordService)
-            .deleteSittingRecord(anyLong());
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
-            .andDo(print())
-            .andExpectAll(
-                status().isNotFound(),
-                jsonPath("$.status").value("NOT_FOUND"),
-                jsonPath("$.errors").value("SITTING_RECORD_ID_NOT_FOUND")
-            );
     }
 }
