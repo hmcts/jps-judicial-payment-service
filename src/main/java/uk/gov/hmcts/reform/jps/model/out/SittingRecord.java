@@ -7,11 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
@@ -45,7 +48,21 @@ public class SittingRecord {
     @JsonIgnore
     @ToString.Exclude
     private List<StatusHistory> statusHistories;
+    @ToString.Exclude
+    private List<JudicialOfficeHolder> judicialOfficeHolders;
 
+    public String getCreatedByUserId() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+    }
+
+    public StatusHistory getFirstStatusHistory() {
+        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
+            .sorted(Comparator.comparingLong(StatusHistory::getId))
+            .toList();
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
+        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+    }
 
     @Override
     public int hashCode() {
@@ -68,6 +85,12 @@ public class SittingRecord {
 
         SittingRecord sittingRecord
             = (SittingRecord) object;
+
+
+        if (null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()) {
+            return true;
+        }
 
         return (sittingRecord.getSittingRecordId() == this.getSittingRecordId()
 
@@ -101,17 +124,26 @@ public class SittingRecord {
             || (null != sittingRecord.getJudgeRoleTypeId() && null != this.getJudgeRoleTypeId()
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())))
 
-            && ((null == sittingRecord.getRegionName() && null == this.getRegionName())
-            || (null != sittingRecord.getRegionName() && null != this.getRegionName()
-            && sittingRecord.getRegionName().equals(this.getRegionName())))
+            && (null != sittingRecord.getRegionName() && sittingRecord.getRegionName().equals(this.getRegionName())
+            || null == sittingRecord.getRegionName() && null == this.getRegionName())
+            && sittingRecord.getRegionId().equals(this.getRegionId())
+            && sittingRecord.getStatusId().equals(this.getStatusId())
 
-            && ((null == sittingRecord.getRegionId() && null == this.getRegionId())
-            || (null != sittingRecord.getRegionId() && null != this.getRegionId()
-            && sittingRecord.getRegionId().equals(this.getRegionId())))
+            && (null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
+            || null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
+            || null == sittingRecord.getStatusHistories() && null != this.getStatusHistories()
+            && this.getStatusHistories().size() == 0
+            || null == this.getStatusHistories() && null != sittingRecord.getStatusHistories()
+            && sittingRecord.getStatusHistories().size() == 0)
 
-            && ((null == sittingRecord.getStatusId() && null == this.getStatusId())
-            || (null != sittingRecord.getStatusId() && null != this.getStatusId()
-            && sittingRecord.getStatusId().equals(this.getStatusId()))));
+            && (null != sittingRecord.getJudicialOfficeHolders() && null != this.getJudicialOfficeHolders()
+            && sittingRecord.getJudicialOfficeHolders().size() == this.getJudicialOfficeHolders().size()
+            || null == sittingRecord.getJudicialOfficeHolders() && null == this.getJudicialOfficeHolders()
+            || null == sittingRecord.getJudicialOfficeHolders() && null != this.getJudicialOfficeHolders()
+            && this.getJudicialOfficeHolders().size() == 0
+            || null == this.getJudicialOfficeHolders() && null != sittingRecord.getJudicialOfficeHolders()
+            && sittingRecord.getJudicialOfficeHolders().size() == 0));
     }
 
     public boolean equalsDomainObject(Object object) {
@@ -134,9 +166,14 @@ public class SittingRecord {
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
+
             && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
             || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size())
+
+            && (null == sittingRecord.getJudicialOfficeHolders() && null == this.getJudicialOfficeHolders()
+            || null != sittingRecord.getJudicialOfficeHolders() && null != this.getJudicialOfficeHolders()
+            && sittingRecord.getJudicialOfficeHolders().size() == this.getJudicialOfficeHolders().size()));
     }
 
 }

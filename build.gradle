@@ -32,6 +32,7 @@ def versions = [
   tomcatEmbedded  : '9.0.75',
   mapstruct       : '1.5.3.Final',
   lombok          : '1.18.24',
+  mockito         : '5.2.0',
   flyway          : '9.15.2',
   postgresql      : '42.6.0'
 ]
@@ -361,16 +362,14 @@ dependencies {
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testcontainers
   integrationTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.11.1'
+  testImplementation group: 'org.mockito', name: 'mockito-inline',  version: versions.mockito
 
   testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.11.1'
   testImplementation group: 'junit', name: 'junit', version: '4.13.2'
   testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.36.0'
   testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.6'
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '3.1.0'
-  testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.11.1'
-  testImplementation group: 'org.powermock', name: 'powermock-api-mockito2', version: '2.0.9'
-  testImplementation group: 'org.powermock', name: 'powermock-module-junit4', version: '2.0.9'
+  testImplementation group: 'org.mockito', name: 'mockito-inline', version: versions.mockito
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 }
 

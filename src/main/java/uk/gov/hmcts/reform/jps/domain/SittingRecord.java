@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,7 +17,6 @@ import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -65,9 +66,17 @@ public class SittingRecord {
     private boolean pm;
 
     @ToString.Exclude
+    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
+
+    @ToString.Exclude
+    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "sittingRecord",
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private final List<JudicialOfficeHolder> judicialOfficeHolders = new ArrayList<>();
+
 
     public String getCreatedByUserId() {
         StatusHistory statusHistory = getFirstStatusHistory();
@@ -115,11 +124,15 @@ public class SittingRecord {
         return optStatHistory.isPresent() ? optStatHistory.get() : null;
     }
 
-
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
         this.setStatusId(statusHistory.getStatusId());
         statusHistory.setSittingRecord(this);
+    }
+
+    public void addJudicialOfficeHolder(JudicialOfficeHolder judicialOfficeHolder) {
+        this.judicialOfficeHolders.add(judicialOfficeHolder);
+        judicialOfficeHolder.setSittingRecord(this);
     }
 
 
@@ -131,7 +144,7 @@ public class SittingRecord {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
-        return (sittingRecord.getId() == this.getId()
+        return (sittingRecord.getId().equals(this.getId())
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
             && sittingRecord.getEpimsId().equals(this.getEpimsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
@@ -143,4 +156,5 @@ public class SittingRecord {
             || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
             && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
     }
+
 }
