@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
@@ -64,15 +63,7 @@ public class SittingRecord {
 
     @JsonIgnore
     public StatusHistory getFirstStatusHistory() {
-        if (null == statusHistories) {
-            return null;
-        }
-
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId))
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.orElse(null);
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
 
     @Override
