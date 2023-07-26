@@ -172,8 +172,11 @@ class SittingRecordControllerTest {
                                                   .content(requestJson)
             )
             .andDo(print())
-            .andExpect(status().isOk())
-            .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+            .andExpectAll(
+                status().isOk(),
+                jsonPath("$.recordingUsers").exists(),
+                jsonPath("$.recordingUsers").isArray(),
+                content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
 
         SittingRecordSearchResponse sittingRecordSearchResponse = objectMapper.readValue(

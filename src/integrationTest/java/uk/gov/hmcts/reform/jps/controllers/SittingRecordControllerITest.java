@@ -48,6 +48,8 @@ class SittingRecordControllerITest extends BaseTest {
     public static final String SEARCH_URL = "/sitting-records/searchSittingRecords/{hmctsServiceCode}";
 
     public static final String TO_DATE_CONST = "toDate";
+    public static final String RECORDING_USERS_JSON_CONST = "$.recordingUsers";
+
 
     @BeforeEach
     void setUp() {
@@ -67,6 +69,9 @@ class SittingRecordControllerITest extends BaseTest {
             .andExpectAll(
                 status().isOk(),
                 jsonPath("$.recordCount").value("0"),
+                jsonPath(RECORDING_USERS_JSON_CONST).exists(),
+                jsonPath(RECORDING_USERS_JSON_CONST).isArray(),
+                jsonPath(RECORDING_USERS_JSON_CONST).isEmpty(),
                 jsonPath("$.sittingRecords").isEmpty()
             )
             .andReturn();
@@ -118,6 +123,9 @@ class SittingRecordControllerITest extends BaseTest {
             .andExpectAll(
                 status().isOk(),
                 jsonPath("$.recordCount").value("1"),
+                jsonPath(RECORDING_USERS_JSON_CONST).exists(),
+                jsonPath(RECORDING_USERS_JSON_CONST).isArray(),
+                jsonPath(RECORDING_USERS_JSON_CONST).isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
