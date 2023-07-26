@@ -9,10 +9,8 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -101,15 +99,11 @@ public class SittingRecord {
     }
 
     public StatusHistory getFirstStatusHistory() {
-        Collections.sort(statusHistories, Comparator.comparing(StatusHistory::getId));
-        Optional<StatusHistory> optStatHistory = statusHistories.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
 
     public StatusHistory getLatestStatusHistory() {
-        Collections.sort(statusHistories, Comparator.comparing(StatusHistory::getId).reversed());
-        Optional<StatusHistory> optStatHistory = statusHistories.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
 
     public void addStatusHistory(StatusHistory statusHistory) {
