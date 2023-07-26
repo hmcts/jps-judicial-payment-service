@@ -18,7 +18,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
@@ -92,7 +91,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[0].statusId").value("RECORDED"),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -103,7 +102,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[1].statusId").value("RECORDED"),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -114,7 +113,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
+                jsonPath("$.errorRecords[2].statusId").value("RECORDED")
             ).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
@@ -151,7 +150,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[0].statusId").value("RECORDED"),
                 jsonPath("$.errorRecords[0].createdDateTime").exists(),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
@@ -163,7 +162,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[1].statusId").value("RECORDED"),
                 jsonPath("$.errorRecords[1].createdDateTime").exists(),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
@@ -175,7 +174,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[2].statusId").value("RECORDED"),
                 jsonPath("$.errorRecords[2].createdDateTime").exists()
             );
     }

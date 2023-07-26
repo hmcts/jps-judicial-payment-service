@@ -10,7 +10,6 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
@@ -22,9 +21,9 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -108,7 +107,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     @Test
     void shouldFindCreatedStatus() {
 
-        statusHistorySubmitted = createStatusHistory(StatusId.SUBMITTED.name(),
+        statusHistorySubmitted = createStatusHistory(StatusId.SUBMITTED,
             JpsRole.ROLE_RECORDER.name(),
             "Matthew Doe",
             persistedSittingRecord);
@@ -117,7 +116,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
 
 
-        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED.name(),
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED,
                                                      JpsRole.ROLE_RECORDER.name(),
                                                      "Matthew Doe",
                                                      persistedSittingRecord);
@@ -130,14 +129,14 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryAsc(persistedSittingRecord.getId()).get(0);
         assertNotNull(statusHistoryFound, "Could not find any status history.");
-        assertEquals(statusHistoryFound, statusHistoryRecorded, "Not the expected " + StatusId.SUBMITTED.name()
+        assertEquals(statusHistoryFound, statusHistoryRecorded, "Not the expected " + StatusId.SUBMITTED
             + " status history!");
     }
 
     @Test
     void shouldFindLatestStatus() {
 
-        statusHistorySubmitted = createStatusHistory(StatusId.SUBMITTED.name(),
+        statusHistorySubmitted = createStatusHistory(StatusId.SUBMITTED,
                                                      JpsRole.ROLE_RECORDER.name(),
                                                      "Matthew Doe",
                                                      persistedSittingRecord);
@@ -149,7 +148,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryDesc(persistedSittingRecord.getId()).get(0);
         assertNotNull(statusHistoryFound, "Could not find any status history.");
-        assertEquals(statusHistoryFound, statusHistorySubmitted, "Not the expected " + StatusId.SUBMITTED.name()
+        assertEquals(statusHistoryFound, statusHistorySubmitted, "Not the expected " + StatusId.SUBMITTED
             + " status history!");
     }
 
@@ -189,8 +188,6 @@ class StatusHistoryRepositoryTest extends AbstractTest {
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
             .build();
     }
 

@@ -19,8 +19,8 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
-import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -74,25 +74,6 @@ class SittingRecordControllerTest {
     private JudicialUserDetailsService judicialUserDetailsService;
 
     private static final String SSCS = "sscs";
-
-    @Test
-    void shouldReturn400WhenHmctsServiceCode() throws Exception {
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
-                                                      "/sitting-records/searchSittingRecords"
-                                                  )
-                                                  .contentType(MediaType.APPLICATION_JSON)
-                                                  .content(requestJson)
-            ).andDo(print())
-            .andExpectAll(status().isBadRequest(),
-                          content().contentType(MediaType.APPLICATION_JSON),
-                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
-            )
-            .andReturn();
-
-        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
-    }
 
     @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
@@ -152,7 +133,7 @@ class SittingRecordControllerTest {
 
         StatusHistory statusHistory1 = StatusHistory.builder()
             .id(1L)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .changeByUserId("11233")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Jason Bourne")
@@ -170,19 +151,19 @@ class SittingRecordControllerTest {
         sittingRecord1.setStatusHistories(List.of(statusHistory1));
 
         StatusHistory statusHistory2a = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .changeByUserId("11244")
             .changeDateTime(LocalDateTime.now().minusDays(2))
             .changeByName("Matt Murdock")
             .build();
         StatusHistory statusHistory2b = StatusHistory.builder()
-            .statusId(StatusId.PUBLISHED.name())
+            .statusId(StatusId.PUBLISHED)
             .changeByUserId("11245")
             .changeDateTime(LocalDateTime.now().minusDays(1))
             .changeByName("Peter Parker")
             .build();
         StatusHistory statusHistory2c = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED.name())
+            .statusId(StatusId.SUBMITTED)
             .changeByUserId("11246")
             .changeDateTime(LocalDateTime.now())
             .changeByName("Stephen Strange")

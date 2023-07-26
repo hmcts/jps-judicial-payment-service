@@ -1,19 +1,19 @@
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '3', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'SUBMITTED', '4', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852649', 'BBA3', '4918178', 1, 'Judge', false, true, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852650', 'BBA3', '4918600', 1, 'Judge', false, true, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-04-10', 'RECORDED', '4', '852650', 'BBA3', '4918600', 1, 'Judge', true, false, null, null, null, null);
-INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm, created_date_time, created_by_user_id, change_date_time, change_by_user_id)
-VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-03-09', 'RECORDED', '4', '852650', 'BBA3', '4918600', 1, 'Judge', true, true, null, null, null, null);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '3', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'SUBMITTED', '4', '852649', 'BBA3', '4918178', 1, 'HealthWorker', false, true);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852649', 'BBA3', '4918178', 1, 'Judge', false, true);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-05-11', 'RECORDED', '4', '852650', 'BBA3', '4918600', 1, 'Judge', false, true);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-04-10', 'RECORDED', '4', '852650', 'BBA3', '4918600', 1, 'Judge', true, false);
+INSERT INTO public.sitting_record (sitting_record_id, sitting_date, status_id, region_id, epimms_id, hmcts_service_id, personal_code, contract_type_id, judge_role_type_id, am, pm)
+VALUES (nextval('sitting_record_sitting_record_id_seq'), '2023-03-09', 'RECORDED', '4', '852650', 'BBA3', '4918600', 1, 'Judge', true, true);
 
 
 

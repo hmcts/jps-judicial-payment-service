@@ -5,15 +5,16 @@ import javax.annotation.Generated;
 import javax.persistence.metamodel.ListAttribute;
 import javax.persistence.metamodel.SingularAttribute;
 import javax.persistence.metamodel.StaticMetamodel;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 @Generated(value = "org.hibernate.jpamodelgen.JPAMetaModelEntityProcessor")
 @StaticMetamodel(SittingRecord.class)
 public abstract class SittingRecord_ {
 
-	public static volatile SingularAttribute<SittingRecord, String> epimsId;
+	public static volatile SingularAttribute<SittingRecord, String> epimmsId;
 	public static volatile SingularAttribute<SittingRecord, String> personalCode;
 	public static volatile ListAttribute<SittingRecord, StatusHistory> statusHistories;
-	public static volatile SingularAttribute<SittingRecord, String> statusId;
+	public static volatile SingularAttribute<SittingRecord, StatusId> statusId;
 	public static volatile SingularAttribute<SittingRecord, String> regionId;
 	public static volatile SingularAttribute<SittingRecord, String> hmctsServiceId;
 	public static volatile SingularAttribute<SittingRecord, String> judgeRoleTypeId;
@@ -23,7 +24,7 @@ public abstract class SittingRecord_ {
 	public static volatile SingularAttribute<SittingRecord, Long> contractTypeId;
 	public static volatile SingularAttribute<SittingRecord, LocalDate> sittingDate;
 
-	public static final String EPIMS_ID = "epimsId";
+	public static final String EPIMMS_ID = "epimmsId";
 	public static final String PERSONAL_CODE = "personalCode";
 	public static final String STATUS_HISTORIES = "statusHistories";
 	public static final String STATUS_ID = "statusId";

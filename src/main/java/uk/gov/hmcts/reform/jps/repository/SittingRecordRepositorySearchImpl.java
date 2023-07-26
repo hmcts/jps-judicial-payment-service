@@ -48,8 +48,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
         predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.REGION_ID),
                                              recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.EPIMS_ID),
-                                             recordSearchRequest.getEpimsId()));
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.EPIMMS_ID),
+                                             recordSearchRequest.getEpimmsId()));
         predicates.add(criteriaBuilder.between(sittingRecord.get(SittingRecord_.SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
@@ -158,7 +158,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
                                   joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
                 .having(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
-                                              StatusId.RECORDED.name()),
+                                              StatusId.RECORDED),
                         criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID),
                                               recordSearchRequest.getCreatedByUserId()));
 

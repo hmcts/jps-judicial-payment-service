@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -108,9 +109,9 @@ class SittingRecordControllerITest {
             .judgeRoleTypeId("HighCourt")
             .build();
         StatusHistory statusHistory1 = StatusHistory.builder()
-            .statusId(StatusId.RECORDED.name())
+            .statusId(RECORDED)
             .changeByUserId("11233")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByName("Jason Bourne")
             .build();
         sittingRecord.addStatusHistory(statusHistory1);
@@ -118,9 +119,9 @@ class SittingRecordControllerITest {
         sittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistory2 = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED.name())
+            .statusId(StatusId.SUBMITTED)
             .changeByUserId("11255")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByName("Jackie Chan")
             .build();
         sittingRecord.addStatusHistory(statusHistory2);
@@ -129,9 +130,9 @@ class SittingRecordControllerITest {
         sittingRecord = recordRepository.save(sittingRecord);
 
         StatusHistory statusHistory3 = StatusHistory.builder()
-            .statusId(StatusId.PUBLISHED.name())
+            .statusId(StatusId.PUBLISHED)
             .changeByUserId("11266")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByName("Denzel Washington")
             .build();
         sittingRecord.addStatusHistory(statusHistory3);

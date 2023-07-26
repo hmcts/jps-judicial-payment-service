@@ -19,11 +19,11 @@ import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
-import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
@@ -33,7 +33,6 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Collections;
 import java.util.Comparator;
@@ -45,12 +44,11 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static java.time.LocalDate.of;
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -70,7 +68,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
-    private static final LocalDateTime CURRENT_DATE_TIME = now();
 
     private static final Long ID = new Random().nextLong();
 
@@ -129,8 +126,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecords).hasSize(2);
 
-        assertEquals(sittingRecords.get(0), getDomainSittingRecords(2).get(0));
-        assertEquals(sittingRecords.get(1), getDomainSittingRecords(2).get(1));
+
+        assertThat(sittingRecords.get(0)).isEqualTo(getDomainSittingRecords(2).get(0));
+        assertThat(sittingRecords.get(1)).isEqualTo(getDomainSittingRecords(2).get(1));
     }
 
 
@@ -154,7 +152,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         domainSittingRecords.get(0).setAm(null);
 
         assertThat(sittingRecords).hasSize(1);
-        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
+        assertThat(sittingRecords.get(0)).isEqualTo(domainSittingRecords.get(0));
     }
 
     @Test
@@ -177,7 +175,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         domainSittingRecords.get(0).setPm(null);
 
         assertThat(sittingRecords).hasSize(1);
-        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
+        assertThat(sittingRecords.get(0)).isEqualTo(domainSittingRecords.get(0));
     }
 
 
@@ -188,83 +186,13 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             requestJson,
             RecordSittingRecordRequest.class
         );
-        sittingRecordService.saveSittingRecords("test",
-                                                recordSittingRecordRequest);
-        verify(sittingRecordRepository, times(3))
-            .save(sittingRecordArgumentCaptor.capture());
-
-        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
-        assertThat(sittingRecords).extracting(SittingRecord_.SITTING_DATE, SittingRecord_.STATUS_ID,
-                                              SittingRecord_.EPIMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
-                                              SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
-                                              SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
-                .contains(
-                    tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
-                    tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
-                    tuple(of(2023, Month.MARCH, 9), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, true)
-        );
-
-        assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .extracting("statusId", "changeByUserId", "changeByName")
-            .contains(
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
-        );
-
-        assertThat(sittingRecords).describedAs("Created date assertion")
-            .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
-    }
-
-    private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
-        return LongStream.range(1, limit + 1)
-            .mapToObj(count -> uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-                .id(count)
-                .sittingDate(LocalDate.now().minusDays(2))
-                .statusId(RECORDED)
-                .regionId("1")
-                .epimmsId("epims001")
-                .hmctsServiceId("sscs")
-                .personalCode("001")
-                .contractTypeId(count)
-                .judgeRoleTypeId("HighCourt")
-                .am(true)
-                .pm(true)
-                .build())
-            .collect(Collectors.toList());
-    }
-
-    private List<SittingRecord> getDomainSittingRecords(int limit) {
-        return LongStream.range(1, limit + 1)
-            .mapToObj(count -> SittingRecord.builder()
-                    .sittingRecordId(count)
-                    .sittingDate(LocalDate.now().minusDays(2))
-                    .statusId(StatusId.RECORDED.name())
-                    .regionId("1")
-                    .epimmsId("epims001")
-                    .hmctsServiceId("sscs")
-                    .personalCode("001")
-                    .contractTypeId(count)
-                    .judgeRoleTypeId("HighCourt")
-                    .am(AM.name())
-                    .pm(PM.name())
-                    .build())
-            .collect(Collectors.toList());
-    }
-
-    @Test
-    void shouldSaveSittingRecordsWhenRequestIsValid() throws IOException {
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
-            requestJson,
-            RecordSittingRecordRequest.class
-        );
-
         List<SittingRecordWrapper> sittingRecordWrappers =
             recordSittingRecordRequest.getRecordedSittingRecords().stream()
-            .map(SittingRecordWrapper::new)
-            .toList();
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        sittingRecordWrappers
+            .forEach(sittingRecordWrapper -> sittingRecordWrapper.setRegionId("1"));
 
         sittingRecordService.saveSittingRecords("test",
                                                 sittingRecordWrappers,
@@ -275,8 +203,10 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .save(sittingRecordArgumentCaptor.capture());
 
         List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
-        assertThat(sittingRecords).extracting("sittingDate", "statusId", "epimmsId", "hmctsServiceId",
-                                              "personalCode", "contractTypeId", "judgeRoleTypeId", "am", "pm")
+        assertThat(sittingRecords).extracting(SittingRecord_.SITTING_DATE, SittingRecord_.STATUS_ID,
+                                              SittingRecord_.EPIMMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
+                                              SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
+                                              SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
                 .contains(
                     tuple(of(2023, Month.MAY, 11), RECORDED, "852649", "test", "4918500", 1L, "Judge", false, true),
                     tuple(of(2023, Month.APRIL, 10), RECORDED, "852649", "test", "4918178", 1L, "Judge", true, false),
@@ -293,14 +223,50 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecords).describedAs("Created date assertion")
             .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+            .allMatch(m -> now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+    }
+
+    private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
+        return LongStream.range(1, limit + 1)
+            .mapToObj(count -> uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                .id(count)
+                .sittingDate(LocalDate.now().minusDays(2))
+                .statusId(RECORDED)
+                .regionId("1")
+                .epimmsId("epimms001")
+                .hmctsServiceId("sscs")
+                .personalCode("001")
+                .contractTypeId(count)
+                .judgeRoleTypeId("HighCourt")
+                .am(true)
+                .pm(true)
+                .build())
+            .collect(Collectors.toList());
+    }
+
+    private List<SittingRecord> getDomainSittingRecords(int limit) {
+        return LongStream.range(1, limit + 1)
+            .mapToObj(count -> SittingRecord.builder()
+                    .sittingRecordId(count)
+                    .sittingDate(LocalDate.now().minusDays(2))
+                    .statusId(StatusId.RECORDED)
+                    .regionId("1")
+                    .epimmsId("epimms001")
+                    .hmctsServiceId("sscs")
+                    .personalCode("001")
+                    .contractTypeId(count)
+                    .judgeRoleTypeId("HighCourt")
+                    .am(AM.name())
+                    .pm(PM.name())
+                    .build())
+            .collect(Collectors.toList());
     }
 
 
     private uk.gov.hmcts.reform.jps.domain.SittingRecord deleteTestSetUp(String changeById, StatusId state) {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(RECORDED)
-            .changeDateTime(LocalDateTime.now())
+            .statusId(state)
+            .changeDateTime(now())
             .changeByUserId(changeById)
             .changeByName("John Smith")
             .build();
@@ -311,17 +277,13 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .sittingDate(LocalDate.now().minusDays(2))
             .statusId(state)
             .regionId("1")
-            .epimmsId("epims001")
+            .epimmsId("epimms001")
             .hmctsServiceId("sscs")
             .personalCode("001")
             .contractTypeId(1L)
             .judgeRoleTypeId("HighCourt")
             .am(true)
             .pm(true)
-            .createdByUserId(USER_ID)
-            .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-            .changeByUserId(changeById)
-            .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
             .build();
 
         sittingRecord.addStatusHistory(statusHistory);
@@ -365,14 +327,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             RECORDED
         );
 
-        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
-
+        StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
+        assertThat(statusHistory).isNotNull();
         assertThat(statusHistory.getStatusId().equals("DELETED"));
-
     }
 
     @Test
@@ -384,14 +341,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             SUBMITTED
         );
 
-        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
-
+        StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
+        assertThat(statusHistory).isNotNull();
         assertThat(statusHistory.getStatusId().equals("DELETED"));
-
     }
 
     @Test
@@ -404,18 +356,16 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Exception exception = assertThrows(ResourceNotFoundException.class, () ->
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+        );
 
-        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
+        StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
+        assertThat(statusHistory).isNotNull();
 
-        assertThat(statusHistory.getStatusId().equals("RECORDED"));
-        assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
+        assertThat(statusHistory.getStatusId()).isEqualTo(RECORDED);
+        assertThat(exception.getMessage())
+            .isEqualTo("User IDAM ID does not match the oldest Changed by IDAM ID ");
     }
 
     @Test
@@ -427,10 +377,11 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
-        assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+        );
+        assertThat(exception.getMessage())
+            .isEqualTo("Sitting Record Status ID is in wrong state");
     }
 
     @Test
@@ -445,7 +396,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         Exception exception = assertThrows(ConflictException.class, () -> {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
-        assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
+        assertThat(exception.getMessage())
+            .isEqualTo("Sitting Record Status ID is in wrong state");
     }
 
     @Test
@@ -460,7 +412,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         Exception exception = assertThrows(ConflictException.class, () -> {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
-        assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
+        assertThat(exception.getMessage())
+            .isEqualTo("Sitting Record Status ID is in wrong state");
     }
 
 

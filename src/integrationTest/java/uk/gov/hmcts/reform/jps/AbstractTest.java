@@ -12,9 +12,9 @@ public class AbstractTest {
     protected SittingRecord createSittingRecord(LocalDate sittingDate) {
         return SittingRecord.builder()
             .sittingDate(sittingDate)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .regionId("1")
-            .epimsId("123")
+            .epimmsId("123")
             .hmctsServiceId("ssc_id")
             .personalCode("001")
             .contractTypeId(2L)
@@ -23,7 +23,7 @@ public class AbstractTest {
             .build();
     }
 
-    protected StatusHistory createStatusHistory(String statusId, String userId, String userName,
+    protected StatusHistory createStatusHistory(StatusId statusId, String userId, String userName,
                                                 SittingRecord sittingRecord) {
         return StatusHistory.builder()
             .statusId(statusId)

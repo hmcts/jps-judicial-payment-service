@@ -9,7 +9,6 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 
 import java.util.List;
-
 import java.util.Optional;
 
 @Repository
