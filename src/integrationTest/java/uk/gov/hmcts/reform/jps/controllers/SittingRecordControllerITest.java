@@ -21,14 +21,19 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -61,14 +66,19 @@ class SittingRecordControllerITest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private StatusHistoryRepository historyRepository;
+
+    @Autowired
     private SittingRecordRepository recordRepository;
+
+    private static final String SEARCH_SITTING_RECORDS_JSON = "searchSittingRecords.json";
 
     @BeforeEach
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "2")
@@ -97,13 +107,49 @@ class SittingRecordControllerITest {
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .build();
+        StatusHistory statusHistory1 = StatusHistory.builder()
+            .statusId(StatusId.RECORDED.name())
+            .changeByUserId("11233")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Jason Bourne")
+            .build();
+        sittingRecord.addStatusHistory(statusHistory1);
+        sittingRecord = recordRepository.save(sittingRecord);
+        sittingRecord.getFirstStatusHistory();
 
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        StatusHistory statusHistory2 = StatusHistory.builder()
+            .statusId(StatusId.SUBMITTED.name())
+            .changeByUserId("11255")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Jackie Chan")
+            .build();
+        sittingRecord.addStatusHistory(statusHistory2);
+        assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
+        historyRepository.save(statusHistory2);
+        sittingRecord = recordRepository.save(sittingRecord);
+
+        StatusHistory statusHistory3 = StatusHistory.builder()
+            .statusId(StatusId.PUBLISHED.name())
+            .changeByUserId("11266")
+            .changeDateTime(LocalDateTime.now())
+            .changeByName("Denzel Washington")
+            .build();
+        sittingRecord.addStatusHistory(statusHistory3);
+        assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
+        statusHistory3 = historyRepository.save(statusHistory3);
+        sittingRecord = recordRepository.save(sittingRecord);
+
+        SittingRecord persistedSittingRecord = recordRepository.findAll().get(0);
+        assertEquals(statusHistory3.getStatusId(), persistedSittingRecord.getStatusId());
+
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
-        assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
+        assertEquals(persistedSittingRecord.getStatusHistories().get(0), sittingRecord.getStatusHistories().get(0));
+        assertEquals(persistedSittingRecord.getStatusHistories().get(1), sittingRecord.getStatusHistories().get(1));
 
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        assertThat(persistedSittingRecord.equalsDomainObject(sittingRecord));
+
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
         mockMvc
             .perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "BBA3")
@@ -115,7 +161,7 @@ class SittingRecordControllerITest {
                 jsonPath("$.recordCount").value("1"),
                 jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].statusId").value("RECORDED"),
+                jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value("London"),
                 jsonPath("$.sittingRecords[0].epimmsId").value("123"),
@@ -125,12 +171,12 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
-                jsonPath("$.sittingRecords[0].createdDateTime").isEmpty(),
-                jsonPath("$.sittingRecords[0].createdByUserId").isEmpty(),
-                jsonPath("$.sittingRecords[0].createdByUserName").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserName").isEmpty()
+                jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changeByUserId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changeByUserName").isNotEmpty()
             )
             .andReturn();
     }

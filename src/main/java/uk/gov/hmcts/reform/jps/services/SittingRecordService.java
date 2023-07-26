@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,6 +40,8 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @Slf4j
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SittingRecordService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordService.class);
+
     private final SittingRecordRepository sittingRecordRepository;
     private final DuplicateCheckerService duplicateCheckerService;
     private final SecurityUtils securityUtils;
@@ -52,33 +56,35 @@ public class SittingRecordService {
             recordSearchRequest,
             hmctsServiceCode
         );
-        String notSet = null;
-        return dbSittingRecords.stream()
-            .map(sittingRecord ->
-                     SittingRecord.builder()
-                         .sittingRecordId(sittingRecord.getId())
-                         .sittingDate(sittingRecord.getSittingDate())
-                         .statusId(sittingRecord.getStatusId())
-                         .regionId(sittingRecord.getRegionId())
-                         .epimmsId(sittingRecord.getEpimmsId())
-                         .hmctsServiceId(sittingRecord.getHmctsServiceId())
-                         .personalCode(sittingRecord.getPersonalCode())
-                         .contractTypeId(sittingRecord.getContractTypeId())
-                         .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
-                         .am(sittingRecord.isAm() ? AM.name() : notSet)
-                         .pm(sittingRecord.isPm() ? PM.name() : notSet)
-                         .createdDateTime(sittingRecord.getCreatedDateTime())
-                         .createdByUserId(sittingRecord.getCreatedByUserId())
-                         .changeDateTime(sittingRecord.getChangeDateTime())
-                         .changeByUserId(sittingRecord.getChangeByUserId())
-                         .build())
-            .toList();
 
+        return dbSittingRecords.stream()
+            .map(sittingRecord -> SittingRecord.builder()
+                    .sittingRecordId(sittingRecord.getId())
+                    .sittingDate(sittingRecord.getSittingDate())
+                    .statusId(sittingRecord.getStatusId())
+                    .regionId(sittingRecord.getRegionId())
+                    .epimmsId(sittingRecord.getEpimmsId())
+                    .hmctsServiceId(sittingRecord.getHmctsServiceId())
+                    .personalCode(sittingRecord.getPersonalCode())
+                    .contractTypeId(sittingRecord.getContractTypeId())
+                    .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
+                    .am(sittingRecord.isAm() ? AM.name() : null)
+                    .pm(sittingRecord.isPm() ? PM.name() : null)
+                    .createdDateTime(sittingRecord.getCreatedDateTime())
+                    .createdByUserId(sittingRecord.getCreatedByUserId())
+                    .createdByUserName(sittingRecord.getCreatedByUserName())
+                    .changeDateTime(sittingRecord.getChangeByDateTime())
+                    .changeByUserId(sittingRecord.getChangeByUserId())
+                    .changeByUserName(sittingRecord.getChangeByUserName())
+                    .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
+                    .build())
+            .toList();
     }
 
     public int getTotalRecordCount(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
+        LOGGER.debug("getTotalRecordCount");
 
         return sittingRecordRepository.totalRecords(recordSearchRequest,
             hmctsServiceCode);
@@ -89,6 +95,7 @@ public class SittingRecordService {
                                    List<SittingRecordWrapper> sittingRecordWrappers,
                                    String recordedByName,
                                    String recordedByIdamId) {
+        LOGGER.debug("saveSittingRecords");
         sittingRecordWrappers
             .forEach(recordSittingRecordWrapper -> {
                 SittingRecordRequest recordSittingRecord = recordSittingRecordWrapper.getSittingRecordRequest();

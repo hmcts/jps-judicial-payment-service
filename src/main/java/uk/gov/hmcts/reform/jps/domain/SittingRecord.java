@@ -18,6 +18,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -67,34 +68,83 @@ public class SittingRecord {
 
     private boolean pm;
 
-    public Optional<StatusHistory> getLatestStatusHistory() {
-
-        Optional<StatusHistory> statusHistory = this.getStatusHistories().stream().max(Comparator.comparing(
-            StatusHistory::getChangeDateTime));
-
-        return statusHistory;
-    }
-
     @ToString.Exclude
     @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, fetch = FetchType.EAGER)
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
-    @Column(name = "created_date_time")
-    private LocalDateTime createdDateTime;
+    public String getCreatedByUserId() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+    }
 
-    @Column(name = "created_by_user_id")
-    private String createdByUserId;
+    public String getCreatedByUserName() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByName() : null;
+    }
 
-    @Column(name = "change_date_time")
-    private LocalDateTime changeDateTime;
+    public LocalDateTime getCreatedDateTime() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+    }
 
-    @Column(name = "change_by_user_id")
-    private String changeByUserId;
+    public String getChangeByUserId() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+    }
+
+    public String getChangeByUserName() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeByName() : null;
+    }
+
+    public LocalDateTime getChangeByDateTime() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+    }
+
+    public StatusHistory getFirstStatusHistory() {
+        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
+            .sorted(Comparator.comparingLong(StatusHistory::getId))
+            .toList();
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
+        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+    }
+
+    public StatusHistory getLatestStatusHistory() {
+        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
+            .sorted(Comparator.comparingLong(StatusHistory::getId).reversed())
+            .toList();
+        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
+        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+    }
+
 
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
+        this.setStatusId(statusHistory.getStatusId());
         statusHistory.setSittingRecord(this);
     }
 
+
+    public boolean equalsDomainObject(Object object) {
+        if (object == null) {
+            return false;
+        }
+
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+            = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
+
+        return (sittingRecord.getId() == this.getId()
+            && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
+            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
+            && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
+            && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.getRegionId().equals(this.getRegionId())
+            && sittingRecord.getStatusId().equals(this.getStatusId())
+            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
+            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+    }
 }
