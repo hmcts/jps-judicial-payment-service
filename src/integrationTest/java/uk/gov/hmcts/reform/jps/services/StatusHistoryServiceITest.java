@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.jps.services;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
@@ -8,7 +7,6 @@ import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,16 +23,7 @@ public class StatusHistoryServiceITest extends BaseTest {
     private SittingRecordRepository sittingRecordRepository;
 
     @Autowired
-    private StatusHistoryRepository statusHistoryRepository;
-
     private StatusHistoryService statusHistoryService;
-
-    @BeforeEach
-    void beforeEach() {
-        statusHistoryService = new StatusHistoryService(
-            statusHistoryRepository
-        );
-    }
 
 
     @Test

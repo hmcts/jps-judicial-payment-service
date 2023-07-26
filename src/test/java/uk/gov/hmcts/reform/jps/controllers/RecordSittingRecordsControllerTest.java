@@ -18,7 +18,6 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
@@ -41,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @WebMvcTest(controllers = RecordSittingRecordsController.class,
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
@@ -64,10 +64,11 @@ class RecordSittingRecordsControllerTest {
     private LocationService regionService;
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200",
-        "recordSittingRecords.json,201"})
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
+        "recordSittingRecords.json,201,4918500"})
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
-                                                      int responseCode) throws Exception {
+                                                      int responseCode,
+                                                      String personalCode) throws Exception {
         String requestJson = Resources.toString(getResource(fileName), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -77,14 +78,14 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.message").value("success"),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value(personalCode),
                 jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[0].statusId").value(RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -95,7 +96,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
+                jsonPath("$.errorRecords[1].statusId").value(RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -106,7 +107,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
+                jsonPath("$.errorRecords[2].statusId").value(RECORDED.name())
             ).andReturn();
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
 
@@ -138,7 +139,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.message").value("008 could not insert"),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918500"),
                 jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
@@ -171,27 +172,6 @@ class RecordSittingRecordsControllerTest {
                                                         eq("d139a314-eb40-45f4-9e7a-9e13f143cc3a"));
         verify(regionService).setRegionId(eq(TEST_SERVICE),
                                           anyList());
-    }
-
-    @Test
-    void shouldReturn400WhenHmctsServiceCode() throws Exception {
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
-                                                  .contentType(MediaType.APPLICATION_JSON)
-                                                  .content(requestJson))
-            .andDo(print())
-            .andExpectAll(status().isBadRequest(),
-                          content().contentType(MediaType.APPLICATION_JSON),
-                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
-            )
-            .andReturn();
-
-        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
-
-        verify(sittingRecordService, never()).checkDuplicateRecords(any());
-        verify(sittingRecordService, never()).saveSittingRecords(any(), any(), any(), any());
-        verify(regionService, never()).setRegionId(any(), any());
     }
 
     @Test

@@ -19,6 +19,7 @@ public class SittingRecordWrapper {
     private final SittingRecordRequest sittingRecordRequest;
     @Builder.Default
     private ErrorCode errorCode = VALID;
+    private Long sittingRecordId;
     private LocalDateTime createdDateTime;
     private String createdByName;
     private StatusId statusId;
