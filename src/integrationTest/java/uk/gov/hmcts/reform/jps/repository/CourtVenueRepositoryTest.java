@@ -26,7 +26,7 @@ class CourtVenueRepositoryTest {
     }
 
     @Test
-    void shouldSaveSittingRecord() {
+    void shouldSaveCourtVenue() {
         CourtVenue courtVenue = createCourtVenue();
 
         CourtVenue persistedCourtVenue = courtVenueRepository.save(courtVenue);
@@ -36,16 +36,8 @@ class CourtVenueRepositoryTest {
         assertThat(persistedCourtVenue).isEqualTo(courtVenue);
     }
 
-    private CourtVenue createCourtVenue() {
-        return CourtVenue.builder()
-            .epimmsId("1234")
-            .hmctsServiceId("test")
-            .costCenterCode("456")
-            .build();
-    }
-
     @Test
-    void shouldUpdateSittingRecordWhenRecordIsPresent() {
+    void shouldUpdateCourtVenueWhenRecordIsPresent() {
         CourtVenue courtVenue = createCourtVenue();
 
         courtVenueRepository.save(courtVenue);
@@ -79,4 +71,13 @@ class CourtVenueRepositoryTest {
 
         assertThat(optionalCourtVenue).isEmpty();
     }
+
+    private CourtVenue createCourtVenue() {
+        return CourtVenue.builder()
+            .epimmsId("1234")
+            .hmctsServiceId("test")
+            .costCenterCode("456")
+            .build();
+    }
+
 }
