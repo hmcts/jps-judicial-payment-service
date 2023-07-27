@@ -37,7 +37,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.AM;
-import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.CREATED_BY_USER_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.HMCTS_SERVICE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.ID;
@@ -242,7 +241,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyTotalCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
-        Long x = 1L;
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(Long.class))
@@ -460,8 +458,9 @@ class SittingRecordRepositorySearchImplTest {
             .thenReturn(statusHistories);
 
         when(statusHistories.<String>get(CHANGE_BY_USER_ID)).thenReturn(attributePath);
-        when(criteriaBuilder.equal(attributePath, CREATED_BY_USER_ID))
+        when(criteriaBuilder.equal(attributePath, CHANGE_BY_USER_ID))
             .thenReturn(mock(ComparisonPredicate.class));
+
         when(statusHistories.<String>get(STATUS_ID)).thenReturn(attributePath);
         when(criteriaBuilder.equal(attributePath, RECORDED))
             .thenReturn(mock(ComparisonPredicate.class));
@@ -474,7 +473,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .personalCode(PERSONAL_CODE)
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .duration(Duration.FULL_DAY)
-                                               .createdByUserId(CREATED_BY_USER_ID)
+                                               .createdByUserId(CHANGE_BY_USER_ID)
                                                .build(), SSCS);
 
         verify(entityManager)
@@ -486,7 +485,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CREATED_BY_USER_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CHANGE_BY_USER_ID));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));

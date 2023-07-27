@@ -34,9 +34,10 @@ import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PERSONAL_CODE;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.REGION_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.SITTING_DATE;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.STATUS_HISTORIES;
-import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.STATUS_ID;
 import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.CHANGE_BY_USER_ID;
+import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.FULL_DAY;
+import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 public class SittingRecordRepositorySearchImpl implements SittingRecordRepositorySearch {
@@ -108,10 +109,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             if (duration.equals(FULL_DAY)) {
                 predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.AM), true));
                 predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.PM), true));
-            } else if (duration.equals(Duration.AM)) {
+            } else if (duration.equals(AM)) {
                 predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.AM), true));
                 predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.PM), false));
-            } else if (duration.equals(Duration.PM)) {
+            } else if (duration.equals(PM)) {
                 predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.PM), true));
                 predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.AM), false));
             }
@@ -222,7 +223,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             predicates.add(criteriaBuilder.equal(statusHistories.get(StatusHistory_.STATUS_ID),
                                                  RECORDED));
         }
-        predicates.add(criteriaBuilder.equal(sittingRecord.get(STATUS_ID),
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.STATUS_ID),
                                              RECORDED));
 
         Optional.ofNullable(recordSearchRequest.getEpimmsId())

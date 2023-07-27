@@ -9,9 +9,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.hmcts.reform.jps.components.EvaluateDuplicate;
-import uk.gov.hmcts.reform.jps.components.EvaluateMatchingDuration;
-import uk.gov.hmcts.reform.jps.components.EvaluateOverlapDuration;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
@@ -48,6 +46,7 @@ public class SittingRecordService {
     private final SittingRecordRepository sittingRecordRepository;
     private final DuplicateCheckerService duplicateCheckerService;
     private final SecurityUtils securityUtils;
+    private final StatusHistoryService statusHistoryService;
 
     @Lazy
     private final SittingRecordService self;

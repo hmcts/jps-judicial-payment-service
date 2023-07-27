@@ -83,6 +83,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private DuplicateCheckerService duplicateCheckerService;
 
+    @Mock
+    private StatusHistoryService statusHistoryService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks

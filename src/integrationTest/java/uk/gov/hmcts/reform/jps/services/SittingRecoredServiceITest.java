@@ -2,12 +2,10 @@ package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
@@ -24,7 +22,6 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -63,8 +60,6 @@ class SittingRecoredServiceITest extends BaseTest {
     @Autowired
     private SittingRecordRepository sittingRecordRepository;
     @Autowired
-    private StatusHistoryRepository statusHistoryRepository;
-    @Autowired
     private SittingRecordService sittingRecordService;
     @Autowired
     private StatusHistoryService statusHistoryService;
@@ -85,12 +80,6 @@ class SittingRecoredServiceITest extends BaseTest {
     private static final String EPIMS_ID_FIXED = "852649";
     private static final String PERSONAL_CODE_FIXED = "4918178";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
-
-    @BeforeEach
-    void beforeEach() {
-        sittingRecordRepository.deleteAll();
-        statusHistoryRepository.deleteAll();
-    }
 
     @AfterEach
     void afterEach() {
@@ -837,10 +826,10 @@ class SittingRecoredServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
-
+        String regionId = "6";
         List<SittingRecord> sittingRecords = sittingRecordRepository.findAll();
         SittingRecord sittingRecord = sittingRecords.stream()
-            .filter(record -> record.getRegionId().equals("4"))
+            .filter(record -> record.getRegionId().equals(regionId))
             .findAny()
             .orElseThrow();
 
@@ -856,7 +845,7 @@ class SittingRecoredServiceITest extends BaseTest {
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
             .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
             .submittedByName("submitter")
-            .regionId("4")
+            .regionId(regionId)
             .dateRangeFrom(LocalDate.parse("2023-05-11"))
             .dateRangeTo(LocalDate.parse("2023-05-11"))
             .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
@@ -873,7 +862,7 @@ class SittingRecoredServiceITest extends BaseTest {
         sittingRecords = sittingRecordRepository.findAll();
 
         sittingRecord = sittingRecords.stream()
-            .filter(record -> record.getRegionId().equals("4"))
+            .filter(record -> record.getRegionId().equals(regionId))
             .findAny()
             .orElseThrow();
 

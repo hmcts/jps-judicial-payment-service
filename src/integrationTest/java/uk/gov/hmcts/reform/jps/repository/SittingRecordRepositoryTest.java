@@ -1,13 +1,12 @@
 package uk.gov.hmcts.reform.jps.repository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.reform.jps.AbstractTest;
 import org.springframework.test.context.jdbc.Sql;
+import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
@@ -24,7 +23,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -35,15 +33,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
-    @Autowired
-    private StatusHistoryRepository historyRepository;
     private StatusHistory statusHistoryRecorded;
-
-    @BeforeEach
-    void setUp() {
-        recordRepository.deleteAll();
-        historyRepository.deleteAll();
-    }
 
     @Test
     void shouldSaveSittingRecord() {
@@ -171,7 +161,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
             "BBA3"
         );
         assertThat(recordsToSubmit)
-            .hasSize(1)
-            .contains(2L);
+            .hasSize(4)
+            .contains(2L, 3L, 5L, 6L);
     }
 }
