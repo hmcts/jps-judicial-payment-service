@@ -6,21 +6,11 @@ create table public.fee (
                              higher_threshold_fee integer,
                              london_weighted_fee integer,
                              effective_from timestamp without time zone not null,
-                             fee_created_date timestamp without time zone not null,
+                             fee_created_date timestamp without time zone not null
 );
 
 ALTER TABLE ONLY public.fee
     ADD CONSTRAINT payment_service_pkey PRIMARY KEY (fee_record_id);
-
-ALTER TABLE ONLY public.fee
-ADD CONSTRAINT uc_fee_id UNIQUE (fee_id);
-
-CREATE SEQUENCE public.fee_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
 
 CREATE SEQUENCE public.fee_record_id_seq
     START WITH 1
@@ -28,8 +18,3 @@ CREATE SEQUENCE public.fee_record_id_seq
     NO MINVALUE
     NO MAXVALUE
     CACHE 1;
-
-ALTER TABLE ONLY public.fee
-ALTER COLUMN request_id SET DEFAULT nextval('public.judicial_id_seq');
-
-ALTER SEQUENCE public.fee_id_seq OWNED BY public.fee.fee_id;

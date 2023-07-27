@@ -30,13 +30,12 @@ class FeeRepositoryTest {
     public void setUp() {
         Fee fee = Fee.builder()
             .hmctsServiceId("123")
-            .feeId("1")
             .judgeRoleId("2")
             .standardFee(5)
+            .higherThresholdFee(2)
             .londonWeightedFee(1)
-            .feeDescription("fee")
             .effectiveFrom(LocalDate.now().minusDays(2))
-            .pensionableCode(1)
+            .feeCreatedDate(LocalDate.now())
             .build();
         Fee persistedFee = feeRepository.save(fee);
 
