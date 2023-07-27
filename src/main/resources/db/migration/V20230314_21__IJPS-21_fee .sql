@@ -1,5 +1,5 @@
 create table public.fee (
-                             fee_record_id bigint not null,
+                             fee_record_id bigserial constraint pk_fee_record primary key,
                              hmcts_service_id varchar(60) not null,
                              judge_role_type_id varchar(60) not null,
                              standard_fee integer not null,
@@ -8,13 +8,3 @@ create table public.fee (
                              effective_from timestamp without time zone not null,
                              fee_created_date timestamp without time zone not null
 );
-
-ALTER TABLE ONLY public.fee
-    ADD CONSTRAINT payment_service_pkey PRIMARY KEY (fee_record_id);
-
-CREATE SEQUENCE public.fee_record_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;

@@ -28,7 +28,11 @@ class FeeRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-        Fee fee = Fee.builder()
+        feeRepository.deleteAll();
+    }
+
+    private Fee createFee() {
+        return Fee.builder()
             .hmctsServiceId("123")
             .judgeRoleId("2")
             .standardFee(5)
@@ -37,13 +41,12 @@ class FeeRepositoryTest {
             .effectiveFrom(LocalDate.now().minusDays(2))
             .feeCreatedDate(LocalDate.now())
             .build();
-        Fee persistedFee = feeRepository.save(fee);
-
     }
 
     @Test
     void shouldSaveFee() {
-
+        Fee fee = createFee();
+        Fee persistedFee = feeRepository.save(fee);
         assertThat(persistedFee).isNotNull();
         assertThat(persistedFee.getId()).isNotNull();
         assertThat(persistedFee).isEqualTo(fee);
@@ -52,13 +55,16 @@ class FeeRepositoryTest {
 
     @Test
     void shouldReturnEmptyWhenFeeNotFound() {
+        Fee fee = createFee();
+        Fee persistedFee = feeRepository.save(fee);
         Optional<Fee> optionalSettingHistoryToUpdate = feeRepository.findById(100L);
         assertThat(optionalSettingHistoryToUpdate).isEmpty();
     }
 
     @Test
     void shouldDeleteSelectedFee() {
-
+        Fee fee = createFee();
+        Fee persistedFee = feeRepository.save(fee);
         Optional<Fee> optionalSettingHistoryToUpdate = feeRepository
             .findById(persistedFee.getId());
         assertThat(optionalSettingHistoryToUpdate).isPresent();
