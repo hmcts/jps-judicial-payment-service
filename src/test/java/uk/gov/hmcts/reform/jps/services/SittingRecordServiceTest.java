@@ -11,6 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -22,14 +23,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static java.time.LocalDate.of;
-import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -41,10 +41,6 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 @ExtendWith(MockitoExtension.class)
 class SittingRecordServiceTest {
-
-    private static final String USER_ID = UUID.randomUUID().toString();
-    private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
-    private static final LocalDateTime CURRENT_DATE_TIME = now();
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
@@ -89,9 +85,10 @@ class SittingRecordServiceTest {
             "test"
         );
 
-        assertThat(sittingRecords)
-            .hasSize(2)
-            .isEqualTo(getDomainSittingRecords(2));
+        assertThat(sittingRecords).hasSize(2);
+
+        assertEquals(sittingRecords.get(0), getDomainSittingRecords(2).get(0));
+        assertEquals(sittingRecords.get(1), getDomainSittingRecords(2).get(1));
     }
 
 
@@ -112,9 +109,8 @@ class SittingRecordServiceTest {
         List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
         domainSittingRecords.get(0).setAm(null);
 
-        assertThat(sittingRecords)
-            .hasSize(1)
-            .isEqualTo(domainSittingRecords);
+        assertThat(sittingRecords).hasSize(1);
+        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
     }
 
     @Test
@@ -134,54 +130,10 @@ class SittingRecordServiceTest {
         List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
         domainSittingRecords.get(0).setPm(null);
 
-        assertThat(sittingRecords)
-            .hasSize(1)
-            .isEqualTo(domainSittingRecords);
+        assertThat(sittingRecords).hasSize(1);
+        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
     }
 
-    private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
-        return LongStream.range(1, limit + 1)
-            .mapToObj(count -> uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-                .id(count)
-                .sittingDate(LocalDate.now().minusDays(2))
-                .statusId(StatusId.RECORDED.name())
-                .regionId("1")
-                .epimsId("epims001")
-                .hmctsServiceId("sscs")
-                .personalCode("001")
-                .contractTypeId(count)
-                .judgeRoleTypeId("HighCourt")
-                .am(true)
-                .pm(true)
-                .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-                .createdByUserId(USER_ID)
-                .changeByUserId(UPDATED_BY_USER_ID)
-                .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
-                .build())
-            .collect(Collectors.toList());
-    }
-
-    private List<SittingRecord> getDomainSittingRecords(int limit) {
-        return LongStream.range(1, limit + 1)
-            .mapToObj(count -> SittingRecord.builder()
-                .sittingRecordId(count)
-                .sittingDate(LocalDate.now().minusDays(2))
-                .statusId(StatusId.RECORDED.name())
-                .regionId("1")
-                .epimsId("epims001")
-                .hmctsServiceId("sscs")
-                .personalCode("001")
-                .contractTypeId(count)
-                .judgeRoleTypeId("HighCourt")
-                .am(AM.name())
-                .pm(PM.name())
-                .createdByUserId(USER_ID)
-                .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-                .changeByUserId(UPDATED_BY_USER_ID)
-                .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
-                .build())
-            .collect(Collectors.toList());
-    }
 
     @Test
     void shouldSaveSittingRecordsWhenRequestIsValid() throws IOException {
@@ -196,8 +148,10 @@ class SittingRecordServiceTest {
             .save(sittingRecordArgumentCaptor.capture());
 
         List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
-        assertThat(sittingRecords).extracting("sittingDate", "statusId", "epimsId", "hmctsServiceId",
-                                              "personalCode", "contractTypeId", "judgeRoleTypeId", "am", "pm")
+        assertThat(sittingRecords).extracting(SittingRecord_.SITTING_DATE, SittingRecord_.STATUS_ID,
+                                              SittingRecord_.EPIMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
+                                              SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
+                                              SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
                 .contains(
                     tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
                     tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
@@ -216,4 +170,41 @@ class SittingRecordServiceTest {
             .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
             .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
+
+    private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
+        return LongStream.range(1, limit + 1)
+            .mapToObj(count -> uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
+                .id(count)
+                .sittingDate(LocalDate.now().minusDays(2))
+                .statusId(StatusId.RECORDED.name())
+                .regionId("1")
+                .epimsId("epims001")
+                .hmctsServiceId("sscs")
+                .personalCode("001")
+                .contractTypeId(count)
+                .judgeRoleTypeId("HighCourt")
+                .am(true)
+                .pm(true)
+                .build())
+            .collect(Collectors.toList());
+    }
+
+    private List<SittingRecord> getDomainSittingRecords(int limit) {
+        return LongStream.range(1, limit + 1)
+            .mapToObj(count -> SittingRecord.builder()
+                    .sittingRecordId(count)
+                    .sittingDate(LocalDate.now().minusDays(2))
+                    .statusId(StatusId.RECORDED.name())
+                    .regionId("1")
+                    .epimsId("epims001")
+                    .hmctsServiceId("sscs")
+                    .personalCode("001")
+                    .contractTypeId(count)
+                    .judgeRoleTypeId("HighCourt")
+                    .am(AM.name())
+                    .pm(PM.name())
+                    .build())
+            .collect(Collectors.toList());
+    }
+
 }
