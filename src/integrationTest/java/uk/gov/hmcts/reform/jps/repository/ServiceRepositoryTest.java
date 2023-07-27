@@ -69,9 +69,11 @@ class ServiceRepositoryTest {
     private Service getPersistedService() {
         Service service = Service.builder()
             .hmctsServiceId("BB4")
+            .serviceName("TestService")
             .accountCenterCode("123")
             .onboardingStartDate(LocalDate.now())
             .retentionTimeInMonths(2)
+            .closeRecordedRecordAfterTimeInMonths(2)
             .build();
 
         return serviceRepository.save(service);

@@ -31,6 +31,9 @@ public class Service {
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
 
+    @Column(name = "service_name")
+    private String serviceName;
+
     @Column(name = "account_center_code")
     private String accountCenterCode;
 
@@ -39,4 +42,7 @@ public class Service {
 
     @Column(name = "retention_time_in_months")
     private Integer retentionTimeInMonths;
+
+    @Column(name = "close_recorded_record_after_time_in_months")
+    private Integer closeRecordedRecordAfterTimeInMonths;
 }
