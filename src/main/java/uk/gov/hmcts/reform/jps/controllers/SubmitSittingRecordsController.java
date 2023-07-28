@@ -47,7 +47,7 @@ public class SubmitSittingRecordsController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @PostMapping(
-        path = {"", "/{hmctsServiceCode}"}
+        path = {"/{hmctsServiceCode}"}
     )
     @PreAuthorize("hasAuthority('jps-submitter')")
     public ResponseEntity<SubmitSittingRecordResponse> submitSittingRecords(
