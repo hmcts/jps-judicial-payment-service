@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,24 +15,29 @@ import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
+import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.function.Predicate.not;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -42,6 +48,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SittingRecordService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordService.class);
+    private static final List<Long> CONTRACT_TYPE_ID_NOT_TO_CLOSE = List.of(2L, 6L);
 
     private final SittingRecordRepository sittingRecordRepository;
     private final DuplicateCheckerService duplicateCheckerService;
@@ -211,23 +218,55 @@ public class SittingRecordService {
 
 
     @Transactional
-    public int submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
-                                    String hmctsServiceCode) {
+    public SubmitSittingRecordResponse submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                                            String hmctsServiceCode) {
 
-        List<Long> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
+        List<RecordSubmitFields> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             hmctsServiceCode
         );
 
-        recordsToSubmit.forEach(sittingRecordId -> {
-            statusHistoryService.insertRecord(sittingRecordId,
-                                              SUBMITTED,
+        int submittedCount = updateRecords(
+            submitSittingRecordRequest,
+            recordsToSubmit,
+            SUBMITTED,
+            not(this::filterRecordsToClose)
+        );
+
+        int closedCount = updateRecords(
+            submitSittingRecordRequest,
+            recordsToSubmit,
+            CLOSED,
+            this::filterRecordsToClose
+        );
+
+        return SubmitSittingRecordResponse.builder()
+            .recordsSubmitted(submittedCount)
+            .recordsClosed(closedCount)
+            .build();
+    }
+
+    private int updateRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                     List<RecordSubmitFields> recordsToSubmit,
+                                     StatusId statusId,
+                                     Predicate<RecordSubmitFields> filter) {
+        List<Long> records = recordsToSubmit.stream()
+            .filter(filter)
+            .map(RecordSubmitFields::getId)
+            .toList();
+
+        records.forEach(submitRecordId -> {
+            statusHistoryService.insertRecord(submitRecordId,
+                                              statusId,
                                               submitSittingRecordRequest.getSubmittedByIdamId(),
                                               submitSittingRecordRequest.getSubmittedByName());
 
-            sittingRecordRepository.updateToSubmitted(sittingRecordId);
+            sittingRecordRepository.updateRecordedStatus(submitRecordId, statusId);
         });
+        return records.size();
+    }
 
-        return recordsToSubmit.size();
+    private boolean filterRecordsToClose(RecordSubmitFields recordSubmitFields) {
+        return !CONTRACT_TYPE_ID_NOT_TO_CLOSE.contains(recordSubmitFields.getContractTypeId());
     }
 }

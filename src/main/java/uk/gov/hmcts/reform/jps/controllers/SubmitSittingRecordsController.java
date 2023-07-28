@@ -55,10 +55,10 @@ public class SubmitSittingRecordsController {
         @Valid @RequestBody SubmitSittingRecordRequest submitSittingRecordRequest) {
 
         String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
-        int recordsSubmitted = sittingRecordService.submitSittingRecords(submitSittingRecordRequest,
-                                                                         hmctsServiceCode);
-        return ResponseEntity.ok(SubmitSittingRecordResponse.builder()
-                                     .recordsSubmitted(recordsSubmitted)
-                                     .build());
+        SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        );
+        return ResponseEntity.ok(submitSittingRecordResponse);
     }
 }

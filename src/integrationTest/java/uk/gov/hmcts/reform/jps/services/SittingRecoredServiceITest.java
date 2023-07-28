@@ -3,6 +3,8 @@ package uk.gov.hmcts.reform.jps.services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +23,7 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
+import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.io.IOException;
@@ -823,10 +826,16 @@ class SittingRecoredServiceITest extends BaseTest {
         return sittingRecordWrappers;
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # REGION_ID,       Expected_Status_ID
+      6,                SUBMITTED
+      7,                CLOSED
+        """)
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
-        String regionId = "6";
+    void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable(
+        String regionId,
+        StatusId statusId) {
         List<SittingRecord> sittingRecords = sittingRecordRepository.findAll();
         SittingRecord sittingRecord = sittingRecords.stream()
             .filter(record -> record.getRegionId().equals(regionId))
@@ -852,12 +861,10 @@ class SittingRecoredServiceITest extends BaseTest {
             .build();
 
 
-        int countSubmitted = sittingRecordService.submitSittingRecords(
+        SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
             "BBA3"
         );
-        assertThat(countSubmitted)
-            .isEqualTo(1);
 
         sittingRecords = sittingRecordRepository.findAll();
 
@@ -868,12 +875,12 @@ class SittingRecoredServiceITest extends BaseTest {
 
 
         assertThat(sittingRecord.getStatusId())
-            .isEqualTo(SUBMITTED);
+            .isEqualTo(statusId);
 
         statusHistories = sittingRecord.getStatusHistories();
         assertThat(statusHistories)
             .hasSize(2)
             .extracting("statusId")
-            .containsExactly(RECORDED, SUBMITTED);
+            .containsExactly(RECORDED, statusId);
     }
 }

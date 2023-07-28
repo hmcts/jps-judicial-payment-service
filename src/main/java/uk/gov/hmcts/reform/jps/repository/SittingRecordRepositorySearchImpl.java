@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
 import uk.gov.hmcts.reform.jps.model.Duration;
+import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
@@ -26,6 +27,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.CONTRACT_TYPE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.HMCTS_SERVICE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.ID;
@@ -200,13 +202,16 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
 
     @Override
-    public List<Long> findRecordsToSubmit(SubmitSittingRecordRequest recordSearchRequest,
-                                                   String hmctsServiceCode) {
+    public List<RecordSubmitFields> findRecordsToSubmit(SubmitSittingRecordRequest recordSearchRequest,
+                                                        String hmctsServiceCode) {
         CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+        CriteriaQuery<RecordSubmitFields> criteriaQuery = criteriaBuilder.createQuery(RecordSubmitFields.class);
         Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
 
-        criteriaQuery.select(sittingRecord.get(ID));
+        criteriaQuery.multiselect(
+            sittingRecord.get(ID),
+            sittingRecord.get(CONTRACT_TYPE_ID),
+            sittingRecord.get(PERSONAL_CODE));
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get(HMCTS_SERVICE_ID),
@@ -240,7 +245,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         Predicate[] predicatesArray = new Predicate[predicates.size()];
         criteriaQuery.where(criteriaBuilder.and(predicates.toArray(predicatesArray)));
 
-        TypedQuery<Long> typedQuery = entityManager.createQuery(criteriaQuery);
+        TypedQuery<RecordSubmitFields> typedQuery = entityManager.createQuery(criteriaQuery);
         return typedQuery.getResultList();
     }
 

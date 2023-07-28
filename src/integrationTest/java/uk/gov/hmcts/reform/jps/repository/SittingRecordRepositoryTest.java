@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
+import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
@@ -156,12 +157,13 @@ class SittingRecordRepositoryTest extends AbstractTest {
             .build();
 
 
-        List<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
+        List<RecordSubmitFields> recordsToSubmit = recordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             "BBA3"
         );
         assertThat(recordsToSubmit)
             .hasSize(4)
+            .extracting("id")
             .contains(2L, 3L, 5L, 6L);
     }
 }

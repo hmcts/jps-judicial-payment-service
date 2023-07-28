@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,18 +34,30 @@ class SubmitSittingRecordsControllerITest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # RegionId,    SUBMITTED,   CLOSED
+      6,             1,           0
+      7,             0,           1
+        """)
+
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-submitter"})
-    void shouldReturnRecordCountOfSubmittedRecordsWhenRecordsAreSubmitted() throws Exception {
-        String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
+    void shouldReturnRecordCountOfSubmittedRecordsWhenRecordsAreSubmitted(
+        String regionId,
+        Integer submitted,
+        Integer closed) throws Exception {
+
+        String requestJson = Resources.toString(getResource("submitSittingRecordsWithDynamicRegionId.json"), UTF_8);
+        String updatedJson = requestJson.replace("replaceRegion", regionId);
         mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                             .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestJson))
+                            .content(updatedJson))
             .andDo(print())
             .andExpectAll(
                 status().isOk(),
-                jsonPath("$.recordsSubmitted").value(1)
+                jsonPath("$.recordsSubmitted").value(submitted),
+                jsonPath("$.recordsClosed").value(closed)
             );
     }
 
