@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 
 import java.time.LocalDate;
@@ -30,17 +29,13 @@ class SittingRecordRepositoryTest {
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("ssc_id")
+            .personalCode("001")
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
@@ -56,6 +51,7 @@ class SittingRecordRepositoryTest {
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("ssc_id")
+            .personalCode("001")
             .contractTypeId(2L)
             .pm(true)
             .judgeRoleTypeId("HighCourt")
@@ -63,11 +59,6 @@ class SittingRecordRepositoryTest {
             .createdByUserId("555")
             .build();
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
 
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
             .findById(persistedSittingRecord.getId());
@@ -97,6 +88,7 @@ class SittingRecordRepositoryTest {
             .regionId("1")
             .epimsId("123")
             .hmctsServiceId("ssc_id")
+            .personalCode("001")
             .contractTypeId(2L)
             .am(true)
             .pm(true)
@@ -104,11 +96,6 @@ class SittingRecordRepositoryTest {
             .createdDateTime(LocalDateTime.now())
             .createdByUserId("jp-recorder")
             .build();
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 

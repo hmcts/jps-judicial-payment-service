@@ -8,6 +8,7 @@ import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -39,11 +40,20 @@ public class JudicialOfficeHolder {
     @OneToMany(fetch = FetchType.LAZY)
     private List<SittingRecord> sittingRecords;
 
+    @ToString.Exclude
+    @OneToMany(mappedBy = "judicialOfficeHolder", orphanRemoval = true, cascade = {CascadeType.ALL})
+    private final List<JohAttributes> johAttributes = new ArrayList<>();
+
     public void addSittingRecord(SittingRecord sittingRecord) {
         if (null == sittingRecords) {
             sittingRecords = new ArrayList<>();
         }
         this.sittingRecords.add(sittingRecord);
+    }
+
+    public void addJohAttributes(JohAttributes johAttributes) {
+        this.johAttributes.add(johAttributes);
+        johAttributes.setJudicialOfficeHolder(this);
     }
 
 }

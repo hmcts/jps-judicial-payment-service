@@ -3,7 +3,6 @@ package uk.gov.hmcts.reform.jps.services.refdata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiRequest;
 import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiResponse;
@@ -22,17 +21,12 @@ public class JudicialUserDetailsService {
     public void setJudicialUserDetails(List<SittingRecord> sittingRecords) {
 
         JudicialUserDetailsApiRequest judicialUsersApiRequest = sittingRecords.stream()
-            .map(SittingRecord::getJudicialOfficeHolder)
+            .map(SittingRecord::getPersonalCode)
             .collect(collectingAndThen(
                 toList(),
-                judicialOfficeHolders -> judicialOfficeHolders.stream()
-                    .map(JudicialOfficeHolder::getPersonalCode)
-                        .collect(collectingAndThen(
-                            toList(),
-                            personalCodes -> JudicialUserDetailsApiRequest.builder()
-                                .personalCode(personalCodes)
-                                .build()
-                        ))
+                personalCodes -> JudicialUserDetailsApiRequest.builder()
+                    .personalCode(personalCodes)
+                    .build()
             ));
 
         List<JudicialUserDetailsApiResponse> judicialUserDetails = judicialUserServiceClient.getJudicialUserDetails(
@@ -41,7 +35,7 @@ public class JudicialUserDetailsService {
 
         sittingRecords.forEach(sittingRecord -> {
             String personalName = getJudicialUserResponse(
-                sittingRecord.getJudicialOfficeHolder().getPersonalCode(),
+                sittingRecord.getPersonalCode(),
                 judicialUserDetails
             )
                 .map(JudicialUserDetailsApiResponse::getFullName)

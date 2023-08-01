@@ -13,12 +13,9 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
@@ -51,9 +48,8 @@ public class SittingRecord {
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    @JoinColumn(name = "personal_code", nullable = false)
-    private JudicialOfficeHolder judicialOfficeHolder;
+    @Column(name = "personal_code")
+    private String personalCode;
 
     @Column(name = "contract_type_id")
     private Long contractTypeId;
@@ -81,13 +77,17 @@ public class SittingRecord {
     @Column(name = "change_by_user_id")
     private String changeByUserId;
 
+
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
         statusHistory.setSittingRecord(this);
     }
 
     public void setJudicialOfficeHolder(JudicialOfficeHolder judicialOfficeHolder) {
-        this.judicialOfficeHolder = judicialOfficeHolder;
         judicialOfficeHolder.addSittingRecord(this);
+    }
+
+    public JudicialOfficeHolder getJudicialOfficeHolder() {
+        return JudicialOfficeHolder.builder().build();
     }
 }

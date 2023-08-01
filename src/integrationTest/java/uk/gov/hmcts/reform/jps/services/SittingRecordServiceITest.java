@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -59,7 +58,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
-        SittingRecord sittingRecord = getSittingRecord(1);
+        SittingRecord sittingRecord = getSittingRecord(2);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
 
@@ -88,12 +87,6 @@ class SittingRecordServiceITest extends BaseTest {
     private uk.gov.hmcts.reform.jps.model.out.SittingRecord getSittingRecord(
         SittingRecord sittingRecord) {
         String notSet = null;
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
-
         return Optional.ofNullable(sittingRecord)
             .map(persistedSittingRecord -> uk.gov.hmcts.reform.jps.model.out.SittingRecord.builder()
             .sittingRecordId(persistedSittingRecord.getId())
@@ -102,7 +95,7 @@ class SittingRecordServiceITest extends BaseTest {
             .regionId(persistedSittingRecord.getRegionId())
             .epimsId(persistedSittingRecord.getEpimsId())
             .hmctsServiceId(persistedSittingRecord.getHmctsServiceId())
-            .judicialOfficeHolder(persistedSittingRecord.getJudicialOfficeHolder())
+            .personalCode(persistedSittingRecord.getPersonalCode())
             .contractTypeId(persistedSittingRecord.getContractTypeId())
             .judgeRoleTypeId(persistedSittingRecord.getJudgeRoleTypeId())
             .am(persistedSittingRecord.isAm() ? AM.name() : notSet)
@@ -117,35 +110,26 @@ class SittingRecordServiceITest extends BaseTest {
 
     private  SittingRecord getSittingRecord(long counter) {
         StatusId recorded = StatusId.RECORDED;
-        StringBuilder personalCode = new StringBuilder("001");
-        if (counter > 1) {
-            personalCode.append(counter);
-        }
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode(personalCode.toString())
-            .build();
-
-        SittingRecord sittingRecord = SittingRecord.builder()
+        SittingRecord.SittingRecordBuilder builder = SittingRecord.builder();
+        return builder
             .sittingDate(LocalDate.now().minusDays(counter))
             .statusId(recorded.name())
             .regionId("1")
             .epimsId(EPIM_ID)
             .hmctsServiceId(SSC_ID)
+            .personalCode("001")
             .contractTypeId(counter)
             .am(true)
             .judgeRoleTypeId("HighCourt")
             .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .createdByUserId(USER_ID)
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
-
-        return sittingRecord;
     }
+
 
     @Test
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
-        SittingRecord sittingRecord = getSittingRecord(1);
+        SittingRecord sittingRecord = getSittingRecord(2);
         SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
 
@@ -217,8 +201,9 @@ class SittingRecordServiceITest extends BaseTest {
             );
     }
 
+
     @Test
-    void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
+    void shouldReturnLast2RecordsWhenSortOrderIsDecending() {
         int recordCount = 22;
         String reasonId = "1";
 
