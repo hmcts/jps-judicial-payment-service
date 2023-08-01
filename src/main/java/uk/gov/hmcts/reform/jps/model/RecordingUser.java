@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.jps.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,18 +13,16 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class RecordingUser implements Comparable {
 
-    @JsonAlias("userId")
-    private String changeByUserId;
-    @JsonAlias("userName")
-    private String changeByUserName;
+    private String userId;
+    private String userName;
 
     @Override
     public int compareTo(@NotNull Object o) {
         RecordingUser ru = (RecordingUser) o;
-        if (this.changeByUserId.compareTo(ru.getChangeByUserId()) != 0) {
-            return this.changeByUserId.compareTo(ru.getChangeByUserId());
+        if (this.userId.compareTo(ru.getUserId()) != 0) {
+            return this.userId.compareTo(ru.getUserId());
         } else {
-            return this.changeByUserName.compareTo(ru.getChangeByUserName());
+            return this.userName.compareTo(ru.getUserName());
         }
     }
 }

@@ -238,7 +238,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         assertThat(recordingUsers).doesNotHaveDuplicates();
         assertEquals(recordingUsers.size(), 4);
         recordingUsers.forEach(e ->
-                       assertTrue(e.getChangeByUserId().contains("john_")));
+                       assertTrue(e.getUserId().contains("john_")));
     }
 
     private void shouldFindNoRecordingUsersGivenCriteria(String hmctsServiceId, String regionId, List<String> statusIds,
@@ -249,7 +249,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
             .findRecordingUsers(hmctsServiceId, regionId, statusIds, startDate, endDate)
             .stream().sorted().toList();
         recordingUsers.forEach(e ->
-            LOGGER.info("recordingUser:{}:{}", e.getChangeByUserId(), e.getChangeByUserName()));
+            LOGGER.info("recordingUser:{}:{}", e.getUserId(), e.getUserName()));
 
 
         assertTrue(recordingUsers.isEmpty());

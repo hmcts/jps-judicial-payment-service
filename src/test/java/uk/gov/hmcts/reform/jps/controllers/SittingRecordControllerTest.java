@@ -231,12 +231,12 @@ class SittingRecordControllerTest {
 
     private List<RecordingUser> generateRecordingUsers() {
         RecordingUser recUser1 = RecordingUser.builder()
-            .changeByUserId("10011")
-            .changeByUserName("User One")
+            .userId("10011")
+            .userName("User One")
             .build();
         RecordingUser recUser2 = RecordingUser.builder()
-            .changeByUserId("10022")
-            .changeByUserName("User Two")
+            .userId("10022")
+            .userName("User Two")
             .build();
         return List.of(recUser1, recUser2);
     }
