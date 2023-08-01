@@ -43,6 +43,7 @@ public class SittingRecord {
     private Boolean londonFlag = false;
     private String payrollId;
     private String accountCode;
+    private Long fee;
     private String am;
     private String pm;
     private LocalDateTime createdDateTime;
