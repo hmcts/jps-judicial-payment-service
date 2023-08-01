@@ -124,6 +124,7 @@ public class SittingRecord {
     }
 
 
+
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
         this.setStatusId(statusHistory.getStatusId());

@@ -246,7 +246,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .regionId("1")
                 .epimmsId("epimms001")
                 .hmctsServiceId("sscs")
-                .personalCode("001")
                 .contractTypeId(count)
                 .judgeRoleTypeId("HighCourt")
                 .am(true)
