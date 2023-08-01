@@ -146,8 +146,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserName").isNotEmpty()
+                jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
             .andReturn();
     }
@@ -217,8 +217,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserName").isNotEmpty()
+                jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
             .andReturn();
     }
@@ -288,8 +288,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserName").isNotEmpty()
+                jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
             .andReturn();
     }
@@ -359,8 +359,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserName").isNotEmpty()
+                jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
             .andReturn();
     }
@@ -508,12 +508,13 @@ class SittingRecordControllerITest extends BaseTest {
             .build();
     }
 
-    private StatusHistory createStatusHistory(String changeByName, String changeByUserId, LocalDateTime changeDateTime,
+    private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
+                                              LocalDateTime changeDateTime,
                                               String statusId) {
         return StatusHistory.builder()
-            .changeByName(changeByName)
-            .changeByUserId(changeByUserId)
-            .changeDateTime(changeDateTime)
+            .changedByName(changedByName)
+            .changedByUserId(changedByUserId)
+            .changedDateTime(changeDateTime)
             .statusId(statusId)
             .build();
     }

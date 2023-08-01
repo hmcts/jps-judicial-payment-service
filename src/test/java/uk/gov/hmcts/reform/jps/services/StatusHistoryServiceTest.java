@@ -145,13 +145,14 @@ class StatusHistoryServiceTest {
         assertEquals(StatusId.RECORDED.name(), sittingRecordRetrieved.getStatusId());
     }
 
-    private StatusHistory createStatusHistory(String changeByName, String changeByUserId, LocalDateTime changeDateTime,
+    private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
+                                              LocalDateTime changeDateTime,
                                               Long id, String statusId) {
 
         StatusHistory statusHistory = new StatusHistory();
-        statusHistory.setChangeByName(changeByName);
-        statusHistory.setChangeByUserId(changeByUserId);
-        statusHistory.setChangeDateTime(changeDateTime);
+        statusHistory.setChangedByName(changedByName);
+        statusHistory.setChangedByUserId(changedByUserId);
+        statusHistory.setChangedDateTime(changeDateTime);
         statusHistory.setId(id);
         statusHistory.setStatusId(statusId);
         return statusHistory;

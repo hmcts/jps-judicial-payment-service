@@ -248,9 +248,9 @@ class SittingRecordControllerTest {
         StatusHistory statusHistory1 = StatusHistory.builder()
             .id(++idStatusHistory)
             .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11233")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Jason Bourne")
+            .changedByUserId("11233")
+            .changedDateTime(LocalDateTime.now())
+            .changedByName("Jason Bourne")
             .build();
         SittingRecord sittingRecord1 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
@@ -278,31 +278,31 @@ class SittingRecordControllerTest {
             .createdByUserId("charlie_chaplin")
             .createdByUserName("Charlie Chaplin")
             .changeDateTime(LocalDateTime.now().minusDays(270))
-            .changeByUserId("buster_keaton")
-            .changeByUserName("Buster Keaton")
+            .changedByUserId("buster_keaton")
+            .changedByUserName("Buster Keaton")
             .build();
         sittingRecord1.setStatusHistories(List.of(statusHistory1));
 
         StatusHistory statusHistory2a = StatusHistory.builder()
             .id(++idStatusHistory)
             .statusId(StatusId.RECORDED.name())
-            .changeByUserId("11244")
-            .changeDateTime(LocalDateTime.now().minusDays(2))
-            .changeByName("Matt Murdock")
+            .changedByUserId("11244")
+            .changedDateTime(LocalDateTime.now().minusDays(2))
+            .changedByName("Matt Murdock")
             .build();
         StatusHistory statusHistory2b = StatusHistory.builder()
             .id(++idStatusHistory)
             .statusId(StatusId.PUBLISHED.name())
-            .changeByUserId("11245")
-            .changeDateTime(LocalDateTime.now().minusDays(1))
-            .changeByName("Peter Parker")
+            .changedByUserId("11245")
+            .changedDateTime(LocalDateTime.now().minusDays(1))
+            .changedByName("Peter Parker")
             .build();
         StatusHistory statusHistory2c = StatusHistory.builder()
             .id(++idStatusHistory)
             .statusId(StatusId.SUBMITTED.name())
-            .changeByUserId("11246")
-            .changeDateTime(LocalDateTime.now())
-            .changeByName("Stephen Strange")
+            .changedByUserId("11246")
+            .changedDateTime(LocalDateTime.now())
+            .changedByName("Stephen Strange")
             .build();
         SittingRecord sittingRecord2 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
@@ -330,8 +330,8 @@ class SittingRecordControllerTest {
             .createdByUserId("charlie_chaplin")
             .createdByUserName("Charlie Chaplin")
             .changeDateTime(LocalDateTime.now().minusDays(270))
-            .changeByUserId("buster_keaton")
-            .changeByUserName("Buster Keaton")
+            .changedByUserId("buster_keaton")
+            .changedByUserName("Buster Keaton")
             .build();
         sittingRecord2.setStatusHistories(List.of(statusHistory2a, statusHistory2b, statusHistory2c));
 

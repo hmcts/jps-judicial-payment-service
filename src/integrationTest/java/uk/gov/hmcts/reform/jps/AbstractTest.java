@@ -34,9 +34,9 @@ public class AbstractTest {
                                                 String userName, SittingRecord sittingRecord) {
         return StatusHistory.builder()
             .statusId(statusId)
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId(userId)
-            .changeByName(userName)
+            .changedDateTime(LocalDateTime.now())
+            .changedByUserId(userId)
+            .changedByName(userName)
             .sittingRecord(sittingRecord)
             .build();
     }

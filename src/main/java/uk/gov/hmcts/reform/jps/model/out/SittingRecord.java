@@ -50,8 +50,8 @@ public class SittingRecord {
     private String createdByUserId;
     private String createdByUserName;
     private LocalDateTime changeDateTime;
-    private String changeByUserId;
-    private String changeByUserName;
+    private String changedByUserId;
+    private String changedByUserName;
 
     @JsonIgnore
     @ToString.Exclude
@@ -59,7 +59,7 @@ public class SittingRecord {
 
     public String getCreatedByUserId() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
     @JsonIgnore

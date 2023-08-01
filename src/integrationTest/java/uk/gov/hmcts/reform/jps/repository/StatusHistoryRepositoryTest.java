@@ -78,8 +78,8 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         StatusHistory settingHistoryToUpdate = null;
         if (optionalSettingHistoryToUpdate.isPresent()) {
             settingHistoryToUpdate = optionalSettingHistoryToUpdate.get();
-            settingHistoryToUpdate.setChangeDateTime(LocalDateTime.now());
-            settingHistoryToUpdate.setChangeByUserId(JpsRole.ROLE_SUBMITTER.name());
+            settingHistoryToUpdate.setChangedDateTime(LocalDateTime.now());
+            settingHistoryToUpdate.setChangedByUserId(JpsRole.ROLE_SUBMITTER.name());
         }
 
         StatusHistory updatedStatusHistory = historyRepository.save(settingHistoryToUpdate);

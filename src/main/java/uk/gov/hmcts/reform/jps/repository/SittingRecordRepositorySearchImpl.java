@@ -161,10 +161,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                 sittingRecord.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
 
             criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
-                                  joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
+                                  joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID))
                 .having(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
                                               StatusId.RECORDED.name()),
-                        criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID),
+                        criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID),
                                               recordSearchRequest.getCreatedByUserId()));
 
             LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id and selected created by user");

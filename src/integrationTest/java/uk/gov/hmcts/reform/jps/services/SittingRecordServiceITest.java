@@ -160,7 +160,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         for (uk.gov.hmcts.reform.jps.model.out.SittingRecord sittingRecord : response) {
             assertThat(sittingRecord.getStatusHistories())
-                .extracting(StatusHistory_.CHANGE_BY_USER_ID)
+                .extracting(StatusHistory_.CHANGED_BY_USER_ID)
                 .contains(USER_ID);
         }
     }
@@ -199,7 +199,7 @@ class SittingRecordServiceITest extends BaseTest {
         for (uk.gov.hmcts.reform.jps.model.out.SittingRecord sittingRecord : response) {
             assertThat(sittingRecord.getStatusHistories())
                 .as("Extracting change by user")
-                .extracting(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.STATUS_ID)
+                .extracting(StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.STATUS_ID)
                 .contains(
                     tuple(USER_ID, STATUS_ID_FIXED)
                 );
@@ -261,7 +261,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         List<StatusHistory> statusHistories = statusHistoryService.findAll();
         assertThat(statusHistories)
-            .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.CHANGE_BY_NAME)
+            .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.CHANGED_BY_NAME)
             .contains(
                 tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
                 tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
@@ -269,7 +269,7 @@ class SittingRecordServiceITest extends BaseTest {
             );
 
         assertThat(statusHistories).describedAs("Created date assertion")
-            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangedDateTime()));
     }
 
     @Test
@@ -320,7 +320,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
 
-        LOGGER.debug("ChangeByUserId:{}", actual.getChangeByUserId());
+        LOGGER.debug("changedByUserId:{}", actual.getChangedByUserId());
         LOGGER.debug("actual:{}", actual);
         LOGGER.debug("actual.statusHistories:{}", actual.getStatusHistories());
 
@@ -365,9 +365,9 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistory createStatusHistory(String statusId, String userId, String userName) {
         return StatusHistory.builder()
             .statusId(statusId)
-            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
-            .changeByUserId(userId)
-            .changeByName(userName)
+            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
+            .changedByUserId(userId)
+            .changedByName(userName)
             .build();
     }
 

@@ -20,7 +20,7 @@ public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Lo
     List<StatusHistory> findStatusHistoryDesc(@Param("id") Long id);
 
 
-    @Query("select distinct new uk.gov.hmcts.reform.jps.model.RecordingUser(sh.changeByUserId, sh.changeByName) "
+    @Query("select distinct new uk.gov.hmcts.reform.jps.model.RecordingUser(sh.changedByUserId, sh.changedByName) "
         + "from StatusHistory sh inner join SittingRecord sr "
         + "on sh.sittingRecord.id = sr.id and sh.statusId = 'RECORDED' "
         + "where sr.hmctsServiceId = :hmctsServiceId "

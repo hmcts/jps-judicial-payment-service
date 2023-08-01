@@ -70,32 +70,32 @@ public class SittingRecord {
 
     public String getCreatedByUserId() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
     public String getCreatedByUserName() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByName() : null;
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
     }
 
     public LocalDateTime getCreatedDateTime() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
     }
 
-    public String getChangeByUserId() {
+    public String getChangedByUserId() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
-    public String getChangeByUserName() {
+    public String getChangedByUserName() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByName() : null;
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
     }
 
-    public LocalDateTime getChangeByDateTime() {
+    public LocalDateTime getChangedByDateTime() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
     }
 
     public StatusHistory getFirstStatusHistory() {
