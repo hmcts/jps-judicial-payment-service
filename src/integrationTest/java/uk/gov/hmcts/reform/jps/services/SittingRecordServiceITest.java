@@ -78,13 +78,9 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
-    private static final String STATUS_ID_FIXED = "RECORDED";
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMS_ID_FIXED = "852649";
-    private static final String PERSONAL_CODE_FIXED = "4918178";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
-    public static final String CONTRACT_TYPE_ID = "contractTypeId";
-
 
     @AfterEach
     void afterEach() {
@@ -280,9 +276,9 @@ class SittingRecordServiceITest extends BaseTest {
             .contains(
                 tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918500",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, RECORDED, SSC_ID),
-                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918179",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, RECORDED, SSC_ID),
-                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918180",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, RECORDED, SSC_ID)
             );
 

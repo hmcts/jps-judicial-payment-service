@@ -65,37 +65,10 @@ class SubmitSittingRecordsControllerTest {
             );
     }
 
-    @Test
-    void shouldThrowWhenRecordsAreSubmitted() throws Exception {
-        String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/submitSittingRecords/")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestJson))
-            .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
-            );
-    }
-
-    @Test
-    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
-        String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/submitSittingRecords/")
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestJson))
-            .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
-            );
-    }
 
     @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
-        mockMvc.perform(post("/submitSittingRecords/")
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
             .andDo(print())

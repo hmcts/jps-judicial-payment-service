@@ -148,7 +148,7 @@ class RecordSittingRecordsControllerTest {
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918179"),
                 jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
@@ -157,7 +157,7 @@ class RecordSittingRecordsControllerTest {
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918180"),
                 jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
