@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
@@ -186,5 +185,4 @@ public class SittingRecordService {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
         }
     }
-
 }
