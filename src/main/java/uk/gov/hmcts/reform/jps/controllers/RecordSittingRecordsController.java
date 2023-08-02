@@ -125,7 +125,6 @@ public class RecordSittingRecordsController {
 
             return status(httpStatus)
                 .body(RecordSittingRecordResponse.builder()
-                          .message("success")
                           .errorRecords(generateResponse(sittingRecordWrappers,
                                                          errorCode -> VALID,
                                                          sittingRecordWrapper ->

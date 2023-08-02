@@ -59,6 +59,7 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
@@ -79,6 +80,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Mock
     private DuplicateCheckerService duplicateCheckerService;
+
+    @Mock
+    private SittingRecordService self;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -208,9 +212,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                                               SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
                                               SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
                 .contains(
-                    tuple(of(2023, Month.MAY, 11), RECORDED, "852649", "test", "4918500", 1L, "Judge", false, true),
-                    tuple(of(2023, Month.APRIL, 10), RECORDED, "852649", "test", "4918178", 1L, "Judge", true, false),
-                    tuple(of(2023, Month.MARCH, 9), RECORDED, "852649", "test", "4918178", 1L, "Judge", true, true)
+                    tuple(of(2022, Month.MAY, 11), RECORDED, "852649", "test", "4918500", 1L, "Tester", false, true),
+                    tuple(of(2023, Month.APRIL, 10), RECORDED, "852649", "test", "4918179", 1L, "Judge", true, false),
+                    tuple(of(2023, Month.MARCH, 9), RECORDED, "852649", "test", "4918180", 1L, "Judge", true, true)
         );
 
         assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
@@ -474,5 +478,88 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         verify(duplicateCheckerService, never()).evaluate(any(), any());
+    }
+
+    @Test
+    void shouldRecordSittingRecordsWhenPotentialDuplicateRecord() throws IOException {
+        long sittingRecordId = 9L;
+        String requestJson = Resources.toString(getResource("singleSittingRecordWithPotentialDuplicate.json"), UTF_8);
+        requestJson = requestJson.replace("<flag>", "true");
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+                requestJson,
+                RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+                recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                        .map(SittingRecordWrapper::new)
+                        .peek(sittingRecordWrapper -> {
+                            sittingRecordWrapper.setSittingRecordId(sittingRecordId);
+                            sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+                        })
+                        .toList();
+
+        sittingRecordService.saveSittingRecords("SSC_ID",
+                sittingRecordWrappers,
+                recordSittingRecordRequest.getRecordedByName(),
+                recordSittingRecordRequest.getRecordedByIdamId());
+
+        verify(self).deleteSittingRecord(sittingRecordId);
+        verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
+    }
+
+    @Test
+    void shouldNotDeleteRecordSittingRecordsWhenPotentialDuplicateRecordIsNotSet() throws IOException {
+        long sittingRecordId = 9L;
+        String requestJson = Resources.toString(getResource("singleSittingRecordWithPotentialDuplicate.json"), UTF_8);
+        requestJson = requestJson.replace("<flag>", "true");
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+                requestJson,
+                RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+                recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                        .map(SittingRecordWrapper::new)
+                        .peek(sittingRecordWrapper -> {
+                            sittingRecordWrapper.setSittingRecordId(sittingRecordId);
+                        })
+                        .toList();
+
+        sittingRecordService.saveSittingRecords("SSC_ID",
+                sittingRecordWrappers,
+                recordSittingRecordRequest.getRecordedByName(),
+                recordSittingRecordRequest.getRecordedByIdamId());
+
+        verify(self, never()).deleteSittingRecord(sittingRecordId);
+        verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
+    }
+
+    @Test
+    void shouldNotDeleteRecordSittingRecordsWhenPotentialDuplicateRecordButNoReplaceDuplicate() throws IOException {
+        long sittingRecordId = 9L;
+        String requestJson = Resources.toString(getResource("singleSittingRecordWithPotentialDuplicate.json"), UTF_8);
+        requestJson = requestJson.replace("<flag>", "false");
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+                requestJson,
+                RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+                recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                        .map(SittingRecordWrapper::new)
+                        .peek(sittingRecordWrapper -> {
+                            sittingRecordWrapper.setSittingRecordId(sittingRecordId);
+                            sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+                        })
+                        .toList();
+
+        sittingRecordService.saveSittingRecords("SSC_ID",
+                sittingRecordWrappers,
+                recordSittingRecordRequest.getRecordedByName(),
+                recordSittingRecordRequest.getRecordedByIdamId());
+
+        verify(self, never()).deleteSittingRecord(sittingRecordId);
+        verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
     }
 }

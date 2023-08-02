@@ -76,7 +76,6 @@ class SittingRecoredServiceITest extends BaseTest {
     private static final String STATUS_ID_FIXED = "RECORDED";
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMS_ID_FIXED = "852649";
-    private static final String PERSONAL_CODE_FIXED = "4918178";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
     @BeforeEach
@@ -242,6 +241,7 @@ class SittingRecoredServiceITest extends BaseTest {
         assertThat(totalRecordCount).isEqualTo(25);
     }
 
+
     @Test
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -272,11 +272,11 @@ class SittingRecoredServiceITest extends BaseTest {
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
-                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918500",
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, RECORDED, SSC_ID),
-                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2022, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918500",
+                      "Tester", 1L, false, true, RECORDED, SSC_ID),
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918179",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, RECORDED, SSC_ID),
-                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918180",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, RECORDED, SSC_ID)
             );
 
@@ -610,7 +610,8 @@ class SittingRecoredServiceITest extends BaseTest {
     }
 
     @Test
-    void shouldSetValidRecordWhenJudgeRoleTypeIdDoesntMatchWithReplaceDuplicateSetToTrue() throws IOException {
+    void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatchWithReplaceDuplicateSetToTrue()
+        throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 
         String requestJson = Resources.toString(
@@ -629,9 +630,9 @@ class SittingRecoredServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(VALID, null, null),
-                      tuple(VALID, null, null),
-                      tuple(VALID, null, null)
+            .contains(tuple(POTENTIAL_DUPLICATE_RECORD, null, null),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, null, null),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, null, null)
             );
     }
 

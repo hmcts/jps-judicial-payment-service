@@ -263,11 +263,11 @@ class SittingRecordServiceITest extends BaseTest {
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
-                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918500",
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, RECORDED, SSC_ID),
-                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2022, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918500",
+                      "Tester", 1L, false, true, RECORDED, SSC_ID),
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918179",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, RECORDED, SSC_ID),
-                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918180",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, RECORDED, SSC_ID)
             );
 

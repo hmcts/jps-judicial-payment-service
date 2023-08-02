@@ -31,6 +31,7 @@ import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -99,7 +100,8 @@ public class SittingRecordService {
         sittingRecordWrappers
             .forEach(recordSittingRecordWrapper -> {
                 SittingRecordRequest recordSittingRecord = recordSittingRecordWrapper.getSittingRecordRequest();
-                if (TRUE.equals(recordSittingRecord.getReplaceDuplicate())) {
+                if (POTENTIAL_DUPLICATE_RECORD == recordSittingRecordWrapper.getErrorCode()
+                        && TRUE.equals(recordSittingRecord.getReplaceDuplicate())) {
                     self.deleteSittingRecord(recordSittingRecordWrapper.getSittingRecordId());
                 }
 

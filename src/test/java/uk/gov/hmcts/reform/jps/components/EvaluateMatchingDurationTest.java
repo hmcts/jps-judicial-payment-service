@@ -148,7 +148,7 @@ class EvaluateMatchingDurationTest extends BaseEvaluateDuplicate {
         evaluateMatchingDuration.evaluate(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
 
         assertThat(sittingRecordWrapper.getErrorCode())
-            .isEqualTo(VALID);
+            .isEqualTo(POTENTIAL_DUPLICATE_RECORD);
 
         verify(statusHistoryService, never())
             .updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);

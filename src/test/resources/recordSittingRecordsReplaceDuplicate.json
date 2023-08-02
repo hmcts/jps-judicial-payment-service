@@ -3,20 +3,19 @@
   "recordedByName": "Recorder",
   "recordedSittingRecords": [
     {
-      "sittingRecordId": 5,
-      "sittingDate": "2023-05-11",
+      "sittingDate": "2022-05-11",
       "epimmsId": "852649",
       "personalCode": "4918178",
-      "judgeRoleTypeId": "Judge",
+      "judgeRoleTypeId": "Tester",
       "contractTypeId": "1",
-      "pm": true,
       "am": false,
+      "pm": true,
       "replaceDuplicate": true
     },
     {
       "sittingDate": "2023-04-10",
       "epimmsId": "852649",
-      "personalCode": "4918178",
+      "personalCode": "4918179",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
       "am": true,
@@ -25,7 +24,7 @@
     {
       "sittingDate": "2023-03-09",
       "epimmsId": "852649",
-      "personalCode": "4918178",
+      "personalCode": "4918180",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
       "am": true,
