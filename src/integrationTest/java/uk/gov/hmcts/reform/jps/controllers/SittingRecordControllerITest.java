@@ -106,7 +106,7 @@ class SittingRecordControllerITest extends BaseTest {
             .contractTypeId(2L)
             .am(true)
             .judgeRoleTypeId("HighCourt")
-            .build();
+            .pm(false).build();
         StatusHistory statusHistory1 = StatusHistory.builder()
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11233")

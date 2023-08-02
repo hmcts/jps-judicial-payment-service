@@ -17,7 +17,6 @@ import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
-import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -47,8 +46,6 @@ class SittingRecordDeleteControllerTest {
     private LocationService regionService;
     @MockBean
     private JudicialUserDetailsService judicialUserDetailsService;
-    @MockBean
-    private CaseWorkerService caseWorkerService;
 
     @Test
     @WithMockUser(authorities = {"jps-recorder"})

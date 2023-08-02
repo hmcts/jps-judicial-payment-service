@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Consumer;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
@@ -40,20 +39,6 @@ public class SittingRecordService {
 
     private SecurityUtils securityUtils;
 
-    private Consumer<uk.gov.hmcts.reform.jps.domain.SittingRecord>
-        deleteSittingRecord = sittingRecord -> {
-        StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.DELETED.name())
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId(securityUtils.getUserInfo().getUid())
-            .changeByName(securityUtils.getUserInfo().getName())
-            .build();
-
-        sittingRecord.addStatusHistory(statusHistory);
-        sittingRecord.setStatusId(DELETED.name());
-        sittingRecordRepository.save(sittingRecord);
-    };
-
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
@@ -64,25 +49,25 @@ public class SittingRecordService {
 
         return dbSittingRecords.stream()
             .map(sittingRecord -> SittingRecord.builder()
-                    .sittingRecordId(sittingRecord.getId())
-                    .sittingDate(sittingRecord.getSittingDate())
-                    .statusId(sittingRecord.getStatusId())
-                    .regionId(sittingRecord.getRegionId())
-                    .epimsId(sittingRecord.getEpimsId())
-                    .hmctsServiceId(sittingRecord.getHmctsServiceId())
-                    .personalCode(sittingRecord.getPersonalCode())
-                    .contractTypeId(sittingRecord.getContractTypeId())
-                    .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
-                    .am(sittingRecord.isAm() ? AM.name() : null)
-                    .pm(sittingRecord.isPm() ? PM.name() : null)
-                    .createdDateTime(sittingRecord.getCreatedDateTime())
-                    .createdByUserId(sittingRecord.getCreatedByUserId())
-                    .createdByUserName(sittingRecord.getCreatedByUserName())
-                    .changeDateTime(sittingRecord.getChangeByDateTime())
-                    .changeByUserId(sittingRecord.getChangeByUserId())
-                    .changeByUserName(sittingRecord.getChangeByUserName())
-                    .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
-                    .build())
+                .sittingRecordId(sittingRecord.getId())
+                .sittingDate(sittingRecord.getSittingDate())
+                .statusId(sittingRecord.getStatusId())
+                .regionId(sittingRecord.getRegionId())
+                .epimsId(sittingRecord.getEpimsId())
+                .hmctsServiceId(sittingRecord.getHmctsServiceId())
+                .personalCode(sittingRecord.getPersonalCode())
+                .contractTypeId(sittingRecord.getContractTypeId())
+                .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
+                .am(sittingRecord.isAm() ? AM.name() : null)
+                .pm(sittingRecord.isPm() ? PM.name() : null)
+                .createdDateTime(sittingRecord.getCreatedDateTime())
+                .createdByUserId(sittingRecord.getCreatedByUserId())
+                .createdByUserName(sittingRecord.getCreatedByUserName())
+                .changeDateTime(sittingRecord.getChangeByDateTime())
+                .changeByUserId(sittingRecord.getChangeByUserId())
+                .changeByUserName(sittingRecord.getChangeByUserName())
+                .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
+                .build())
             .toList();
     }
 
@@ -92,7 +77,7 @@ public class SittingRecordService {
         LOGGER.debug("getTotalRecordCount");
 
         return sittingRecordRepository.totalRecords(recordSearchRequest,
-                                                    hmctsServiceCode);
+            hmctsServiceCode);
     }
 
     @Transactional
@@ -112,9 +97,9 @@ public class SittingRecordService {
                         .contractTypeId(recordSittingRecord.getContractTypeId())
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
                         .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getAm).orElse(false))
+                            .map(DurationBoolean::getAm).orElse(false))
                         .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getPm).orElse(false))
+                            .map(DurationBoolean::getPm).orElse(false))
                         .build();
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
@@ -185,4 +170,5 @@ public class SittingRecordService {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
         }
     }
+
 }

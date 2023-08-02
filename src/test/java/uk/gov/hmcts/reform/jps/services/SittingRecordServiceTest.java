@@ -37,11 +37,11 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static java.time.LocalDate.of;
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -196,7 +196,7 @@ class SittingRecordServiceTest {
 
         assertThat(sittingRecords).describedAs("Created date assertion")
             .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+            .allMatch(m -> now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 
     private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
@@ -239,7 +239,7 @@ class SittingRecordServiceTest {
     private uk.gov.hmcts.reform.jps.domain.SittingRecord deleteTestSetUp(String changeById, String state) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(RECORDED.name())
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(now())
             .changeByUserId(changeById)
             .changeByName("John Smith")
             .build();
@@ -257,10 +257,6 @@ class SittingRecordServiceTest {
             .judgeRoleTypeId("HighCourt")
             .am(true)
             .pm(true)
-            .createdByUserId(USER_ID)
-            .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-            .changeByUserId(changeById)
-            .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
             .build();
 
         sittingRecord.addStatusHistory(statusHistory);
@@ -355,11 +351,7 @@ class SittingRecordServiceTest {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());
         });
 
-        Optional<StatusHistory> optionalStatusHistory = sittingRecord.getLatestStatusHistory();
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
+        StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
 
         assertThat(statusHistory.getStatusId()).isEqualTo("RECORDED");
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
