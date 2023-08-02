@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -50,10 +51,11 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public static final String EPIM_ID = "123";
-    public static final String SSC_ID = "ssc_id";
+    public static final String EPIMMS_ID = "852649";
+    public static final String HMCTS_SERVICE_CODE = "BBA3";
     private SittingRecordService sittingRecordService;
     private StatusHistoryService statusHistoryService;
+    private LocationService locationService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -68,7 +70,7 @@ class SittingRecordServiceITest extends BaseTest {
     void beforeEach() {
         statusHistoryRepository.deleteAll();
         sittingRecordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(sittingRecordRepository);
+        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService);
         statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 
@@ -139,7 +141,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIM_ID)
+            .epimsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -147,7 +149,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
             recordSearchRequest,
-            SSC_ID
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(response).hasSize(5);
@@ -176,7 +178,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(20)
             .regionId(reasonId)
-            .epimsId(EPIM_ID)
+            .epimsId(EPIMMS_ID)
             .dateOrder(DESCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -184,7 +186,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
             recordSearchRequest,
-            SSC_ID
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(response).hasSize(2);
@@ -217,7 +219,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIM_ID)
+            .epimsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -225,7 +227,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         int totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
-            SSC_ID
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(totalRecordCount).isEqualTo(25);
@@ -241,7 +243,7 @@ class SittingRecordServiceITest extends BaseTest {
         recordSittingRecordRequest.getRecordedSittingRecords()
             .forEach(sittingRecordRequest -> sittingRecordRequest.setRegionId("1"));
 
-        sittingRecordService.saveSittingRecords(SSC_ID, recordSittingRecordRequest);
+        sittingRecordService.saveSittingRecords(HMCTS_SERVICE_CODE, recordSittingRecordRequest);
         List<SittingRecord> savedSittingRecords = sittingRecordRepository.findAll();
 
         assertThat(savedSittingRecords)
@@ -252,11 +254,11 @@ class SittingRecordServiceITest extends BaseTest {
             )
             .contains(
                 tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, SSC_ID),
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
                 tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, SSC_ID),
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
                 tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, SSC_ID)
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE)
             );
 
         List<StatusHistory> statusHistories = statusHistoryService.findAll();
@@ -350,8 +352,8 @@ class SittingRecordServiceITest extends BaseTest {
             .sittingDate(LocalDate.now().minusDays(counter))
             .statusId(statusId)
             .regionId("1")
-            .epimsId(EPIM_ID)
-            .hmctsServiceId(SSC_ID)
+            .epimsId(EPIMMS_ID)
+            .hmctsServiceId(HMCTS_SERVICE_CODE)
             .personalCode("001")
             .contractTypeId(counter)
             .am(true)

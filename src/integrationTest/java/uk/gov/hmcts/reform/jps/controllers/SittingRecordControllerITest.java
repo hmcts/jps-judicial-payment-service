@@ -52,6 +52,8 @@ class SittingRecordControllerITest extends BaseTest {
         "searchSittingRecordsNoEpimmsNoRegion.json";
 
     private static final String DENZEL_WASHINGTON = "Denzel Washington";
+    private static final String EPIMMS_ID = "852649";
+    private static final String HMCTS_SERVICE_CODE = "BBA3";
     private static final String JASON_BOURNE = "Jason Bourne";
     private static final String JOE_BLOGGS = "Joe Bloggs";
     private static final String JACKIE_CHAN = "Jackie Chan";
@@ -93,7 +95,7 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
+        SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                            StatusId.RECORDED.name());
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
@@ -144,8 +146,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value("123"),
-                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
+                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
@@ -164,7 +166,7 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidButNoRegionAndHasMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
+        SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
@@ -200,7 +202,7 @@ class SittingRecordControllerITest extends BaseTest {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_NO_REGION_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
-            .perform(post(SEARCH_URL, "BBA3")
+            .perform(post(SEARCH_URL, HMCTS_SERVICE_CODE)
                          .contentType(MediaType.APPLICATION_JSON)
                          .content(updatedRecord))
             .andDo(print())
@@ -215,8 +217,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value("123"),
-                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
+                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
@@ -235,7 +237,7 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsAndHasMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
+        SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
@@ -271,7 +273,7 @@ class SittingRecordControllerITest extends BaseTest {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_NO_EPIMMS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
-            .perform(post(SEARCH_URL, "BBA3")
+            .perform(post(SEARCH_URL, HMCTS_SERVICE_CODE)
                          .contentType(MediaType.APPLICATION_JSON)
                          .content(updatedRecord))
             .andDo(print())
@@ -286,8 +288,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value("123"),
-                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
+                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
@@ -306,7 +308,7 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
+        SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
@@ -342,7 +344,7 @@ class SittingRecordControllerITest extends BaseTest {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_NO_EPIMMS_NO_REGION_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
-            .perform(post(SEARCH_URL, "BBA3")
+            .perform(post(SEARCH_URL, HMCTS_SERVICE_CODE)
                          .contentType(MediaType.APPLICATION_JSON)
                          .content(updatedRecord))
             .andDo(print())
@@ -357,8 +359,8 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value("123"),
-                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
+                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
@@ -378,7 +380,7 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMultipleMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord1 = createSittingRecord(2L, "123", "BBA3",
+        SittingRecord sittingRecord1 = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
         StatusHistory statusHistory1a = createStatusHistory(JASON_BOURNE, "11233",
@@ -394,7 +396,7 @@ class SittingRecordControllerITest extends BaseTest {
         historyRepository.save(statusHistory1b);
         recordRepository.save(sittingRecord1);
 
-        SittingRecord sittingRecord2 = createSittingRecord(3L, "124", "BBA3",
+        SittingRecord sittingRecord2 = createSittingRecord(3L, "124", HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923422", "2",
                                                           StatusId.RECORDED.name());
         StatusHistory statusHistory2a = createStatusHistory(JASON_BOURNE, "11244",

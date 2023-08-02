@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -27,6 +28,9 @@ public class SittingRecordService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordService.class);
 
     private final SittingRecordRepository sittingRecordRepository;
+
+    private final LocationService locationService;
+
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -56,9 +60,22 @@ public class SittingRecordService {
                 .sittingRecordId(sittingRecord.getId())
                 .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                 .statusId(sittingRecord.getStatusId())
-                .venueName(null)
-                .build())
+                .venueName(getVenueName(hmctsServiceCode, sittingRecord.getEpimsId()))
+                .build()
+            )
             .toList();
+    }
+
+    private String getVenueName(String hmctsServiceCode, String epimmsId) {
+        LOGGER.info("hmctsServiceCode<{}> epimmsId<{}>", hmctsServiceCode, epimmsId);
+        if (null == locationService) {
+            LOGGER.info("locationService is NULL!");
+            return null;
+        }
+
+        String venueName = locationService.getVenueName(hmctsServiceCode, epimmsId);
+        LOGGER.info("venueName is <{}>", venueName);
+        return venueName;
     }
 
     public int getTotalRecordCount(
