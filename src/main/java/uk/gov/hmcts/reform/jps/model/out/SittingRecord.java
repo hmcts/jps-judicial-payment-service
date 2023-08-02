@@ -49,7 +49,7 @@ public class SittingRecord {
     private LocalDateTime createdDateTime;
     private String createdByUserId;
     private String createdByUserName;
-    private LocalDateTime changeDateTime;
+    private LocalDateTime changedDateTime;
     private String changedByUserId;
     private String changedByUserName;
 

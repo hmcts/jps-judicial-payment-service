@@ -146,13 +146,13 @@ class StatusHistoryServiceTest {
     }
 
     private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
-                                              LocalDateTime changeDateTime,
+                                              LocalDateTime changedDateTime,
                                               Long id, String statusId) {
 
         StatusHistory statusHistory = new StatusHistory();
         statusHistory.setChangedByName(changedByName);
         statusHistory.setChangedByUserId(changedByUserId);
-        statusHistory.setChangedDateTime(changeDateTime);
+        statusHistory.setChangedDateTime(changedDateTime);
         statusHistory.setId(id);
         statusHistory.setStatusId(statusId);
         return statusHistory;

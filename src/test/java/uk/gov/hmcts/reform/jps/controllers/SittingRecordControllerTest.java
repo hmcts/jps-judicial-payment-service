@@ -277,7 +277,7 @@ class SittingRecordControllerTest {
             .createdDateTime(LocalDateTime.now().minusDays(300))
             .createdByUserId("charlie_chaplin")
             .createdByUserName("Charlie Chaplin")
-            .changeDateTime(LocalDateTime.now().minusDays(270))
+            .changedDateTime(LocalDateTime.now().minusDays(270))
             .changedByUserId("buster_keaton")
             .changedByUserName("Buster Keaton")
             .build();
@@ -329,7 +329,7 @@ class SittingRecordControllerTest {
             .createdDateTime(LocalDateTime.now().minusDays(300))
             .createdByUserId("charlie_chaplin")
             .createdByUserName("Charlie Chaplin")
-            .changeDateTime(LocalDateTime.now().minusDays(270))
+            .changedDateTime(LocalDateTime.now().minusDays(270))
             .changedByUserId("buster_keaton")
             .changedByUserName("Buster Keaton")
             .build();

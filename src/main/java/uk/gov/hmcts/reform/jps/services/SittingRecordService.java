@@ -41,7 +41,7 @@ public class SittingRecordService {
                 .am(sittingRecord.isAm() ? AM.name() : null)
                 .changedByUserId(sittingRecord.getChangedByUserId())
                 .changedByUserName(sittingRecord.getChangedByUserName())
-                .changeDateTime(sittingRecord.getChangedByDateTime())
+                .changedDateTime(sittingRecord.getChangedByDateTime())
                 .contractTypeId(sittingRecord.getContractTypeId())
                 .createdByUserId(sittingRecord.getCreatedByUserId())
                 .createdByUserName(sittingRecord.getCreatedByUserName())
