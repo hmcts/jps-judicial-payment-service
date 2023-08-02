@@ -9,19 +9,19 @@ import javax.persistence.metamodel.StaticMetamodel;
 @StaticMetamodel(StatusHistory.class)
 public abstract class StatusHistory_ {
 
-	public static volatile SingularAttribute<StatusHistory, String> changeByName;
+	public static volatile SingularAttribute<StatusHistory, LocalDateTime> changedDateTime;
 	public static volatile SingularAttribute<StatusHistory, String> statusId;
+	public static volatile SingularAttribute<StatusHistory, String> changedByUserId;
 	public static volatile SingularAttribute<StatusHistory, Long> id;
 	public static volatile SingularAttribute<StatusHistory, SittingRecord> sittingRecord;
-	public static volatile SingularAttribute<StatusHistory, String> changeByUserId;
-	public static volatile SingularAttribute<StatusHistory, LocalDateTime> changeDateTime;
+	public static volatile SingularAttribute<StatusHistory, String> changedByName;
 
-	public static final String CHANGE_BY_NAME = "changeByName";
+	public static final String CHANGED_DATE_TIME = "changedDateTime";
 	public static final String STATUS_ID = "statusId";
+	public static final String CHANGED_BY_USER_ID = "changedByUserId";
 	public static final String ID = "id";
 	public static final String SITTING_RECORD = "sittingRecord";
-	public static final String CHANGE_BY_USER_ID = "changeByUserId";
-	public static final String CHANGE_DATE_TIME = "changeDateTime";
+	public static final String CHANGED_BY_NAME = "changedByName";
 
 }
 
