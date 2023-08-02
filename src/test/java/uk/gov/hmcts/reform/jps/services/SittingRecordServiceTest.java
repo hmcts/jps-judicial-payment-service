@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
@@ -36,11 +37,11 @@ import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
 import static java.time.LocalDate.of;
-import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -87,10 +88,8 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldReturnTotalRecordCount() {
-        when(sittingRecordRepository.totalRecords(
-            isA(SittingRecordSearchRequest.class),
-            isA(String.class)
-        ))
+        when(sittingRecordRepository.totalRecords(isA(SittingRecordSearchRequest.class),
+                                                  isA(String.class)))
             .thenReturn(10);
 
         int totalRecordCount = sittingRecordService.getTotalRecordCount(
@@ -105,10 +104,8 @@ class SittingRecordServiceTest {
 
     @Test
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
-        when(sittingRecordRepository.find(
-            isA(SittingRecordSearchRequest.class),
-            isA(String.class)
-        ))
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
+                                                  isA(String.class)))
             .thenReturn(getDbSittingRecords(2));
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
@@ -116,9 +113,10 @@ class SittingRecordServiceTest {
             "test"
         );
 
-        assertThat(sittingRecords)
-            .hasSize(2)
-            .isEqualTo(getDomainSittingRecords(2));
+        assertThat(sittingRecords).hasSize(2);
+
+        assertEquals(sittingRecords.get(0), getDomainSittingRecords(2).get(0));
+        assertEquals(sittingRecords.get(1), getDomainSittingRecords(2).get(1));
     }
 
 
@@ -127,10 +125,8 @@ class SittingRecordServiceTest {
         List<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = getDbSittingRecords(1);
         dbSittingRecords.get(0).setAm(false);
 
-        when(sittingRecordRepository.find(
-            isA(SittingRecordSearchRequest.class),
-            isA(String.class)
-        ))
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
+                                          isA(String.class)))
             .thenReturn(dbSittingRecords);
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
@@ -141,9 +137,8 @@ class SittingRecordServiceTest {
         List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
         domainSittingRecords.get(0).setAm(null);
 
-        assertThat(sittingRecords)
-            .hasSize(1)
-            .isEqualTo(domainSittingRecords);
+        assertThat(sittingRecords).hasSize(1);
+        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
     }
 
     @Test
@@ -151,10 +146,8 @@ class SittingRecordServiceTest {
         List<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = getDbSittingRecords(1);
         dbSittingRecords.get(0).setPm(false);
 
-        when(sittingRecordRepository.find(
-            isA(SittingRecordSearchRequest.class),
-            isA(String.class)
-        ))
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
+                                          isA(String.class)))
             .thenReturn(dbSittingRecords);
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
@@ -165,9 +158,45 @@ class SittingRecordServiceTest {
         List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
         domainSittingRecords.get(0).setPm(null);
 
-        assertThat(sittingRecords)
-            .hasSize(1)
-            .isEqualTo(domainSittingRecords);
+        assertThat(sittingRecords).hasSize(1);
+        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
+    }
+
+
+    @Test
+    void shouldSaveSittingRecordsWhenRequestIsValid() throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+        sittingRecordService.saveSittingRecords("test",
+                                                recordSittingRecordRequest);
+        verify(sittingRecordRepository, times(3))
+            .save(sittingRecordArgumentCaptor.capture());
+
+        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
+        assertThat(sittingRecords).extracting(SittingRecord_.SITTING_DATE, SittingRecord_.STATUS_ID,
+                                              SittingRecord_.EPIMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
+                                              SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
+                                              SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
+                .contains(
+                    tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
+                    tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
+                    tuple(of(2023, Month.MARCH, 9), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, true)
+        );
+
+        assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
+            .extracting("statusId", "changeByUserId", "changeByName")
+            .contains(
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
+        );
+
+        assertThat(sittingRecords).describedAs("Created date assertion")
+            .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 
     private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
@@ -184,10 +213,6 @@ class SittingRecordServiceTest {
                 .judgeRoleTypeId("HighCourt")
                 .am(true)
                 .pm(true)
-                .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-                .createdByUserId(USER_ID)
-                .changeByUserId(UPDATED_BY_USER_ID)
-                .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
                 .build())
             .collect(Collectors.toList());
     }
@@ -195,58 +220,19 @@ class SittingRecordServiceTest {
     private List<SittingRecord> getDomainSittingRecords(int limit) {
         return LongStream.range(1, limit + 1)
             .mapToObj(count -> SittingRecord.builder()
-                .sittingRecordId(count)
-                .sittingDate(LocalDate.now().minusDays(2))
-                .statusId(StatusId.RECORDED.name())
-                .regionId("1")
-                .epimsId("epims001")
-                .hmctsServiceId("sscs")
-                .personalCode("001")
-                .contractTypeId(count)
-                .judgeRoleTypeId("HighCourt")
-                .am(AM.name())
-                .pm(PM.name())
-                .createdByUserId(USER_ID)
-                .createdDateTime(CURRENT_DATE_TIME.minusDays(2))
-                .changeByUserId(UPDATED_BY_USER_ID)
-                .changeDateTime(CURRENT_DATE_TIME.minusDays(1))
-                .build())
+                    .sittingRecordId(count)
+                    .sittingDate(LocalDate.now().minusDays(2))
+                    .statusId(StatusId.RECORDED.name())
+                    .regionId("1")
+                    .epimsId("epims001")
+                    .hmctsServiceId("sscs")
+                    .personalCode("001")
+                    .contractTypeId(count)
+                    .judgeRoleTypeId("HighCourt")
+                    .am(AM.name())
+                    .pm(PM.name())
+                    .build())
             .collect(Collectors.toList());
-    }
-
-    @Test
-    void shouldSaveSittingRecordsWhenRequestIsValid() throws IOException {
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
-            requestJson,
-            RecordSittingRecordRequest.class
-        );
-        sittingRecordService.saveSittingRecords(
-            "test",
-            recordSittingRecordRequest
-        );
-        verify(sittingRecordRepository, times(3))
-            .save(sittingRecordArgumentCaptor.capture());
-
-        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
-        assertThat(sittingRecords).extracting("sittingDate", "statusId", "epimsId", "hmctsServiceId",
-                                              "personalCode", "contractTypeId", "judgeRoleTypeId", "am", "pm"
-            )
-            .contains(
-                tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
-                tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
-                tuple(of(2023, Month.MARCH, 9), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, true));
-
-        assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .extracting("statusId", "changeByUserId", "changeByName")
-            .contains(
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"));
-
-        assertThat(sittingRecords).describedAs("Created date assertion")
-            .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
     }
 
 
