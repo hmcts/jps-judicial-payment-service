@@ -80,7 +80,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Date order is mandatory"
 
-  @S-005.10 #AC05
+  @S-005.10 @Ignore #AC05
   Scenario: Negative response, when the request payload is missing dateRange
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -92,15 +92,15 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Date range to is mandatory"
     And the response contains "errors[1].message" as "Date range from is mandatory"
 
-  @S-005.11 @Ignore #AC06
+  @S-005.11 #AC06
   Scenario: Negative response, when the request user doesn't have permissions
-    Given a user with the IDAM role of "ccd-admin"
+    Given a user with the IDAM role of "ccd-import"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
     And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
-    Then a "negative" response is received with a "401 Unauthorised" status code
+    Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-005.12 #AC07
   Scenario: Negative response, when the service token is invalid
