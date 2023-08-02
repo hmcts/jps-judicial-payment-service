@@ -22,6 +22,8 @@ import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -48,6 +50,13 @@ class SittingRecordControllerITest extends BaseTest {
     private static final String SEARCH_SITTING_RECORDS_NO_REGION_JSON = "searchSittingRecordsNoRegion.json";
     private static final String SEARCH_SITTING_RECORDS_NO_EPIMMS_NO_REGION_JSON =
         "searchSittingRecordsNoEpimmsNoRegion.json";
+
+    private static final String DENZEL_WASHINGTON = "Denzel Washington";
+    private static final String JASON_BOURNE = "Jason Bourne";
+    private static final String JOE_BLOGGS = "Joe Bloggs";
+    private static final String JACKIE_CHAN = "Jackie Chan";
+    private static final String HIGHCOURT = "HighCourt";
+    private static final String LONDON = "London";
 
     public static final String SEARCH_URL = "/sitting-records/searchSittingRecords/{hmctsServiceCode}";
 
@@ -85,22 +94,22 @@ class SittingRecordControllerITest extends BaseTest {
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
-                                                          "HighCourt", "4923421", "1",
+                                                          HIGHCOURT, "4923421", "1",
                                                            StatusId.RECORDED.name());
-        StatusHistory statusHistory1 = createStatusHistory("Jason Bourne", "11233",
+        StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
                                                            LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
-        StatusHistory statusHistory2 = createStatusHistory("Jackie Chan", "11255",
+        StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
                                                            LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
-        StatusHistory statusHistory3 = createStatusHistory("Denzel Washington", "11266",
+        StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
                                                            LocalDateTime.now(), StatusId.PUBLISHED.name());
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
@@ -134,18 +143,18 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").value("London"),
+                jsonPath("$.sittingRecords[0].regionName").value(LONDON),
                 jsonPath("$.sittingRecords[0].epimsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
-                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
-                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
+                jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
+                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
@@ -156,22 +165,22 @@ class SittingRecordControllerITest extends BaseTest {
     void shouldHaveOkResponseWhenRequestIsValidButNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
-                                                          "HighCourt", "4923421", "1",
+                                                          HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
-        StatusHistory statusHistory1 = createStatusHistory("Jason Bourne", "11233",
+        StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
                                                            LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
-        StatusHistory statusHistory2 = createStatusHistory("Jackie Chan", "11255",
+        StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
                                                            LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
-        StatusHistory statusHistory3 = createStatusHistory("Denzel Washington", "11266",
+        StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
                                                            LocalDateTime.now(), StatusId.PUBLISHED.name());
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
@@ -181,12 +190,12 @@ class SittingRecordControllerITest extends BaseTest {
         SittingRecord persistedSittingRecord = recordRepository.findAll().get(0);
         assertEquals(statusHistory3.getStatusId(), persistedSittingRecord.getStatusId());
 
-        assertThat(persistedSittingRecord).isNotNull();
-        assertThat(persistedSittingRecord.getId()).isNotNull();
+        assertNotNull(persistedSittingRecord);
+        assertNotNull(persistedSittingRecord.getId());
         assertEquals(persistedSittingRecord.getStatusHistories().get(0), sittingRecord.getStatusHistories().get(0));
         assertEquals(persistedSittingRecord.getStatusHistories().get(1), sittingRecord.getStatusHistories().get(1));
 
-        assertThat(persistedSittingRecord.equalsDomainObject(sittingRecord));
+        assertTrue(persistedSittingRecord.equalsDomainObject(sittingRecord));
 
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_NO_REGION_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
@@ -205,18 +214,18 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").value("London"),
+                jsonPath("$.sittingRecords[0].regionName").value(LONDON),
                 jsonPath("$.sittingRecords[0].epimsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
-                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
-                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
+                jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
+                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
@@ -227,22 +236,22 @@ class SittingRecordControllerITest extends BaseTest {
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
-                                                          "HighCourt", "4923421", "1",
+                                                          HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
-        StatusHistory statusHistory1 = createStatusHistory("Jason Bourne", "11233",
+        StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
                                                            LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
-        StatusHistory statusHistory2 = createStatusHistory("Jackie Chan", "11255",
+        StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
                                                            LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
-        StatusHistory statusHistory3 = createStatusHistory("Denzel Washington", "11266",
+        StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
                                                            LocalDateTime.now(), StatusId.PUBLISHED.name());
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
@@ -257,7 +266,7 @@ class SittingRecordControllerITest extends BaseTest {
         assertEquals(persistedSittingRecord.getStatusHistories().get(0), sittingRecord.getStatusHistories().get(0));
         assertEquals(persistedSittingRecord.getStatusHistories().get(1), sittingRecord.getStatusHistories().get(1));
 
-        assertThat(persistedSittingRecord.equalsDomainObject(sittingRecord));
+        assertTrue(persistedSittingRecord.equalsDomainObject(sittingRecord));
 
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_NO_EPIMMS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
@@ -276,18 +285,18 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").value("London"),
+                jsonPath("$.sittingRecords[0].regionName").value(LONDON),
                 jsonPath("$.sittingRecords[0].epimsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
-                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
-                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
+                jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
+                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
@@ -298,22 +307,22 @@ class SittingRecordControllerITest extends BaseTest {
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, "123", "BBA3",
-                                                          "HighCourt", "4923421", "1",
+                                                          HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
-        StatusHistory statusHistory1 = createStatusHistory("Jason Bourne", "11233",
+        StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
                                                            LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
-        StatusHistory statusHistory2 = createStatusHistory("Jackie Chan", "11255",
+        StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
                                                            LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
-        StatusHistory statusHistory3 = createStatusHistory("Denzel Washington", "11266",
+        StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
                                                            LocalDateTime.now(), StatusId.PUBLISHED.name());
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
@@ -347,18 +356,18 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").value("London"),
+                jsonPath("$.sittingRecords[0].regionName").value(LONDON),
                 jsonPath("$.sittingRecords[0].epimsId").value("123"),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
-                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
-                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
+                jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
+                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].changedDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].changedByUserName").isNotEmpty()
             )
@@ -370,15 +379,15 @@ class SittingRecordControllerITest extends BaseTest {
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMultipleMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord1 = createSittingRecord(2L, "123", "BBA3",
-                                                          "HighCourt", "4923421", "1",
+                                                          HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED.name());
-        StatusHistory statusHistory1a = createStatusHistory("Jason Bourne", "11233",
+        StatusHistory statusHistory1a = createStatusHistory(JASON_BOURNE, "11233",
                                                            LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord1.addStatusHistory(statusHistory1a);
         sittingRecord1 = recordRepository.save(sittingRecord1);
         sittingRecord1.getFirstStatusHistory();
 
-        StatusHistory statusHistory1b = createStatusHistory("Denzil Washington", "11266",
+        StatusHistory statusHistory1b = createStatusHistory(DENZEL_WASHINGTON, "11266",
                                                            LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord1.addStatusHistory(statusHistory1b);
         assertEquals(statusHistory1b.getStatusId(), sittingRecord1.getStatusId());
@@ -386,15 +395,15 @@ class SittingRecordControllerITest extends BaseTest {
         recordRepository.save(sittingRecord1);
 
         SittingRecord sittingRecord2 = createSittingRecord(3L, "124", "BBA3",
-                                                          "HighCourt", "4923422", "2",
+                                                          HIGHCOURT, "4923422", "2",
                                                           StatusId.RECORDED.name());
-        StatusHistory statusHistory2a = createStatusHistory("Jason Bourne", "11244",
+        StatusHistory statusHistory2a = createStatusHistory(JASON_BOURNE, "11244",
                                                            LocalDateTime.now(), StatusId.RECORDED.name());
         sittingRecord2.addStatusHistory(statusHistory2a);
         sittingRecord2 = recordRepository.save(sittingRecord2);
         sittingRecord2.getFirstStatusHistory();
 
-        StatusHistory statusHistory2b = createStatusHistory("Jackie Chan", "11255",
+        StatusHistory statusHistory2b = createStatusHistory(JACKIE_CHAN, "11255",
                                                            LocalDateTime.now(), StatusId.SUBMITTED.name());
         sittingRecord2.addStatusHistory(statusHistory2b);
         assertEquals(statusHistory2b.getStatusId(), sittingRecord2.getStatusId());
@@ -509,12 +518,12 @@ class SittingRecordControllerITest extends BaseTest {
     }
 
     private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
-                                              LocalDateTime changeDateTime,
+                                              LocalDateTime changedDateTime,
                                               String statusId) {
         return StatusHistory.builder()
             .changedByName(changedByName)
             .changedByUserId(changedByUserId)
-            .changedDateTime(changeDateTime)
+            .changedDateTime(changedDateTime)
             .statusId(statusId)
             .build();
     }
