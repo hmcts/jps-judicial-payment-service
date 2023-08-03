@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -7,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -22,27 +24,38 @@ class SittingRecordRepositoryTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
+    @Autowired
+    private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
+
+    @BeforeEach
+    void setUp() {
+        judicialOfficeHolderRepository.deleteAll();
+        recordRepository.deleteAll();
+    }
+
     @Test
     void shouldSaveSittingRecord() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
-            .build();
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode("001")
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+        judicialOfficeHolderRepository.save(judicialOfficeHolder);
 
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .createdDateTime(LocalDateTime.now())
+            .createdByUserId("jp-recorder")
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId(StatusId.RECORDED.name())
+            .build();
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
         assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
@@ -50,24 +63,26 @@ class SittingRecordRepositoryTest {
 
     @Test
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .contractTypeId(2L)
-            .pm(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("555")
-            .build();
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode("001")
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+        judicialOfficeHolderRepository.save(judicialOfficeHolder);
+
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .contractTypeId(2L)
+            .createdDateTime(LocalDateTime.now())
+            .createdByUserId("555")
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .pm(true)
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId(StatusId.RECORDED.name())
+            .build();
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
             .findById(persistedSittingRecord.getId());
@@ -91,24 +106,27 @@ class SittingRecordRepositoryTest {
 
     @Test
     void shouldDeleteSelectedRecord() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .contractTypeId(2L)
-            .am(true)
-            .pm(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
-            .build();
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode("001")
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+        judicialOfficeHolderRepository.save(judicialOfficeHolder);
+
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .createdByUserId("jp-recorder")
+            .createdDateTime(LocalDateTime.now())
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .pm(true)
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId(StatusId.RECORDED.name())
+            .build();
+
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 

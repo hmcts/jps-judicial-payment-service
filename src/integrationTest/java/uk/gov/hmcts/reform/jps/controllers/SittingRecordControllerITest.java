@@ -10,6 +10,7 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
@@ -55,21 +56,21 @@ class SittingRecordControllerITest extends BaseTest {
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("BBA3")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .build();
-
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode("4923421")
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .epimsId("123")
+            .hmctsServiceId("BBA3")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId(StatusId.RECORDED.name())
+            .build();
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
@@ -86,24 +87,24 @@ class SittingRecordControllerITest extends BaseTest {
             .andExpectAll(
                 status().isOk(),
                 jsonPath("$.recordCount").value("1"),
-                jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].statusId").value("recorded"),
-                jsonPath("$.sittingRecords[0].regionId").value("1"),
-                jsonPath("$.sittingRecords[0].regionName").value("London"),
-                jsonPath("$.sittingRecords[0].epimsId").value("123"),
-                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
-                jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
-                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
-                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
                 jsonPath("$.sittingRecords[0].am").value("AM"),
-                jsonPath("$.sittingRecords[0].pm").isEmpty(),
-                jsonPath("$.sittingRecords[0].createdDateTime").isEmpty(),
+                jsonPath("$.sittingRecords[0].changeByUserId").isEmpty(),
+                jsonPath("$.sittingRecords[0].changeByUserName").isEmpty(),
+                jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeDateTime").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserId").isEmpty(),
-                jsonPath("$.sittingRecords[0].changeByUserName").isEmpty()
+                jsonPath("$.sittingRecords[0].createdDateTime").isEmpty(),
+                jsonPath("$.sittingRecords[0].epimsId").value("123"),
+                jsonPath("$.sittingRecords[0].hmctsServiceId").value("BBA3"),
+                jsonPath("$.sittingRecords[0].judgeRoleTypeId").value("HighCourt"),
+                jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
+                jsonPath("$.sittingRecords[0].personalName").value("Joe Bloggs"),
+                jsonPath("$.sittingRecords[0].pm").isEmpty(),
+                jsonPath("$.sittingRecords[0].regionId").value("1"),
+                jsonPath("$.sittingRecords[0].regionName").value("London"),
+                jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
+                jsonPath("$.sittingRecords[0].statusId").value(StatusId.RECORDED.name())
             )
             .andReturn();
     }

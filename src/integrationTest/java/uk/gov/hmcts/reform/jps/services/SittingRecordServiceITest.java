@@ -87,12 +87,10 @@ class SittingRecordServiceITest extends BaseTest {
 
     private uk.gov.hmcts.reform.jps.model.out.SittingRecord getSittingRecord(
         SittingRecord sittingRecord) {
-        String notSet = null;
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode("001")
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
 
         return Optional.ofNullable(sittingRecord)
             .map(persistedSittingRecord -> uk.gov.hmcts.reform.jps.model.out.SittingRecord.builder()
@@ -102,11 +100,11 @@ class SittingRecordServiceITest extends BaseTest {
             .regionId(persistedSittingRecord.getRegionId())
             .epimsId(persistedSittingRecord.getEpimsId())
             .hmctsServiceId(persistedSittingRecord.getHmctsServiceId())
-            .judicialOfficeHolder(persistedSittingRecord.getJudicialOfficeHolder())
+            .personalCode(persistedSittingRecord.getPersonalCode())
             .contractTypeId(persistedSittingRecord.getContractTypeId())
             .judgeRoleTypeId(persistedSittingRecord.getJudgeRoleTypeId())
-            .am(persistedSittingRecord.isAm() ? AM.name() : notSet)
-            .pm(persistedSittingRecord.isPm() ? PM.name() : notSet)
+            .am(persistedSittingRecord.isAm() ? AM.name() : null)
+            .pm(persistedSittingRecord.isPm() ? PM.name() : null)
             .createdDateTime(persistedSittingRecord.getCreatedDateTime())
             .createdByUserId(persistedSittingRecord.getCreatedByUserId())
             .changeDateTime(persistedSittingRecord.getChangeDateTime())
@@ -127,18 +125,18 @@ class SittingRecordServiceITest extends BaseTest {
             .build();
 
         SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(counter))
-            .statusId(recorded.name())
-            .regionId("1")
+            .am(true)
+            .contractTypeId(counter)
+            .createdByUserId(USER_ID)
+            .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .epimsId(EPIM_ID)
             .hmctsServiceId(SSC_ID)
-            .contractTypeId(counter)
-            .am(true)
             .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
-            .createdByUserId(USER_ID)
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(counter))
+            .statusId(recorded.name())
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
 
         return sittingRecord;
     }
@@ -293,18 +291,21 @@ class SittingRecordServiceITest extends BaseTest {
             .extracting("sittingDate","regionId",  "epimsId", "personalCode", "judgeRoleTypeId", "contractTypeId",
                         "am", "pm", "statusId", "hmctsServiceId")
             .contains(
-                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true, "RECORDED", "ssc_id"),
-                tuple(of(2023, APRIL,10), "1", "852649", "4918179", "Judge", 1L, true, false, "RECORDED", "ssc_id"),
-                tuple(of(2023, MARCH,9), "1", "852649", "4918180", "Judge", 1L, true, true, "RECORDED", "ssc_id")
+                tuple(of(2023, MAY, 11), "1", "852649", "4918178", "Judge", 1L, false, true,
+                      StatusId.RECORDED.name(), "ssc_id"),
+                tuple(of(2023, APRIL,10), "1", "852649", "4918179", "Judge", 1L, true, false,
+                      StatusId.RECORDED.name(), "ssc_id"),
+                tuple(of(2023, MARCH,9), "1", "852649", "4918180", "Judge", 1L, true, true,
+                      StatusId.RECORDED.name(), "ssc_id")
             );
 
         List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
         assertThat(statusHistories)
             .extracting("statusId", "changeByUserId", "changeByName")
             .contains(
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
-                tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
+                tuple(StatusId.RECORDED.name(), "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple(StatusId.RECORDED.name(), "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
+                tuple(StatusId.RECORDED.name(), "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder")
             );
 
         assertThat(statusHistories).describedAs("Created date assertion")

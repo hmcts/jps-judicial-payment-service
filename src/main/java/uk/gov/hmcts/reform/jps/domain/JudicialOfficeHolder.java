@@ -6,16 +6,12 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
-import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Builder
@@ -34,16 +30,5 @@ public class JudicialOfficeHolder {
 
     @JoinColumn(name = "personal_code")
     private String personalCode;
-
-    @ToString.Exclude
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<SittingRecord> sittingRecords;
-
-    public void addSittingRecord(SittingRecord sittingRecord) {
-        if (null == sittingRecords) {
-            sittingRecords = new ArrayList<>();
-        }
-        this.sittingRecords.add(sittingRecord);
-    }
 
 }

@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -21,7 +20,7 @@ public class SittingRecord {
     private String regionName;
     private String epimsId;
     private String hmctsServiceId;
-    private JudicialOfficeHolder judicialOfficeHolder;
+    private String personalCode;
     private String personalName;
     private Long contractTypeId;
     private String judgeRoleTypeId;

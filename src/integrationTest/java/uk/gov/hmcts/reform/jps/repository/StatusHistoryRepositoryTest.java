@@ -9,6 +9,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,29 +33,31 @@ class StatusHistoryRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
-            .build();
+
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode("001")
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
+
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .createdByUserId("jp-recorder")
+            .createdDateTime(LocalDateTime.now())
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .statusId("recorded")
+            .build();
 
         statusHistory = StatusHistory.builder()
-            .statusId("recorded")
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId("jp-recorder")
             .changeByName("John Doe")
+            .changeByUserId("jp-recorder")
+            .changeDateTime(LocalDateTime.now())
+            .statusId(StatusId.RECORDED.name())
             .build();
         sittingRecord.addStatusHistory(statusHistory);
 
@@ -87,7 +90,7 @@ class StatusHistoryRepositoryTest {
     }
 
     @Test
-    void shouldReturnEmptyWhenHistorydNotFound() {
+    void shouldReturnEmptyWhenHistoryNotFound() {
         Optional<StatusHistory> optionalSettingHistoryToUpdate = historyRepository.findById(100L);
         assertThat(optionalSettingHistoryToUpdate).isEmpty();
     }

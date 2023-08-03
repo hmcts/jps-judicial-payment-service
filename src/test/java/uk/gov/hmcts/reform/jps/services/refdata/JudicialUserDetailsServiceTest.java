@@ -39,13 +39,13 @@ class JudicialUserDetailsServiceTest {
 
         List<SittingRecord> sittingRecords = List.of(
             SittingRecord.builder()
-                .judicialOfficeHolder(judicialOfficeHolder1)
+                .personalCode(judicialOfficeHolder1.getPersonalCode())
                 .build(),
             SittingRecord.builder()
-                .judicialOfficeHolder(judicialOfficeHolder2)
+                .personalCode(judicialOfficeHolder2.getPersonalCode())
                 .build(),
             SittingRecord.builder()
-                .judicialOfficeHolder(judicialOfficeHolder3)
+                .personalCode(judicialOfficeHolder3.getPersonalCode())
                 .build()
         );
         List<String> personalCodes = List.of(
@@ -65,7 +65,6 @@ class JudicialUserDetailsServiceTest {
                                                                   .personalCode(personalCodes)
                                                                   .build()))
             .thenReturn(response);
-
 
         judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
 

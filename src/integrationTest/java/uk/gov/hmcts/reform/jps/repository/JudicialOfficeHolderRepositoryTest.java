@@ -11,6 +11,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,45 +30,40 @@ class JudicialOfficeHolderRepositoryTest {
     private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
     @Autowired
     private SittingRecordRepository recordRepository;
-    private SittingRecord persistedSittingRecord;
     private static final String PERSONAL_CODE = "001";
-
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JudicialOfficeHolderRepositoryTest.class);
 
     @BeforeEach
     public void setUp() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .build();
-
-        StatusHistory statusHistory = StatusHistory.builder()
-            .statusId("recorded")
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId("jp-recorder")
-            .changeByName("John Doe")
-            .build();
-        sittingRecord.addStatusHistory(statusHistory);
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(PERSONAL_CODE)
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
-        judicialOfficeHolder.addSittingRecord(sittingRecord);
-        LOGGER.info("judicialOfficeHolder:{}", judicialOfficeHolder);
-        LOGGER.info("sittingRecord:{}", sittingRecord);
-
-        persistedSittingRecord = recordRepository.save(sittingRecord);
+        LOGGER.debug("judicialOfficeHolder:{}", judicialOfficeHolder);
         judicialOfficeHolderRepository.save(judicialOfficeHolder);
-        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
 
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .epimsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .build();
+
+        StatusHistory statusHistory = StatusHistory.builder()
+            .changeByName("John Doe")
+            .changeByUserId("jp-recorder")
+            .changeDateTime(LocalDateTime.now())
+            .statusId(StatusId.RECORDED.name())
+            .build();
+        sittingRecord.addStatusHistory(statusHistory);
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
 
         List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
         LOGGER.info("list.size:{}", list);
@@ -83,8 +79,6 @@ class JudicialOfficeHolderRepositoryTest {
         JudicialOfficeHolder judicialOfficeHolder = list.get(0);
         assertEquals(judicialOfficeHolder.getId(), 1L);
         assertEquals(judicialOfficeHolder.getPersonalCode(), PERSONAL_CODE);
-
-        assertEquals(persistedSittingRecord.getJudicialOfficeHolder(), judicialOfficeHolder);
     }
 
 }
