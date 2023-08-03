@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.JpsRole;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
@@ -15,47 +18,41 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
-class SittingRecordRepositoryTest {
+class SittingRecordRepositoryTest extends AbstractTest {
 
     @Autowired
     private SittingRecordRepository recordRepository;
 
     @Autowired
+    private StatusHistoryRepository historyRepository;
+
+    @Autowired
     private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
+
+    private StatusHistory statusHistoryRecorded;
 
     @BeforeEach
     void setUp() {
         judicialOfficeHolderRepository.deleteAll();
         recordRepository.deleteAll();
+        historyRepository.deleteAll();
     }
 
     @Test
     void shouldSaveSittingRecord() {
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        judicialOfficeHolderRepository.save(judicialOfficeHolder);
-
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .am(true)
-            .contractTypeId(2L)
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .judgeRoleTypeId("HighCourt")
-            .personalCode(judicialOfficeHolder.getPersonalCode())
-            .regionId("1")
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(StatusId.RECORDED.name())
-            .build();
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   JpsRole.ROLE_RECORDER.name(),
+                                                   "John Doe",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
         assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
@@ -63,25 +60,13 @@ class SittingRecordRepositoryTest {
 
     @Test
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   "555",
+                                                   "John Doe 555",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
 
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        judicialOfficeHolderRepository.save(judicialOfficeHolder);
-
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .contractTypeId(2L)
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("555")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .judgeRoleTypeId("HighCourt")
-            .personalCode(judicialOfficeHolder.getPersonalCode())
-            .pm(true)
-            .regionId("1")
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(StatusId.RECORDED.name())
-            .build();
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
@@ -90,8 +75,15 @@ class SittingRecordRepositoryTest {
 
         SittingRecord settingRecordToUpdate = optionalSettingRecordToUpdate.get();
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
-        settingRecordToUpdate.setChangeDateTime(LocalDateTime.now());
-        settingRecordToUpdate.setChangeByUserId("jp-submitter");
+
+        StatusHistory statusHistory = StatusHistory.builder()
+            .statusId(StatusId.SUBMITTED.name())
+            .changedDateTime(LocalDateTime.now())
+            .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
+            .changedByName("John Doe")
+            .sittingRecord(settingRecordToUpdate)
+            .build();
+        settingRecordToUpdate.addStatusHistory(statusHistory);
 
         SittingRecord updatedSittingRecord = recordRepository.save(settingRecordToUpdate);
         assertThat(updatedSittingRecord).isNotNull();
@@ -106,27 +98,12 @@ class SittingRecordRepositoryTest {
 
     @Test
     void shouldDeleteSelectedRecord() {
-
-        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
-            .personalCode("001")
-            .build();
-        judicialOfficeHolderRepository.save(judicialOfficeHolder);
-
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .am(true)
-            .contractTypeId(2L)
-            .createdByUserId("jp-recorder")
-            .createdDateTime(LocalDateTime.now())
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .judgeRoleTypeId("HighCourt")
-            .personalCode(judicialOfficeHolder.getPersonalCode())
-            .pm(true)
-            .regionId("1")
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(StatusId.RECORDED.name())
-            .build();
-
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   JpsRole.ROLE_RECORDER.getValue(),
+                                                   "John Doe",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
@@ -139,5 +116,40 @@ class SittingRecordRepositoryTest {
 
         optionalSettingRecordToUpdate = recordRepository.findById(settingRecordToDelete.getId());
         assertThat(optionalSettingRecordToUpdate).isEmpty();
+    }
+
+    @Test
+    void shouldFindCreatedByUserId() {
+        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
+        String createdByUserId = recordRepository.findCreatedByUserId(persistedSittingRecord.getId());
+
+        assertNotNull(createdByUserId, "Could not find created by user id.");
+        assertEquals(statusHistoryRecorded.getChangedByUserId(), createdByUserId,
+                     "Not the expected CREATED BY USER ID!");
+    }
+
+    private SittingRecord createSittingRecordWithSeveralStatus() {
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
+                                                    JpsRole.ROLE_RECORDER.getValue(),
+                                                    "John Doe",
+                                                    sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded);
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(StatusId.SUBMITTED.name(),
+                                                   JpsRole.ROLE_RECORDER.getValue(),
+                                                   "Matthew Doe",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistorySubmitted1);
+
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED.name(),
+                                                     JpsRole.ROLE_RECORDER.getValue(),
+                                                     "Mark Doe",
+                                                     sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryPublished);
+
+        return sittingRecord;
     }
 }

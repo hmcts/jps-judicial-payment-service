@@ -9,10 +9,12 @@ import lombok.ToString;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -62,25 +64,73 @@ public class SittingRecord {
     private boolean pm;
 
     @ToString.Exclude
-    @OneToMany(mappedBy = "sittingRecord", orphanRemoval = true, cascade = {CascadeType.ALL})
+    @OneToMany(mappedBy = "sittingRecord",
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
-    @Column(name = "created_date_time")
-    private LocalDateTime createdDateTime;
+    public String getCreatedByUserId() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+    }
 
-    @Column(name = "created_by_user_id")
-    private String createdByUserId;
+    public String getCreatedByUserName() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
+    }
 
-    @Column(name = "change_date_time")
-    private LocalDateTime changeDateTime;
+    public LocalDateTime getCreatedDateTime() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
+    }
 
-    @Column(name = "change_by_user_id")
-    private String changeByUserId;
+    public String getChangedByUserId() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+    }
+
+    public String getChangedByUserName() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
+    }
+
+    public LocalDateTime getChangedByDateTime() {
+        StatusHistory statusHistory = getLatestStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
+    }
+
+    public StatusHistory getFirstStatusHistory() {
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    }
+
+    public StatusHistory getLatestStatusHistory() {
+        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    }
 
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
-        setStatusId(statusHistory.getStatusId());
+        this.setStatusId(statusHistory.getStatusId());
         statusHistory.setSittingRecord(this);
     }
 
+
+    public boolean equalsDomainObject(Object object) {
+        if (object == null) {
+            return false;
+        }
+
+        uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+            = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
+
+        return (sittingRecord.getId() == this.getId()
+            && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
+            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
+            && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
+            && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.getRegionId().equals(this.getRegionId())
+            && sittingRecord.getStatusId().equals(this.getStatusId())
+            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
+            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+    }
 }

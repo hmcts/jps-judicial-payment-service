@@ -12,11 +12,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.controllers.util.Utility;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
-import uk.gov.hmcts.reform.jps.services.refdata.CaseWorkerService;
+import uk.gov.hmcts.reform.jps.services.StatusHistoryService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -38,9 +40,9 @@ import static org.springframework.http.ResponseEntity.ok;
 @Slf4j
 public class SittingRecordController {
     private final SittingRecordService sittingRecordService;
+    private final StatusHistoryService statusHistoryService;
     private final LocationService regionService;
     private final JudicialUserDetailsService judicialUserDetailsService;
-    private final CaseWorkerService caseWorkerService;
 
     @PostMapping(
         path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
@@ -57,6 +59,7 @@ public class SittingRecordController {
         );
 
         List<SittingRecord> sittingRecords = emptyList();
+        List<RecordingUser> recordingUsers = emptyList();
 
         if (totalRecordCount > 0) {
             sittingRecords = sittingRecordService.getSittingRecords(
@@ -67,12 +70,21 @@ public class SittingRecordController {
             if (!sittingRecords.isEmpty()) {
                 regionService.setRegionName(hmctsServiceCode, sittingRecords);
                 judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
-                caseWorkerService.setCaseWorkerDetails(sittingRecords);
+
+                recordingUsers =
+                    statusHistoryService.findRecordingUsers(
+                        hmctsServiceCode,
+                        sittingRecordSearchRequest.getRegionId(),
+                        List.of(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(), StatusId.SUBMITTED.name()),
+                        sittingRecordSearchRequest.getDateRangeFrom(),
+                        sittingRecordSearchRequest.getDateRangeTo()
+                    );
             }
         }
 
         return ok(SittingRecordSearchResponse.builder()
                       .recordCount(totalRecordCount)
+                      .recordingUsers(recordingUsers)
                       .sittingRecords(sittingRecords)
                       .build());
     }

@@ -39,14 +39,20 @@
     <appender-ref ref="Console" />
   </root>
 
-  <!-- LOG "uk.gov.hmcts.reform.jps" at INFO level -->
-  <logger name="uk.gov.hmcts.reform.jps" level="info" additivity="false">
+  <!-- LOG "uk.gov.hmcts.reform.jps" at DEBUG level -->
+  <logger name="uk.gov.hmcts.reform.jps" level="debug" additivity="false">
     <appender-ref ref="RollingFile" />
     <appender-ref ref="Console" />
   </logger>
 
-  <!-- LOG "org.hibernate" at INFO level -->
-  <logger name="org.hibernate" level="info" additivity="false">
+  <!-- LOG "javax.persistence.criteria" at DEBUG level -->
+  <logger name="javax.persistence.criteria" level="debug" additivity="false">
+    <appender-ref ref="RollingFile" />
+    <appender-ref ref="Console" />
+  </logger>
+
+  <!-- LOG "org.hibernate" at DEBUG level -->
+  <logger name="org.hibernate" level="debug" additivity="false">
     <appender-ref ref="RollingFile" />
     <appender-ref ref="Console" />
   </logger>
