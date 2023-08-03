@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
@@ -24,6 +25,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
@@ -143,15 +145,18 @@ public class SittingRecordService {
     private void checkDuplicateRecords(SittingRecordWrapper sittingRecordWrapper) {
         SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
 
-        sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
-            sittingRecordRequest.getSittingDate(),
-            sittingRecordRequest.getEpimmsId(),
-            sittingRecordRequest.getPersonalCode(),
-            DELETED
-        ).forEach(sittingRecordDuplicateCheckFields ->
-                                                     duplicateCheckerService
-                                                         .evaluate(sittingRecordWrapper,
-                                                                   sittingRecordDuplicateCheckFields));
+        try (Stream<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> stream
+                     = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+                sittingRecordRequest.getSittingDate(),
+                sittingRecordRequest.getEpimmsId(),
+                sittingRecordRequest.getPersonalCode(),
+                DELETED
+        ).stream()) {
+            stream.forEach(sittingRecordDuplicateCheckFields ->
+                    duplicateCheckerService
+                            .evaluate(sittingRecordWrapper,
+                                    sittingRecordDuplicateCheckFields));
+        }
     }
 
     @Transactional
