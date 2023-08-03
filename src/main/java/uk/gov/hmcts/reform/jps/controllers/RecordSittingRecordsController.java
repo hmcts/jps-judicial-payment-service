@@ -22,8 +22,8 @@ import uk.gov.hmcts.reform.jps.model.ErrorCode;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
-import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordResponse;
-import uk.gov.hmcts.reform.jps.model.in.SittingRecordResponse;
+import uk.gov.hmcts.reform.jps.model.out.RecordSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.model.out.SittingRecordResponse;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
