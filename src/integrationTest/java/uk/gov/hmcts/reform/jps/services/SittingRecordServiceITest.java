@@ -56,6 +56,7 @@ class SittingRecordServiceITest extends BaseTest {
     private SittingRecordService sittingRecordService;
     private StatusHistoryService statusHistoryService;
     private LocationService locationService;
+    private ServiceService serviceService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -70,7 +71,7 @@ class SittingRecordServiceITest extends BaseTest {
     void beforeEach() {
         statusHistoryRepository.deleteAll();
         sittingRecordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService);
+        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
         statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 

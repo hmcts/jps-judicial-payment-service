@@ -31,6 +31,8 @@ public class SittingRecordService {
 
     private final LocationService locationService;
 
+    private final ServiceService serviceService;
+
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -61,21 +63,10 @@ public class SittingRecordService {
                 .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                 .statusId(sittingRecord.getStatusId())
                 .venueName(getVenueName(hmctsServiceCode, sittingRecord.getEpimsId()))
+                .accountCode(getAccountCode(hmctsServiceCode))
                 .build()
             )
             .toList();
-    }
-
-    private String getVenueName(String hmctsServiceCode, String epimmsId) {
-        LOGGER.info("hmctsServiceCode<{}> epimmsId<{}>", hmctsServiceCode, epimmsId);
-        if (null == locationService) {
-            LOGGER.info("locationService is NULL!");
-            return null;
-        }
-
-        String venueName = locationService.getVenueName(hmctsServiceCode, epimmsId);
-        LOGGER.info("venueName is <{}>", venueName);
-        return venueName;
     }
 
     public int getTotalRecordCount(
@@ -121,6 +112,30 @@ public class SittingRecordService {
                 sittingRecord.addStatusHistory(statusHistory);
                 sittingRecordRepository.save(sittingRecord);
             });
+    }
+
+    private String getAccountCode(String hmctsServiceCode) {
+        if (null == serviceService) {
+            LOGGER.info("serviceService is NULL!");
+            return null;
+        }
+
+        uk.gov.hmcts.reform.jps.domain.Service service = serviceService.findService(hmctsServiceCode);
+        if (null == service) {
+            LOGGER.info("service is NULL!");
+            return null;
+        }
+
+        return service.getAccountCenterCode();
+    }
+
+    private String getVenueName(String hmctsServiceCode, String epimmsId) {
+        if (null == locationService) {
+            LOGGER.info("locationService is NULL!");
+            return null;
+        }
+
+        return locationService.getVenueName(hmctsServiceCode, epimmsId);
     }
 
 }
