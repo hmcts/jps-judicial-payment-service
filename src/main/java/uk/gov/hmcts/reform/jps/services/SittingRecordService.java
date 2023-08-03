@@ -44,6 +44,7 @@ public class SittingRecordService {
 
         return dbSittingRecords.stream()
             .map(sittingRecord -> SittingRecord.builder()
+                .accountCode(getAccountCode(hmctsServiceCode))
                 .am(sittingRecord.isAm() ? AM.name() : null)
                 .changedByUserId(sittingRecord.getChangedByUserId())
                 .changedByUserName(sittingRecord.getChangedByUserName())
@@ -63,7 +64,6 @@ public class SittingRecordService {
                 .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                 .statusId(sittingRecord.getStatusId())
                 .venueName(getVenueName(hmctsServiceCode, sittingRecord.getEpimsId()))
-                .accountCode(getAccountCode(hmctsServiceCode))
                 .build()
             )
             .toList();
