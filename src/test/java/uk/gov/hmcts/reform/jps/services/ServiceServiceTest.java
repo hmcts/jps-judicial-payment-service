@@ -32,9 +32,9 @@ class ServiceServiceTest {
     @Test
     void testFindService() {
         Service service = createService();
-        when(serviceRepository.findServiceByHmctsServiceId(Mockito.<String>any())).thenReturn(service);
+        when(serviceRepository.findByHmctsServiceId(Mockito.<String>any())).thenReturn(service);
         assertSame(service, serviceService.findService("42"));
-        verify(serviceRepository).findServiceByHmctsServiceId(Mockito.<String>any());
+        verify(serviceRepository).findByHmctsServiceId(Mockito.<String>any());
     }
 
     private Service createService() {

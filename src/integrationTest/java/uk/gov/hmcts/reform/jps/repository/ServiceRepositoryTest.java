@@ -75,7 +75,7 @@ class ServiceRepositoryTest {
     void shouldSuccessfullyFindServiceByHmctsServiceId() {
         getPersistedService();
 
-        Service service = serviceRepository.findServiceByHmctsServiceId(HMCTS_SERVICE_ID);
+        Service service = serviceRepository.findByHmctsServiceId(HMCTS_SERVICE_ID);
         assertNotNull(service);
     }
 
@@ -83,7 +83,7 @@ class ServiceRepositoryTest {
     void shouldFailToFindServiceByHmctsServiceId() {
         getPersistedService();
 
-        Service service = serviceRepository.findServiceByHmctsServiceId("FFGHJHUJ");
+        Service service = serviceRepository.findByHmctsServiceId("FFGHJHUJ");
         assertNull(service);
     }
 

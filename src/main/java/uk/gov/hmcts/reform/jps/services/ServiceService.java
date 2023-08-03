@@ -15,7 +15,7 @@ public class ServiceService {
     private final ServiceRepository serviceRepository;
 
     public uk.gov.hmcts.reform.jps.domain.Service findService(String hmctsServiceId) {
-        return serviceRepository.findServiceByHmctsServiceId(hmctsServiceId);
+        return serviceRepository.findByHmctsServiceId(hmctsServiceId);
     }
 
 }

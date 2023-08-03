@@ -38,11 +38,9 @@ public class LocationService {
     }
 
     public String getVenueName(String hmctsServiceCode, String epimmsId) {
-        Optional<CourtVenue> courtVenue = getCourtVenue(hmctsServiceCode, epimmsId);
-        if (courtVenue.isEmpty()) {
-            return "";
-        }
-        return courtVenue.get().getVenueName();
+        return getCourtVenue(hmctsServiceCode, epimmsId)
+            .map(CourtVenue::getVenueName)
+            .orElse("");
     }
 
     public void setRegionName(String hmctsServiceCode,
