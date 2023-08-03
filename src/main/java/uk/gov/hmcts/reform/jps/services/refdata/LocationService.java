@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.jps.services.refdata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
+import uk.gov.hmcts.reform.jps.model.ErrorCode;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
@@ -50,8 +50,11 @@ public class LocationService {
                 sittingRecordWrapper.getSittingRecordRequest().getEpimmsId(),
                 (court, epimmsId) -> court.getEpimmsId().equals(epimmsId)
             );
-            sittingRecordWrapper.setRegionId(courtVenue.map(CourtVenue::getRegionId)
-                                                 .orElseThrow(InvalidLocationException::new));
+            if (courtVenue.isPresent()) {
+                sittingRecordWrapper.setRegionId(courtVenue.get().getRegionId());
+            } else {
+                sittingRecordWrapper.setErrorCode(ErrorCode.INVALID_LOCATION);
+            }
         });
     }
 

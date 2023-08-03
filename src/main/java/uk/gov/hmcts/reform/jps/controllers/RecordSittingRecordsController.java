@@ -30,6 +30,7 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
@@ -44,6 +45,7 @@ import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESP
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -88,15 +90,20 @@ public class RecordSittingRecordsController {
         regionService.setRegionId(hmctsServiceCode,
                                   sittingRecordWrappers);
 
-        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+        Optional<ErrorCode> errorCodeCheck = checkForErrors(sittingRecordWrappers,
+                                                            sittingRecordWrapper -> true);
 
-        Optional<ErrorCode> errorCodeCheck = sittingRecordWrappers.stream()
-            .filter(not(sittingRecordWrapper ->
-                            nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-                                && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()))
-            .map(SittingRecordWrapper::getErrorCode)
-            .filter(errorCode -> errorCode != VALID)
-            .findAny();
+        if (errorCodeCheck.isEmpty()) {
+            sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+            errorCodeCheck = checkForErrors(
+                sittingRecordWrappers,
+                not(sittingRecordWrapper ->
+                        POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
+                        && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
+                            && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
+            );
+        }
 
         if (errorCodeCheck.isPresent()) {
             return status(HttpStatus.BAD_REQUEST)
@@ -135,6 +142,17 @@ public class RecordSittingRecordsController {
                 );
         }
     }
+
+
+    private Optional<ErrorCode> checkForErrors(List<SittingRecordWrapper> sittingRecordWrappers,
+                                                      Predicate<SittingRecordWrapper> predicate) {
+        return sittingRecordWrappers.stream()
+            .filter(predicate)
+            .map(SittingRecordWrapper::getErrorCode)
+            .filter(errorCode -> errorCode != VALID)
+            .findAny();
+    }
+
 
     private List<SittingRecordResponse> generateResponse(
         List<SittingRecordWrapper> sittingRecordWrappers,

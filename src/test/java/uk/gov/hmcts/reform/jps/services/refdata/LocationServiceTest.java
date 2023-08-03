@@ -5,7 +5,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -16,8 +15,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 
 @ExtendWith(MockitoExtension.class)
 class LocationServiceTest {
@@ -115,7 +114,7 @@ class LocationServiceTest {
 
 
     @Test
-    void shouldThrowInvalidLocationExceptionWhenRegionDetailsNotFound() {
+    void shouldSetInvalidLocationWhenRegionDetailsNotFound() {
         LocationApiResponse locationApiResponse = LocationApiResponse.builder()
             .serviceCode("serviceCode")
             .courtVenues(List.of(
@@ -140,9 +139,11 @@ class LocationServiceTest {
         when(locationServiceClient.getCourtVenue("serviceCode"))
             .thenReturn(locationApiResponse);
 
-        assertThatThrownBy(() -> locationService.setRegionId("serviceCode",
-                                                             sittingRecordWrappers))
-            .isInstanceOf(InvalidLocationException.class)
-            .hasMessage("invalid location");
+        locationService.setRegionId("serviceCode",
+                                    sittingRecordWrappers);
+
+        assertThat(sittingRecordWrappers)
+            .extracting("errorCode")
+            .contains(INVALID_LOCATION);
     }
 }

@@ -17,7 +17,6 @@ import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import uk.gov.hmcts.reform.jps.exceptions.ApiError;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
-import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.exceptions.ServiceException;
@@ -130,15 +129,6 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     private ResponseEntity<Object> toResponseEntity(HttpStatus status, String... errors) {
         var apiError = new ApiError(status, errors == null ? null : List.of(errors));
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
-    }
-
-
-    @ExceptionHandler(InvalidLocationException.class)
-    protected ResponseEntity<Object> handleInvalidLocationExceptionException(InvalidLocationException exception) {
-        ModelValidationError error = new ModelValidationError(
-            of(new FieldError("invalidLocation", exception.getMessage()))
-        );
-        return badRequest().body(error);
     }
 
     @ExceptionHandler(AccessDeniedException.class)
