@@ -29,9 +29,6 @@ public class LocationService {
     private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo,
                                                String value,
                                                BiPredicate<CourtVenue, String> predicate) {
-        if (null == serviceCourtInfo) {
-            return Optional.empty();
-        }
         return serviceCourtInfo.getCourtVenues().stream()
             .filter(courtVenue -> predicate.test(courtVenue, value))
             .findAny();
