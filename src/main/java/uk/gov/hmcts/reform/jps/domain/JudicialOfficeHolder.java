@@ -11,7 +11,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.Table;
 
 @Builder
@@ -28,7 +27,7 @@ public class JudicialOfficeHolder {
     @Column(name = "local_joh_record_id")
     private Long id;
 
-    @JoinColumn(name = "personal_code")
+    @Column(name = "personal_code")
     private String personalCode;
 
 }

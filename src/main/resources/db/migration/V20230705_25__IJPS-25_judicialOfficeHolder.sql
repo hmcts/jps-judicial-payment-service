@@ -4,7 +4,3 @@ CREATE TABLE judicial_office_holder (
     UNIQUE (personal_code)
 );
 
-ALTER TABLE ONLY public.sitting_record
-ADD CONSTRAINT uc_personal_code UNIQUE (personal_code);
-
-

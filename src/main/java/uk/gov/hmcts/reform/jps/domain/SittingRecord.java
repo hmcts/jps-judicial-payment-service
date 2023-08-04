@@ -121,12 +121,14 @@ public class SittingRecord {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
-        return (sittingRecord.getId() == this.getId()
+        return (sittingRecord.getId().equals(this.getId())
+            && sittingRecord.isAm() == this.isAm()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
             && sittingRecord.getEpimsId().equals(this.getEpimsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
             && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()

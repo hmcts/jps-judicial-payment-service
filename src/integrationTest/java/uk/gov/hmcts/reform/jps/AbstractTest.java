@@ -12,18 +12,17 @@ public class AbstractTest {
     protected static final Long CONTRACT_TYPE_ID = 2L;
     protected static final String EPIMS_ID = "123";
     protected static final String JUDGE_ROLE_TYPE_ID = "HighCourt";
-    protected static final String PERSONAL_CODE = "001";
     protected static final String REGION_ID = "1";
     protected static final String SSC_ID = "ssc_id";
 
-    protected SittingRecord createSittingRecord(LocalDate sittingDate) {
+    protected SittingRecord createSittingRecord(LocalDate sittingDate, String personalCode) {
         return SittingRecord.builder()
             .sittingDate(sittingDate)
             .statusId(StatusId.RECORDED.name())
             .regionId(REGION_ID)
             .epimsId(EPIMS_ID)
             .hmctsServiceId(SSC_ID)
-            .personalCode(PERSONAL_CODE)
+            .personalCode(personalCode)
             .contractTypeId(CONTRACT_TYPE_ID)
             .am(true)
             .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)

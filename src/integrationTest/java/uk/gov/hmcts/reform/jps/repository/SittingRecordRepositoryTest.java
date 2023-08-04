@@ -7,7 +7,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.AbstractTest;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
@@ -37,6 +36,8 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     private StatusHistory statusHistoryRecorded;
 
+    private static final String PERSONAL_CODE = "001";
+
     @BeforeEach
     void setUp() {
         judicialOfficeHolderRepository.deleteAll();
@@ -46,7 +47,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     @Test
     void shouldSaveSittingRecord() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.name(),
                                                    "John Doe",
@@ -60,7 +61,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     @Test
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    "555",
                                                    "John Doe 555",
@@ -98,7 +99,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     @Test
     void shouldDeleteSelectedRecord() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "John Doe",
@@ -132,7 +133,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     }
 
     private SittingRecord createSittingRecordWithSeveralStatus() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
                                                     JpsRole.ROLE_RECORDER.getValue(),
                                                     "John Doe",

@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -25,7 +24,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import static java.time.LocalDate.of;
@@ -41,8 +39,6 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 class SittingRecordServiceITest extends BaseTest {
 
@@ -68,7 +64,6 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String STATUS_ID_FIXED = "RECORDED";
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMS_ID_FIXED = "852649";
-    private static final String PERSONAL_CODE_FIXED = "4918178";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
     @BeforeEach
@@ -258,11 +253,11 @@ class SittingRecordServiceITest extends BaseTest {
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
-                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918178",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
-                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918179",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
-                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, "4918180",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE)
             );
 
@@ -383,6 +378,5 @@ class SittingRecordServiceITest extends BaseTest {
             createAndSaveSittingRecord(STATUS_ID_FIXED, i, USER_ID, USER_NAME);
         }
     }
-
 
 }

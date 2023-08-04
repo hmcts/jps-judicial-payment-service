@@ -22,11 +22,11 @@ public class JudicialUserDetailsService {
 
         JudicialUserDetailsApiRequest judicialUsersApiRequest = sittingRecords.stream()
             .map(SittingRecord::getPersonalCode)
-                        .collect(collectingAndThen(
-                            toList(),
-                            personalCodes -> JudicialUserDetailsApiRequest.builder()
-                                .personalCode(personalCodes)
-                                .build()
+            .collect(collectingAndThen(
+                toList(),
+                personalCodes -> JudicialUserDetailsApiRequest.builder()
+                    .personalCode(personalCodes)
+                    .build()
             ));
 
         List<JudicialUserDetailsApiResponse> judicialUserDetails = judicialUserServiceClient.getJudicialUserDetails(

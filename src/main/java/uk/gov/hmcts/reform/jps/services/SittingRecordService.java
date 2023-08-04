@@ -83,7 +83,6 @@ public class SittingRecordService {
     @Transactional
     public void saveSittingRecords(String hmctsServiceCode,
                                    RecordSittingRecordRequest recordSittingRecordRequest) {
-        LOGGER.debug("saveSittingRecords");
         recordSittingRecordRequest.getRecordedSittingRecords()
             .forEach(recordSittingRecord -> {
 
@@ -96,14 +95,17 @@ public class SittingRecordService {
                         .hmctsServiceId(hmctsServiceCode)
                         .personalCode(recordSittingRecord.getPersonalCode())
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
+                        .personalCode(recordSittingRecord.getPersonalCode())
                         .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                            .map(DurationBoolean::getPm).orElse(false))
+                                .map(DurationBoolean::getPm).orElse(false))
                         .regionId(recordSittingRecord.getRegionId())
                         .sittingDate(recordSittingRecord.getSittingDate())
                         .statusId(StatusId.RECORDED.name())
                         .build();
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+
+                createJudicialOfficeHolder(recordSittingRecord.getPersonalCode());
 
                 StatusHistory statusHistory = StatusHistory.builder()
                     .changedByName(recordSittingRecordRequest.getRecordedByName())
@@ -113,8 +115,12 @@ public class SittingRecordService {
                     .build();
 
                 sittingRecord.addStatusHistory(statusHistory);
-                sittingRecordRepository.save(sittingRecord);
+                save(sittingRecord);
             });
+    }
+
+    public void save(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        sittingRecordRepository.save(sittingRecord);
     }
 
     private String getAccountCode(String hmctsServiceCode) {

@@ -31,17 +31,21 @@ class JudicialOfficeHolderRepositoryTest {
     @Autowired
     private SittingRecordRepository recordRepository;
     private static final String PERSONAL_CODE = "001";
+    private JudicialOfficeHolder persistedJudicialOfficeHolder;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JudicialOfficeHolderRepositoryTest.class);
 
     @BeforeEach
     public void setUp() {
 
+        judicialOfficeHolderRepository.deleteAll();
+        recordRepository.deleteAll();
+
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(PERSONAL_CODE)
             .build();
         LOGGER.debug("judicialOfficeHolder:{}", judicialOfficeHolder);
-        judicialOfficeHolderRepository.save(judicialOfficeHolder);
+        persistedJudicialOfficeHolder = judicialOfficeHolderRepository.save(judicialOfficeHolder);
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .am(true)
@@ -49,15 +53,16 @@ class JudicialOfficeHolderRepositoryTest {
             .epimsId("123")
             .hmctsServiceId("ssc_id")
             .judgeRoleTypeId("HighCourt")
+            .personalCode(PERSONAL_CODE)
             .personalCode(judicialOfficeHolder.getPersonalCode())
             .regionId("1")
             .sittingDate(LocalDate.now().minusDays(2))
             .build();
 
         StatusHistory statusHistory = StatusHistory.builder()
-            .changeByName("John Doe")
-            .changeByUserId("jp-recorder")
-            .changeDateTime(LocalDateTime.now())
+            .changedByName("John Doe")
+            .changedByUserId("jp-recorder")
+            .changedDateTime(LocalDateTime.now())
             .statusId(StatusId.RECORDED.name())
             .build();
         sittingRecord.addStatusHistory(statusHistory);
@@ -77,8 +82,12 @@ class JudicialOfficeHolderRepositoryTest {
         assertNotNull(list);
         assertFalse(list.isEmpty());
         JudicialOfficeHolder judicialOfficeHolder = list.get(0);
-        assertEquals(judicialOfficeHolder.getId(), 1L);
+        assertEquals(judicialOfficeHolder.getId(), persistedJudicialOfficeHolder.getId());
         assertEquals(judicialOfficeHolder.getPersonalCode(), PERSONAL_CODE);
+
+        SittingRecord persistedSittingRecord = recordRepository.findAll().get(0);
+
+        assertEquals(PERSONAL_CODE, persistedSittingRecord.getPersonalCode());
     }
 
 }
