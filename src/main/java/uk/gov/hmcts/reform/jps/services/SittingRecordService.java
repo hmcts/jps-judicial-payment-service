@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,8 +48,6 @@ public class SittingRecordService {
     private final DuplicateCheckerService duplicateCheckerService;
     private final SecurityUtils securityUtils;
 
-    @Lazy
-    private final SittingRecordService self;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -104,7 +101,11 @@ public class SittingRecordService {
                 SittingRecordRequest recordSittingRecord = recordSittingRecordWrapper.getSittingRecordRequest();
                 if (POTENTIAL_DUPLICATE_RECORD == recordSittingRecordWrapper.getErrorCode()
                         && TRUE.equals(recordSittingRecord.getReplaceDuplicate())) {
-                    self.deleteSittingRecord(recordSittingRecordWrapper.getSittingRecordId());
+                    uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+                            = sittingRecordRepository.findById(recordSittingRecordWrapper.getSittingRecordId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
+
+                    deleteSittingRecord(sittingRecord);
                 }
 
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =

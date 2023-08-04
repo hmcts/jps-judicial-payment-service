@@ -49,6 +49,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -80,9 +81,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Mock
     private DuplicateCheckerService duplicateCheckerService;
-
-    @Mock
-    private SittingRecordService self;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -498,14 +496,20 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                             sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
                         })
                         .toList();
+        when(sittingRecordRepository.findById(anyLong()))
+            .thenReturn(Optional.of(uk.gov.hmcts.reform.jps.domain.SittingRecord.builder().build()));
+        UserInfo userInfo = UserInfo.builder()
+            .uid(USER_ID)
+            .givenName("Judge")
+            .build();
+        when(securityUtils.getUserInfo()).thenReturn(userInfo);
 
         sittingRecordService.saveSittingRecords("SSC_ID",
                 sittingRecordWrappers,
                 recordSittingRecordRequest.getRecordedByName(),
                 recordSittingRecordRequest.getRecordedByIdamId());
 
-        verify(self).deleteSittingRecord(sittingRecordId);
-        verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
+        verify(sittingRecordRepository, times(2)).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
     }
 
     @Test
@@ -531,7 +535,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 recordSittingRecordRequest.getRecordedByName(),
                 recordSittingRecordRequest.getRecordedByIdamId());
 
-        verify(self, never()).deleteSittingRecord(sittingRecordId);
         verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
     }
 
@@ -559,7 +562,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 recordSittingRecordRequest.getRecordedByName(),
                 recordSittingRecordRequest.getRecordedByIdamId());
 
-        verify(self, never()).deleteSittingRecord(sittingRecordId);
         verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
     }
 }
