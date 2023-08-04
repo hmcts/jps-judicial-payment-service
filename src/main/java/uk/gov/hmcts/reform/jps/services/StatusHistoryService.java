@@ -5,9 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import javax.transaction.Transactional;
 
@@ -22,6 +24,17 @@ public class StatusHistoryService {
         return statusHistoryRepository.findAll();
     }
 
+    public List<RecordingUser> findRecordingUsers(String hmctsServiceId,
+                                           String regionId,
+                                           List<String> statusIds,
+                                           LocalDate startDate,
+                                           LocalDate endDate) {
+        return statusHistoryRepository.findRecordingUsers(hmctsServiceId,
+                                                   regionId,
+                                                   statusIds,
+                                                   startDate,
+                                                   endDate);
+    }
 
     @Transactional
     public void saveStatusHistory(StatusHistory statusHistory, SittingRecord sittingRecord) {
