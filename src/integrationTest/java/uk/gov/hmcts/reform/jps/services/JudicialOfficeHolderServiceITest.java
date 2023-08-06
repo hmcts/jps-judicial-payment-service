@@ -15,9 +15,8 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
 
     @Test
     void shouldObtainSaveJudicialOfficeHolder() {
-        final String PERSONAL_CODE = "PC111";
-        JudicialOfficeHolder persistedJudicialOfficeHolder = createAndSaveJudicialOfficeHolder(PERSONAL_CODE);
-
+        final String Personal_Code = "PC111";
+        JudicialOfficeHolder persistedJudicialOfficeHolder = createAndSaveJudicialOfficeHolder(Personal_Code);
 
         JudicialOfficeHolder obtainedJudicialOfficeHolder  =
             judicialOfficeHolderRepository.findById(persistedJudicialOfficeHolder.getId()).get();

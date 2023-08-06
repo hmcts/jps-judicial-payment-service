@@ -1,11 +1,5 @@
 package uk.gov.hmcts.reform.jps.services;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
@@ -15,6 +9,12 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.repository.JudicialOfficeHolderRepository;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ContextConfiguration(classes = {JudicialOfficeHolderService.class})
 @ExtendWith(SpringExtension.class)
@@ -27,14 +27,14 @@ class JudicialOfficeHolderServiceTest {
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
     /**
-     * Method under test: {@link JudicialOfficeHolderService#findJudicialOfficeHolder(Long)}
+     * Method under test: {@link JudicialOfficeHolderService#findJudicialOfficeHolder(Long)}.
      */
     @Test
     void testFindJudicialOfficeHolderById() {
-        final String PERSONAL_CODE = "PersonalCode345";
+        final String Personal_Code = "PersonalCode345";
         JudicialOfficeHolder judicialOfficeHolder = new JudicialOfficeHolder();
         judicialOfficeHolder.setId(1L);
-        judicialOfficeHolder.setPersonalCode(PERSONAL_CODE);
+        judicialOfficeHolder.setPersonalCode(Personal_Code);
         Optional<JudicialOfficeHolder> ofResult = Optional.of(judicialOfficeHolder);
         when(judicialOfficeHolderRepository.findById(Mockito.<Long>any())).thenReturn(ofResult);
         assertSame(judicialOfficeHolder, judicialOfficeHolderService.findJudicialOfficeHolder(1L));
@@ -42,16 +42,16 @@ class JudicialOfficeHolderServiceTest {
     }
 
     /**
-     * Method under test: {@link JudicialOfficeHolderService#findJudicialOfficeHolder(String)}
+     * Method under test: {@link JudicialOfficeHolderService#findJudicialOfficeHolder(String)}.
      */
     @Test
     void testFindJudicialOfficeHolderByPersonalCode() {
-        final String PERSONAL_CODE = "PersonalCode777";
+        final String Personal_Code = "PersonalCode777";
         JudicialOfficeHolder judicialOfficeHolder = new JudicialOfficeHolder();
         judicialOfficeHolder.setId(1L);
-        judicialOfficeHolder.setPersonalCode(PERSONAL_CODE);
+        judicialOfficeHolder.setPersonalCode(Personal_Code);
         when(judicialOfficeHolderRepository.findByPersonalCode(Mockito.<String>any())).thenReturn(judicialOfficeHolder);
-        assertSame(judicialOfficeHolder, judicialOfficeHolderService.findJudicialOfficeHolder(PERSONAL_CODE));
+        assertSame(judicialOfficeHolder, judicialOfficeHolderService.findJudicialOfficeHolder(Personal_Code));
         verify(judicialOfficeHolderRepository).findByPersonalCode(Mockito.<String>any());
     }
 }
