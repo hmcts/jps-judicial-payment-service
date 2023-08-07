@@ -114,7 +114,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the request body contains the "payload with no epimmsId" as in "S-004.10.json"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
-    And the response contains "errors[0].message" as "Epims Id is mandatory"
+    And the response contains "errors[0].message" as "Epimms Id is mandatory"
 
   @S-004.11 #AC06
   Scenario: Negative response, return 400 Bad Request when the request is missing 'personalCode'
