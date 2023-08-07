@@ -149,7 +149,7 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
-        when(criteriaBuilder.equal(attributePath, RECORDED.name())).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, RECORDED)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, EPIMMS_ID)).thenReturn(mock(ComparisonPredicate.class));
         when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
@@ -184,7 +184,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }
@@ -205,7 +205,7 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
-        when(criteriaBuilder.equal(attributePath, RECORDED.name())).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, RECORDED)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
@@ -240,7 +240,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }
@@ -260,7 +260,7 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
-        when(criteriaBuilder.equal(attributePath, RECORDED.name())).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, RECORDED)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
@@ -292,7 +292,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }

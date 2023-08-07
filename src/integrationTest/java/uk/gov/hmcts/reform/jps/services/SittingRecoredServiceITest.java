@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,6 +51,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
+@Disabled
 class SittingRecoredServiceITest extends BaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
 

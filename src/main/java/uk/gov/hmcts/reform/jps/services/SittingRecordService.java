@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -226,22 +225,13 @@ public class SittingRecordService {
     }
 
     private String getAccountCode(String hmctsServiceCode) {
-        if (Objects.isNull(serviceService)) {
-            LOGGER.info("serviceService is NULL!");
-            return null;
-        }
+        return serviceService.findService(hmctsServiceCode)
+            .map(uk.gov.hmcts.reform.jps.domain.Service::getAccountCenterCode)
+            .orElse(null);
 
-        uk.gov.hmcts.reform.jps.domain.Service service = serviceService.findService(hmctsServiceCode);
-        if (Objects.isNull(service)) {
-            LOGGER.info("service is NULL!");
-            return null;
-        }
-
-        return service.getAccountCenterCode();
     }
 
     private String getVenueName(String hmctsServiceCode, String epimmsId) {
         return locationService.getVenueName(hmctsServiceCode, epimmsId);
     }
-
 }

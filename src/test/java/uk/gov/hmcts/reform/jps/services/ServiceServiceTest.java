@@ -11,8 +11,9 @@ import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.repository.ServiceRepository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +33,12 @@ class ServiceServiceTest {
     @Test
     void testFindService() {
         Service service = createService();
-        when(serviceRepository.findByHmctsServiceId(Mockito.<String>any())).thenReturn(service);
-        assertSame(service, serviceService.findService("42"));
-        verify(serviceRepository).findByHmctsServiceId(Mockito.<String>any());
+        when(serviceRepository.findByHmctsServiceId(Mockito.anyString()))
+            .thenReturn(Optional.of(service));
+        Optional<Service> foundService = serviceService.findService("42");
+        assertThat(foundService).isPresent();
+        assertThat(foundService).hasValue(service);
+        verify(serviceRepository).findByHmctsServiceId(Mockito.anyString());
     }
 
     private Service createService() {

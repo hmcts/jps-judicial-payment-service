@@ -11,8 +11,6 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -75,16 +73,16 @@ class ServiceRepositoryTest {
     void shouldSuccessfullyFindServiceByHmctsServiceId() {
         getPersistedService();
 
-        Service service = serviceRepository.findByHmctsServiceId(HMCTS_SERVICE_ID);
-        assertNotNull(service);
+        assertThat(serviceRepository.findByHmctsServiceId(HMCTS_SERVICE_ID))
+            .isPresent();
     }
 
     @Test
     void shouldFailToFindServiceByHmctsServiceId() {
         getPersistedService();
 
-        Service service = serviceRepository.findByHmctsServiceId("FFGHJHUJ");
-        assertNull(service);
+        assertThat(serviceRepository.findByHmctsServiceId("FFGHJHUJ"))
+            .isEmpty();
     }
 
     private Service getPersistedService() {
