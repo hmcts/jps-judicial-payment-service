@@ -4,7 +4,7 @@
   "recordedSittingRecords": [
     {
       "sittingDate": "2023-05-11",
-      "epimsId": "852649",
+      "epimmsId": "852649",
       "personalCode": "4918178",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
@@ -13,7 +13,7 @@
     },
     {
       "sittingDate": "2023-04-10",
-      "epimsId": "852649",
+      "epimmsId": "852649",
       "personalCode": "4918179",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",
@@ -22,7 +22,7 @@
     },
     {
       "sittingDate": "2023-03-09",
-      "epimsId": "852649",
+      "epimmsId": "852649",
       "personalCode": "4918180",
       "judgeRoleTypeId": "Judge",
       "contractTypeId": "1",

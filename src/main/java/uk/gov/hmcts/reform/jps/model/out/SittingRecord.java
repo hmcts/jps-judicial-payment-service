@@ -28,7 +28,7 @@ public class SittingRecord {
     private String statusId;
     private String regionId;
     private String regionName;
-    private String epimsId;
+    private String epimmsId;
     private String venueName;
     private String hmctsServiceId;
     private String personalCode;
@@ -73,7 +73,7 @@ public class SittingRecord {
             17,
             37
         ).append(sittingRecordId).append(sittingDate).append(statusId).append(regionId).append(regionName).append(
-            epimsId).append(hmctsServiceId).append(personalCode).append(personalName).append(contractTypeId).append(
+            epimmsId).append(hmctsServiceId).append(personalCode).append(personalName).append(contractTypeId).append(
             judgeRoleTypeId).append(am).append(pm).append(statusHistories).toHashCode();
     }
 
@@ -98,9 +98,9 @@ public class SittingRecord {
             || (null != sittingRecord.getContractTypeId() && null != this.getContractTypeId()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())))
 
-            && ((null == sittingRecord.getEpimsId() && null == this.getEpimsId())
-            || (null != sittingRecord.getEpimsId() && null != this.getEpimsId()
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())))
+            && ((null == sittingRecord.getEpimmsId() && null == this.getEpimmsId())
+            || (null != sittingRecord.getEpimmsId() && null != this.getEpimmsId()
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())))
 
             && ((null == sittingRecord.getPersonalCode() && null == this.getPersonalCode())
             || (null != sittingRecord.getPersonalCode() && null != this.getPersonalCode()
@@ -146,7 +146,7 @@ public class SittingRecord {
             && (null == this.getAm() && !sittingRecord.isAm()
             || null != this.getAm() && this.getAm().equals(AM.name()) && sittingRecord.isAm())
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && (null == this.getPm() && !sittingRecord.isPm()
             || null != this.getPm() && this.getPm().equals(PM.name()) && sittingRecord.isPm())

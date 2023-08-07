@@ -44,8 +44,8 @@ public class SittingRecord {
     @Column(name = "region_id")
     private String regionId;
 
-    @Column(name =  "epims_id")
-    private String epimsId;
+    @Column(name =  "epimms_id")
+    private String epimmsId;
 
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
@@ -124,7 +124,7 @@ public class SittingRecord {
         return (sittingRecord.getId().equals(this.getId())
             && sittingRecord.isAm() == this.isAm()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())

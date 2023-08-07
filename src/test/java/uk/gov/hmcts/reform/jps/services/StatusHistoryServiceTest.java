@@ -159,13 +159,13 @@ class StatusHistoryServiceTest {
     }
 
 
-    private SittingRecord createSittingRecord(Boolean am, Long contractTypeId, String epimsId, String hmctsServiceId,
+    private SittingRecord createSittingRecord(Boolean am, Long contractTypeId, String epimmsId, String hmctsServiceId,
                                                Long id, String judgeRoleTypeId, String personalCode, Boolean pm,
                                                String regionId, LocalDate sittingDate, String statusId) {
         SittingRecord sittingRecord = new SittingRecord();
         sittingRecord.setAm(am);
         sittingRecord.setContractTypeId(contractTypeId);
-        sittingRecord.setEpimsId(epimsId);
+        sittingRecord.setEpimmsId(epimmsId);
         sittingRecord.setHmctsServiceId(hmctsServiceId);
         sittingRecord.setId(id);
         sittingRecord.setJudgeRoleTypeId(judgeRoleTypeId);

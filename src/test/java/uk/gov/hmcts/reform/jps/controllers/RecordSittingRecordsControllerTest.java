@@ -45,12 +45,6 @@ class RecordSittingRecordsControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @MockBean
-    private SittingRecordService sittingRecordService;
-
-    @MockBean
-    private LocationService regionService;
-
     @Test
     void shouldCreateSittingRecordsWhenRequestIsValid() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -61,7 +55,7 @@ class RecordSittingRecordsControllerTest {
             .andExpectAll(
                 status().isCreated(),
                 jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
-                jsonPath("$.errorRecords[0].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918178"),
                 jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
@@ -72,7 +66,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
-                jsonPath("$.errorRecords[1].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918179"),
                 jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
@@ -83,7 +77,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
-                jsonPath("$.errorRecords[2].postedRecord.epimsId").value("852649"),
+                jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918180"),
                 jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),

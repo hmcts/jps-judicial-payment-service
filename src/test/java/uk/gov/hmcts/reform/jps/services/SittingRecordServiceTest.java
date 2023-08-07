@@ -149,7 +149,7 @@ class SittingRecordServiceTest {
 
         List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
         assertThat(sittingRecords).extracting(SittingRecord_.SITTING_DATE, SittingRecord_.STATUS_ID,
-                                              SittingRecord_.EPIMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
+                                              SittingRecord_.EPIMMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
                                               SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
                                               SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
                 .contains(
@@ -181,7 +181,7 @@ class SittingRecordServiceTest {
                 .sittingDate(LocalDate.now().minusDays(2))
                 .statusId(StatusId.RECORDED.name())
                 .regionId("1")
-                .epimsId("epims001")
+                .epimmsId("epims001")
                 .hmctsServiceId("sscs")
                 .personalCode("001")
                 .contractTypeId(count)
@@ -199,7 +199,7 @@ class SittingRecordServiceTest {
                     .sittingDate(LocalDate.now().minusDays(2))
                     .statusId(StatusId.RECORDED.name())
                     .regionId("1")
-                    .epimsId("epims001")
+                    .epimmsId("epims001")
                     .hmctsServiceId("sscs")
                     .personalCode("001")
                     .contractTypeId(count)

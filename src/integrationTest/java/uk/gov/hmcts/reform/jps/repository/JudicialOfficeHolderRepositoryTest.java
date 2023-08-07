@@ -50,7 +50,7 @@ class JudicialOfficeHolderRepositoryTest {
         SittingRecord sittingRecord = SittingRecord.builder()
             .am(true)
             .contractTypeId(2L)
-            .epimsId("123")
+            .epimmsId("123")
             .hmctsServiceId("ssc_id")
             .judgeRoleTypeId("HighCourt")
             .personalCode(PERSONAL_CODE)

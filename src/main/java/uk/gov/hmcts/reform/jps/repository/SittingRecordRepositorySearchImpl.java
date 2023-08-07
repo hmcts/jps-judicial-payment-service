@@ -55,9 +55,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
                 sittingRecord.get(SittingRecord_.REGION_ID), value)));
 
-        Optional.ofNullable(recordSearchRequest.getEpimsId())
+        Optional.ofNullable(recordSearchRequest.getEpimmsId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
-                sittingRecord.get(SittingRecord_.EPIMS_ID), value)));
+                sittingRecord.get(SittingRecord_.EPIMMS_ID), value)));
 
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(

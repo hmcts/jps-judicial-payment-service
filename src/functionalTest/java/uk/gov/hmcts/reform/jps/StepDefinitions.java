@@ -186,7 +186,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0].statusId",equalTo("RECORDED"))
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
-            .body("sittingRecords[0].epimsId",equalTo("229786"))
+            .body("sittingRecords[0].epimmsId",equalTo("229786"))
             .body("sittingRecords[0].venueName",equalTo("venue name here"))
             .body("sittingRecords[0].hmctsServiceId",equalTo("ABA5"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
