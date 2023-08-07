@@ -21,7 +21,7 @@ import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.exceptions.ServiceException;
 import uk.gov.hmcts.reform.jps.exceptions.UnauthorisedException;
-import uk.gov.hmcts.reform.jps.exceptions.UnknowValueException;
+import uk.gov.hmcts.reform.jps.exceptions.UnknownValueException;
 import uk.gov.hmcts.reform.jps.model.out.errors.FieldError;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 
@@ -136,8 +136,8 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return status(UNAUTHORIZED).build();
     }
 
-    @ExceptionHandler(UnknowValueException.class)
-    protected ResponseEntity<Object> handleUnknowValueException(UnknowValueException exception) {
+    @ExceptionHandler(UnknownValueException.class)
+    protected ResponseEntity<Object> handleUnknowValueException(UnknownValueException exception) {
         ModelValidationError error = new ModelValidationError(
             of(new FieldError(exception.field, exception.getMessage()))
         );

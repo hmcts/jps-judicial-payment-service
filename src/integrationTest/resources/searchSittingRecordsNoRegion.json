@@ -1,0 +1,9 @@
+{
+  "pageSize":10,
+  "offset" :0,
+  "epimsId" : "852649",
+  "dateRangeFrom" : "2023-04-11",
+  "dateRangeTo" : "toDate",
+  "dateOrder" : "ASCENDING",
+  "duration" : "AM"
+}

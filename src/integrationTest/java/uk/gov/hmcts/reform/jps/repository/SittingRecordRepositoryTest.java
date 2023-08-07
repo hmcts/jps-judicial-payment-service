@@ -72,10 +72,10 @@ class SittingRecordRepositoryTest extends AbstractTest {
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
 
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED)
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId(JpsRole.ROLE_SUBMITTER.getValue())
-            .changeByName("John Doe")
+            .statusId(StatusId.SUBMITTED.name())
+            .changedDateTime(LocalDateTime.now())
+            .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
+            .changedByName("John Doe")
             .sittingRecord(settingRecordToUpdate)
             .build();
         settingRecordToUpdate.addStatusHistory(statusHistory);
@@ -122,7 +122,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         String createdByUserId = recordRepository.findCreatedByUserId(persistedSittingRecord.getId());
 
         assertNotNull(createdByUserId, "Could not find created by user id.");
-        assertEquals(statusHistoryRecorded.getChangeByUserId(), createdByUserId,
+        assertEquals(statusHistoryRecorded.getChangedByUserId(), createdByUserId,
                      "Not the expected CREATED BY USER ID!");
     }
 

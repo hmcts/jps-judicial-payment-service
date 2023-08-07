@@ -216,7 +216,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         );
 
         assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .extracting("statusId", "changeByUserId", "changeByName")
+            .extracting("statusId", "changedByUserId", "changedByName")
             .contains(
                 tuple(RECORDED, "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
                 tuple(RECORDED, "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
@@ -225,7 +225,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecords).describedAs("Created date assertion")
             .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangedDateTime()));
     }
 
     private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {

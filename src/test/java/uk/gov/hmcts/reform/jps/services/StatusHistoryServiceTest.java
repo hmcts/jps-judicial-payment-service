@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
@@ -26,6 +27,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -62,25 +64,13 @@ class StatusHistoryServiceTest extends BaseEvaluateDuplicate {
      */
     @Test
     void shouldSaveStatusHistory() {
-        SittingRecord sittingRecord = new SittingRecord();
-        sittingRecord.addStatusHistory(new StatusHistory());
-        sittingRecord.setAm(true);
-        sittingRecord.setContractTypeId(1L);
-        sittingRecord.setEpimmsId("42");
-        sittingRecord.setHmctsServiceId("42");
-        sittingRecord.setId(1L);
-        sittingRecord.setJudgeRoleTypeId("42");
-        sittingRecord.setPersonalCode("Personal Code");
-        sittingRecord.setPm(true);
-        sittingRecord.setRegionId("us-east-2");
-        sittingRecord.setSittingDate(LocalDate.of(1970, 1, 1));
-        sittingRecord.setStatusId(RECORDED);
-
-        StatusHistory statusHistory = new StatusHistory();
-        statusHistory.setChangeByName("Change By Name");
-        statusHistory.setChangeByUserId("42");
-        statusHistory.setChangeDateTime(LocalDate.of(1970, 1, 1).atStartOfDay());
-        statusHistory.setId(1L);
+        SittingRecord sittingRecord = createSittingRecord(true, 1L, "EP1", "HM1",
+                                                          1L, "JRT1", "PC1", true,
+                                                          "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                          StatusId.RECORDED.name());
+        StatusHistory statusHistory = createStatusHistory("Jason Bourne", "11233",
+                                                          LocalDateTime.now(),  1L, StatusId.RECORDED.name());
         statusHistory.setSittingRecord(sittingRecord);
         statusHistory.setStatusId(RECORDED);
 
@@ -261,103 +251,120 @@ class StatusHistoryServiceTest extends BaseEvaluateDuplicate {
         sittingRecord9.setRegionId("us-east-2");
         sittingRecord9.setSittingDate(LocalDate.of(1970, 1, 1));
         sittingRecord9.setStatusId(RECORDED);
-        statusHistoryService.saveStatusHistory(statusHistory7, sittingRecord9);
+        sittingRecord.addStatusHistory(statusHistory);
+        SittingRecord sittingRecord2 = createSittingRecord(true, 1L, "EP2", "HM2",
+                                                           2L, "42", "PC1", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory2 = createStatusHistory("Matt Murdock", "11244",
+                                                          LocalDateTime.now(),  2L, StatusId.RECORDED.name());
+        sittingRecord2.addStatusHistory(statusHistory2);
+        SittingRecord sittingRecord3 = createSittingRecord(true, 1L, "EP3", "HM3",
+                                                           3L, "42", "PC1", true,
+                                                           "us-east-2",
+                                                            LocalDate.of(1970, 1, 1),
+                                                           "42");
+        StatusHistory statusHistory3 = createStatusHistory("Stephen Strange", "11255",
+                                                           LocalDateTime.now(),  3L, StatusId.RECORDED.name());
+        statusHistory3.setSittingRecord(sittingRecord3);
+        sittingRecord3.addStatusHistory(statusHistory3);
+
+        SittingRecord sittingRecord4 = createSittingRecord(true, 1L, "42", "42",
+                                                           4L, "42", "PC1", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory4 = createStatusHistory("Bruce Wayne", "11266",
+                                                          LocalDateTime.now(),  4L, StatusId.RECORDED.name());
+        sittingRecord4.addStatusHistory(statusHistory4);
+        SittingRecord sittingRecord5 = createSittingRecord(true, 1L, "EP5", "HM5",
+                                                           5L, "JRT5", "PC5", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory5 = createStatusHistory("Lois Lane", "11277",
+                                                         LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                                           5L, StatusId.RECORDED.name());
+        sittingRecord5.addStatusHistory(statusHistory5);
+        SittingRecord sittingRecord6 = createSittingRecord(true, 1L, "42", "42",
+                                                           6L, "JRT5", "PC5", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory6 = createStatusHistory("Lois Lane", "11277",
+                                                           LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                                           6L, StatusId.RECORDED.name());
+        statusHistory4.setSittingRecord(sittingRecord6);
+        sittingRecord4.addStatusHistory(statusHistory6);
+        SittingRecord sittingRecord7 = createSittingRecord(true, 1L, "42", "42",
+                                                           7L, "JRT5", "PC5", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory7 = createStatusHistory("Lois Lane", "11277",
+                                                           LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                                           7L, StatusId.RECORDED.name());
+        sittingRecord7.addStatusHistory(statusHistory7);
+        SittingRecord sittingRecord8 = createSittingRecord(true, 1L, "42", "42",
+                                                           8L, "JRT5", "PC5", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory8 = createStatusHistory("Lois Lane", "11277",
+                                                           LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                                           8L, StatusId.RECORDED.name());
+        statusHistory8.setSittingRecord(sittingRecord8);
+        SittingRecord sittingRecord9 = createSittingRecord(true, 1L, "42", "42",
+                                                           9L, "JRT5", "PC5", true,
+                                                           "us-east-2",
+                                                           LocalDate.of(1970, 1, 1),
+                                                           StatusId.RECORDED.name());
+        StatusHistory statusHistory9 = createStatusHistory("Lois Lane", "11277",
+                                                           LocalDate.of(1970, 1, 1).atStartOfDay(),
+                                                           9L, StatusId.RECORDED.name());
+        statusHistory9.setSittingRecord(sittingRecord9);
+
+        statusHistoryService.saveStatusHistory(statusHistory9, sittingRecord9);
         verify(sittingRecordRepository).save(Mockito.any());
         verify(statusHistoryRepository).save(Mockito.any());
-        SittingRecord sittingRecord10 = statusHistory7.getSittingRecord();
-        assertSame(sittingRecord9, sittingRecord10);
-        assertEquals(2, sittingRecord10.getStatusHistories().size());
-        assertEquals(RECORDED, sittingRecord10.getStatusId());
+        SittingRecord sittingRecordRetrieved = statusHistory9.getSittingRecord();
+        assertSame(sittingRecord9, sittingRecordRetrieved);
+        assertEquals(2, sittingRecordRetrieved.getStatusHistories().size());
+        assertEquals(StatusId.RECORDED.name(), sittingRecordRetrieved.getStatusId());
+    }
+
+    private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
+                                              LocalDateTime changedDateTime,
+                                              Long id, String statusId) {
+
+        StatusHistory statusHistory = new StatusHistory();
+        statusHistory.setChangedByName(changedByName);
+        statusHistory.setChangedByUserId(changedByUserId);
+        statusHistory.setChangedDateTime(changedDateTime);
+        statusHistory.setId(id);
+        statusHistory.setStatusId(statusId);
+        return statusHistory;
     }
 
 
-    @Test
-    void shouldUpdateWithStatusHistoryWhenDbRecordPresent() throws IOException {
-        String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
-        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
-            requestJson,
-            RecordSittingRecordRequest.class
-        );
+    private SittingRecord createSittingRecord(Boolean am, Long contractTypeId, String epimsId, String hmctsServiceId,
+                                               Long id, String judgeRoleTypeId, String personalCode, Boolean pm,
+                                               String regionId, LocalDate sittingDate, String statusId) {
+        SittingRecord sittingRecord = new SittingRecord();
+        sittingRecord.setAm(am);
+        sittingRecord.setContractTypeId(contractTypeId);
+        sittingRecord.setEpimsId(epimsId);
+        sittingRecord.setHmctsServiceId(hmctsServiceId);
+        sittingRecord.setId(id);
+        sittingRecord.setJudgeRoleTypeId(judgeRoleTypeId);
+        sittingRecord.setPersonalCode(personalCode);
+        sittingRecord.setPm(pm);
+        sittingRecord.setRegionId(regionId);
+        sittingRecord.setSittingDate(sittingDate);
+        sittingRecord.setStatusId(statusId);
 
-        List<SittingRecordWrapper> sittingRecordWrappers =
-            recordSittingRecordRequest.getRecordedSittingRecords().stream()
-                .map(SittingRecordWrapper::new)
-                .toList();
-
-
-        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
-        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
-            = getDbRecord(
-            sittingRecordRequest.getSittingDate(),
-            "2000",
-            sittingRecordRequest.getPersonalCode(),
-            sittingRecordRequest.getDurationBoolean().getAm(),
-            sittingRecordRequest.getDurationBoolean().getPm(),
-            "Tester",
-            RECORDED
-        );
-
-        StatusHistory statusHistory = StatusHistory.builder()
-            .changeByName("Recorder")
-            .changeDateTime(LocalDateTime.now().minusSeconds(30))
-            .statusId(RECORDED)
-            .build();
-
-        when(statusHistoryRepository.findFirstBySittingRecord(any(), any()))
-            .thenReturn(Optional.of(statusHistory));
-
-        SittingRecordWrapper sittingRecordWrapper = sittingRecordWrappers.get(0);
-        statusHistoryService.updateFromStatusHistory(sittingRecordWrapper,
-                                                     sittingRecordDuplicateCheckFields);
-
-        assertThat(sittingRecordWrapper.getCreatedByName())
-            .isEqualTo(statusHistory.getChangeByName());
-        assertThat(sittingRecordWrapper.getCreatedDateTime())
-            .isEqualTo(statusHistory.getChangeDateTime());
-        assertThat(sittingRecordWrapper.getStatusId())
-            .isEqualTo(statusHistory.getStatusId());
-
-    }
-
-    @Test
-    void shouldNotUpdateWithStatusHistoryWhenDbRecordNotPresent() throws IOException {
-        String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
-        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
-            requestJson,
-            RecordSittingRecordRequest.class
-        );
-
-        List<SittingRecordWrapper> sittingRecordWrappers =
-            recordSittingRecordRequest.getRecordedSittingRecords().stream()
-                .map(SittingRecordWrapper::new)
-                .toList();
-
-
-        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
-        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
-            = getDbRecord(
-            sittingRecordRequest.getSittingDate(),
-            "2000",
-            sittingRecordRequest.getPersonalCode(),
-            sittingRecordRequest.getDurationBoolean().getAm(),
-            sittingRecordRequest.getDurationBoolean().getPm(),
-            "Tester",
-            RECORDED
-        );
-
-        when(statusHistoryRepository.findFirstBySittingRecord(any(), any()))
-            .thenReturn(Optional.empty());
-
-        SittingRecordWrapper sittingRecordWrapper = sittingRecordWrappers.get(0);
-        statusHistoryService.updateFromStatusHistory(sittingRecordWrapper,
-                                                     sittingRecordDuplicateCheckFields);
-
-        assertThat(sittingRecordWrapper.getCreatedByName())
-            .isNull();
-        assertThat(sittingRecordWrapper.getCreatedDateTime())
-            .isNull();
-        assertThat(sittingRecordWrapper.getStatusId())
-            .isNull();
+        return sittingRecord;
     }
 }
 

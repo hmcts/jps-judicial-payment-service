@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
@@ -33,20 +34,38 @@ public class SittingRecord {
     private String personalCode;
     private String personalName;
     private Long contractTypeId;
+    private String contractTypeName;
     private String judgeRoleTypeId;
+    private String judgeRoleTypeName;
+    @Builder.Default
+    private Boolean crownServantFlag = false;
+    @Builder.Default
+    private Boolean londonFlag = false;
+    private String payrollId;
+    private String accountCode;
+    private Long fee;
     private String am;
     private String pm;
     private LocalDateTime createdDateTime;
     private String createdByUserId;
     private String createdByUserName;
-    private LocalDateTime changeDateTime;
-    private String changeByUserId;
-    private String changeByUserName;
+    private LocalDateTime changedDateTime;
+    private String changedByUserId;
+    private String changedByUserName;
 
     @JsonIgnore
     @ToString.Exclude
     private List<StatusHistory> statusHistories;
 
+    public String getCreatedByUserId() {
+        StatusHistory statusHistory = getFirstStatusHistory();
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+    }
+
+    @JsonIgnore
+    public StatusHistory getFirstStatusHistory() {
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    }
 
     @Override
     public int hashCode() {
@@ -70,7 +89,7 @@ public class SittingRecord {
         SittingRecord sittingRecord
             = (SittingRecord) object;
 
-        return (sittingRecord.getSittingRecordId() == this.getSittingRecordId()
+        return (sittingRecord.getSittingRecordId().equals(this.getSittingRecordId())
 
             && ((null == sittingRecord.getAm() && null == this.getAm())
             || (null != sittingRecord.getAm() && sittingRecord.getAm().equals(this.getAm())))
@@ -123,7 +142,7 @@ public class SittingRecord {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
-        return (sittingRecord.getId() == this.getSittingRecordId()
+        return (sittingRecord.getId().equals(this.getSittingRecordId())
             && (null == this.getAm() && !sittingRecord.isAm()
             || null != this.getAm() && this.getAm().equals(AM.name()) && sittingRecord.isAm())
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
