@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
@@ -17,6 +18,8 @@ import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
+import uk.gov.hmcts.reform.jps.services.SittingRecordService;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -41,6 +44,12 @@ class RecordSittingRecordsControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @MockBean
+    private SittingRecordService sittingRecordService;
+
+    @MockBean
+    private LocationService regionService;
 
     @Test
     void shouldCreateSittingRecordsWhenRequestIsValid() throws Exception {
