@@ -72,7 +72,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
 
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED.name())
+            .statusId(StatusId.SUBMITTED)
             .changedDateTime(LocalDateTime.now())
             .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
             .changedByName("John Doe")

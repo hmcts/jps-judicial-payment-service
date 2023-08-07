@@ -76,7 +76,7 @@ public class SittingRecordController {
                     statusHistoryService.findRecordingUsers(
                         hmctsServiceCode,
                         sittingRecordSearchRequest.getRegionId(),
-                        List.of(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(), StatusId.SUBMITTED.name()),
+                        List.of(StatusId.RECORDED, StatusId.PUBLISHED, StatusId.SUBMITTED),
                         sittingRecordSearchRequest.getDateRangeFrom(),
                         sittingRecordSearchRequest.getDateRangeTo()
                     );

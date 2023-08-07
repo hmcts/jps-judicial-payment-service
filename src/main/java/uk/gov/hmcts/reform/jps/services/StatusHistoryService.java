@@ -7,8 +7,9 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
+import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
@@ -30,7 +31,7 @@ public class StatusHistoryService {
 
     public List<RecordingUser> findRecordingUsers(String hmctsServiceId,
                                            String regionId,
-                                           List<String> statusIds,
+                                           List<StatusId> statusIds,
                                            LocalDate startDate,
                                            LocalDate endDate) {
         return statusHistoryRepository.findRecordingUsers(hmctsServiceId,
@@ -59,8 +60,8 @@ public class StatusHistoryService {
         );
 
         lastStatusHistory.ifPresent(lastStatusHistoryRecorded -> {
-            sittingRecordWrapper.setCreatedByName(lastStatusHistoryRecorded.getChangeByName());
-            sittingRecordWrapper.setCreatedDateTime(lastStatusHistoryRecorded.getChangeDateTime());
+            sittingRecordWrapper.setCreatedByName(lastStatusHistoryRecorded.getChangedByName());
+            sittingRecordWrapper.setCreatedDateTime(lastStatusHistoryRecorded.getChangedDateTime());
             sittingRecordWrapper.setStatusId(lastStatusHistoryRecorded.getStatusId());
         });
     }

@@ -42,7 +42,7 @@ public class SittingRecordSearchRequest implements Serializable {
 
     //Optional parameters
     private final String regionId;
-    private final String epimsId;
+    private final String epimmsId;
     private final String personalCode;
     private final String judgeRoleTypeId;
     private final Boolean medicalMembersOnly;

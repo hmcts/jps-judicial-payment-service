@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
-import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -57,26 +57,22 @@ class SittingRecordServiceITest extends BaseTest {
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
+    @Autowired
     private SittingRecordService sittingRecordService;
     @Autowired
     private StatusHistoryService statusHistoryService;
-    private LocationService locationService;
-    private ServiceService serviceService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMMS_ID_FIXED = "852649";
-    private static final String PERSONAL_CODE_FIXED = "4918178";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
     @BeforeEach
     void beforeEach() {
         statusHistoryRepository.deleteAll();
         sittingRecordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
-        statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 
     @Test
@@ -146,7 +142,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -183,7 +179,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(20)
             .regionId(reasonId)
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(DESCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -224,7 +220,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -239,6 +235,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -251,11 +248,10 @@ class SittingRecordServiceITest extends BaseTest {
                 .map(SittingRecordWrapper::new)
                 .toList();
 
-        sittingRecordService.saveSittingRecords(HMCTS_SERVICE_CODE, recordSittingRecordRequest);
         sittingRecordWrappers
             .forEach(sittingRecordWrapper -> sittingRecordWrapper.setRegionId("1"));
 
-        sittingRecordService.saveSittingRecords(SSC_ID,
+        sittingRecordService.saveSittingRecords(HMCTS_SERVICE_CODE,
                                                 sittingRecordWrappers,
                                                 recordSittingRecordRequest.getRecordedByName(),
                                                 recordSittingRecordRequest.getRecordedByIdamId());
@@ -269,7 +265,7 @@ class SittingRecordServiceITest extends BaseTest {
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
-                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918500",
+                tuple(of(2022, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918500",
                       "Tester", 1L, false, true, RECORDED, HMCTS_SERVICE_CODE),
                 tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918179",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, RECORDED, HMCTS_SERVICE_CODE),
@@ -291,6 +287,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
         final String Bruce_Wayne = "Bruce Wayne";
         final String Clark_Kent = "Clark Kent";

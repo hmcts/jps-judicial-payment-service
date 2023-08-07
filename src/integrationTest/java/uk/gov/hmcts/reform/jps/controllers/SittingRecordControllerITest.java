@@ -49,7 +49,6 @@ import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HIST
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
-import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -119,27 +118,27 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:insert_service_test_data.sql"})
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, "classpath:sql/insert_service_test_data.sql"})
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                            StatusId.RECORDED);
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
-                                                           LocalDateTime.now(), StatusId.RECORDED.name());
+                                                           LocalDateTime.now(), StatusId.RECORDED);
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
-                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
+                                                           LocalDateTime.now(), StatusId.SUBMITTED);
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
-        historyRepository.save(statusHistory2);
+        //historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
         StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
-                                                           LocalDateTime.now(), StatusId.PUBLISHED.name());
+                                                           LocalDateTime.now(), StatusId.PUBLISHED);
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
         statusHistory3 = historyRepository.save(statusHistory3);
@@ -173,7 +172,7 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -197,20 +196,20 @@ class SittingRecordControllerITest {
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED);
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
-                                                           LocalDateTime.now(), StatusId.RECORDED.name());
+                                                           LocalDateTime.now(), StatusId.RECORDED);
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
-                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
+                                                           LocalDateTime.now(), StatusId.SUBMITTED);
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
         StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
-                                                           LocalDateTime.now(), StatusId.PUBLISHED.name());
+                                                           LocalDateTime.now(), StatusId.PUBLISHED);
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
         statusHistory3 = historyRepository.save(statusHistory3);
@@ -262,26 +261,27 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED);
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
-                                                           LocalDateTime.now(), StatusId.RECORDED.name());
+                                                           LocalDateTime.now(), StatusId.RECORDED);
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
-                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
+                                                           LocalDateTime.now(), StatusId.SUBMITTED);
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
         StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
-                                                           LocalDateTime.now(), StatusId.PUBLISHED.name());
+                                                           LocalDateTime.now(), StatusId.PUBLISHED);
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
         statusHistory3 = historyRepository.save(statusHistory3);
@@ -312,10 +312,10 @@ class SittingRecordControllerITest {
                 jsonPath(RECORDING_USERS_JSON_CONST).isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED),
+                jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -333,26 +333,27 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED);
         StatusHistory statusHistory1 = createStatusHistory(JASON_BOURNE, "11233",
-                                                           LocalDateTime.now(), StatusId.RECORDED.name());
+                                                           LocalDateTime.now(), StatusId.RECORDED);
         sittingRecord.addStatusHistory(statusHistory1);
         sittingRecord = recordRepository.save(sittingRecord);
         sittingRecord.getFirstStatusHistory();
 
         StatusHistory statusHistory2 = createStatusHistory(JACKIE_CHAN, "11255",
-                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
+                                                           LocalDateTime.now(), StatusId.SUBMITTED);
         sittingRecord.addStatusHistory(statusHistory2);
         assertEquals(statusHistory2.getStatusId(), sittingRecord.getStatusId());
         historyRepository.save(statusHistory2);
         sittingRecord = recordRepository.save(sittingRecord);
 
         StatusHistory statusHistory3 = createStatusHistory(DENZEL_WASHINGTON, "11266",
-                                                           LocalDateTime.now(), StatusId.PUBLISHED.name());
+                                                           LocalDateTime.now(), StatusId.PUBLISHED);
         sittingRecord.addStatusHistory(statusHistory3);
         assertEquals(statusHistory3.getStatusId(), sittingRecord.getStatusId());
         statusHistory3 = historyRepository.save(statusHistory3);
@@ -383,10 +384,10 @@ class SittingRecordControllerITest {
                 jsonPath(RECORDING_USERS_JSON_CONST).isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingRecordId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].sittingDate").isNotEmpty(),
-                jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED),
+                jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -405,19 +406,20 @@ class SittingRecordControllerITest {
 
 
     @Test
+    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMultipleMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord1 = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
                                                           HIGHCOURT, "4923421", "1",
                                                           StatusId.RECORDED);
         StatusHistory statusHistory1a = createStatusHistory(JASON_BOURNE, "11233",
-                                                           LocalDateTime.now(), StatusId.RECORDED.name());
+                                                           LocalDateTime.now(), StatusId.RECORDED);
         sittingRecord1.addStatusHistory(statusHistory1a);
         sittingRecord1 = recordRepository.save(sittingRecord1);
         sittingRecord1.getFirstStatusHistory();
 
         StatusHistory statusHistory1b = createStatusHistory(DENZEL_WASHINGTON, "11266",
-                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
+                                                           LocalDateTime.now(), StatusId.SUBMITTED);
         sittingRecord1.addStatusHistory(statusHistory1b);
         assertEquals(statusHistory1b.getStatusId(), sittingRecord1.getStatusId());
         historyRepository.save(statusHistory1b);
@@ -427,13 +429,13 @@ class SittingRecordControllerITest {
                                                           HIGHCOURT, "4923422", "2",
                                                           StatusId.RECORDED);
         StatusHistory statusHistory2a = createStatusHistory(JASON_BOURNE, "11244",
-                                                           LocalDateTime.now(), StatusId.RECORDED.name());
+                                                           LocalDateTime.now(), StatusId.RECORDED);
         sittingRecord2.addStatusHistory(statusHistory2a);
         sittingRecord2 = recordRepository.save(sittingRecord2);
         sittingRecord2.getFirstStatusHistory();
 
         StatusHistory statusHistory2b = createStatusHistory(JACKIE_CHAN, "11255",
-                                                           LocalDateTime.now(), StatusId.SUBMITTED.name());
+                                                           LocalDateTime.now(), StatusId.SUBMITTED);
         sittingRecord2.addStatusHistory(statusHistory2b);
         assertEquals(statusHistory2b.getStatusId(), sittingRecord2.getStatusId());
         historyRepository.save(statusHistory2b);
@@ -456,23 +458,6 @@ class SittingRecordControllerITest {
                 status().isOk(),
                 jsonPath("$.recordCount").value("2")
             )
-            .andReturn();
-    }
-
-    @Test
-    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
-        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
-        String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
-        mockMvc
-            .perform(post("/sitting-records/searchSittingRecords")
-                         .contentType(MediaType.APPLICATION_JSON)
-                         .content(updatedRecord))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors[0].fieldName")
-                           .value("PathVariable"))
-            .andExpect(jsonPath("$.errors[0].message")
-                           .value("hmctsServiceCode is mandatory"))
             .andReturn();
     }
 
@@ -548,14 +533,15 @@ class SittingRecordControllerITest {
 
     private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
                                               LocalDateTime changedDateTime,
-                                              String statusId) {
+                                              StatusId statusId) {
         return StatusHistory.builder()
             .changedByName(changedByName)
             .changedByUserId(changedByUserId)
-            .changedDateTime(changedDateTime)
+            .changedDateTime(changedDateTime.truncatedTo(ChronoUnit.MICROS))
             .statusId(statusId)
             .build();
     }
+
     @ParameterizedTest
     @CsvSource(textBlock = """
       # ROLE

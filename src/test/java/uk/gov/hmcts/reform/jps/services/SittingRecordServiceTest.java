@@ -33,6 +33,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.Collections;
 import java.util.Comparator;
@@ -268,9 +269,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     private uk.gov.hmcts.reform.jps.domain.SittingRecord deleteTestSetUp(String changeById, StatusId state) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(state)
-            .changeDateTime(now())
-            .changeByUserId(changeById)
-            .changeByName("John Smith")
+            .changedDateTime(now())
+            .changedByUserId(changeById)
+            .changedByName("John Smith")
             .build();
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
@@ -310,7 +311,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
-            StatusHistory::getChangeDateTime));
+            StatusHistory::getChangedDateTime));
         StatusHistory statusHistory = null;
         if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
             statusHistory = optionalStatusHistory.get();

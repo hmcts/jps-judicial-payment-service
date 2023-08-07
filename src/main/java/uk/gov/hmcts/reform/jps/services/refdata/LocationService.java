@@ -22,7 +22,7 @@ public class LocationService {
         return getCourtVenue(
             getLocationApiResponse(hmctsServiceCode),
             epimmsId,
-            (court, epimsId) -> court.getEpimmsId().equals(epimsId)
+            (court, paraEpimmsId) -> court.getEpimmsId().equals(paraEpimmsId)
         );
     }
 
@@ -33,6 +33,7 @@ public class LocationService {
             .filter(courtVenue -> predicate.test(courtVenue, value))
             .findAny();
     }
+
 
     public String getVenueName(String hmctsServiceCode, String epimmsId) {
         return getCourtVenue(hmctsServiceCode, epimmsId)

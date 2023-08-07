@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 public class AbstractTest {
 
     protected static final Long CONTRACT_TYPE_ID = 2L;
-    protected static final String EPIMS_ID = "123";
+    protected static final String EPIMMS_ID = "123";
     protected static final String JUDGE_ROLE_TYPE_ID = "HighCourt";
     protected static final String PERSONAL_CODE = "001";
     protected static final String REGION_ID = "1";

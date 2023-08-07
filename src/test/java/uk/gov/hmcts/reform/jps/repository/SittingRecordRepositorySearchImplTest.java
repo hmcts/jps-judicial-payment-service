@@ -34,6 +34,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.JUDGE_ROLE_TYPE_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PERSONAL_CODE;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @ExtendWith(MockitoExtension.class)
@@ -69,7 +72,7 @@ class SittingRecordRepositorySearchImplTest {
     private SittingRecordRepositorySearchImpl sittingRecordRepositorySearch;
 
     @Test
-    @Sql(scripts = {"classpath:insert_service_test_data.sql"})
+    @Sql(scripts = {"classpath:sql/insert_service_test_data.sql"})
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
 
         setUpMock();
@@ -80,19 +83,19 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(EPIMMS_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
         when(criteriaBuilder.equal(attributePath, RECORDED)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID))
+        when(criteriaBuilder.equal(attributePath, EPIMMS_ID))
             .thenReturn(mock(ComparisonPredicate.class));
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(true);
@@ -102,12 +105,12 @@ class SittingRecordRepositorySearchImplTest {
                                                .offset(5)
                                                .pageSize(10)
                                                .regionId(SittingRecord_.REGION_ID)
-                                               .epimmsId(SittingRecord_.EPIMMS_ID)
+                                               .epimmsId(EPIMMS_ID)
                                                .dateOrder(DateOrder.ASCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
-                                               .personalCode(SittingRecord_.PERSONAL_CODE)
-                                               .judgeRoleTypeId(SittingRecord_.JUDGE_ROLE_TYPE_ID)
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(RECORDED)
                                                .duration(Duration.FULL_DAY)
                                                .build(), SSCS);
@@ -122,9 +125,9 @@ class SittingRecordRepositorySearchImplTest {
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -140,17 +143,17 @@ class SittingRecordRepositorySearchImplTest {
 
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.EPIMS_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(EPIMMS_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
         when(criteriaBuilder.equal(attributePath, RECORDED.name())).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMS_ID)).thenReturn(mock(ComparisonPredicate.class));
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, EPIMMS_ID)).thenReturn(mock(ComparisonPredicate.class));
+        when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(true);
@@ -159,12 +162,12 @@ class SittingRecordRepositorySearchImplTest {
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
                                                .pageSize(10)
-                                               .epimsId(SittingRecord_.EPIMS_ID)
+                                               .epimmsId(EPIMMS_ID)
                                                .dateOrder(DateOrder.ASCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
-                                               .personalCode(SittingRecord_.PERSONAL_CODE)
-                                               .judgeRoleTypeId(SittingRecord_.JUDGE_ROLE_TYPE_ID)
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(RECORDED)
                                                .duration(Duration.FULL_DAY)
                                                .build(), SSCS);
@@ -178,9 +181,9 @@ class SittingRecordRepositorySearchImplTest {
         assertThat(value1.isAscending()).isTrue();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMS_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -197,16 +200,16 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
         when(criteriaBuilder.equal(attributePath, RECORDED.name())).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(true);
@@ -219,8 +222,8 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateOrder(DateOrder.ASCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
-                                               .personalCode(SittingRecord_.PERSONAL_CODE)
-                                               .judgeRoleTypeId(SittingRecord_.JUDGE_ROLE_TYPE_ID)
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(RECORDED)
                                                .duration(Duration.FULL_DAY)
                                                .build(), SSCS);
@@ -235,8 +238,8 @@ class SittingRecordRepositorySearchImplTest {
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -252,15 +255,15 @@ class SittingRecordRepositorySearchImplTest {
 
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
         when(criteriaBuilder.equal(attributePath, RECORDED.name())).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(true);
@@ -272,8 +275,8 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateOrder(DateOrder.ASCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
-                                               .personalCode(SittingRecord_.PERSONAL_CODE)
-                                               .judgeRoleTypeId(SittingRecord_.JUDGE_ROLE_TYPE_ID)
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(RECORDED)
                                                .duration(Duration.FULL_DAY)
                                                .build(), SSCS);
@@ -287,8 +290,8 @@ class SittingRecordRepositorySearchImplTest {
         assertThat(value1.isAscending()).isTrue();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -303,12 +306,12 @@ class SittingRecordRepositorySearchImplTest {
 
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(EPIMMS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
 
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, EPIMMS_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(false);
@@ -317,7 +320,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .offset(5)
                                                .pageSize(10)
                                                .regionId(SittingRecord_.REGION_ID)
-                                               .epimmsId(SittingRecord_.EPIMMS_ID)
+                                               .epimmsId(EPIMMS_ID)
                                                .dateOrder(DateOrder.DESCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
@@ -334,7 +337,7 @@ class SittingRecordRepositorySearchImplTest {
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
         verify(criteriaBuilder, times(1))
             .equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -348,12 +351,12 @@ class SittingRecordRepositorySearchImplTest {
 
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(EPIMMS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, EPIMMS_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(false);
@@ -363,7 +366,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .offset(5)
                                                .pageSize(10)
                                                .regionId(SittingRecord_.REGION_ID)
-                                               .epimmsId(SittingRecord_.EPIMMS_ID)
+                                               .epimmsId(EPIMMS_ID)
                                                .dateOrder(DateOrder.DESCENDING)
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
@@ -382,7 +385,7 @@ class SittingRecordRepositorySearchImplTest {
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
         verify(criteriaBuilder, times(1))
             .equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -403,9 +406,9 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(EPIMMS_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
@@ -414,11 +417,11 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(mock(ComparisonPredicate.class));
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID))
             .thenReturn(mock(ComparisonPredicate.class));
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID))
+        when(criteriaBuilder.equal(attributePath, EPIMMS_ID))
             .thenReturn(mock(ComparisonPredicate.class));
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE))
+        when(criteriaBuilder.equal(attributePath, PERSONAL_CODE))
             .thenReturn(mock(ComparisonPredicate.class));
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID))
+        when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID))
             .thenReturn(mock(ComparisonPredicate.class));
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
@@ -428,12 +431,12 @@ class SittingRecordRepositorySearchImplTest {
                 .offset(5)
                 .pageSize(10)
                 .regionId(SittingRecord_.REGION_ID)
-                .epimmsId(SittingRecord_.EPIMMS_ID)
+                .epimmsId(EPIMMS_ID)
                 .dateOrder(DateOrder.ASCENDING)
                 .dateRangeFrom(LocalDate.now().minusDays(2))
                 .dateRangeTo(LocalDate.now())
-                .personalCode(SittingRecord_.PERSONAL_CODE)
-                .judgeRoleTypeId(SittingRecord_.JUDGE_ROLE_TYPE_ID)
+                .personalCode(PERSONAL_CODE)
+                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                 .statusId(RECORDED)
                 .duration(Duration.FULL_DAY)
                 .build(),
@@ -448,9 +451,9 @@ class SittingRecordRepositorySearchImplTest {
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2))
             .equal(isA(SingularAttributePath.class), eq(true));
@@ -470,9 +473,9 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
-        when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(EPIMMS_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
@@ -480,9 +483,9 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, RECORDED)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE)).thenReturn(predicate);
-        when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, EPIMMS_ID)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, PERSONAL_CODE)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
@@ -490,12 +493,12 @@ class SittingRecordRepositorySearchImplTest {
             .offset(5)
             .pageSize(10)
             .regionId(SittingRecord_.REGION_ID)
-            .epimmsId(SittingRecord_.EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(DateOrder.ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(2))
             .dateRangeTo(LocalDate.now())
-            .personalCode(SittingRecord_.PERSONAL_CODE)
-            .judgeRoleTypeId(SittingRecord_.JUDGE_ROLE_TYPE_ID)
+            .personalCode(PERSONAL_CODE)
+            .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
             .statusId(RECORDED)
             .duration(Duration.FULL_DAY)
             .build();
@@ -509,9 +512,9 @@ class SittingRecordRepositorySearchImplTest {
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));

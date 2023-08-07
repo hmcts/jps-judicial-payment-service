@@ -30,6 +30,7 @@ public class SittingRecord {
     private String regionId;
     private String regionName;
     private String epimmsId;
+    private String venueName;
     private String hmctsServiceId;
     private String personalCode;
     private String personalName;

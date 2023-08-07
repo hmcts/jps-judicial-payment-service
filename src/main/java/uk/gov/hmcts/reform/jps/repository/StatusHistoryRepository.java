@@ -8,6 +8,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -34,7 +35,7 @@ public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Lo
         )
     List<RecordingUser> findRecordingUsers(@Param("hmctsServiceId") String hmctsServiceId,
                                            @Param("regionId") String regionId,
-                                           @Param("statusIds") List<String> statusIds,
+                                           @Param("statusIds") List<StatusId> statusIds,
                                            @Param("startDate") LocalDate startDate,
                                            @Param("endDate") LocalDate endDate
     );

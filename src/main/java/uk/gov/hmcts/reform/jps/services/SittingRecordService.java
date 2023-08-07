@@ -75,7 +75,7 @@ public class SittingRecordService {
                 .createdByUserId(sittingRecord.getCreatedByUserId())
                 .createdByUserName(sittingRecord.getCreatedByUserName())
                 .createdDateTime(sittingRecord.getCreatedDateTime())
-                .epimsId(sittingRecord.getEpimmsId())
+                .epimmsId(sittingRecord.getEpimmsId())
                 .hmctsServiceId(sittingRecord.getHmctsServiceId())
                 .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                 .personalCode(sittingRecord.getPersonalCode())
@@ -129,7 +129,7 @@ public class SittingRecordService {
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
                         .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
                             .map(DurationBoolean::getPm).orElse(false))
-                        .regionId(recordSittingRecord.getRegionId())
+                        .regionId(recordSittingRecordWrapper.getRegionId())
                         .sittingDate(recordSittingRecord.getSittingDate())
                         .statusId(RECORDED)
                         .build();
@@ -137,9 +137,9 @@ public class SittingRecordService {
                 recordSittingRecordWrapper.setCreatedDateTime(LocalDateTime.now());
 
                 StatusHistory statusHistory = StatusHistory.builder()
-                    .changedByName(recordSittingRecordRequest.getRecordedByName())
-                    .changedByUserId(recordSittingRecordRequest.getRecordedByIdamId())
-                    .changedDateTime(recordSittingRecord.getCreatedDateTime())
+                    .changedByName(recordedByName)
+                    .changedByUserId(recordedByIdamId)
+                    .changedDateTime(recordSittingRecordWrapper.getCreatedDateTime())
                     .statusId(RECORDED)
                     .build();
 
@@ -199,9 +199,9 @@ public class SittingRecordService {
     private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(DELETED)
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId(securityUtils.getUserInfo().getUid())
-            .changeByName(securityUtils.getUserInfo().getName())
+            .changedDateTime(LocalDateTime.now())
+            .changedByUserId(securityUtils.getUserInfo().getUid())
+            .changedByName(securityUtils.getUserInfo().getName())
             .build();
 
         sittingRecord.addStatusHistory(statusHistory);
@@ -213,7 +213,8 @@ public class SittingRecordService {
         if (sittingRecord.getStatusId() == RECORDED) {
             StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
                 .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
-                .filter(statusHistory -> statusHistory.getChangeByUserId().equals(securityUtils.getUserInfo().getUid()))
+                .filter(statusHistory ->
+                            statusHistory.getChangedByUserId().equals(securityUtils.getUserInfo().getUid()))
                 .findAny()
                 .orElseThrow(() -> new ResourceNotFoundException(
                     "User IDAM ID does not match the oldest Changed by IDAM ID "));
@@ -240,11 +241,6 @@ public class SittingRecordService {
     }
 
     private String getVenueName(String hmctsServiceCode, String epimmsId) {
-        if (Objects.isNull(locationService)) {
-            LOGGER.info("locationService is NULL!");
-            return null;
-        }
-
         return locationService.getVenueName(hmctsServiceCode, epimmsId);
     }
 

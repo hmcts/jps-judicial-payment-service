@@ -40,9 +40,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
@@ -269,7 +269,7 @@ class SittingRecordControllerTest {
             .contractTypeId(11222L)
             .contractTypeName("Contract Type 1")
             .crownServantFlag(Boolean.TRUE)
-            .epimsId("EP1")
+            .epimmsId("EP1")
             .fee(10234L)
             .hmctsServiceId("HMCTS1")
             .judgeRoleTypeId("JR1")
