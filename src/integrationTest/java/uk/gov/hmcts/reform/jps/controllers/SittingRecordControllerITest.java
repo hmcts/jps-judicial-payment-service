@@ -3,14 +3,13 @@ package uk.gov.hmcts.reform.jps.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -19,8 +18,8 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -251,16 +250,12 @@ class SittingRecordControllerITest extends BaseTest {
             .contains("one of the values accepted for Enum class: [ASCENDING, DESCENDING]");
     }
 
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-      # ROLE
-      jps-recorder
-        """)
+    @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-recorder"})
-    void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder(String role) throws Exception {
+    void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder() throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
-        when(userInfo.getRoles()).thenReturn(List.of(role));
+        when(userInfo.getRoles()).thenReturn(List.of("jps-recorder"));
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
         when(userInfo.getName()).thenReturn("Joe Bloggs");
 
@@ -269,16 +264,12 @@ class SittingRecordControllerITest extends BaseTest {
             .andExpect(status().isOk());
     }
 
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-      # ROLE
-      jps-submitter
-        """)
+    @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-submitter"})
-    void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter(String role) throws Exception {
+    void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter() throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
-        when(userInfo.getRoles()).thenReturn(List.of(role));
+        when(userInfo.getRoles()).thenReturn(List.of("jps-submitter"));
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
         when(userInfo.getName()).thenReturn("Joe Bloggs");
 
@@ -287,16 +278,12 @@ class SittingRecordControllerITest extends BaseTest {
             .andExpect(status().isOk());
     }
 
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-      # ROLE
-      jps-admin
-        """)
+    @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-admin"})
-    void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin(String role) throws Exception {
+    void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin() throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
-        when(userInfo.getRoles()).thenReturn(List.of(role));
+        when(userInfo.getRoles()).thenReturn(List.of("jps-admin"));
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
         when(userInfo.getName()).thenReturn("Joe Bloggs");
 
