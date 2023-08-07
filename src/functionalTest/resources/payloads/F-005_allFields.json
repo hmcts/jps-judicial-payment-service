@@ -9,5 +9,7 @@
   "duration": "FULL_DAY",
   "dateRangeFrom": "2023-03-10",
   "dateRangeTo": "2023-05-12",
-  "statusId": "RECORDED"
+  "statusId": "RECORDED",
+  "medicalMembersOnly": false,
+  "includeFees": false
 }

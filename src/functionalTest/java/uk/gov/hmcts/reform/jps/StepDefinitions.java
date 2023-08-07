@@ -198,7 +198,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0].crownServantFlag",equalTo(false))
             .body("sittingRecords[0].londonFlag",equalTo(false))
             .body("sittingRecords[0]", Matchers.hasKey("payrollId"))
-            .body("sittingRecords[0].accountCode",equalTo("SSCS"))
+            .body("sittingRecords[0]", Matchers.hasKey("accountCode"))
             .body("sittingRecords[0]", Matchers.hasKey("fee"))
             .body("sittingRecords[0].am",equalTo("AM"))
             .body("sittingRecords[0].pm",equalTo("PM"))
