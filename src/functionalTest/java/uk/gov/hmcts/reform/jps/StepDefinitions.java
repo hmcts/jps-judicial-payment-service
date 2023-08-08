@@ -23,10 +23,8 @@ import java.nio.file.Paths;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.not;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.OK;
@@ -71,22 +69,28 @@ public class StepDefinitions extends TestVariables {
         }
     }
 
-    @Given("a record for the given hmctsServiceCode exists in the database")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+    @Given("a record for the hmctsServiceCode {string} exists in the database")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode) throws IOException {
         randomDate = RandomDateGenerator.generateRandomDate().toString();
 
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-004_allFields.json")));
-        body = body.replace("2023-04-10", randomDate);
+        body = body.replace("dateToBeReplaced", randomDate);
 
         RestAssured.baseURI = testUrl;
         given().header("Content-Type","application/json")
             .header("Authorization", recorderAccessToken)
             .header("ServiceAuthorization", validS2sToken)
             .body(body).log().all()
-            .when().post("/recordSittingRecords/ABA5")
+            .when().post("/recordSittingRecords/"+serviceCode)
             .then().log().all().assertThat().statusCode(201);
     }
+
+    @Given("the existing record is in Submitted state")
+    public void the_existing_record_is_in_submitted_state() {
+        // Write code here after IJPS-62 is ready
+    }
+
 
     @When("a request is prepared with appropriate values")
     public void requestIsPreparedWithAppropriateValues() {
@@ -115,10 +119,12 @@ public class StepDefinitions extends TestVariables {
     @When("the request body contains the {string} as in {string}")
     public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
         String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName)));
-        if (description.equalsIgnoreCase("payload matching data from existing record")) {
-            body = body.replace("2023-03-10", randomDate);
-            body = body.replace("2023-05-12", randomDate);
+
+        if (description.equalsIgnoreCase("payload with 3 sitting records")) {
+            randomDate = RandomDateGenerator.generateRandomDate().toString();
         }
+
+        body = body.replace("dateToBeReplaced", randomDate);
 
         given.body(body);
     }
@@ -181,24 +187,35 @@ public class StepDefinitions extends TestVariables {
     public void theResponseReturnsTheMatchingSittingRecords() {
         response.then().assertThat()
             .body("recordCount",equalTo(1))
+            .body("recordingUsers[0].userId",equalTo("d139a314-eb40-45f4-9e7a-9e13f143cc3a"))
+            .body("recordingUsers[0].userName",equalTo("Recorder"))
+            .body("sittingRecords[0].sittingRecordId",Matchers.notNullValue())
             .body("sittingRecords[0].sittingDate",equalTo(randomDate))
             .body("sittingRecords[0].statusId",equalTo("RECORDED"))
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
-            .body("sittingRecords[0].epimmsId",equalTo("229786"))
+            .body("sittingRecords[0].epimsId",equalTo("229786"))
+            .body("sittingRecords[0].venueName",equalTo("Barnet"))
             .body("sittingRecords[0].hmctsServiceId",equalTo("ABA5"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
             .body("sittingRecords[0].personalName",equalTo("Joe Bloggs"))
             .body("sittingRecords[0].contractTypeId",equalTo(2))
+            .body("sittingRecords[0]", Matchers.hasKey("contractTypeName"))
             .body("sittingRecords[0].judgeRoleTypeId",equalTo("Judge"))
+            .body("sittingRecords[0]", Matchers.hasKey("judgeRoleTypeName"))
+            .body("sittingRecords[0].crownServantFlag",equalTo(false))
+            .body("sittingRecords[0].londonFlag",equalTo(false))
+            .body("sittingRecords[0]", Matchers.hasKey("payrollId"))
+            .body("sittingRecords[0]", Matchers.hasKey("accountCode"))
+            .body("sittingRecords[0]", Matchers.hasKey("fee"))
             .body("sittingRecords[0].am",equalTo("AM"))
             .body("sittingRecords[0].pm",equalTo("PM"))
-            .body("sittingRecords[0].createdDateTime",not(emptyOrNullString()))
+            .body("sittingRecords[0].createdDateTime",Matchers.notNullValue())
             .body("sittingRecords[0].createdByUserId",equalTo("d139a314-eb40-45f4-9e7a-9e13f143cc3a"))
             .body("sittingRecords[0].createdByUserName",equalTo("Recorder"))
-            .body("sittingRecords[0].changeDateTime",not(emptyOrNullString()))
-            .body("sittingRecords[0].changeByUserId",equalTo("d139a314-eb40-45f4-9e7a-9e13f143cc3a"))
-            .body("sittingRecords[0].changeByUserName",equalTo("Recorder"));
+            .body("sittingRecords[0].changedDateTime",Matchers.notNullValue())
+            .body("sittingRecords[0].changedByUserId",equalTo("d139a314-eb40-45f4-9e7a-9e13f143cc3a"))
+            .body("sittingRecords[0].changedByUserName",equalTo("Recorder"));
     }
 
     @Then("the response contains {string} as {string}")
