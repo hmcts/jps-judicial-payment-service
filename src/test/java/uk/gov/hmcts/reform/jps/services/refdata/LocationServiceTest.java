@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
@@ -89,10 +90,10 @@ class LocationServiceTest {
             .build();
         List<SittingRecordRequest> sittingRecordRequest = List.of(
             SittingRecordRequest.builder()
-                .epimsId("2")
+                .epimmsId("2")
                 .build(),
             SittingRecordRequest.builder()
-                .epimsId("1")
+                .epimmsId("1")
                 .build()
         );
 
@@ -103,7 +104,7 @@ class LocationServiceTest {
                                     sittingRecordRequest);
 
         assertThat(sittingRecordRequest)
-            .extracting("regionId", "epimsId")
+            .extracting(SittingRecord_.REGION_ID, SittingRecord_.EPIMMS_ID)
             .contains(
                 tuple("2", "2"),
                 tuple("1", "1")
@@ -125,7 +126,7 @@ class LocationServiceTest {
             .build();
         List<SittingRecordRequest> sittingRecords = List.of(
             SittingRecordRequest.builder()
-                .epimsId("3")
+                .epimmsId("3")
                 .build()
         );
 

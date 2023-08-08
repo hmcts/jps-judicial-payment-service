@@ -34,7 +34,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload with an invalid epimsId for BBA3" as in "S-004.3.json"
+    And the request body contains the "payload with an invalid epimmsId for BBA3" as in "S-004.3.json"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "invalid location"
@@ -106,15 +106,15 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Sitting date is mandatory"
 
   @S-004.10 #AC06
-  Scenario: Negative response, return 400 Bad Request when the request is missing 'epimsId'
+  Scenario: Negative response, return 400 Bad Request when the request is missing 'epimmsId'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "payload with no epimsId" as in "S-004.10.json"
+    And the request body contains the "payload with no epimmsId" as in "S-004.10.json"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
-    And the response contains "errors[0].message" as "Epims Id is mandatory"
+    And the response contains "errors[0].message" as "Epimms Id is mandatory"
 
   @S-004.11 #AC06
   Scenario: Negative response, return 400 Bad Request when the request is missing 'personalCode'

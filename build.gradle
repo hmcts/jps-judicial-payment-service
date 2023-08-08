@@ -31,7 +31,7 @@ def versions = [
   serviceAuthVersion: '3.1.1',
   tomcatEmbedded  : '9.0.75',
   mapstruct       : '1.5.3.Final',
-  lombok          : '1.18.24',
+  lombok          : '1.18.28',
   mockito         : '5.2.0',
   flyway          : '9.15.2',
   postgresql      : '42.6.0'
@@ -118,7 +118,7 @@ test {
   failFast = true
 }
 
-tasks.register('smoke', Test) {
+task smoke(type: Test) {
   description = "Runs smoke tests"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath

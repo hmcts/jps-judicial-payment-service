@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -46,13 +45,13 @@ public class SittingRecord {
     @Column(name = "region_id")
     private String regionId;
 
-    @Column(name =  "epims_id")
-    private String epimsId;
+    @Column(name =  "epimms_id")
+    private String epimmsId;
 
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
 
-    @Column(name = "personal_code")
+    @Column(name = "personal_code", nullable = false)
     private String personalCode;
 
     @Column(name = "contract_type_id")
@@ -71,68 +70,48 @@ public class SittingRecord {
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
-    @ToString.Exclude
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
-    private final List<JudicialOfficeHolder> judicialOfficeHolders = new ArrayList<>();
-
-
     public String getCreatedByUserId() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
     public String getCreatedByUserName() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByName() : null;
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
     }
 
     public LocalDateTime getCreatedDateTime() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
     }
 
-    public String getChangeByUserId() {
+    public String getChangedByUserId() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
-    public String getChangeByUserName() {
+    public String getChangedByUserName() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByName() : null;
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
     }
 
-    public LocalDateTime getChangeByDateTime() {
+    public LocalDateTime getChangedByDateTime() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
     }
 
     public StatusHistory getFirstStatusHistory() {
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId))
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
 
     public StatusHistory getLatestStatusHistory() {
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId).reversed())
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
 
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
         this.setStatusId(statusHistory.getStatusId());
         statusHistory.setSittingRecord(this);
-    }
-
-    public void addJudicialOfficeHolder(JudicialOfficeHolder judicialOfficeHolder) {
-        this.judicialOfficeHolders.add(judicialOfficeHolder);
-        judicialOfficeHolder.setSittingRecord(this);
     }
 
 
@@ -145,11 +124,13 @@ public class SittingRecord {
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
         return (sittingRecord.getId().equals(this.getId())
+            && sittingRecord.isAm() == this.isAm()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
             && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()

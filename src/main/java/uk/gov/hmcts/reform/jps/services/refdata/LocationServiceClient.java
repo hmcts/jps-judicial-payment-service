@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.jps.config.IdamTokenGenerator;
-import uk.gov.hmcts.reform.jps.exceptions.UnknowValueException;
+import uk.gov.hmcts.reform.jps.exceptions.UnknownValueException;
 import uk.gov.hmcts.reform.jps.refdata.location.client.LocationApi;
 import uk.gov.hmcts.reform.jps.refdata.location.model.LocationApiResponse;
 
@@ -27,8 +27,8 @@ public class LocationServiceClient {
             );
         } catch (FeignException exception) {
             if (exception.status() == HttpStatus.NOT_FOUND.value()) {
-                throw new UnknowValueException("hmctsServiceCode",
-                                               "004 unknown hmctsServiceCode");
+                throw new UnknownValueException("hmctsServiceCode",
+                                                "004 unknown hmctsServiceCode");
             }
             throw exception;
         }
