@@ -43,6 +43,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
@@ -198,7 +199,7 @@ class SittingRecordServiceITest extends BaseTest {
         assertThat(response)
             .as("Extracting unique value by status")
             .extracting(SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.STATUS_ID)
-            .contains(
+            .containsExactly(
                 tuple(21L, RECORDED),
                 tuple(22L, RECORDED)
             );
@@ -268,7 +269,7 @@ class SittingRecordServiceITest extends BaseTest {
                         SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM,
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
-            .contains(
+            .containsExactly(
                 tuple(of(2022, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918500",
                       "Tester", 1L, false, true, RECORDED, HMCTS_SERVICE_CODE),
                 tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918179",
@@ -280,7 +281,7 @@ class SittingRecordServiceITest extends BaseTest {
         List<StatusHistory> statusHistories = statusHistoryService.findAll();
         assertThat(statusHistories)
             .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.CHANGED_BY_NAME)
-            .contains(
+            .containsExactly(
                 tuple(RECORDED, USER_ID_FIXED, USER_NAME_FIXED),
                 tuple(RECORDED, USER_ID_FIXED, USER_NAME_FIXED),
                 tuple(RECORDED, USER_ID_FIXED, USER_NAME_FIXED)
@@ -353,12 +354,52 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED)
+            .contains(
+                tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED)
             );
 
         assertThat(sittingRecordWrappers).describedAs("Created date assertion")
+            .allMatch(sittingRecordWrapper -> LocalDateTime.now().minusMinutes(5)
+                .isBefore(sittingRecordWrapper.getCreatedDateTime()));
+    }
+
+    @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
+    void shouldSetPotentialDuplicateRecordAndInvalidLocationWhenJudgeRoleTypeIdDoesntMatchAndLocationIsInvalid()
+        throws IOException {
+        recordSittingRecords("recordSittingRecords.json");
+
+        String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        sittingRecordWrappers.stream()
+                .skip(1)
+                .forEach(sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(INVALID_LOCATION));
+
+
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        assertThat(sittingRecordWrappers)
+            .map(SittingRecordWrapper::getErrorCode,
+                 SittingRecordWrapper::getCreatedByName,
+                 SittingRecordWrapper::getStatusId)
+            .containsExactly(tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                             tuple(INVALID_LOCATION, null, null),
+                             tuple(INVALID_LOCATION, null, null)
+            );
+
+        assertThat(sittingRecordWrappers).describedAs("Created date assertion")
+            .filteredOn(sittingRecordWrapper -> sittingRecordWrapper.getErrorCode() == POTENTIAL_DUPLICATE_RECORD)
             .allMatch(sittingRecordWrapper -> LocalDateTime.now().minusMinutes(5)
                 .isBefore(sittingRecordWrapper.getCreatedDateTime()));
     }
@@ -382,7 +423,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
+            .containsExactly(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED)
             );
@@ -424,7 +465,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(VALID, null, null),
+            .containsExactly(tuple(VALID, null, null),
                       tuple(VALID, null, null),
                       tuple(VALID, null, null)
             );
@@ -461,7 +502,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(VALID, null, null),
+            .containsExactly(tuple(VALID, null, null),
                       tuple(VALID, null, null),
                       tuple(VALID, null, null)
             );
@@ -500,7 +541,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(VALID, null, null),
+            .containsExactly(tuple(VALID, null, null),
                       tuple(VALID, null, null),
                       tuple(VALID, null, null)
             );
@@ -537,7 +578,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(VALID, null, null),
+            .containsExactly(tuple(VALID, null, null),
                       tuple(VALID, null, null),
                       tuple(VALID, null, null)
             );
@@ -564,7 +605,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(POTENTIAL_DUPLICATE_RECORD, null, null),
+            .containsExactly(tuple(POTENTIAL_DUPLICATE_RECORD, null, null),
                       tuple(POTENTIAL_DUPLICATE_RECORD, null, null),
                       tuple(POTENTIAL_DUPLICATE_RECORD, null, null)
             );
@@ -591,7 +632,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
+            .containsExactly(tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED)
             );
@@ -602,7 +643,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    void shouldSetPotentialDuplicateRecordWhenStatusRecordedDurationIntersect() throws IOException {
+    void shouldSetInvalidDuplicateRecordWhenStatusRecordedDurationIntersect() throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -636,7 +677,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
+            .containsExactlyInAnyOrder(tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", RECORDED),
                       tuple(VALID, null, null)
             );
@@ -677,7 +718,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .contains(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
+            .containsExactlyInAnyOrder(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
                       tuple(VALID, null, null)
             );

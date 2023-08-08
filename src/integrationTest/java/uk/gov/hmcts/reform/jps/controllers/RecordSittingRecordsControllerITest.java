@@ -232,6 +232,24 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
+    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            )
+            .andReturn();
+
+        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
+    }
+
+    @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("recordMandatoryFieldsMissing.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)

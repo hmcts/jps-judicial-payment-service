@@ -34,6 +34,7 @@ import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -148,7 +149,9 @@ public class SittingRecordService {
     }
 
     public void checkDuplicateRecords(List<SittingRecordWrapper> sittingRecordWrappers) {
-        sittingRecordWrappers
+        sittingRecordWrappers.stream()
+            .filter(sittingRecordWrapper ->
+                            VALID == sittingRecordWrapper.getErrorCode())
             .forEach(this::checkDuplicateRecords);
     }
 

@@ -98,6 +98,23 @@ class SittingRecordControllerITest {
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
 
     @Test
+    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
+        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
+        mockMvc
+            .perform(post("/sitting-records/searchSittingRecords")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(updatedRecord))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors[0].fieldName")
+                           .value("PathVariable"))
+            .andExpect(jsonPath("$.errors[0].message")
+                           .value("hmctsServiceCode is mandatory"))
+            .andReturn();
+    }
+
+    @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
@@ -190,6 +207,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
     void shouldHaveOkResponseWhenRequestIsValidButNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,

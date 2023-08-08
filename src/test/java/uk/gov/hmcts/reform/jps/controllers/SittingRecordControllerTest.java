@@ -84,6 +84,25 @@ class SittingRecordControllerTest {
     private static final String SSCS = "sscs";
 
     @Test
+    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+                                                      "/sitting-records/searchSittingRecords"
+                                                  )
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson)
+            ).andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            )
+            .andReturn();
+
+        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
+    }
+
+    @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsWithoutMandatoryFields.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
@@ -213,6 +232,17 @@ class SittingRecordControllerTest {
         assertEquals(0, sittingRecordSearchResponse.getSittingRecords().size());
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
+    }
+
+    @Test
+    void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
+            .andDo(print())
+            .andExpectAll(
+                status().isBadRequest(),
+                jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                jsonPath("$.errors[0].message").value("sittingRecordId is mandatory")
+            );
     }
 
     @Test

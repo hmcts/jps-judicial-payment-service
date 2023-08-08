@@ -73,7 +73,7 @@ public class RecordSittingRecordsController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @PostMapping(
-        path = {"/{hmctsServiceCode}"}
+        path = {"", "/{hmctsServiceCode}"}
     )
     @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
     public ResponseEntity<RecordSittingRecordResponse> recordSittingRecords(
@@ -90,20 +90,16 @@ public class RecordSittingRecordsController {
         regionService.setRegionId(hmctsServiceCode,
                                   sittingRecordWrappers);
 
-        Optional<ErrorCode> errorCodeCheck = checkForErrors(sittingRecordWrappers,
-                                                            sittingRecordWrapper -> true);
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+        Optional<ErrorCode> errorCodeCheck = checkForErrors(
+            sittingRecordWrappers,
+            not(sittingRecordWrapper ->
+                    POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
+                    && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
+                        && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()
+            )
+        );
 
-        if (errorCodeCheck.isEmpty()) {
-            sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
-
-            errorCodeCheck = checkForErrors(
-                sittingRecordWrappers,
-                not(sittingRecordWrapper ->
-                        POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
-                        && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-                            && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-            );
-        }
 
         if (errorCodeCheck.isPresent()) {
             return status(HttpStatus.BAD_REQUEST)

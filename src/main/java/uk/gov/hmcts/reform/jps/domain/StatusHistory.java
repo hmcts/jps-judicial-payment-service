@@ -10,6 +10,7 @@ import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDateTime;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -46,6 +47,7 @@ public class StatusHistory {
 
     @Column(name = "status_id")
     @Enumerated(EnumType.STRING)
+    @Basic(optional = false)
     private StatusId statusId;
 
     @Column(name = "changed_date_time")

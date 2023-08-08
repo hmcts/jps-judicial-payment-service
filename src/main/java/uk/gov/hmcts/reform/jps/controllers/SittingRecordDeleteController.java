@@ -33,7 +33,7 @@ public class SittingRecordDeleteController {
     private final SittingRecordService sittingRecordService;
 
     @DeleteMapping(
-        path = {"/{sittingRecordId}"}
+        path = {"", "/{sittingRecordId}"}
     )
     @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "','" + JPS_ADMIN + "')")
     public ResponseEntity<String> deleteSittingRecord(
