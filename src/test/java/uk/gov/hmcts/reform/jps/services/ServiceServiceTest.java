@@ -36,8 +36,9 @@ class ServiceServiceTest {
         when(serviceRepository.findByHmctsServiceId(Mockito.anyString()))
             .thenReturn(Optional.of(service));
         Optional<Service> foundService = serviceService.findService("42");
-        assertThat(foundService).isPresent();
-        assertThat(foundService).hasValue(service);
+        assertThat(foundService)
+            .isPresent()
+            .hasValue(service);
         verify(serviceRepository).findByHmctsServiceId(Mockito.anyString());
     }
 

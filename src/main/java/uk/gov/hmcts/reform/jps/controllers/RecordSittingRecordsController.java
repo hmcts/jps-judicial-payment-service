@@ -62,6 +62,15 @@ public class RecordSittingRecordsController {
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
 
+    @Operation(description = "Root not to be displayed", hidden = true)
+    @PostMapping(
+        path = {""}
+    )
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
+    public ResponseEntity<String> recordSittingRecords() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateServiceCode(Optional.empty()));
+    }
 
     @Operation(description = "Create a new sitting record")
     @ApiResponse(responseCode = "201",
@@ -73,7 +82,7 @@ public class RecordSittingRecordsController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @PostMapping(
-        path = {"", "/{hmctsServiceCode}"}
+        path = { "/{hmctsServiceCode}"}
     )
     @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
     public ResponseEntity<RecordSittingRecordResponse> recordSittingRecords(
