@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
@@ -17,6 +16,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import javax.transaction.Transactional;
+
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
@@ -51,18 +52,17 @@ public class StatusHistoryService {
     public void updateFromStatusHistory(SittingRecordWrapper sittingRecordWrapper,
                                         SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
                                                                             sittingRecordDuplicateCheckFields) {
-        Sort.TypedSort<StatusHistory> sort = Sort.sort(StatusHistory.class);
-        Optional<StatusHistory> lastStatusHistory = statusHistoryRepository.findFirstBySittingRecord(
+        Optional<StatusHistory> firstStatusHistory = statusHistoryRepository.findBySittingRecordAndStatusId(
             uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
                 .id(sittingRecordDuplicateCheckFields.getId())
                 .build(),
-            sort.by(StatusHistory::getId).descending()
+            RECORDED
         );
 
-        lastStatusHistory.ifPresent(lastStatusHistoryRecorded -> {
-            sittingRecordWrapper.setCreatedByName(lastStatusHistoryRecorded.getChangedByName());
-            sittingRecordWrapper.setCreatedDateTime(lastStatusHistoryRecorded.getChangedDateTime());
-            sittingRecordWrapper.setStatusId(lastStatusHistoryRecorded.getStatusId());
+        firstStatusHistory.ifPresent(firstStatusHistoryRecorded -> {
+            sittingRecordWrapper.setCreatedByName(firstStatusHistoryRecorded.getChangedByName());
+            sittingRecordWrapper.setCreatedDateTime(firstStatusHistoryRecorded.getChangedDateTime());
+            sittingRecordWrapper.setStatusId(sittingRecordDuplicateCheckFields.getStatusId());
         });
     }
 }

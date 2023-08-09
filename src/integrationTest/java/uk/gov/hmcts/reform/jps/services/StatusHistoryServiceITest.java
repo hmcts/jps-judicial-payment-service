@@ -16,7 +16,7 @@ import java.util.List;
 import static java.time.Month.JUNE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
-import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 public class StatusHistoryServiceITest extends BaseTest {
     @Autowired
@@ -47,8 +47,8 @@ public class StatusHistoryServiceITest extends BaseTest {
         statusHistoryService.updateFromStatusHistory(wrapper, sittingRecordDuplicateCheckFields);
         assertThat(wrapper.getCreatedByName()).isEqualTo("Recorder");
         assertThat(wrapper.getCreatedDateTime().toLocalDate())
-            .isEqualTo(LocalDateTime.of(2023, JUNE, 29, 11, 40, 30, 490419)
+            .isEqualTo(LocalDateTime.of(2023, JUNE, 27, 11, 40, 30, 490419)
                            .toLocalDate());
-        assertThat(wrapper.getStatusId()).isEqualTo(PUBLISHED);
+        assertThat(wrapper.getStatusId()).isEqualTo(RECORDED);
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -29,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -366,8 +368,36 @@ class StatusHistoryRepositoryTest extends AbstractTest {
             sort.by(StatusHistory::getId).descending()
         );
 
-        assertThat(lastStatusHistory).isPresent();
-        assertThat(lastStatusHistory).hasValue(latestSavedStatusHistory.get());
+        assertThat(lastStatusHistory)
+            .isPresent()
+            .hasValue(latestSavedStatusHistory.get());
+    }
+
+    @Test
+    @Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
+    void shouldReturnFirstRecordedStatusHistoryWhenMultipleRecordsPresentForASittingRecord() {
+        SittingRecord sittingRecord = createSittingRecord();
+        Arrays.stream(StatusId.values())
+            .map(this::createStatusHistory)
+            .forEach(sittingRecord::addStatusHistory);
+
+        SittingRecord savedSittingRecord = recordRepository.save(sittingRecord);
+
+        List<StatusHistory> statusHistories = historyRepository.findAll();
+        Optional<StatusHistory> firstSavedStatusHistory = statusHistories.stream()
+            .filter(statusHistory -> statusHistory.getSittingRecord().getId().equals(sittingRecord.getId()))
+            .min(Comparator.comparing(StatusHistory::getChangedDateTime));
+
+        Optional<StatusHistory> firstStatusHistory = historyRepository.findBySittingRecordAndStatusId(
+            SittingRecord.builder()
+                .id(savedSittingRecord.getId())
+                .build(),
+            RECORDED
+        );
+
+        assertThat(firstStatusHistory)
+            .isPresent()
+            .hasValue(firstSavedStatusHistory.get());
     }
 
     SittingRecord createSittingRecord() {

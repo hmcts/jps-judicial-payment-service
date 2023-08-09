@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -46,8 +47,9 @@ import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
-import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 class SittingRecordServiceITest extends BaseTest {
 
@@ -406,7 +408,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetInvalidDuplicateRecordWhenJudgeRoleTypeIdDoesntMatchAndStatusSubmitted() throws IOException {
-        repoRecordSittingRecords("recordSittingRecords.json", SUBMITTED);
+        repoRecordSittingRecords("recordSittingRecords.json", PUBLISHED);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -423,9 +425,9 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .containsExactly(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
-                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
-                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED)
+            .containsExactly(tuple(INVALID_DUPLICATE_RECORD, "Recorder", PUBLISHED),
+                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", PUBLISHED),
+                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", PUBLISHED)
             );
 
         assertThat(sittingRecordWrappers).describedAs("Created date assertion")
@@ -685,7 +687,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetInvalidDuplicateRecordWhenStatusNotRecordedAndDurationIntersect() throws IOException {
-        repoRecordSittingRecords("recordSittingRecords.json", SUBMITTED);
+        repoRecordSittingRecords("recordSittingRecords.json", PUBLISHED);
 
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -718,8 +720,8 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .containsExactlyInAnyOrder(tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
-                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", SUBMITTED),
+            .containsExactlyInAnyOrder(tuple(INVALID_DUPLICATE_RECORD, "Recorder", PUBLISHED),
+                      tuple(INVALID_DUPLICATE_RECORD, "Recorder", PUBLISHED),
                       tuple(VALID, null, null)
             );
     }
@@ -784,14 +786,19 @@ class SittingRecordServiceITest extends BaseTest {
 
                 recordSittingRecordWrapper.setCreatedDateTime(LocalDateTime.now());
 
-                StatusHistory statusHistory = StatusHistory.builder()
-                    .statusId(statusId)
-                    .changedDateTime(LocalDateTime.now())
-                    .changedByUserId(recordSittingRecordRequest.getRecordedByIdamId())
-                    .changedByName(recordSittingRecordRequest.getRecordedByName())
-                    .build();
+                Arrays.stream(StatusId.values())
+                    .filter(statusId1 -> statusId1 != DELETED)
+                    .forEach(statusId1 -> {
+                        StatusHistory statusHistory = StatusHistory.builder()
+                            .statusId(statusId1)
+                            .changedDateTime(LocalDateTime.now())
+                            .changedByUserId(recordSittingRecordRequest.getRecordedByIdamId())
+                            .changedByName(recordSittingRecordRequest.getRecordedByName())
+                            .build();
 
-                sittingRecord.addStatusHistory(statusHistory);
+                        sittingRecord.addStatusHistory(statusHistory);
+                    });
+
                 sittingRecordRepository.save(sittingRecord);
             });
 

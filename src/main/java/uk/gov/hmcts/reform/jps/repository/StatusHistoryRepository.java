@@ -41,4 +41,6 @@ public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Lo
     );
 
     Optional<StatusHistory> findFirstBySittingRecord(SittingRecord sittingRecord, Sort sort);
+
+    Optional<StatusHistory> findBySittingRecordAndStatusId(SittingRecord sittingRecord, StatusId statusId);
 }
