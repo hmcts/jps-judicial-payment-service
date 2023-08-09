@@ -67,7 +67,7 @@ class RecordSittingRecordsControllerTest {
     private LocationService regionService;
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178",
         "recordSittingRecords.json,201,4918500"})
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
                                                       int responseCode,

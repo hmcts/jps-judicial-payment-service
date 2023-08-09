@@ -70,7 +70,7 @@ public class RecordSittingRecordsControllerITest {
 
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178,true",
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178,true",
         "recordSittingRecords.json,201,4918500,false"})
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})

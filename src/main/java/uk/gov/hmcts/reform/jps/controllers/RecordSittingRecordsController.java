@@ -37,7 +37,6 @@ import javax.validation.Valid;
 import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
@@ -127,15 +126,7 @@ public class RecordSittingRecordsController {
                                                     recordSittingRecordRequest.getRecordedByName(),
                                                     recordSittingRecordRequest.getRecordedByIdamId()
             );
-            HttpStatus httpStatus = sittingRecordWrappers.stream()
-                .filter(wrapper ->
-                            Boolean.TRUE
-                                .equals(wrapper.getSittingRecordRequest().getReplaceDuplicate()))
-                .findAny()
-                .map(sittingRecordWrapper -> OK)
-                .orElse(CREATED);
-
-            return status(httpStatus)
+            return status(CREATED)
                 .body(RecordSittingRecordResponse.builder()
                           .errorRecords(generateResponse(sittingRecordWrappers,
                                                          errorCode -> VALID,
