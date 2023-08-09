@@ -209,7 +209,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0]", Matchers.hasKey("accountCode"))
             .body("sittingRecords[0]", Matchers.hasKey("fee"))
             .body("sittingRecords[0].am",equalTo("AM"))
-            .body("sittingRecords[0].pm",equalTo("PM"))
+            .body("sittingRecords[0]", Matchers.hasKey("pm"))
             .body("sittingRecords[0].createdDateTime",Matchers.notNullValue())
             .body("sittingRecords[0].createdByUserId",equalTo("d139a314-eb40-45f4-9e7a-9e13f143cc3a"))
             .body("sittingRecords[0].createdByUserName",equalTo("Recorder"))

@@ -295,7 +295,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the request contains the "hmctsServiceCode" as "ABA5"
     And the request body contains the "3 sitting records, 2 valid, 1 potential with replaceDuplicate flag set to true" as in "S-004.26.json"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
-    Then a "positive" response is received with a "200 OK" status code
+    Then a "positive" response is received with a "201 OK" status code
     And the response contains "errorRecords[0].errorCode" as "VALID"
     And the response contains "errorRecords[0].statusId" as "RECORDED"
     And the response contains "errorRecords[0].createdByName" as "Recorder"
@@ -318,3 +318,14 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
     And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+
+  @S-004.28 @PossibleDuplicates #AC08
+  Scenario: Negative response - Return 400 - 008 could not insert generic error
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "has personalCode with more characters than it is allowed by the db" as in "S-004.28.json"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "errors[0].message" as "008 could not insert"
