@@ -70,7 +70,7 @@ public class RecordSittingRecordsControllerITest {
 
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178,true",
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178,true",
         "recordSittingRecords.json,201,4918500,false"})
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
@@ -229,6 +229,24 @@ public class RecordSittingRecordsControllerITest {
         assertThat(actualErrors.getErrors()).isNotEmpty();
         assertThat(actualErrors.getErrors())
             .hasSameElementsAs(expectedErrors.getErrors());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            )
+            .andReturn();
+
+        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
     }
 
     @Test

@@ -37,7 +37,6 @@ import javax.validation.Valid;
 import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
@@ -62,6 +61,15 @@ public class RecordSittingRecordsController {
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
 
+    @Operation(description = "Root not to be displayed", hidden = true)
+    @PostMapping(
+        path = {""}
+    )
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
+    public ResponseEntity<String> recordSittingRecords() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateServiceCode(Optional.empty()));
+    }
 
     @Operation(description = "Create a new sitting record")
     @ApiResponse(responseCode = "201",
@@ -73,7 +81,7 @@ public class RecordSittingRecordsController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @PostMapping(
-        path = {"/{hmctsServiceCode}"}
+        path = { "/{hmctsServiceCode}"}
     )
     @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
     public ResponseEntity<RecordSittingRecordResponse> recordSittingRecords(
@@ -90,20 +98,16 @@ public class RecordSittingRecordsController {
         regionService.setRegionId(hmctsServiceCode,
                                   sittingRecordWrappers);
 
-        Optional<ErrorCode> errorCodeCheck = checkForErrors(sittingRecordWrappers,
-                                                            sittingRecordWrapper -> true);
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+        Optional<ErrorCode> errorCodeCheck = checkForErrors(
+            sittingRecordWrappers,
+            not(sittingRecordWrapper ->
+                    POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
+                    && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
+                        && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()
+            )
+        );
 
-        if (errorCodeCheck.isEmpty()) {
-            sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
-
-            errorCodeCheck = checkForErrors(
-                sittingRecordWrappers,
-                not(sittingRecordWrapper ->
-                        POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
-                        && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-                            && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-            );
-        }
 
         if (errorCodeCheck.isPresent()) {
             return status(HttpStatus.BAD_REQUEST)
@@ -122,15 +126,7 @@ public class RecordSittingRecordsController {
                                                     recordSittingRecordRequest.getRecordedByName(),
                                                     recordSittingRecordRequest.getRecordedByIdamId()
             );
-            HttpStatus httpStatus = sittingRecordWrappers.stream()
-                .filter(wrapper ->
-                            Boolean.TRUE
-                                .equals(wrapper.getSittingRecordRequest().getReplaceDuplicate()))
-                .findAny()
-                .map(sittingRecordWrapper -> OK)
-                .orElse(CREATED);
-
-            return status(httpStatus)
+            return status(CREATED)
                 .body(RecordSittingRecordResponse.builder()
                           .errorRecords(generateResponse(sittingRecordWrappers,
                                                          errorCode -> VALID,

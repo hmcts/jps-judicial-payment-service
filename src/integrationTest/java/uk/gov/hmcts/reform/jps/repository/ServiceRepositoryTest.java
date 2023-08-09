@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -19,6 +20,8 @@ class ServiceRepositoryTest {
 
     @Autowired
     private ServiceRepository serviceRepository;
+
+    private static final String HMCTS_SERVICE_ID = "BB4";
 
     @Test
     void shouldSaveService() {
@@ -34,7 +37,7 @@ class ServiceRepositoryTest {
 
         Optional<Service> optionalServiceToUpdate = serviceRepository
             .findById(service.getId());
-        assertThat(optionalServiceToUpdate).isPresent();
+        assertTrue(optionalServiceToUpdate.isPresent());
 
         Service serviceToUpdate = optionalServiceToUpdate.get();
         serviceToUpdate.setHmctsServiceId("Updated");
@@ -57,18 +60,34 @@ class ServiceRepositoryTest {
         Service service = getPersistedService();
         Optional<Service> optionalServiceToUpdate = serviceRepository
             .findById(service.getId());
-        assertThat(optionalServiceToUpdate).isPresent();
+        assertTrue(optionalServiceToUpdate.isPresent());
 
         Service settingRecordToDelete = optionalServiceToUpdate.get();
         serviceRepository.deleteById(settingRecordToDelete.getId());
 
         optionalServiceToUpdate = serviceRepository.findById(settingRecordToDelete.getId());
-        assertThat(optionalServiceToUpdate).isEmpty();
+        assertTrue(optionalServiceToUpdate.isEmpty());
+    }
+
+    @Test
+    void shouldSuccessfullyFindServiceByHmctsServiceId() {
+        getPersistedService();
+
+        assertThat(serviceRepository.findByHmctsServiceId(HMCTS_SERVICE_ID))
+            .isPresent();
+    }
+
+    @Test
+    void shouldFailToFindServiceByHmctsServiceId() {
+        getPersistedService();
+
+        assertThat(serviceRepository.findByHmctsServiceId("FFGHJHUJ"))
+            .isEmpty();
     }
 
     private Service getPersistedService() {
         Service service = Service.builder()
-            .hmctsServiceId("BB4")
+            .hmctsServiceId(HMCTS_SERVICE_ID)
             .serviceName("TestService")
             .accountCenterCode("123")
             .onboardingStartDate(LocalDate.now())

@@ -46,13 +46,18 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.REGION_ID),
-                                             recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.EPIMMS_ID),
-                                             recordSearchRequest.getEpimmsId()));
+
         predicates.add(criteriaBuilder.between(sittingRecord.get(SittingRecord_.SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
+
+        Optional.ofNullable(recordSearchRequest.getRegionId())
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.REGION_ID), value)));
+
+        Optional.ofNullable(recordSearchRequest.getEpimmsId())
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.EPIMMS_ID), value)));
 
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
@@ -64,7 +69,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
-                sittingRecord.get("statusId"), value)));
+                sittingRecord.get(SittingRecord_.STATUS_ID), value)));
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
@@ -156,10 +161,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                 sittingRecord.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
 
             criteriaQuery.groupBy(sittingRecord.get(SittingRecord_.ID), joinStatusHistory.get(StatusHistory_.ID),
-                                  joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID))
+                                  joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID))
                 .having(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
                                               StatusId.RECORDED),
-                        criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGE_BY_USER_ID),
+                        criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID),
                                               recordSearchRequest.getCreatedByUserId()));
 
             LOGGER.debug("Group By sittingRecord.Id, statusHistory.Id and selected created by user");

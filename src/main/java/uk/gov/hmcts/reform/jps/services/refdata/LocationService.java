@@ -18,6 +18,29 @@ import java.util.function.BiPredicate;
 public class LocationService {
     private final LocationServiceClient regionServiceClient;
 
+    public Optional<CourtVenue> getCourtVenue(String hmctsServiceCode, String epimmsId) {
+        return getCourtVenue(
+            getLocationApiResponse(hmctsServiceCode),
+            epimmsId,
+            (court, paraEpimmsId) -> court.getEpimmsId().equals(paraEpimmsId)
+        );
+    }
+
+    private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo,
+                                               String value,
+                                               BiPredicate<CourtVenue, String> predicate) {
+        return serviceCourtInfo.getCourtVenues().stream()
+            .filter(courtVenue -> predicate.test(courtVenue, value))
+            .findAny();
+    }
+
+
+    public String getVenueName(String hmctsServiceCode, String epimmsId) {
+        return getCourtVenue(hmctsServiceCode, epimmsId)
+            .map(CourtVenue::getVenueName)
+            .orElse("");
+    }
+
     public void setRegionName(String hmctsServiceCode,
                               List<SittingRecord> sittingRecords) {
         LocationApiResponse serviceCourtInfo = regionServiceClient.getCourtVenue(hmctsServiceCode);
@@ -58,11 +81,8 @@ public class LocationService {
         });
     }
 
-    private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo,
-                                               String value,
-                                               BiPredicate<CourtVenue, String> predicate) {
-        return serviceCourtInfo.getCourtVenues().stream()
-            .filter(coutVenue -> predicate.test(coutVenue, value))
-            .findAny();
+    private LocationApiResponse getLocationApiResponse(String hmctsServiceCode) {
+        return regionServiceClient.getCourtVenue(hmctsServiceCode);
     }
+
 }

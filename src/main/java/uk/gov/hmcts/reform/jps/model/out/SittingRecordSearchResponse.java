@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.extern.jackson.Jacksonized;
+import uk.gov.hmcts.reform.jps.model.RecordingUser;
 
 import java.util.List;
 
@@ -15,5 +16,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SittingRecordSearchResponse {
     private int recordCount;
+    private List<RecordingUser> recordingUsers;
     private List<SittingRecord> sittingRecords;
 }

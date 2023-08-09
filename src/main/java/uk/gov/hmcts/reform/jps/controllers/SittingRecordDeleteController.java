@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,16 @@ import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 @Slf4j
 public class SittingRecordDeleteController {
     private final SittingRecordService sittingRecordService;
+
+    @Operation(description = "Root not to be displayed", hidden = true)
+    @DeleteMapping(
+        path = {""}
+    )
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "','" + JPS_ADMIN + "')")
+    public ResponseEntity<Long> deleteSittingRecord() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateSittingRecordId(Optional.empty()));
+    }
 
     @DeleteMapping(
         path = {"/{sittingRecordId}"}

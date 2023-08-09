@@ -14,7 +14,7 @@ import java.time.LocalDate;
 @Repository
 public interface SittingRecordRepository extends JpaRepository<SittingRecord, Long>, SittingRecordRepositorySearch {
 
-    @Query("select sh.changeByUserId from SittingRecord sr inner join StatusHistory sh "
+    @Query("select sh.changedByUserId from SittingRecord sr inner join StatusHistory sh "
         + "on sh.sittingRecord.id = sr.id and sh.statusId = 'RECORDED' "
         + "where sh.sittingRecord.id = :id ")
     String findCreatedByUserId(@Param("id") Long id);

@@ -1,8 +1,6 @@
 {
   "pageSize": "1",
   "dateOrder": "ASCENDING",
-  "regionId": "1",
-  "epimmsId": "1234",
   "dateRangeFrom": "dateToBeReplaced",
   "dateRangeTo": "dateToBeReplaced"
 }

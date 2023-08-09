@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
@@ -28,6 +29,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -65,7 +67,7 @@ class RecordSittingRecordsControllerTest {
     private LocationService regionService;
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178",
         "recordSittingRecords.json,201,4918500"})
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
                                                       int responseCode,
@@ -178,10 +180,23 @@ class RecordSittingRecordsControllerTest {
     void shouldRepondWithBadRequestWhenInvalidLocationRecordFound() throws Exception {
         doAnswer(invocation -> {
             List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(0);
-            sittingRecordWrappers.forEach(
-                sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(INVALID_LOCATION));
+            sittingRecordWrappers.stream()
+                .skip(2)
+                .forEach(
+                    sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD)
+                );
             return null;
         }).when(sittingRecordService).checkDuplicateRecords(anyList());
+
+        doAnswer(invocation -> {
+            List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(1);
+            sittingRecordWrappers.stream()
+                .limit(2)
+                .forEach(
+                    sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(INVALID_LOCATION)
+                );
+            return null;
+        }).when(regionService).setRegionId(anyString(), anyList());
 
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -216,7 +231,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
-                jsonPath("$.errorRecords[2].errorCode").value(INVALID_LOCATION.name())
+                jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name())
             ).andReturn();
 
         verify(sittingRecordService).checkDuplicateRecords(anyList());
@@ -256,6 +271,24 @@ class RecordSittingRecordsControllerTest {
         verify(sittingRecordService, never()).checkDuplicateRecords(any());
         verify(sittingRecordService, never()).saveSittingRecords(any(), any(), any(), any());
         verify(regionService, never()).setRegionId(any(), any());
+    }
+
+    @Test
+    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            )
+            .andReturn();
+
+        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
     }
 
     @Test
