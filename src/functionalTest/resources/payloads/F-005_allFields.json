@@ -9,7 +9,7 @@
   "duration": "AM",
   "dateRangeFrom": "dateToBeReplaced",
   "dateRangeTo": "dateToBeReplaced",
-  "statusIds": "RECORDED",
+  "statusId": "RECORDED",
   "medicalMembersOnly": false,
   "includeFees": false
 }

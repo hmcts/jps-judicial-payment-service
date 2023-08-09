@@ -82,7 +82,7 @@ public class StepDefinitions extends TestVariables {
             .header("Authorization", recorderAccessToken)
             .header("ServiceAuthorization", validS2sToken)
             .body(body).log().all()
-            .when().post("/recordSittingRecords/"+serviceCode)
+            .when().post("/recordSittingRecords/" + serviceCode)
             .then().log().all().assertThat().statusCode(201);
     }
 
