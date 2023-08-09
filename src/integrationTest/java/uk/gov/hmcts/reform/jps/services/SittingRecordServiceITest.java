@@ -52,7 +52,9 @@ class SittingRecordServiceITest extends BaseTest {
 
     public static final String EPIM_ID = "123";
     public static final String SSC_ID = "ssc_id";
+    @Autowired
     private SittingRecordService sittingRecordService;
+    @Autowired
     private StatusHistoryService statusHistoryService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
@@ -68,8 +70,6 @@ class SittingRecordServiceITest extends BaseTest {
     void beforeEach() {
         sittingRecordRepository.deleteAll();
         statusHistoryRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(sittingRecordRepository);
-        statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 
     @Test

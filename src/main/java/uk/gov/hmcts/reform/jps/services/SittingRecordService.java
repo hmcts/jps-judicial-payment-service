@@ -37,7 +37,7 @@ public class SittingRecordService {
 
     private final SittingRecordRepository sittingRecordRepository;
 
-    private SecurityUtils securityUtils;
+    private final SecurityUtils securityUtils;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,

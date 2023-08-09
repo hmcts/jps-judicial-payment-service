@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,7 +8,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -18,7 +16,6 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -30,6 +27,7 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -48,7 +46,7 @@ import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HIST
 @AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")
 @ActiveProfiles("itest")
-class SittingRecordControllerITest extends BaseTest {
+class SittingRecordControllerITest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -69,11 +67,6 @@ class SittingRecordControllerITest extends BaseTest {
 
     private static final String SEARCH_SITTING_RECORDS_JSON = "searchSittingRecords.json";
 
-    @BeforeEach
-    void setUp() {
-        historyRepository.deleteAll();
-        recordRepository.deleteAll();
-    }
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
@@ -93,6 +86,7 @@ class SittingRecordControllerITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = SittingRecord.builder()
@@ -109,7 +103,7 @@ class SittingRecordControllerITest extends BaseTest {
         StatusHistory statusHistory1 = StatusHistory.builder()
             .statusId(StatusId.RECORDED.name())
             .changeByUserId("11233")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByName("Jason Bourne")
             .build();
         sittingRecord.addStatusHistory(statusHistory1);
@@ -119,7 +113,7 @@ class SittingRecordControllerITest extends BaseTest {
         StatusHistory statusHistory2 = StatusHistory.builder()
             .statusId(StatusId.SUBMITTED.name())
             .changeByUserId("11255")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByName("Jackie Chan")
             .build();
         sittingRecord.addStatusHistory(statusHistory2);
@@ -130,7 +124,7 @@ class SittingRecordControllerITest extends BaseTest {
         StatusHistory statusHistory3 = StatusHistory.builder()
             .statusId(StatusId.PUBLISHED.name())
             .changeByUserId("11266")
-            .changeDateTime(LocalDateTime.now())
+            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
             .changeByName("Denzel Washington")
             .build();
         sittingRecord.addStatusHistory(statusHistory3);
