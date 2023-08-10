@@ -6,9 +6,9 @@
   "epimmsId": "229786",
   "personalCode": "4918178",
   "judgeRoleTypeId": "Judge",
-  "duration": "FULL_DAY",
-  "dateRangeFrom": "2023-03-10",
-  "dateRangeTo": "2023-05-12",
+  "duration": "AM",
+  "dateRangeFrom": "dateToBeReplaced",
+  "dateRangeTo": "dateToBeReplaced",
   "statusId": "RECORDED",
   "medicalMembersOnly": false,
   "includeFees": false

@@ -7,8 +7,9 @@
       "epimmsId": "229786",
       "personalCode": "4918178",
       "contractTypeId": "2",
-      "judgeRoleTypeId": "Judge",
-      "pm": true,
+      "judgeRoleTypeId": "Medical Member",
+      "am": true,
+      "pm": false,
       "replaceDuplicate": false
     }
   ]
