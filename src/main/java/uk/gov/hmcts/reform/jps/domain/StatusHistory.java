@@ -27,6 +27,7 @@ import javax.persistence.Table;
 @AllArgsConstructor
 @Data
 @ToString
+@org.hibernate.annotations.Immutable
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {

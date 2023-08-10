@@ -27,7 +27,7 @@ public class StatusHistoryServiceITest extends BaseTest {
 
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldUpdateWithStatusHistoryWhenDbRecordPresent() {
         List<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> dbRecord
             = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(

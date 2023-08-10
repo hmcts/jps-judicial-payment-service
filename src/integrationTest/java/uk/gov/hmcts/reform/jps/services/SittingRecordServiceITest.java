@@ -8,10 +8,14 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
-import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -30,6 +34,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -45,7 +50,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
@@ -56,8 +62,13 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @Transactional
-@Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
-class SittingRecordServiceITest extends BaseTest {
+@Sql(scripts = RESET_DATABASE)
+@SpringBootTest
+@AutoConfigureMockMvc
+@AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")
+@ActiveProfiles("itest")
+class SittingRecordServiceITest {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
 
     @Autowired
@@ -402,7 +413,7 @@ class SittingRecordServiceITest extends BaseTest {
 
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatch() throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 
@@ -826,14 +837,27 @@ class SittingRecordServiceITest extends BaseTest {
 
     @ParameterizedTest
     @CsvSource(textBlock = """
-      # REGION_ID,       Expected_Status_ID
-      6,                SUBMITTED
-      7,                CLOSED
+      # RegionId,    Submitted,   Closed, StatusId, PreviousStatusId, Count
+      6,             1,           0,      SUBMITTED, RECORDED,          2
+      7,             0,           1,      CLOSED,    RECORDED,          2
+      8,             0,           1,      CLOSED,    RECORDED,          2
+      9,             1,           0,      SUBMITTED, RECORDED,          2
+      10,            0,           0,      RECORDED,  RECORDED,          1
+      11,            0,           0,      RECORDED , RECORDED,          1
         """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    @WithMockUser(authorities = {"jps-submitter"})
     void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable(
         String regionId,
-        StatusId statusId) {
+        Integer submitted,
+        Integer closed,
+        StatusId statusId,
+        StatusId previousId,
+        Integer count) {
+        HashSet<StatusId> statusIds = new HashSet<>();
+        statusIds.add(statusId);
+        statusIds.add(previousId);
+
         List<SittingRecord> sittingRecords = sittingRecordRepository.findAll();
         SittingRecord sittingRecord = sittingRecords.stream()
             .filter(record -> record.getRegionId().equals(regionId))
@@ -864,6 +888,11 @@ class SittingRecordServiceITest extends BaseTest {
             "BBA3"
         );
 
+        assertThat(submitSittingRecordResponse.getRecordsSubmitted())
+            .isEqualTo(submitted);
+        assertThat(submitSittingRecordResponse.getRecordsClosed())
+            .isEqualTo(closed);
+
         sittingRecords = sittingRecordRepository.findAll();
 
         sittingRecord = sittingRecords.stream()
@@ -877,8 +906,8 @@ class SittingRecordServiceITest extends BaseTest {
 
         statusHistories = sittingRecord.getStatusHistories();
         assertThat(statusHistories)
-            .hasSize(2)
-            .extracting("statusId")
-            .containsExactly(RECORDED, statusId);
+            .hasSize(count)
+            .map(StatusHistory::getStatusId)
+            .containsExactlyInAnyOrderElementsOf(statusIds);
     }
 }

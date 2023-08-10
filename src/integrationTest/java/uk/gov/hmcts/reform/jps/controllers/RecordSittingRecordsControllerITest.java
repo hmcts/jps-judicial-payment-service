@@ -34,7 +34,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_PUBLISHER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
@@ -65,7 +65,7 @@ public class RecordSittingRecordsControllerITest {
     @ParameterizedTest
     @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
         "recordSittingRecords.json,201,4918500"})
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldRecordSittingRecordsWhenAllDataIsPresent(String fileName,
                                                         int responseCode,
@@ -129,7 +129,7 @@ public class RecordSittingRecordsControllerITest {
 
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
         String requestJson =  Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);

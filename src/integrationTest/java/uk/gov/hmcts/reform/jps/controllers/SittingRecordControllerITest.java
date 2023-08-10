@@ -43,7 +43,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
@@ -75,7 +75,7 @@ class SittingRecordControllerITest {
     private static final String SEARCH_SITTING_RECORDS_JSON = "searchSittingRecords.json";
 
     @BeforeEach
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE})
 
     @Test
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
@@ -240,7 +240,7 @@ class SittingRecordControllerITest {
       # ROLE
       jps-recorder
         """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_RECORDER})
     void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
@@ -258,7 +258,7 @@ class SittingRecordControllerITest {
       # ROLE
       jps-submitter
         """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_SUBMITTER})
     void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
@@ -276,7 +276,7 @@ class SittingRecordControllerITest {
       # ROLE
       jps-admin
         """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_ADMIN})
     void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin(String role) throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);

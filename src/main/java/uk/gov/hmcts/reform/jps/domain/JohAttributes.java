@@ -20,6 +20,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
+@org.hibernate.annotations.Immutable
 @Entity
 @Table(name = "joh_attributes")
 public class JohAttributes {

@@ -27,7 +27,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
+import java.util.function.BiPredicate;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.function.Predicate.not;
@@ -53,6 +53,7 @@ public class SittingRecordService {
     private final DuplicateCheckerService duplicateCheckerService;
     private final SecurityUtils securityUtils;
     private final StatusHistoryService statusHistoryService;
+    private final JudicialOfficeHolderService judicialOfficeHolderService;
 
     @Lazy
     private final SittingRecordService self;
@@ -217,27 +218,43 @@ public class SittingRecordService {
 
 
     @Transactional
+    @PreAuthorize("hasAuthority('jps-submitter')")
     public SubmitSittingRecordResponse submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
                                                             String hmctsServiceCode) {
+        BiPredicate<RecordSubmitFields, Boolean> filter = this::filterRecordsToClose;
+
+        int submittedCount = 0;
+        int closedCount = 0;
 
         List<RecordSubmitFields> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             hmctsServiceCode
         );
 
-        int submittedCount = updateRecords(
-            submitSittingRecordRequest,
-            recordsToSubmit,
-            SUBMITTED,
-            not(this::filterRecordsToClose)
-        );
+        if (!recordsToSubmit.isEmpty()) {
+            List<Long> updatedRecords = getUpdatedRecords(
+                submitSittingRecordRequest,
+                recordsToSubmit,
+                SUBMITTED,
+                filter.negate(),
+                true
+            );
 
-        int closedCount = updateRecords(
-            submitSittingRecordRequest,
-            recordsToSubmit,
-            CLOSED,
-            this::filterRecordsToClose
-        );
+            submittedCount = updatedRecords.size();
+
+            recordsToSubmit = recordsToSubmit.stream()
+                    .filter(not(recordSubmitFields -> updatedRecords.contains(recordSubmitFields.getId())))
+                    .toList();
+
+
+            closedCount = getUpdatedRecords(
+                submitSittingRecordRequest,
+                recordsToSubmit,
+                CLOSED,
+                filter,
+                false
+            ).size();
+        }
 
         return SubmitSittingRecordResponse.builder()
             .recordsSubmitted(submittedCount)
@@ -245,12 +262,14 @@ public class SittingRecordService {
             .build();
     }
 
-    private int updateRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
-                                     List<RecordSubmitFields> recordsToSubmit,
-                                     StatusId statusId,
-                                     Predicate<RecordSubmitFields> filter) {
+    private List<Long> getUpdatedRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                         List<RecordSubmitFields> recordsToSubmit,
+                                         StatusId statusId,
+                                         BiPredicate<RecordSubmitFields, Boolean> filter,
+                                         Boolean crownFlagEmpty
+    ) {
         List<Long> records = recordsToSubmit.stream()
-            .filter(filter)
+            .filter(recordSubmitFields -> filter.test(recordSubmitFields, crownFlagEmpty))
             .map(RecordSubmitFields::getId)
             .toList();
 
@@ -262,10 +281,19 @@ public class SittingRecordService {
 
             sittingRecordRepository.updateRecordedStatus(submitRecordId, statusId);
         });
-        return records.size();
+        return records;
     }
 
-    private boolean filterRecordsToClose(RecordSubmitFields recordSubmitFields) {
-        return !CONTRACT_TYPE_ID_NOT_TO_CLOSE.contains(recordSubmitFields.getContractTypeId());
+    private boolean filterRecordsToClose(RecordSubmitFields recordSubmitFields, Boolean crownFlagEmpty) {
+        Optional<Boolean> crownServiceFlag = Optional.empty();
+        if (recordSubmitFields.getContractTypeId() == 6L) {
+            crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(recordSubmitFields.getPersonalCode());
+            if (crownServiceFlag.isEmpty()) {
+                return crownFlagEmpty;
+            }
+        }
+
+        return !CONTRACT_TYPE_ID_NOT_TO_CLOSE.contains(recordSubmitFields.getContractTypeId())
+            || crownServiceFlag.map(Boolean.FALSE::equals).orElse(false);
     }
 }

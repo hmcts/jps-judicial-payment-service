@@ -89,6 +89,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private StatusHistoryService statusHistoryService;
 
+    @Mock
+    private JudicialOfficeHolderService judicialOfficeHolderService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
@@ -98,6 +101,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
     @Captor
     private ArgumentCaptor<Long> records;
+    @Captor
+    private ArgumentCaptor<String> data;
 
     @BeforeEach
     void setUp() {
@@ -491,18 +496,19 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
         String hmctsServiceCode = "BBA3";
         List<RecordSubmitFields> sittingRecordIds = List.of(
-            RecordSubmitFields.builder()
-                .id(1L)
-                .contractTypeId(6L)
-                .build(),
-            RecordSubmitFields.builder()
-                .id(100L)
-                .contractTypeId(2L)
-                .build(),
-            RecordSubmitFields.builder()
-                .id(200L)
-                .contractTypeId(3L)
-                .build());
+            getRecordSubmitFields(1L, 6L, "123"),
+            getRecordSubmitFields(100L, 2L, "243"),
+            getRecordSubmitFields(200L, 3L, "567"),
+            getRecordSubmitFields(300L, 6L, "789"),
+            getRecordSubmitFields(400L, 6L, "999")
+        );
+
+        when(judicialOfficeHolderService.getCrownServiceFlag("123"))
+            .thenReturn(Optional.of(true));
+        when(judicialOfficeHolderService.getCrownServiceFlag("789"))
+            .thenReturn(Optional.of(false));
+        when(judicialOfficeHolderService.getCrownServiceFlag("999"))
+            .thenReturn(Optional.empty());
 
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
             .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
@@ -532,7 +538,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .describedAs("Records submitted")
             .contains(1L, 100L);
 
-        verify(statusHistoryService, times(1))
+        verify(statusHistoryService, times(2))
             .insertRecord(records.capture(),
                           eq(CLOSED),
                           eq(submitSittingRecordRequest.getSubmittedByIdamId()),
@@ -547,11 +553,28 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .isEqualTo(2);
 
         assertThat(submitSittingRecordResponse.getRecordsClosed())
-            .isEqualTo(1);
+            .isEqualTo(2);
 
 
-        verify(sittingRecordRepository, times(3))
+        verify(sittingRecordRepository, times(4))
             .updateRecordedStatus(anyLong(), isA(StatusId.class));
+        verify(judicialOfficeHolderService, times(5))
+            .getCrownServiceFlag(data.capture());
+
+        assertThat(data.getAllValues())
+            .containsExactlyInAnyOrder("123",
+                                       "789",
+                                       "999",
+                                       "789",
+                                       "999");
+    }
+
+    private static RecordSubmitFields getRecordSubmitFields(long id, long contractTypeId, String number) {
+        return RecordSubmitFields.builder()
+            .id(id)
+            .contractTypeId(contractTypeId)
+            .personalCode(number)
+            .build();
     }
 
     @Test
