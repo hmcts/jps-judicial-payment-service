@@ -215,8 +215,6 @@ public class SittingRecordService {
         }
     }
 
-
-
     @Transactional
     @PreAuthorize("hasAuthority('jps-submitter')")
     public SubmitSittingRecordResponse submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
@@ -245,7 +243,6 @@ public class SittingRecordService {
             recordsToSubmit = recordsToSubmit.stream()
                     .filter(not(recordSubmitFields -> updatedRecords.contains(recordSubmitFields.getId())))
                     .toList();
-
 
             closedCount = getUpdatedRecords(
                 submitSittingRecordRequest,
