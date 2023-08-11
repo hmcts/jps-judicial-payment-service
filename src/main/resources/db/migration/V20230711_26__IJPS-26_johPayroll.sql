@@ -12,9 +12,6 @@ CREATE TABLE joh_payroll (
     payroll_id varchar(255) NOT NULL
 );
 
-ALTER TABLE ONLY public.judicial_office_holder
-ADD CONSTRAINT uc_judicial_office_holder UNIQUE (local_joh_record_id);
-
 ALTER TABLE ONLY public.joh_payroll
 ADD CONSTRAINT fk_johp_judicial_office_holder FOREIGN KEY (local_joh_record_id)
   REFERENCES public.judicial_office_holder(local_joh_record_id);
