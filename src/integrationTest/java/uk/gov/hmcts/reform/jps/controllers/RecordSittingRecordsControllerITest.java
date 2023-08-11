@@ -9,6 +9,7 @@ import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
@@ -26,6 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
@@ -41,6 +43,7 @@ public class RecordSittingRecordsControllerITest {
     private ObjectMapper objectMapper;
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -94,6 +97,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-publisher", "jps-admin"})
     void shouldReturnUnauthorizedStatusWhenUserIsUnauthorized() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -105,6 +109,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
@@ -123,6 +128,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenRequestIsEmpty() throws Exception {
         String requestJson = "{}";
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -149,6 +155,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("recordMandatoryFieldsMissing.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)

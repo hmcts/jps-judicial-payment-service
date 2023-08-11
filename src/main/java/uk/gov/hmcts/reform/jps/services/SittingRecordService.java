@@ -120,6 +120,9 @@ public class SittingRecordService {
     @Transactional
     @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
     public void deleteSittingRecord(Long sittingRecordId) {
+        System.out.println("in function");
+        System.out.println(sittingRecordId.toString());
+        System.out.println(sittingRecordRepository.findById(sittingRecordId));
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = sittingRecordRepository.findById(sittingRecordId)
             .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));

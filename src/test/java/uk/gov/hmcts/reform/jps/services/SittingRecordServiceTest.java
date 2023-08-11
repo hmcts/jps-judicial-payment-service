@@ -31,7 +31,6 @@ import java.time.Month;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -61,7 +60,7 @@ class SittingRecordServiceTest {
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
     private static final LocalDateTime CURRENT_DATE_TIME = now();
 
-    private static final Long ID = new Random().nextLong();
+    private static final Long ID = 1L;
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
@@ -271,9 +270,22 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
 
+
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findById(ID)).thenReturn(Optional.of(sittingRecord));
+
+        System.out.println(sittingRecord.getId());
+        System.out.println(sittingRecord);
+        System.out.println(sittingRecordRepository.findById(ID));
+        System.out.println(sittingRecord.getLatestStatusHistory());
+
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
+
+        System.out.println("post delete");
+        System.out.println(sittingRecord);
+        System.out.println(sittingRecordRepository.findById(ID));
+        System.out.println(sittingRecord.getLatestStatusHistory());
 
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
@@ -348,7 +360,7 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
 
         Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
+            sittingRecordService.deleteSittingRecord(ID);
         });
 
         StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
