@@ -7,12 +7,12 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -69,6 +69,6 @@ public class JudicialOfficeHolder {
 
     @Override
     public int hashCode() {
-        return new HashCodeBuilder(17, 37).append(id).append(personalCode).append(johPayrolls).toHashCode();
+        return Objects.hashCode(this);
     }
 }
