@@ -120,9 +120,6 @@ public class SittingRecordService {
     @Transactional
     @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
     public void deleteSittingRecord(Long sittingRecordId) {
-        System.out.println("in function");
-        System.out.println(sittingRecordId.toString());
-        System.out.println(sittingRecordRepository.findById(sittingRecordId));
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = sittingRecordRepository.findById(sittingRecordId)
             .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
@@ -130,19 +127,9 @@ public class SittingRecordService {
         if (securityUtils.getUserInfo().getRoles().contains("jps-recorder")) {
             recorderDelete(sittingRecord);
         } else if (securityUtils.getUserInfo().getRoles().contains("jps-submitter")) {
-            deleteSittingRecord(sittingRecord, RECORDED);
+            stateCheck(sittingRecord, RECORDED);
         } else if (securityUtils.getUserInfo().getRoles().contains("jps-admin")) {
-            deleteSittingRecord(sittingRecord, SUBMITTED);
-        }
-    }
-
-    private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
-                                     StatusId recorded) {
-
-        if (sittingRecord.getStatusId().equals(recorded.name())) {
-            deleteSittingRecord(sittingRecord);
-        } else {
-            throw new ConflictException("Sitting Record Status ID is in wrong state");
+            stateCheck(sittingRecord, SUBMITTED);
         }
     }
 
@@ -157,6 +144,16 @@ public class SittingRecordService {
         sittingRecord.addStatusHistory(statusHistory);
         sittingRecord.setStatusId(DELETED.name());
         sittingRecordRepository.save(sittingRecord);
+    }
+
+    private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
+                                     StatusId recorded) {
+
+        if (sittingRecord.getStatusId().equals(recorded.name())) {
+            deleteSittingRecord(sittingRecord);
+        } else {
+            throw new ConflictException("Sitting Record Status ID is in wrong state");
+        }
     }
 
     private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {

@@ -9,7 +9,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
@@ -41,7 +40,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -237,7 +235,7 @@ class SittingRecordServiceTest {
 
     private uk.gov.hmcts.reform.jps.domain.SittingRecord deleteTestSetUp(String changeById, String state) {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(RECORDED.name())
+            .statusId(state)
             .changeDateTime(now())
             .changeByUserId(changeById)
             .changeByName("John Smith")
@@ -270,15 +268,8 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
 
-
         when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
         when(sittingRecordRepository.findById(ID)).thenReturn(Optional.of(sittingRecord));
-
-        System.out.println(sittingRecord.getId());
-        System.out.println(sittingRecord);
-        System.out.println(sittingRecordRepository.findById(ID));
-        System.out.println(sittingRecord.getLatestStatusHistory());
-
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
