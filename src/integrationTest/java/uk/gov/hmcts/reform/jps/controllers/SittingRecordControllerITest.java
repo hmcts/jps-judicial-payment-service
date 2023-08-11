@@ -10,6 +10,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -148,7 +149,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -219,7 +220,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -290,7 +291,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -361,7 +362,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].statusId").value(StatusId.PUBLISHED.name()),
                 jsonPath("$.sittingRecords[0].regionId").value("1"),
                 jsonPath("$.sittingRecords[0].regionName").value(LONDON),
-                jsonPath("$.sittingRecords[0].epimsId").value(EPIMMS_ID),
+                jsonPath("$.sittingRecords[0].epimmsId").value(EPIMMS_ID),
                 jsonPath("$.sittingRecords[0].hmctsServiceId").value(HMCTS_SERVICE_CODE),
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
@@ -504,16 +505,22 @@ class SittingRecordControllerITest extends BaseTest {
             .contains("one of the values accepted for Enum class: [ASCENDING, DESCENDING]");
     }
 
-    private SittingRecord createSittingRecord(Long contractTypeId, String epimsId, String hmctsServiceId,
+    private SittingRecord createSittingRecord(Long contractTypeId, String epimmsId, String hmctsServiceId,
                                               String judgeRoleTypeId, String personalCode, String regionId,
                                               String statusId) {
+
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode(personalCode)
+            .build();
+
+
         return SittingRecord.builder()
             .am(true)
             .contractTypeId(contractTypeId)
-            .epimsId(epimsId)
+            .epimmsId(epimmsId)
             .hmctsServiceId(hmctsServiceId)
             .judgeRoleTypeId(judgeRoleTypeId)
-            .personalCode(personalCode)
+            .personalCode(judicialOfficeHolder.getPersonalCode())
             .pm(false)
             .regionId(regionId)
             .sittingDate(LocalDate.now().minusDays(2L))

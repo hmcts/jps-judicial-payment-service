@@ -22,7 +22,7 @@ public class LocationService {
         return getCourtVenue(
             getLocationApiResponse(hmctsServiceCode),
             epimmsId,
-            (court, epimsId) -> court.getEpimmsId().equals(epimsId)
+            (court, epimmId) -> court.getEpimmsId().equals(epimmId)
         );
     }
 
@@ -69,8 +69,8 @@ public class LocationService {
         recordedSittingRecords.forEach(sittingRecordRequest -> {
             Optional<CourtVenue> courtVenue = getCourtVenue(
                 serviceCourtInfo,
-                sittingRecordRequest.getEpimsId(),
-                (court, epimsId) -> court.getEpimmsId().equals(epimsId)
+                sittingRecordRequest.getEpimmsId(),
+                (court, epimmsId) -> court.getEpimmsId().equals(epimmsId)
             );
             sittingRecordRequest.setRegionId(courtVenue.map(CourtVenue::getRegionId)
                                                  .orElseThrow(InvalidLocationException::new));

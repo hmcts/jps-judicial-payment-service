@@ -30,24 +30,30 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     @Autowired
     private StatusHistoryRepository historyRepository;
+
+    @Autowired
+    private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
+
     private StatusHistory statusHistoryRecorded;
+
+    private static final String PERSONAL_CODE = "001";
 
     @BeforeEach
     void setUp() {
+        judicialOfficeHolderRepository.deleteAll();
         recordRepository.deleteAll();
         historyRepository.deleteAll();
     }
 
     @Test
     void shouldSaveSittingRecord() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.name(),
                                                    "John Doe",
                                                    sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded1);
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
         assertThat(persistedSittingRecord).isEqualTo(sittingRecord);
@@ -55,7 +61,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     @Test
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    "555",
                                                    "John Doe 555",
@@ -93,7 +99,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
     @Test
     void shouldDeleteSelectedRecord() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "John Doe",
@@ -127,7 +133,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     }
 
     private SittingRecord createSittingRecordWithSeveralStatus() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
                                                     JpsRole.ROLE_RECORDER.getValue(),
                                                     "John Doe",

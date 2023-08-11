@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -54,7 +55,7 @@ public class SittingRecordService {
                 .createdByUserId(sittingRecord.getCreatedByUserId())
                 .createdByUserName(sittingRecord.getCreatedByUserName())
                 .createdDateTime(sittingRecord.getCreatedDateTime())
-                .epimsId(sittingRecord.getEpimsId())
+                .epimmsId(sittingRecord.getEpimmsId())
                 .hmctsServiceId(sittingRecord.getHmctsServiceId())
                 .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                 .personalCode(sittingRecord.getPersonalCode())
@@ -64,7 +65,7 @@ public class SittingRecordService {
                 .sittingRecordId(sittingRecord.getId())
                 .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                 .statusId(sittingRecord.getStatusId())
-                .venueName(getVenueName(hmctsServiceCode, sittingRecord.getEpimsId()))
+                .venueName(getVenueName(hmctsServiceCode, sittingRecord.getEpimmsId()))
                 .build()
             )
             .toList();
@@ -82,26 +83,29 @@ public class SittingRecordService {
     @Transactional
     public void saveSittingRecords(String hmctsServiceCode,
                                    RecordSittingRecordRequest recordSittingRecordRequest) {
-        LOGGER.debug("saveSittingRecords");
         recordSittingRecordRequest.getRecordedSittingRecords()
             .forEach(recordSittingRecord -> {
+
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
                     uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
                         .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
                                 .map(DurationBoolean::getAm).orElse(false))
                         .contractTypeId(recordSittingRecord.getContractTypeId())
-                        .epimsId(recordSittingRecord.getEpimsId())
+                        .epimmsId(recordSittingRecord.getEpimmsId())
                         .hmctsServiceId(hmctsServiceCode)
                         .personalCode(recordSittingRecord.getPersonalCode())
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
+                        .personalCode(recordSittingRecord.getPersonalCode())
                         .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                            .map(DurationBoolean::getPm).orElse(false))
+                                .map(DurationBoolean::getPm).orElse(false))
                         .regionId(recordSittingRecord.getRegionId())
                         .sittingDate(recordSittingRecord.getSittingDate())
                         .statusId(StatusId.RECORDED.name())
                         .build();
 
                 recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+
+                createJudicialOfficeHolder(recordSittingRecord.getPersonalCode());
 
                 StatusHistory statusHistory = StatusHistory.builder()
                     .changedByName(recordSittingRecordRequest.getRecordedByName())
@@ -111,8 +115,12 @@ public class SittingRecordService {
                     .build();
 
                 sittingRecord.addStatusHistory(statusHistory);
-                sittingRecordRepository.save(sittingRecord);
+                save(sittingRecord);
             });
+    }
+
+    public void save(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        sittingRecordRepository.save(sittingRecord);
     }
 
     private String getAccountCode(String hmctsServiceCode) {
@@ -137,6 +145,13 @@ public class SittingRecordService {
         }
 
         return locationService.getVenueName(hmctsServiceCode, epimmsId);
+    }
+
+    private JudicialOfficeHolder createJudicialOfficeHolder(String personalCode) {
+        return JudicialOfficeHolder.builder()
+            .personalCode(personalCode)
+            .build();
+
     }
 
 }

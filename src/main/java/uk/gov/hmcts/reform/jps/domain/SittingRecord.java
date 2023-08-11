@@ -44,13 +44,13 @@ public class SittingRecord {
     @Column(name = "region_id")
     private String regionId;
 
-    @Column(name =  "epims_id")
-    private String epimsId;
+    @Column(name =  "epimms_id")
+    private String epimmsId;
 
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
 
-    @Column(name = "personal_code")
+    @Column(name = "personal_code", nullable = false)
     private String personalCode;
 
     @Column(name = "contract_type_id")
@@ -121,12 +121,14 @@ public class SittingRecord {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
-        return (sittingRecord.getId() == this.getId()
+        return (sittingRecord.getId().equals(this.getId())
+            && sittingRecord.isAm() == this.isAm()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
             && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()

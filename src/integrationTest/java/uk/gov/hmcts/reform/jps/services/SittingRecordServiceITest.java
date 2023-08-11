@@ -63,8 +63,7 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
     private static final String STATUS_ID_FIXED = "RECORDED";
     private static final String REGION_ID_FIXED = "1";
-    private static final String EPIMS_ID_FIXED = "852649";
-    private static final String PERSONAL_CODE_FIXED = "4918178";
+    private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
     @BeforeEach
@@ -83,7 +82,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(10)
             .offset(0)
             .regionId(sittingRecord.getRegionId())
-            .epimsId(sittingRecord.getEpimsId())
+            .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(4))
             .dateRangeTo(LocalDate.now())
@@ -112,7 +111,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(10)
             .offset(0)
             .regionId(sittingRecord.getRegionId())
-            .epimsId(sittingRecord.getEpimsId())
+            .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(4))
             .dateRangeTo(LocalDate.now())
@@ -142,7 +141,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -179,7 +178,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(20)
             .regionId(reasonId)
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(DESCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -220,7 +219,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -248,17 +247,17 @@ class SittingRecordServiceITest extends BaseTest {
         List<SittingRecord> savedSittingRecords = sittingRecordRepository.findAll();
 
         assertThat(savedSittingRecords)
-            .extracting(SittingRecord_.SITTING_DATE, SittingRecord_.REGION_ID, SittingRecord_.EPIMS_ID,
+            .extracting(SittingRecord_.SITTING_DATE, SittingRecord_.REGION_ID, SittingRecord_.EPIMMS_ID,
                         SittingRecord_.PERSONAL_CODE, SittingRecord_.JUDGE_ROLE_TYPE_ID,
                         SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM,
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
-                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918178",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
-                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918179",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
-                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918180",
                       JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE)
             );
 
@@ -309,7 +308,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(10)
             .offset(0)
             .regionId(sittingRecord.getRegionId())
-            .epimsId(sittingRecord.getEpimsId())
+            .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -353,7 +352,7 @@ class SittingRecordServiceITest extends BaseTest {
             .sittingDate(LocalDate.now().minusDays(counter))
             .statusId(statusId)
             .regionId("1")
-            .epimsId(EPIMMS_ID)
+            .epimmsId(EPIMMS_ID)
             .hmctsServiceId(HMCTS_SERVICE_CODE)
             .personalCode("001")
             .contractTypeId(counter)

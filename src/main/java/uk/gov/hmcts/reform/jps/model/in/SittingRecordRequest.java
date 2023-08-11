@@ -28,8 +28,8 @@ public class SittingRecordRequest implements Serializable {
     @NotNull(message = "Sitting date is mandatory")
     private final LocalDate sittingDate;
 
-    @NotBlank(message = "Epims Id is mandatory")
-    private final String epimsId;
+    @NotBlank(message = "Epimms Id is mandatory")
+    private final String epimmsId;
 
     @NotBlank(message = "Personal code is mandatory")
     private final String personalCode;
