@@ -15,6 +15,6 @@ public class JudicialOfficeHolderService {
 
     public Optional<Boolean> getCrownServiceFlag(String personalCode) {
         return judicialOfficeHolderRepository.findByPersonalCode(personalCode)
-            .map(JudicialOfficeHolder::getGetActiveJohAttributesCrownFlag);
+            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag);
     }
 }

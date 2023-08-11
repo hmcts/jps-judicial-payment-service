@@ -2,8 +2,9 @@ package uk.gov.hmcts.reform.jps.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.time.LocalDate;
 import javax.persistence.Column;
@@ -19,7 +20,8 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @org.hibernate.annotations.Immutable
 @Entity
 @Table(name = "joh_attributes")
@@ -30,7 +32,7 @@ public class JohAttributes {
     @Column(name = "joh_attributes_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "local_joh_record_id")
     private JudicialOfficeHolder judicialOfficeHolder;
 

@@ -2,17 +2,16 @@ package uk.gov.hmcts.reform.jps.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
 import org.hibernate.annotations.Formula;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -21,10 +20,10 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Builder
-@NoArgsConstructor()
+@NoArgsConstructor
 @AllArgsConstructor
-@Data
-@ToString
+@Setter
+@Getter
 @Entity
 @Table(name = "judicial_office_holder")
 public class JudicialOfficeHolder {
@@ -37,13 +36,9 @@ public class JudicialOfficeHolder {
     @JoinColumn(name = "personal_code")
     private String personalCode;
 
-    @ToString.Exclude
-    @OneToMany(fetch = FetchType.LAZY)
-    private List<SittingRecord> sittingRecords;
 
-    @ToString.Exclude
     @OneToMany(mappedBy = "judicialOfficeHolder", orphanRemoval = true, cascade = {CascadeType.ALL})
-    private final List<JohAttributes> johAttributes = new ArrayList<>();
+    private final Set<JohAttributes> johAttributes = new HashSet<>();
 
     @Formula("""
         (select j.crown_servant_flag
@@ -54,18 +49,10 @@ public class JudicialOfficeHolder {
         limit 1)
         """
     )
-    private Boolean getActiveJohAttributesCrownFlag;
-
-    public void addSittingRecord(SittingRecord sittingRecord) {
-        if (null == sittingRecords) {
-            sittingRecords = new ArrayList<>();
-        }
-        this.sittingRecords.add(sittingRecord);
-    }
+    private Boolean isActiveJohAttributesCrownFlag;
 
     public void addJohAttributes(JohAttributes johAttributes) {
         this.johAttributes.add(johAttributes);
         johAttributes.setJudicialOfficeHolder(this);
     }
-
 }

@@ -37,6 +37,8 @@ INSERT INTO public.judicial_office_holder (local_joh_record_id, personal_code)
 VALUES (5,'8918178');
 INSERT INTO public.judicial_office_holder (local_joh_record_id, personal_code)
 VALUES (6,'9918178');
+INSERT INTO public.judicial_office_holder (local_joh_record_id, personal_code)
+VALUES (7,'9928178');
 
 INSERT INTO public.joh_attributes (joh_attributes_id, local_joh_record_id, effective_start_date, crown_servant_flag, london_flag)
 VALUES (1,3, '2023-04-27', false, true);
@@ -44,6 +46,10 @@ INSERT INTO public.joh_attributes (joh_attributes_id, local_joh_record_id, effec
 VALUES (2,4, '2023-04-27', true, true);
 INSERT INTO public.joh_attributes (joh_attributes_id, local_joh_record_id, effective_start_date, crown_servant_flag, london_flag)
 VALUES (3,6, CURRENT_DATE + 2, true, true);
+INSERT INTO public.joh_attributes (joh_attributes_id, local_joh_record_id, effective_start_date, crown_servant_flag, london_flag)
+VALUES (4,7, CURRENT_DATE + 2, true, true);
+INSERT INTO public.joh_attributes (joh_attributes_id, local_joh_record_id, effective_start_date, crown_servant_flag, london_flag)
+VALUES (5,7, CURRENT_DATE, true, true);
 
 
 
