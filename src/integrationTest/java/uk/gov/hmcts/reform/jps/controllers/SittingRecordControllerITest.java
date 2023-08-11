@@ -8,11 +8,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -20,7 +17,6 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
-import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -32,7 +28,6 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -95,6 +90,7 @@ class SittingRecordControllerITest {
 
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
@@ -115,6 +111,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     @Sql(scripts = {"classpath:insert_service_test_data.sql"})
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
@@ -187,6 +184,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldHaveOkResponseWhenRequestIsValidButNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -258,6 +256,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -329,6 +328,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -401,6 +401,7 @@ class SittingRecordControllerITest {
 
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMultipleMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord1 = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -456,6 +457,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
@@ -473,6 +475,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsWithoutMandatoryFields.json"), UTF_8);
         MvcResult response = mockMvc
@@ -498,6 +501,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenEnumValuesIncorrect() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsInValidEnumData.json"), UTF_8);
         MvcResult response = mockMvc

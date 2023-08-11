@@ -7,9 +7,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
@@ -185,9 +185,9 @@ public class SittingRecordService {
     private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(StatusId.DELETED.name())
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId(securityUtils.getUserInfo().getUid())
-            .changeByName(securityUtils.getUserInfo().getName())
+            .changedDateTime(LocalDateTime.now())
+            .changedByUserId(securityUtils.getUserInfo().getUid())
+            .changedByName(securityUtils.getUserInfo().getName())
             .build();
 
         sittingRecord.addStatusHistory(statusHistory);
@@ -209,7 +209,8 @@ public class SittingRecordService {
         if (sittingRecord.getStatusId().equals(RECORDED.name())) {
             StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
                 .filter(statusHistory -> statusHistory.getStatusId().equals(RECORDED.name()))
-                .filter(statusHistory -> statusHistory.getChangeByUserId().equals(securityUtils.getUserInfo().getUid()))
+                .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
+                    securityUtils.getUserInfo().getUid()))
                 .findAny()
                 .orElseThrow(() -> new ResourceNotFoundException(
                     "User IDAM ID does not match the oldest Changed by IDAM ID "));

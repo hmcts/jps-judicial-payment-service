@@ -71,7 +71,8 @@ class SittingRecordServiceITest extends BaseTest {
     void beforeEach() {
         statusHistoryRepository.deleteAll();
         sittingRecordRepository.deleteAll();
-        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
+        sittingRecordService = new SittingRecordService(
+            sittingRecordRepository, locationService, serviceService, securityUtils);
         statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 

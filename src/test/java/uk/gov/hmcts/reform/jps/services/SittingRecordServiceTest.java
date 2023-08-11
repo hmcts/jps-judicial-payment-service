@@ -239,9 +239,9 @@ class SittingRecordServiceTest {
     private uk.gov.hmcts.reform.jps.domain.SittingRecord deleteTestSetUp(String changeById, String state) {
         StatusHistory statusHistory = StatusHistory.builder()
             .statusId(state)
-            .changeDateTime(now())
-            .changeByUserId(changeById)
-            .changeByName("John Smith")
+            .changedDateTime(now())
+            .changedByUserId(changeById)
+            .changedByName("John Smith")
             .build();
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
@@ -250,7 +250,7 @@ class SittingRecordServiceTest {
             .sittingDate(LocalDate.now().minusDays(2))
             .statusId(state)
             .regionId("1")
-            .epimsId("epims001")
+            .epimmsId("epims001")
             .hmctsServiceId("sscs")
             .personalCode("001")
             .contractTypeId(1L)
@@ -278,7 +278,7 @@ class SittingRecordServiceTest {
 
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
-            StatusHistory::getChangeDateTime));
+            StatusHistory::getChangedDateTime));
         StatusHistory statusHistory = null;
         if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
             statusHistory = optionalStatusHistory.get();
@@ -303,7 +303,7 @@ class SittingRecordServiceTest {
 
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
-            StatusHistory::getChangeDateTime));
+            StatusHistory::getChangedDateTime));
         StatusHistory statusHistory = null;
         if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
             statusHistory = optionalStatusHistory.get();
@@ -328,7 +328,7 @@ class SittingRecordServiceTest {
 
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
-            StatusHistory::getChangeDateTime));
+            StatusHistory::getChangedDateTime));
         StatusHistory statusHistory = null;
         if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
             statusHistory = optionalStatusHistory.get();
