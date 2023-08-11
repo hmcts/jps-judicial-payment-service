@@ -44,7 +44,7 @@ class JohPayrollServiceTest {
         JudicialOfficeHolder judicialOfficeHolder2 = createJudicialOfficeHolder(2L, "Personal Code 2");
         johPayroll2.setJudicialOfficeHolder(judicialOfficeHolder2);
         Optional<JohPayroll> ofResult = Optional.of(johPayroll2);
-        when(johPayrollRepository.findById(Mockito.<Long>any())).thenReturn(ofResult);
+        when(johPayrollService.findById(Mockito.<Long>any())).thenReturn(ofResult);
         Optional<JohPayroll> actualFindByIdResult = johPayrollService.findById(1L);
         assertSame(ofResult, actualFindByIdResult);
         assertTrue(actualFindByIdResult.isPresent());
@@ -70,7 +70,7 @@ class JohPayrollServiceTest {
         JohPayroll johPayroll3 = createJohPayroll(2L, LocalDate.of(2023, 1, 1),
                                                   "jr333", "pr33333");
         johPayroll3.setJudicialOfficeHolder(judicialOfficeHolder2);
-        when(johPayrollRepository.save(Mockito.<JohPayroll>any())).thenReturn(johPayroll3);
+        when(johPayrollService.save(Mockito.<JohPayroll>any())).thenReturn(johPayroll3);
 
         JudicialOfficeHolder judicialOfficeHolder3 = createJudicialOfficeHolder(3L, "Personal Code 3");
         judicialOfficeHolder3.addJohPayroll(johPayroll3);
