@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;
@@ -38,7 +36,6 @@ public class StatusHistory {
 
     @JsonIgnore
     @ToString.Exclude
-    @LazyCollection(LazyCollectionOption.FALSE)
     @ManyToOne(optional = false)
     @JoinColumn(name = "sitting_record_id")
     private SittingRecord sittingRecord;
