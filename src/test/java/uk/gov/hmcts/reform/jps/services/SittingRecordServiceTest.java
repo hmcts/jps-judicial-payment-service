@@ -41,6 +41,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -81,7 +82,6 @@ class SittingRecordServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         objectMapper.registerModule(new JavaTimeModule());
     }
 
@@ -281,11 +281,6 @@ class SittingRecordServiceTest {
 
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-
-        System.out.println("post delete");
-        System.out.println(sittingRecord);
-        System.out.println(sittingRecordRepository.findById(ID));
-        System.out.println(sittingRecord.getLatestStatusHistory());
 
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
