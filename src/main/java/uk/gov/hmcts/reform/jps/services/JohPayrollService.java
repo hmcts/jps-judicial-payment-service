@@ -6,14 +6,16 @@ import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.domain.JohPayroll;
 import uk.gov.hmcts.reform.jps.repository.JohPayrollRepository;
 
+import java.util.Optional;
+
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
 public class JohPayrollService {
 
     private final JohPayrollRepository johPayrollRepository;
 
-    public JohPayroll findById(Long johId) {
-        return  johPayrollRepository.findById(johId).orElse(null);
+    public Optional<JohPayroll> findById(Long johId) {
+        return  johPayrollRepository.findById(johId);
     }
 
     public JohPayroll save(JohPayroll johPayroll) {
