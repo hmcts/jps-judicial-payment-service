@@ -17,6 +17,7 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -50,26 +51,28 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public static final String EPIM_ID = "123";
-    public static final String SSC_ID = "ssc_id";
-    @Autowired
+    public static final String EPIMMS_ID = "852649";
+    public static final String HMCTS_SERVICE_CODE = "BBA3";
     private SittingRecordService sittingRecordService;
     @Autowired
     private StatusHistoryService statusHistoryService;
+    private LocationService locationService;
+    private ServiceService serviceService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
     private static final String STATUS_ID_FIXED = "RECORDED";
     private static final String REGION_ID_FIXED = "1";
-    private static final String EPIMS_ID_FIXED = "852649";
-    private static final String PERSONAL_CODE_FIXED = "4918178";
+    private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
     @BeforeEach
     void beforeEach() {
-        sittingRecordRepository.deleteAll();
         statusHistoryRepository.deleteAll();
+        sittingRecordRepository.deleteAll();
+        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
+        statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 
     @Test
@@ -80,7 +83,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(10)
             .offset(0)
             .regionId(sittingRecord.getRegionId())
-            .epimsId(sittingRecord.getEpimsId())
+            .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(4))
             .dateRangeTo(LocalDate.now())
@@ -95,6 +98,8 @@ class SittingRecordServiceITest extends BaseTest {
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
 
         assertThat(response).hasSize(1);
+        LOGGER.debug("actual:        {}", actual);
+        LOGGER.debug("sittingRecord: {}", sittingRecord);
         assertTrue(actual.equalsDomainObject(sittingRecord));
     }
 
@@ -107,7 +112,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(10)
             .offset(0)
             .regionId(sittingRecord.getRegionId())
-            .epimsId(sittingRecord.getEpimsId())
+            .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(4))
             .dateRangeTo(LocalDate.now())
@@ -137,7 +142,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIM_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -145,7 +150,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
             recordSearchRequest,
-            SSC_ID
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(response).hasSize(5);
@@ -158,7 +163,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         for (uk.gov.hmcts.reform.jps.model.out.SittingRecord sittingRecord : response) {
             assertThat(sittingRecord.getStatusHistories())
-                .extracting(StatusHistory_.CHANGE_BY_USER_ID)
+                .extracting(StatusHistory_.CHANGED_BY_USER_ID)
                 .contains(USER_ID);
         }
     }
@@ -174,7 +179,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(20)
             .regionId(reasonId)
-            .epimsId(EPIM_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(DESCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -182,7 +187,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
             recordSearchRequest,
-            SSC_ID
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(response).hasSize(2);
@@ -197,7 +202,7 @@ class SittingRecordServiceITest extends BaseTest {
         for (uk.gov.hmcts.reform.jps.model.out.SittingRecord sittingRecord : response) {
             assertThat(sittingRecord.getStatusHistories())
                 .as("Extracting change by user")
-                .extracting(StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.STATUS_ID)
+                .extracting(StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.STATUS_ID)
                 .contains(
                     tuple(USER_ID, STATUS_ID_FIXED)
                 );
@@ -215,7 +220,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(5)
             .offset(10)
             .regionId(reasonId)
-            .epimsId(EPIM_ID)
+            .epimmsId(EPIMMS_ID)
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -223,7 +228,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         int totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
-            SSC_ID
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(totalRecordCount).isEqualTo(25);
@@ -239,27 +244,27 @@ class SittingRecordServiceITest extends BaseTest {
         recordSittingRecordRequest.getRecordedSittingRecords()
             .forEach(sittingRecordRequest -> sittingRecordRequest.setRegionId("1"));
 
-        sittingRecordService.saveSittingRecords(SSC_ID, recordSittingRecordRequest);
+        sittingRecordService.saveSittingRecords(HMCTS_SERVICE_CODE, recordSittingRecordRequest);
         List<SittingRecord> savedSittingRecords = sittingRecordRepository.findAll();
 
         assertThat(savedSittingRecords)
-            .extracting(SittingRecord_.SITTING_DATE, SittingRecord_.REGION_ID, SittingRecord_.EPIMS_ID,
+            .extracting(SittingRecord_.SITTING_DATE, SittingRecord_.REGION_ID, SittingRecord_.EPIMMS_ID,
                         SittingRecord_.PERSONAL_CODE, SittingRecord_.JUDGE_ROLE_TYPE_ID,
                         SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM,
                         SittingRecord_.STATUS_ID, SittingRecord_.HMCTS_SERVICE_ID
             )
             .contains(
-                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, SSC_ID),
-                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, SSC_ID),
-                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMS_ID_FIXED, PERSONAL_CODE_FIXED,
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, SSC_ID)
+                tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918178",
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
+                tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918179",
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
+                tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918180",
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE)
             );
 
         List<StatusHistory> statusHistories = statusHistoryService.findAll();
         assertThat(statusHistories)
-            .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGE_BY_USER_ID, StatusHistory_.CHANGE_BY_NAME)
+            .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.CHANGED_BY_NAME)
             .contains(
                 tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
                 tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
@@ -267,7 +272,7 @@ class SittingRecordServiceITest extends BaseTest {
             );
 
         assertThat(statusHistories).describedAs("Created date assertion")
-            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangedDateTime()));
     }
 
     @Test
@@ -304,7 +309,7 @@ class SittingRecordServiceITest extends BaseTest {
             .pageSize(10)
             .offset(0)
             .regionId(sittingRecord.getRegionId())
-            .epimsId(sittingRecord.getEpimsId())
+            .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
             .dateRangeTo(LocalDate.now())
@@ -318,7 +323,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
 
-        LOGGER.debug("ChangeByUserId:{}", actual.getChangeByUserId());
+        LOGGER.debug("changedByUserId:{}", actual.getChangedByUserId());
         LOGGER.debug("actual:{}", actual);
         LOGGER.debug("actual.statusHistories:{}", actual.getStatusHistories());
 
@@ -328,8 +333,8 @@ class SittingRecordServiceITest extends BaseTest {
         assertTrue(actual.equalsDomainObject(sittingRecord));
         StatusHistory statusHistoryCreated1 = sittingRecord.getStatusHistories().get(0);
         LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
-        LOGGER.debug("actual               :{}", actual.getStatusHistories().get(0));
-        assertTrue(statusHistoryCreated1.equals(actual.getStatusHistories().get(0)));
+        LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
+        assertTrue(statusHistoryCreated1.equals(actual.getFirstStatusHistory()));
 
     }
 
@@ -348,8 +353,8 @@ class SittingRecordServiceITest extends BaseTest {
             .sittingDate(LocalDate.now().minusDays(counter))
             .statusId(statusId)
             .regionId("1")
-            .epimsId(EPIM_ID)
-            .hmctsServiceId(SSC_ID)
+            .epimmsId(EPIMMS_ID)
+            .hmctsServiceId(HMCTS_SERVICE_CODE)
             .personalCode("001")
             .contractTypeId(counter)
             .am(true)
@@ -363,9 +368,9 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistory createStatusHistory(String statusId, String userId, String userName) {
         return StatusHistory.builder()
             .statusId(statusId)
-            .changeDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
-            .changeByUserId(userId)
-            .changeByName(userName)
+            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
+            .changedByUserId(userId)
+            .changedByName(userName)
             .build();
     }
 

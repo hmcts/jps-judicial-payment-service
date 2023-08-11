@@ -9,7 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import uk.gov.hmcts.reform.authorisation.generators.AuthTokenGenerator;
 import uk.gov.hmcts.reform.jps.config.IdamTokenGenerator;
-import uk.gov.hmcts.reform.jps.exceptions.UnknowValueException;
+import uk.gov.hmcts.reform.jps.exceptions.UnknownValueException;
 import uk.gov.hmcts.reform.jps.refdata.location.client.LocationApi;
 import uk.gov.hmcts.reform.jps.refdata.location.model.LocationApiResponse;
 
@@ -42,7 +42,7 @@ class LocationServiceClientTest {
     }
 
     @Test
-    void shouldThrowUnknownValueExcepitonWhenInValidCourtVenueIsLookedUp() {
+    void shouldThrowUnknownValueExceptionWhenInValidCourtVenueIsLookedUp() {
         when(idamTokenGenerator.generateIdamTokenForRefData()).thenReturn("idamToken");
         when(authTokenGenerator.generate()).thenReturn("serviceToken");
         when(feignException.status()).thenReturn(HttpStatus.NOT_FOUND.value());
@@ -50,7 +50,7 @@ class LocationServiceClientTest {
             .thenThrow(feignException);
 
         assertThatThrownBy(() -> locationServiceClient.getCourtVenue("123"))
-            .isInstanceOf(UnknowValueException.class)
+            .isInstanceOf(UnknownValueException.class)
             .hasMessage("004 unknown hmctsServiceCode");
     }
 

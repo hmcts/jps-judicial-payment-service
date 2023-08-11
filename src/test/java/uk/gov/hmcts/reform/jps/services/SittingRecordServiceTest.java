@@ -174,17 +174,20 @@ class SittingRecordServiceTest {
 
         List<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecords = sittingRecordArgumentCaptor.getAllValues();
         assertThat(sittingRecords).extracting(SittingRecord_.SITTING_DATE, SittingRecord_.STATUS_ID,
-                                              SittingRecord_.EPIMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
+                                              SittingRecord_.EPIMMS_ID, SittingRecord_.HMCTS_SERVICE_ID,
                                               SittingRecord_.PERSONAL_CODE, SittingRecord_.CONTRACT_TYPE_ID,
                                               SittingRecord_.JUDGE_ROLE_TYPE_ID, SittingRecord_.AM, SittingRecord_.PM)
                 .contains(
-                    tuple(of(2023, Month.MAY, 11), "RECORDED", "852649", "test", "4918178", 1L, "Judge", false, true),
-                    tuple(of(2023, Month.APRIL, 10), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, false),
-                    tuple(of(2023, Month.MARCH, 9), "RECORDED", "852649", "test", "4918178", 1L, "Judge", true, true)
+                    tuple(of(2023, Month.MAY, 11), StatusId.RECORDED.name(), "852649",
+                          "test", "4918178", 1L, "Judge", false, true),
+                    tuple(of(2023, Month.APRIL, 10), StatusId.RECORDED.name(), "852649",
+                          "test", "4918179", 1L, "Judge", true, false),
+                    tuple(of(2023, Month.MARCH, 9), StatusId.RECORDED.name(), "852649",
+                          "test", "4918180", 1L, "Judge", true, true)
         );
 
         assertThat(sittingRecords).flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .extracting("statusId", "changeByUserId", "changeByName")
+            .extracting("statusId", "changedByUserId", "changedByName")
             .contains(
                 tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
                 tuple("RECORDED", "d139a314-eb40-45f4-9e7a-9e13f143cc3a", "Recorder"),
@@ -193,7 +196,7 @@ class SittingRecordServiceTest {
 
         assertThat(sittingRecords).describedAs("Created date assertion")
             .flatExtracting(uk.gov.hmcts.reform.jps.domain.SittingRecord::getStatusHistories)
-            .allMatch(m -> now().minusMinutes(5).isBefore(m.getChangeDateTime()));
+            .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangedDateTime()));
     }
 
     private List<uk.gov.hmcts.reform.jps.domain.SittingRecord> getDbSittingRecords(int limit) {
@@ -203,7 +206,7 @@ class SittingRecordServiceTest {
                 .sittingDate(LocalDate.now().minusDays(2))
                 .statusId(StatusId.RECORDED.name())
                 .regionId("1")
-                .epimsId("epims001")
+                .epimmsId("epims001")
                 .hmctsServiceId("sscs")
                 .personalCode("001")
                 .contractTypeId(count)
@@ -221,7 +224,7 @@ class SittingRecordServiceTest {
                     .sittingDate(LocalDate.now().minusDays(2))
                     .statusId(StatusId.RECORDED.name())
                     .regionId("1")
-                    .epimsId("epims001")
+                    .epimmsId("epims001")
                     .hmctsServiceId("sscs")
                     .personalCode("001")
                     .contractTypeId(count)

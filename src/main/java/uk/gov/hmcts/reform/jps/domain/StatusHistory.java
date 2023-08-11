@@ -28,6 +28,8 @@ import javax.persistence.Table;
 @Table(name = "status_history")
 public class StatusHistory {
 
+    public static final String FIND_ALL_RECORDING_USERS = "FIND_ALL_RECORDING_USERS";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_history_id")
@@ -42,14 +44,14 @@ public class StatusHistory {
     @Column(name = "status_id")
     private String statusId;
 
-    @Column(name = "change_date_time")
-    private LocalDateTime changeDateTime;
+    @Column(name = "changed_date_time")
+    private LocalDateTime changedDateTime;
 
-    @Column(name = "change_by_user_id")
-    private String changeByUserId;
+    @Column(name = "changed_by_user_id")
+    private String changedByUserId;
 
-    @Column(name = "change_by_name")
-    private String changeByName;
+    @Column(name = "changed_by_name")
+    private String changedByName;
 
     @Override
     public boolean equals(Object o) {
@@ -64,8 +66,8 @@ public class StatusHistory {
         return (that.getId().equals(this.getId())
             && that.getStatusId().equals(this.getStatusId())
             && that.getSittingRecord().getId().equals(this.getSittingRecord().getId())
-            && that.getChangeByUserId().equals(this.getChangeByUserId())
-            && that.getChangeDateTime().equals(this.getChangeDateTime()));
+            && that.getChangedByUserId().equals(this.getChangedByUserId())
+            && that.getChangedDateTime().equals(this.getChangedDateTime()));
     }
 
     @Override
@@ -73,7 +75,9 @@ public class StatusHistory {
         return new HashCodeBuilder(
             17,
             37
-        ).append(id).append(sittingRecord).append(statusId).append(changeDateTime).append(changeByUserId).append(
-            changeByName).toHashCode();
+        ).append(id).append(sittingRecord).append(statusId).append(changedDateTime).append(changedByUserId).append(
+            changedByName).toHashCode();
     }
+
+
 }

@@ -4,7 +4,7 @@
   "recordedSittingRecords": [
     {
       "sittingDate": "2023-04-10",
-      "epimsId": "229786",
+      "epimmsId": "229786",
       "personalCode": "4918178",
       "judgeRoleTypeId": "Judge",
       "am": false,
