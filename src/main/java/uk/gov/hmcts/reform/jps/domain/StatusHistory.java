@@ -3,8 +3,9 @@ package uk.gov.hmcts.reform.jps.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
@@ -21,8 +22,9 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
 @ToString
+@Setter
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {
