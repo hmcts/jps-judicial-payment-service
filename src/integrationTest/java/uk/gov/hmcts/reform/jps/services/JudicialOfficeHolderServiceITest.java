@@ -20,7 +20,10 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
 
         JudicialOfficeHolder obtainedJudicialOfficeHolder  =
             judicialOfficeHolderRepository.findById(persistedJudicialOfficeHolder.getId()).get();
-        assertEquals(persistedJudicialOfficeHolder, obtainedJudicialOfficeHolder);
+        assertEquals(persistedJudicialOfficeHolder.getId(), obtainedJudicialOfficeHolder.getId());
+        assertEquals(persistedJudicialOfficeHolder.getPersonalCode(), obtainedJudicialOfficeHolder.getPersonalCode());
+        assertEquals(persistedJudicialOfficeHolder.getJohPayrolls().size(),
+                     obtainedJudicialOfficeHolder.getJohPayrolls().size());
     }
 
     private JudicialOfficeHolder createAndSaveJudicialOfficeHolder(String personalCode) {

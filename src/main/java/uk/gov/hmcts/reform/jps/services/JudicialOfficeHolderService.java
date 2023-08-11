@@ -20,4 +20,8 @@ public class JudicialOfficeHolderService {
         return judicialOfficeHolderRepository.findByPersonalCode(personalCode);
     }
 
+    public JudicialOfficeHolder save(JudicialOfficeHolder judicialOfficeHolder) {
+        return judicialOfficeHolderRepository.save(judicialOfficeHolder);
+    }
+
 }
