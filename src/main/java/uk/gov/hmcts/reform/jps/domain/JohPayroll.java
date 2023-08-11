@@ -3,8 +3,9 @@ package uk.gov.hmcts.reform.jps.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -22,7 +23,8 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @ToString
 @Entity
 @Table(name = "joh_payroll")

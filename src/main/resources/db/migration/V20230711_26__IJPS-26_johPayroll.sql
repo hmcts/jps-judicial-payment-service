@@ -7,7 +7,7 @@ DROP TABLE IF EXISTS joh_payroll;
 CREATE TABLE joh_payroll (
     joh_payroll_id bigserial constraint pk_joh_payroll primary key,
     local_joh_record_id bigint NOT NULL,
-    effective_start_date timestamp not null,
+    effective_start_date date not null,
     judge_role_type_id varchar(255) NOT NULL,
     payroll_id varchar(255) NOT NULL
 );

@@ -76,7 +76,6 @@ public class JohPayrollRepositoryTest {
         assertEquals(persistedJohPayroll3.getJudicialOfficeHolder(), judicialOfficeHolder);
     }
 
-
     private JudicialOfficeHolder createJudicialOfficeHolder(String personalCode) {
         JudicialOfficeHolder judicialOfficeHolderNew = JudicialOfficeHolder.builder()
             .personalCode(personalCode)
