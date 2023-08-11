@@ -5,3 +5,7 @@ create table public.joh_attributes (
    crown_servant_flag boolean,
    london_flag boolean
 );
+
+ALTER TABLE public.joh_attributes
+ADD CONSTRAINT fk_joh_attributes_judicial_office_holder FOREIGN KEY (local_joh_record_id)
+REFERENCES public.judicial_office_holder(local_joh_record_id);
