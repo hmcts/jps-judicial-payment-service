@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps.services;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
@@ -13,6 +14,7 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldObtainSaveJudicialOfficeHolder() {
         final String Personal_Code = "PC111";
         JudicialOfficeHolder persistedJudicialOfficeHolder = createAndSaveJudicialOfficeHolder(Personal_Code);
@@ -26,6 +28,7 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldObtainSavedJudicialOfficeHolderByPersonalCode() {
         final String Personal_Code = "PC111";
         JudicialOfficeHolder persistedJudicialOfficeHolder = createAndSaveJudicialOfficeHolder(Personal_Code);
