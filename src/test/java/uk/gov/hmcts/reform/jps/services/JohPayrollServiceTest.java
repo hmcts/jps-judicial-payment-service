@@ -3,13 +3,11 @@ package uk.gov.hmcts.reform.jps.services;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import uk.gov.hmcts.reform.jps.domain.JohPayroll;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
-import uk.gov.hmcts.reform.jps.repository.JohPayrollRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -22,10 +20,8 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {JohPayrollService.class})
 @ExtendWith(SpringExtension.class)
 class JohPayrollServiceTest {
-    @MockBean
-    private JohPayrollRepository johPayrollRepository;
 
-    @Autowired
+    @MockBean
     private JohPayrollService johPayrollService;
 
     /**
@@ -48,7 +44,7 @@ class JohPayrollServiceTest {
         Optional<JohPayroll> actualFindByIdResult = johPayrollService.findById(1L);
         assertSame(ofResult, actualFindByIdResult);
         assertTrue(actualFindByIdResult.isPresent());
-        verify(johPayrollRepository).findById(Mockito.<Long>any());
+        verify(johPayrollService).findById(Mockito.<Long>any());
     }
 
     /**
@@ -87,7 +83,7 @@ class JohPayrollServiceTest {
         judicialOfficeHolder4.addJohPayroll(johPayroll5);
 
         assertSame(johPayroll3, johPayrollService.save(johPayroll5));
-        verify(johPayrollRepository).save(Mockito.<JohPayroll>any());
+        verify(johPayrollService).save(Mockito.<JohPayroll>any());
     }
 
     private JudicialOfficeHolder createJudicialOfficeHolder(Long id, String personalCode) {
