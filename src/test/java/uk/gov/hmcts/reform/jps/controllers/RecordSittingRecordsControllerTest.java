@@ -4,6 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,9 +24,13 @@ import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
+import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -64,7 +70,13 @@ class RecordSittingRecordsControllerTest {
     private SittingRecordService sittingRecordService;
 
     @MockBean
+    private JudicialUserDetailsService judicialUserDetailsService;
+
+    @MockBean
     private LocationService regionService;
+
+    @Captor
+    private ArgumentCaptor<List<SittingRecordWrapper>> listArgumentCaptor;
 
     @ParameterizedTest
     @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178",
@@ -120,14 +132,24 @@ class RecordSittingRecordsControllerTest {
                                                         eq("d139a314-eb40-45f4-9e7a-9e13f143cc3a"));
         verify(regionService).setRegionId(eq(TEST_SERVICE),
                                           anyList());
+        verify(judicialUserDetailsService, never()).setJudicialUserName(anyList());
     }
 
     @Test
-    void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+    void shouldRespondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+        LocalDateTime creationDateTime = LocalDateTime.now().minusDays(2);
         doAnswer(invocation -> {
             List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(0);
             sittingRecordWrappers.forEach(
-                sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD));
+                sittingRecordWrapper -> {
+                    sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+                    sittingRecordWrapper.setCreatedByName("Recorder");
+                    sittingRecordWrapper.setCreatedDateTime(creationDateTime);
+                    sittingRecordWrapper.setJudgeRoleTypeId("Judge");
+                    sittingRecordWrapper.setJudgeRoleTypeName("Tester");
+                    sittingRecordWrapper.setAm(Boolean.TRUE);
+                    sittingRecordWrapper.setPm(Boolean.FALSE);
+                });
             return null;
         }).when(sittingRecordService).checkDuplicateRecords(anyList());
 
@@ -147,6 +169,13 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
+                jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[0].createdDateTime")
+                    .value(creationDateTime.truncatedTo(ChronoUnit.NANOS).toString()),
+                jsonPath("$.errorRecords[0].am").value("true"),
+                jsonPath("$.errorRecords[0].pm").value("false"),
+                jsonPath("$.errorRecords[0].judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[0].judgeRoleTypeName").value("Tester"),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -156,6 +185,13 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
+                jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[1].createdDateTime")
+                    .value(creationDateTime.truncatedTo(ChronoUnit.NANOS).toString()),
+                jsonPath("$.errorRecords[1].am").value("true"),
+                jsonPath("$.errorRecords[1].pm").value("false"),
+                jsonPath("$.errorRecords[1].judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[1].judgeRoleTypeName").value("Tester"),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -164,7 +200,14 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
-                jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name())
+                jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
+                jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[2].createdDateTime")
+                    .value(creationDateTime.truncatedTo(ChronoUnit.NANOS).toString()),
+                jsonPath("$.errorRecords[2].am").value("true"),
+                jsonPath("$.errorRecords[2].pm").value("false"),
+                jsonPath("$.errorRecords[2].judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[2].judgeRoleTypeName").value("Tester")
             ).andReturn();
 
         verify(sittingRecordService).checkDuplicateRecords(anyList());
@@ -174,6 +217,11 @@ class RecordSittingRecordsControllerTest {
                                                         eq("d139a314-eb40-45f4-9e7a-9e13f143cc3a"));
         verify(regionService).setRegionId(eq(TEST_SERVICE),
                                           anyList());
+        verify(judicialUserDetailsService).setJudicialUserName(listArgumentCaptor.capture());
+        assertThat(listArgumentCaptor.getValue())
+            .map(SittingRecordWrapper::getJudgeRoleTypeId)
+            .filteredOn(Objects::nonNull)
+            .hasSize(3);
     }
 
     @Test

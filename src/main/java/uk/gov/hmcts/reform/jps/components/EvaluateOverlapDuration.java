@@ -6,7 +6,6 @@ import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
-import uk.gov.hmcts.reform.jps.services.StatusHistoryService;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
@@ -15,7 +14,6 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Component
 public class EvaluateOverlapDuration implements DuplicateChecker {
-    private final StatusHistoryService statusHistoryService;
 
     @Override
     public void next(DuplicateChecker duplicateChecker) {
@@ -38,7 +36,6 @@ public class EvaluateOverlapDuration implements DuplicateChecker {
             || TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
             ))) {
             sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
-            statusHistoryService.updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
         }
     }
 }

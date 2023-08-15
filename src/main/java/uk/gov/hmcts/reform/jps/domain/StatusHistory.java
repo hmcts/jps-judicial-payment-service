@@ -3,8 +3,9 @@ package uk.gov.hmcts.reform.jps.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -26,7 +27,8 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @ToString
 @Entity
 @Table(name = "status_history")
@@ -59,6 +61,7 @@ public class StatusHistory {
     @Column(name = "changed_by_name")
     private String changedByName;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -84,6 +87,4 @@ public class StatusHistory {
         ).append(id).append(sittingRecord).append(statusId).append(changedDateTime).append(changedByUserId).append(
             changedByName).toHashCode();
     }
-
-
 }

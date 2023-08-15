@@ -25,6 +25,7 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordResponse;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
+import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.util.List;
@@ -34,8 +35,11 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
+import static java.lang.Boolean.TRUE;
 import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.ResponseEntity.status;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
@@ -60,6 +64,7 @@ public class RecordSittingRecordsController {
 
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
+    private final JudicialUserDetailsService judicialUserDetailsService;
 
     @Operation(description = "Root not to be displayed", hidden = true)
     @PostMapping(
@@ -103,13 +108,18 @@ public class RecordSittingRecordsController {
             sittingRecordWrappers,
             not(sittingRecordWrapper ->
                     POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
-                    && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
-                        && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()
+                    && TRUE.equals(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
             )
         );
 
-
         if (errorCodeCheck.isPresent()) {
+            sittingRecordWrappers.stream()
+                .filter(sittingRecordWrapper -> nonNull(sittingRecordWrapper.getJudgeRoleTypeId()))
+                .collect(collectingAndThen(toList(), records -> {
+                    judicialUserDetailsService.setJudicialUserName(records);
+                    return null;
+                }));
+
             return status(HttpStatus.BAD_REQUEST)
                 .body(RecordSittingRecordResponse.builder()
                           .message("008 could not insert")
@@ -164,6 +174,10 @@ public class RecordSittingRecordsController {
                          .createdByName(getName.apply(sittingRecordWrapper))
                          .createdDateTime(sittingRecordWrapper.getCreatedDateTime())
                          .statusId(statusIdOperation.apply(sittingRecordWrapper.getStatusId()))
+                         .am(sittingRecordWrapper.getAm())
+                         .pm(sittingRecordWrapper.getPm())
+                         .judgeRoleTypeId(sittingRecordWrapper.getJudgeRoleTypeId())
+                         .judgeRoleTypeName(sittingRecordWrapper.getJudgeRoleTypeName())
                          .build()
             ).toList();
     }

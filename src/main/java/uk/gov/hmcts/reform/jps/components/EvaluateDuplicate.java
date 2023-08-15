@@ -1,12 +1,16 @@
 package uk.gov.hmcts.reform.jps.components;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Component
 public class EvaluateDuplicate implements DuplicateChecker {
+
     private DuplicateChecker duplicateChecker;
 
     @Override
