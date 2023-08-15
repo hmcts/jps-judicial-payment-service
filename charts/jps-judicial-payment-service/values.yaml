@@ -19,6 +19,10 @@ java:
           alias: JUDICIAL_PAYMENT_SERVICE_DB_PORT
         - name: judicial-payment-service-POSTGRES-DATABASE
           alias: JUDICIAL_PAYMENT_SERVICE_DB_NAME
+        - name: idam-jps-system-username
+          alias: IDAM_JPS_SYSTEM_USERNAME
+        - name: idam-jps-system-password
+          alias: IDAM_JPS_SYSTEM_PASSWORD
         - name: idam-jps-judicial-payment-service-client-secret
           alias: JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET
         - name: jps-judicial-payment-service-s2s-secret
@@ -43,6 +47,10 @@ java:
           alias: JPS_INVALID_USERNAME
         - name: idam-jps-invalid-password
           alias: JPS_INVALID_PASSWORD
+        - name: idam-jps-joh-admin-username
+          alias: JPS_JOH_ADMIN_USERNAME
+        - name: idam-jps-joh-admin-password
+          alias: JPS_JOH_ADMIN_PASSWORD
 
   environment:
     JUDICIAL_PAYMENT_SERVICE_DB_OPTIONS: "?stringtype=unspecified&gssEncMode=disable"
@@ -51,10 +59,13 @@ java:
     OIDC_ISSUER: https://forgerock-am.service.core-compute-idam-{{ .Values.global.environment }}.internal:8443/openam/oauth2/hmcts
     IDAM_API_URL: https://idam-api.{{ .Values.global.environment }}.platform.hmcts.net
     S2S_URL: http://rpe-service-auth-provider-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
-    JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES: jps_webapp
+    JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES: jps_judicial_payment_frontend
     HTTP_CLIENT_CONNECTION_TIMEOUT: '10000'
     HTTP_CLIENT_READ_TIMEOUT: '60000'
     HTTP_CLIENT_MAX_TOTAL: '200'
     HTTP_CLIENT_SECONDS_IDLE_CONNECTION: '120'
     HTTP_CLIENT_MAX_CLIENT_PER_ROUTE: '20'
     HTTP_CLIENT_VALIDATE_AFTER_INACTIVITY: '2000'
+    LOCATION_API_URL: http://rd-location-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    JUDICIAL_USERS_API_URL: http://rd-judicial-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal
+    CASEWORKER_API_URL: http://rd-caseworker-ref-api-{{ .Values.global.environment }}.service.core-compute-{{ .Values.global.environment }}.internal

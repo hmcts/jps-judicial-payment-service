@@ -5,7 +5,6 @@ import feign.jackson.JacksonDecoder;
 import feign.jackson.JacksonEncoder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.jps.config.PropertiesReader;
 
 import java.util.Base64;
 
@@ -28,25 +27,37 @@ public class IdamTokenGenerator {
             .target(IdamApi.class, idamApiUrl);
     }
 
-    public String authenticateUser(String username, String password) {
-        String authorisation = username + ":" + password;
-        String base64Authorisation = Base64.getEncoder().encodeToString(authorisation.getBytes());
+    public String authenticateUser(String username, String password) throws InterruptedException {
+        int maxRetries = 3;
+        int retryCount = 0;
 
-        IdamApi.AuthenticateUserResponse authenticateUserResponse = idamApi.authenticateUser(
-            "Basic " + base64Authorisation,
-            "code",
-            clientId,
-            redirectUri
-        );
+        while (retryCount < maxRetries) {
+            try {
+                String authorisation = username + ":" + password;
+                String base64Authorisation = Base64.getEncoder().encodeToString(authorisation.getBytes());
 
-        IdamApi.TokenExchangeResponse tokenExchangeResponse = idamApi.exchangeCode(
-            authenticateUserResponse.getCode(),
-            "authorization_code",
-            clientId,
-            clientSecret,
-            redirectUri
-        );
+                IdamApi.AuthenticateUserResponse authenticateUserResponse = idamApi.authenticateUser(
+                    "Basic " + base64Authorisation,
+                    "code",
+                    clientId,
+                    redirectUri
+                );
 
-        return "Bearer " + tokenExchangeResponse.getAccessToken();
+                IdamApi.TokenExchangeResponse tokenExchangeResponse = idamApi.exchangeCode(
+                    authenticateUserResponse.getCode(),
+                    "authorization_code",
+                    clientId,
+                    clientSecret,
+                    redirectUri
+                );
+
+                return "Bearer " + tokenExchangeResponse.getAccessToken();
+            } catch (Exception e) {
+                System.out.println("The error that occurred during authentication attempt: " + e.getMessage());
+                retryCount++;
+            }
+        }
+
+        throw new RuntimeException("Failed to authenticate user after multiple retries");
     }
 }

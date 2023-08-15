@@ -25,7 +25,7 @@ To build the project execute the following command:
 ### Running the application
 
 The easiest way to run the application locally is to use the `bootWithCCD` Gradle task.
-First time running or when you pull new images you will first need to run the below 
+First time running or when you pull new images you will first need to run the below
 ```bash
  az acr login --name hmctsprivate --subscription DCD-CNP-PROD
  az acr login --name hmctspublic --subscription DCD-CNP-PROD
@@ -51,7 +51,7 @@ You should get a response similar to this:
 
 
 ### Recreating the users
-If you want to recreate the users run the following commands 
+If you want to recreate the users run the following commands
 NOTE: the prune command will remove all volumes not just cftLib
 ```bash
 docker container stop $(docker container ls -a -q)
@@ -62,7 +62,7 @@ you then may see this error
 ```bash
  ERROR [restartedMain] org.springframework.boot.SpringApplicationorg.springframework.beans.factory.BeanCreationException: Error creating bean with name 'cftLibConfig': Invocation of init method failed; nested exception is java.lang.IllegalStateException: Could not find a valid Docker environment. Please see logs and check configuration
  ```
- to solve this run 
+ to solve this run
 ```bash
 sudo ln -s $HOME/.docker/run/docker.sock /var/run/docker.sock
 ./gradlew bootWithCCD
@@ -117,9 +117,16 @@ To run all integration tests execute the following command:
 ```bash
   ./gradlew integration
 ```
-### Functional tests
-To run all integration tests execute the following command:
+
+### Smoke tests
+To run all smoke tests execute the following command:
 ```bash
-  ./gradlew functionalTest
+  ./gradlew smoke
 ```
 
+### Functional tests
+To run all functional tests execute the following command:
+```bash
+  ./gradlew functional
+```
+To specify a particular test or feature for execution, update the tag within the functional task in the build.gradle file with the desired test's tag.

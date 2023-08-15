@@ -16,6 +16,8 @@ springdoc:
 
 #If you use a database then uncomment below lines and update db properties accordingly
 spring:
+  main:
+    allow-bean-definition-overriding: true
   config:
     import: "optional:configtree:/mnt/secrets/jps/"
   application:
@@ -42,14 +44,14 @@ spring:
       ddl-auto: none
     properties:
       hibernate:
+        order_inserts: true
+        order_updates: true
         jdbc:
+          batch_size: 5
           time_zone: UTC
   flyway:
     out-of-order: true
     ignore-missing-migrations: true
-
-  main:
-    allow-bean-definition-overriding: true
   security:
     oauth2:
       client:
@@ -69,13 +71,17 @@ idam:
     totp_secret: ${IDAM_KEY_JPS_JUDICIAL_PAYMENT_SERVICE:AAAAAAAAAAAAAAAA}
     url: ${S2S_URL:http://localhost:8489}
   s2s-authorised:
-    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_webapp}
+    services: ${JPS_PAYMENT_SERVUCE_S2S_AUTHORISED_SERVICES:jps_judicial_payment_frontend}
   client:
     id: jps_judicial_payment_service
     scope: openid roles profile
     secret: ${JPS_JUDICIAL_PAYMENT_SERVICE_IDAM_CLIENT_SECRET:AAAAAAAAAAAAAAAA}
     # same for all environments - not used in jps but configured as idam mandates for token generation
     redirect_uri: http://jps-judicial-payment-service/oauth2redirect
+  jps:
+    system:
+      username: ${IDAM_JPS_SYSTEM_USERNAME:jps-system@gmail.com}
+      password: ${IDAM_JPS_SYSTEM_PASSWORD:}
 
 oidc:
   issuer: ${OIDC_ISSUER:http://fr-am:8080/openam/oauth2/hmcts}
@@ -100,3 +106,15 @@ dbMigration:
   # When true, the app will run DB migration on startup.
   # Otherwise, it will just check if all migrations have been applied (and fail to start if not).
   runOnStartup: ${RUN_DB_MIGRATION_ON_STARTUP:true}
+
+location:
+  api:
+    url: ${LOCATION_API_URL:http://rd-location-ref-api-aat.service.core-compute-aat.internal}
+
+judicialUsers:
+  api:
+    url: ${JUDICIAL_USERS_API_URL:http://rd-judicial-api-aat.service.core-compute-aat.internal}
+
+caseworker:
+  api:
+    url: ${CASEWORKER_API_URL:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}

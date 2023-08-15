@@ -1,0 +1,24 @@
+{
+  "errors": [
+    {
+      "fieldName": "dateRangeTo",
+      "message": "Date range to is mandatory"
+    },
+    {
+      "fieldName": "pageSize",
+      "message": "Page size is mandatory"
+    },
+    {
+      "fieldName": "offset",
+      "message": "Offset is mandatory"
+    },
+    {
+      "fieldName": "dateRangeFrom",
+      "message": "Date range from is mandatory"
+    },
+    {
+      "fieldName": "dateOrder",
+      "message": "Date order is mandatory"
+    }
+  ]
+}

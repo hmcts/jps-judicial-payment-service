@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.jps.testutils;
 
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
-import uk.gov.hmcts.reform.jps.config.PropertiesReader;
 
 import java.util.Map;
 

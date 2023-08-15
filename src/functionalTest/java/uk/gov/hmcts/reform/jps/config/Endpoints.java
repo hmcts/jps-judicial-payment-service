@@ -3,15 +3,16 @@ package uk.gov.hmcts.reform.jps.config;
 public enum Endpoints {
 
     Test("/test"),
+    RecordSittingRecords("/recordSittingRecords/{hmctsServiceCode}"),
+    SearchSittingRecords("/sitting-records/searchSittingRecords/{hmctsServiceCode}"),
     SittingRecord("/sittingRecord/{sittingRecordId}");
+    public String resource;
 
-    public String endpoint;
-
-    Endpoints(String endpoint) {
-        this.endpoint = endpoint;
+    Endpoints(String resource) {
+        this.resource = resource;
     }
 
-    public String getEndpoint(){
-        return endpoint;
+    public String getResource() {
+        return resource;
     }
 }

@@ -1,0 +1,15 @@
+{
+  "pageSize": "1",
+  "offset": "0",
+  "dateOrder": "ASCENDING",
+  "regionId": "1",
+  "epimmsId": "229786",
+  "personalCode": "4918178",
+  "judgeRoleTypeId": "Judge",
+  "duration": "FULL_DAY",
+  "dateRangeFrom": "2023-03-10",
+  "dateRangeTo": "2023-05-12",
+  "statusId": "RECORDED",
+  "medicalMembersOnly": false,
+  "includeFees": false
+}
