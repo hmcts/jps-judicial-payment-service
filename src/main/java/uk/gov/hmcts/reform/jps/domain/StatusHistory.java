@@ -3,15 +3,15 @@ package uk.gov.hmcts.reform.jps.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -22,8 +22,9 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
 @ToString
+@Setter
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {
@@ -37,7 +38,7 @@ public class StatusHistory {
 
     @JsonIgnore
     @ToString.Exclude
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(optional = false)
     @JoinColumn(name = "sitting_record_id")
     private SittingRecord sittingRecord;
 

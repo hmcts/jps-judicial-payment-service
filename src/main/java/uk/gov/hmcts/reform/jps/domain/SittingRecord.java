@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.hibernate.annotations.LazyCollection;
+import org.hibernate.annotations.LazyCollectionOption;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +16,6 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -64,8 +65,9 @@ public class SittingRecord {
     private boolean pm;
 
     @ToString.Exclude
+    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
     public String getCreatedByUserId() {
@@ -135,4 +137,5 @@ public class SittingRecord {
             || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
             && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
     }
+
 }
