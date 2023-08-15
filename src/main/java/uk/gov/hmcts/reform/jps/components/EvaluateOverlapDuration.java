@@ -1,7 +1,5 @@
 package uk.gov.hmcts.reform.jps.components;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
@@ -11,7 +9,6 @@ import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Component
 public class EvaluateOverlapDuration implements DuplicateChecker {
 

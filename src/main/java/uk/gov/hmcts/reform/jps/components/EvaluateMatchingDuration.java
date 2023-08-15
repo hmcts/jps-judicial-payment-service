@@ -10,7 +10,6 @@ import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
-
 @Component
 public class EvaluateMatchingDuration implements DuplicateChecker {
 
