@@ -5,11 +5,11 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Success response - Return 200 success with Sitting Record update status as deleted for jps-recorder
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database
-    And a search is done to get the "recordId"
-    When the request is prepared with appropriate values
+    And a search is done to get the "sittingRecords[0].sittingRecordId"
+    When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
-    And a call is submitted to the "SittingRecordEndpoint" endpoint using a "DELETE" request
+    And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "positive" response is received with a "200 OK" status code
     And the response is empty
 

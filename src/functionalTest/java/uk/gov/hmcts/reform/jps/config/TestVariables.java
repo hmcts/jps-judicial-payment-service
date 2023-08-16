@@ -25,11 +25,10 @@ public class TestVariables {
     protected static String invalidS2sToken;
     protected static String judgeRoleTypeId = RandomStringUtils.randomAlphabetic(10);
     protected static String randomDate;
-    protected static String recordId;
+    protected static String recordAttribute;
     protected static PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
 
     static {
-        PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
         testUrl = propertiesReader.getProperty("test-url");
         recorderUsername = propertiesReader.getProperty("idam.recorder.username");
         recorderPassword = propertiesReader.getProperty("idam.recorder.password");

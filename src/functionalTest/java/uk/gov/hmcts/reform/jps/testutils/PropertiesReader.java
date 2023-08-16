@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.jps.testutils;
 
 import io.restassured.path.json.JsonPath;
-import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -46,8 +46,8 @@ public class PropertiesReader {
         }
     }
 
-    public String getJsonPath (Response response, String key){
-        String resp = response.asString();
+    public String getJsonPath (ValidatableResponse response, String key){
+        String resp = response.extract().response().asString();
         JsonPath js = new JsonPath(resp);
         return js.get(key).toString();
     }

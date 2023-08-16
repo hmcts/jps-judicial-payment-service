@@ -9,6 +9,7 @@ import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
 import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.jps.config.Endpoints;
@@ -25,7 +26,10 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.HttpStatus.*;
+import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 public class StepDefinitions extends TestVariables {
 
@@ -81,8 +85,23 @@ public class StepDefinitions extends TestVariables {
             .body(body).log().all()
             .when().post("/recordSittingRecords/ABA5")
             .then().log().all().assertThat().statusCode(201);
+    }
 
-        recordId = propertiesReader.getJsonPath(response, "place_id");
+    @Given("a search is done to get the {string}")
+    public void a_search_is_done_to_get_the(String attribute) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-005_allFields.json")));
+        body = body.replace("2023-03-10", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        ValidatableResponse response = given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/sitting-records/searchSittingRecords/ABA5")
+            .then().log().all().assertThat().statusCode(200);
+
+        recordAttribute = propertiesReader.getJsonPath(response, attribute);
     }
 
     @When("a request is prepared with appropriate values")
@@ -109,6 +128,9 @@ public class StepDefinitions extends TestVariables {
 
     @When("the request contains the {string} as {string}")
     public void theRequestContainsTheAs(String pathParam, String value) {
+        if (value.equalsIgnoreCase("id of the previously created record")) {
+            value = recordAttribute;
+        }
         given = request.pathParam(pathParam,value);
     }
 
