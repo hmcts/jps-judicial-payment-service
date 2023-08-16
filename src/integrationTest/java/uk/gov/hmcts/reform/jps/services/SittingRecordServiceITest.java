@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
@@ -55,6 +54,7 @@ class SittingRecordServiceITest extends BaseTest {
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
     private SittingRecordService sittingRecordService;
+    @Autowired
     private StatusHistoryService statusHistoryService;
     private LocationService locationService;
     private ServiceService serviceService;
@@ -62,20 +62,23 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
     private static final String USER_ID_FIXED = "d139a314-eb40-45f4-9e7a-9e13f143cc3a";
+    private static final String STATUS_ID_FIXED = "RECORDED";
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
     @BeforeEach
     void beforeEach() {
-        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
+        statusHistoryRepository.deleteAll();
+        sittingRecordRepository.deleteAll();
+        sittingRecordService = new SittingRecordService(
+            sittingRecordRepository, locationService, serviceService, securityUtils);
         statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
-        SittingRecord sittingRecord = createAndSaveSittingRecord(StatusId.RECORDED.name(), 2L, USER_ID, USER_NAME);
+        SittingRecord sittingRecord = createAndSaveSittingRecord(STATUS_ID_FIXED,2L, USER_ID, USER_NAME);
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
@@ -102,10 +105,9 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
 
-        SittingRecord sittingRecord = createAndSaveSittingRecord(StatusId.RECORDED.name(), 2L, USER_ID, USER_NAME);
+        SittingRecord sittingRecord = createAndSaveSittingRecord(STATUS_ID_FIXED, 2L, USER_ID, USER_NAME);
 
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
@@ -131,7 +133,6 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnOffset10RecordsOnwardsInAscendingOrder() {
         int recordCount = 25;
         String reasonId = "1";
@@ -169,7 +170,6 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
         int recordCount = 22;
         String reasonId = "1";
@@ -196,8 +196,8 @@ class SittingRecordServiceITest extends BaseTest {
             .as("Extracting unique value by status")
             .extracting(SittingRecord_.CONTRACT_TYPE_ID, SittingRecord_.STATUS_ID)
             .contains(
-                tuple(21L, StatusId.RECORDED.name()),
-                tuple(22L, StatusId.RECORDED.name())
+                tuple(21L, STATUS_ID_FIXED),
+                tuple(22L, STATUS_ID_FIXED)
             );
 
         for (uk.gov.hmcts.reform.jps.model.out.SittingRecord sittingRecord : response) {
@@ -205,13 +205,12 @@ class SittingRecordServiceITest extends BaseTest {
                 .as("Extracting change by user")
                 .extracting(StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.STATUS_ID)
                 .contains(
-                    tuple(USER_ID, StatusId.RECORDED.name())
+                    tuple(USER_ID, STATUS_ID_FIXED)
                 );
         }
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnTotalRecordCounts() {
         int recordCount = 25;
         String reasonId = "1";
@@ -237,7 +236,6 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -258,20 +256,20 @@ class SittingRecordServiceITest extends BaseTest {
             )
             .contains(
                 tuple(of(2023, MAY, 11), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918178",
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, StatusId.RECORDED.name(), HMCTS_SERVICE_CODE),
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, false, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
                 tuple(of(2023, APRIL, 10), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918179",
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, StatusId.RECORDED.name(), HMCTS_SERVICE_CODE),
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, false, STATUS_ID_FIXED, HMCTS_SERVICE_CODE),
                 tuple(of(2023, MARCH, 9), REGION_ID_FIXED, EPIMMS_ID_FIXED, "4918180",
-                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, StatusId.RECORDED.name(), HMCTS_SERVICE_CODE)
+                      JUDGE_ROLE_TYPE_ID_FIXED, 1L, true, true, STATUS_ID_FIXED, HMCTS_SERVICE_CODE)
             );
 
         List<StatusHistory> statusHistories = statusHistoryService.findAll();
         assertThat(statusHistories)
             .extracting(StatusHistory_.STATUS_ID, StatusHistory_.CHANGED_BY_USER_ID, StatusHistory_.CHANGED_BY_NAME)
             .contains(
-                tuple(StatusId.RECORDED.name(), USER_ID_FIXED, USER_NAME_FIXED),
-                tuple(StatusId.RECORDED.name(), USER_ID_FIXED, USER_NAME_FIXED),
-                tuple(StatusId.RECORDED.name(), USER_ID_FIXED, USER_NAME_FIXED)
+                tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
+                tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED),
+                tuple(STATUS_ID_FIXED, USER_ID_FIXED, USER_NAME_FIXED)
             );
 
         assertThat(statusHistories).describedAs("Created date assertion")
@@ -279,7 +277,6 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
         final String Bruce_Wayne = "Bruce Wayne";
         final String Clark_Kent = "Clark Kent";
@@ -288,7 +285,7 @@ class SittingRecordServiceITest extends BaseTest {
         final String Clark_Kent_ID = "clark-100022";
         final String Peter_Parker_ID = "peter-10033";
 
-        SittingRecord sittingRecord = createAndSaveSittingRecord(StatusId.RECORDED.name(),2L, Bruce_Wayne_ID,
+        SittingRecord sittingRecord = createAndSaveSittingRecord(STATUS_ID_FIXED,2L, Bruce_Wayne_ID,
                                                                  Bruce_Wayne);
 
         StatusHistory statusHistorySubmitted1 = createStatusHistory("SUBMITTED", Clark_Kent_ID, Clark_Kent);
@@ -301,12 +298,11 @@ class SittingRecordServiceITest extends BaseTest {
         assertThat(sittingRecord.getId()).isNotNull();
         assertEquals(sittingRecord.getStatusHistories().size(), 3);
 
-        createAndSaveSittingRecord(StatusId.RECORDED.name(), 2L, Peter_Parker_ID, Peter_Parker);
+        createAndSaveSittingRecord(STATUS_ID_FIXED, 2L, Peter_Parker_ID, Peter_Parker);
 
-        SittingRecord sittingRecord3 = createAndSaveSittingRecord(StatusId.RECORDED.name(), 1L, Clark_Kent_ID,
+        SittingRecord sittingRecord3 = createAndSaveSittingRecord(STATUS_ID_FIXED, 1L, Clark_Kent_ID,
                                                                   Clark_Kent);
-        StatusHistory statusHistorySubmitted3 = createStatusHistory(StatusId.SUBMITTED.name(),
-                                                                    Bruce_Wayne_ID, Bruce_Wayne);
+        StatusHistory statusHistorySubmitted3 = createStatusHistory("SUBMITTED", Bruce_Wayne_ID, Bruce_Wayne);
         statusHistoryService.saveStatusHistory(statusHistorySubmitted3, sittingRecord3);
 
         int recordCount = 22;
@@ -381,7 +377,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     private void createMultipleRecords(int count) {
         for (long i = count; i > 0; i--) {
-            createAndSaveSittingRecord(StatusId.RECORDED.name(), i, USER_ID, USER_NAME);
+            createAndSaveSittingRecord(STATUS_ID_FIXED, i, USER_ID, USER_NAME);
         }
     }
 

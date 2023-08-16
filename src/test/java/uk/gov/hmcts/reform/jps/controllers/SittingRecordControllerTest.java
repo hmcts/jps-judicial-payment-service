@@ -53,7 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 
-@WebMvcTest(controllers = SittingRecordController.class,
+@WebMvcTest(controllers = {SittingRecordController.class, SittingRecordDeleteController.class},
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
             classes = {SecurityConfiguration.class,
                 JwtGrantedAuthoritiesConverter.class})})
