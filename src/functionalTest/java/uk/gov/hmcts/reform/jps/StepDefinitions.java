@@ -25,10 +25,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 public class StepDefinitions extends TestVariables {
 
@@ -58,11 +55,12 @@ public class StepDefinitions extends TestVariables {
 
     @Given("a user with the IDAM role of {string}")
     public void userWithTheIdamRoleOf(String role) {
-
-        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-
         if (role.equalsIgnoreCase("jps-recorder")) {
-            accessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+            accessToken  = recorderAccessToken;
+        } else if (role.equalsIgnoreCase("jps-submitter")) {
+            accessToken  = submitterAccessToken;
+        } else if (role.equalsIgnoreCase("jps-publisher")) {
+            accessToken  = publisherAccessToken;
         } else if (role.equalsIgnoreCase("ccd-import")) {
             accessToken  = invalidAccessToken;
         }
@@ -83,24 +81,11 @@ public class StepDefinitions extends TestVariables {
             .body(body).log().all()
             .when().post("/recordSittingRecords/ABA5")
             .then().log().all().assertThat().statusCode(201);
+
+        recordId = propertiesReader.getJsonPath(response, "place_id");
     }
 
-    @Given("a sitting record is created")
-    public void sittingRecordIsCreated() {
-        //to be added once post sitting records is ready
-    }
-
-    @Given("a sitting record is created by a different user")
-    public void sittingRecordIsCreatedByDifferentUser() {
-        //to be added once post sitting records is ready
-    }
-
-    @Given("a sitting record is created and its status is not {string}")
-    public void sittingRecordIsCreatedAndItsStatusIsNot(String string) {
-        //to be added once post sitting records is ready
-    }
-
-    @When("the request is prepared with appropriate values")
+    @When("a request is prepared with appropriate values")
     public void requestIsPreparedWithAppropriateValues() {
 
         request = new RequestSpecBuilder()

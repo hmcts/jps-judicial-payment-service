@@ -25,6 +25,8 @@ public class TestVariables {
     protected static String invalidS2sToken;
     protected static String judgeRoleTypeId = RandomStringUtils.randomAlphabetic(10);
     protected static String randomDate;
+    protected static String recordId;
+    protected static PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
 
     static {
         PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
@@ -39,5 +41,6 @@ public class TestVariables {
         adminPassword = propertiesReader.getProperty("idam.admin.password");
         invalidUsername = propertiesReader.getProperty("idam.invalid.username");
         invalidPassword = propertiesReader.getProperty("idam.invalid.password");
+
     }
 }

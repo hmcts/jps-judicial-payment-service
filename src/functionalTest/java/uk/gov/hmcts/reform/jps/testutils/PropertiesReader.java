@@ -1,5 +1,8 @@
 package uk.gov.hmcts.reform.jps.testutils;
 
+import io.restassured.path.json.JsonPath;
+import io.restassured.response.Response;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Properties;
@@ -41,5 +44,11 @@ public class PropertiesReader {
                 }
             }
         }
+    }
+
+    public String getJsonPath (Response response, String key){
+        String resp = response.asString();
+        JsonPath js = new JsonPath(resp);
+        return js.get(key).toString();
     }
 }
