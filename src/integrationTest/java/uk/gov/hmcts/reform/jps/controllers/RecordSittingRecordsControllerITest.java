@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -20,6 +21,7 @@ import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -101,11 +103,13 @@ public class RecordSittingRecordsControllerITest {
     @WithMockUser(authorities = {"jps-publisher", "jps-admin"})
     void shouldReturnUnauthorizedStatusWhenUserIsUnauthorized() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestJson))
-            .andDo(print())
-            .andExpect(status().isUnauthorized());
+        assertThatThrownBy(() -> mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestJson))
+                        .andDo(print())
+                        .andReturn())
+                .hasCauseInstanceOf(AccessDeniedException.class);
+
     }
 
     @Test

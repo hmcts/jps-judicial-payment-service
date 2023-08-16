@@ -16,7 +16,7 @@ import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
-import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
+import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -49,6 +49,7 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
@@ -271,8 +272,10 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
-        when(sittingRecordRepository.findById(ID)).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(ID, DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
@@ -297,7 +300,8 @@ class SittingRecordServiceTest {
             UPDATED_BY_USER_ID, RECORDED.name()
         );
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
@@ -322,7 +326,8 @@ class SittingRecordServiceTest {
             UPDATED_BY_USER_ID, SUBMITTED.name()
         );
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
         sittingRecordService.deleteSittingRecord(sittingRecord.getId());
 
@@ -346,9 +351,10 @@ class SittingRecordServiceTest {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
             deleteTestSetUp(UPDATED_BY_USER_ID, RECORDED.name());
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ResourceNotFoundException.class, () -> {
+        Exception exception = assertThrows(ForbiddenException.class, () -> {
             sittingRecordService.deleteSittingRecord(ID);
         });
 
@@ -365,7 +371,8 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, SUBMITTED.name());
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
         Exception exception = assertThrows(ConflictException.class, () -> {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());
@@ -380,7 +387,8 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, SUBMITTED.name());
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
         Exception exception = assertThrows(ConflictException.class, () -> {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());
@@ -395,7 +403,8 @@ class SittingRecordServiceTest {
 
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord = deleteTestSetUp(USER_ID, RECORDED.name());
 
-        when(sittingRecordRepository.findById(sittingRecord.getId())).thenReturn(Optional.of(sittingRecord));
+        when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
+                .thenReturn(Optional.of(sittingRecord));
 
         Exception exception = assertThrows(ConflictException.class, () -> {
             sittingRecordService.deleteSittingRecord(sittingRecord.getId());

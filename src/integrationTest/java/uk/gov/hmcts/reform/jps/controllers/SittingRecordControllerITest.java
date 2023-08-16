@@ -601,7 +601,7 @@ class SittingRecordControllerITest {
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
         when(userInfo.getName()).thenReturn("Joe Bloggs");
 
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 4))
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 5))
             .andDo(print())
             .andExpect(status().isOk());
     }

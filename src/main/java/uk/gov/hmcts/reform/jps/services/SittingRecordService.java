@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
+import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -170,7 +171,7 @@ public class SittingRecordService {
     @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
     public void deleteSittingRecord(Long sittingRecordId) {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
-            = sittingRecordRepository.findById(sittingRecordId)
+            = sittingRecordRepository.findRecorderSittingRecord(sittingRecordId, DELETED.name())
             .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
 
         if (securityUtils.getUserInfo().getRoles().contains("jps-recorder")) {
@@ -212,7 +213,7 @@ public class SittingRecordService {
                 .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
                     securityUtils.getUserInfo().getUid()))
                 .findAny()
-                .orElseThrow(() -> new ResourceNotFoundException(
+                .orElseThrow(() -> new ForbiddenException(
                     "User IDAM ID does not match the oldest Changed by IDAM ID "));
 
             deleteSittingRecord(recordedStatusHistory.getSittingRecord());
