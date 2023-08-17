@@ -3,14 +3,14 @@ import uk.gov.hmcts.contino.AppPipelineDsl
 properties(
   [
     [
-    $class       : 'GithubProjectProperty',
-    projectUrlStr: 'https://github.com/hmcts/jps-judicial-payment-service'
+     $class       : 'GithubProjectProperty',
+     projectUrlStr: 'https://github.com/hmcts/jps-judicial-payment-service'
     ],
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
-   ]
- )
+  ]
+)
 
- @Library("Infrastructure")
+@Library("Infrastructure")
 
 import uk.gov.hmcts.contino.GradleBuilder
 
