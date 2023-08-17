@@ -1,5 +1,9 @@
-#!groovy
-import uk.gov.hmcts.contino.AppPipelineDsl
+#!groovy  @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure") @Library("Infrastructure")
+import uk.gov.hmcts.contino.GradleBuilder
+@Library("Infrastructure")
+
+import uk.gov.hmcts.contino.GradleBuilder
+
 properties(
   [
     [
@@ -9,10 +13,6 @@ properties(
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
   ]
 )
-
-@Library("Infrastructure")
-
-import uk.gov.hmcts.contino.GradleBuilder
 
 def type = "java"
 def product = "jps"
@@ -38,6 +38,8 @@ def secrets = [
     secret('idam-jps-publisher-password', 'JPS_PUBLISHER_PASSWORD'),
     secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
     secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD'),
+    secret('idam-jps-admin-username', 'JPS_ADMIN_USERNAME'),
+    secret('idam-jps-admin-password', 'JPS_ADMIN_PASSWORD'),
     secret('idam-jps-joh-admin-username', 'JPS_JOH_ADMIN_USERNAME'),
     secret('idam-jps-joh-admin-password', 'JPS_JOH_ADMIN_PASSWORD')
   ],
