@@ -1,10 +1,10 @@
 #!groovy
- import uk.gov.hmcts.contino.AppPipelineDsl
- properties(
-   [
-     [
-      $class       : 'GithubProjectProperty',
-      projectUrlStr: 'https://github.com/hmcts/jps-judicial-payment-service'
+import uk.gov.hmcts.contino.AppPipelineDsl
+properties(
+  [
+    [
+    $class       : 'GithubProjectProperty',
+    projectUrlStr: 'https://github.com/hmcts/jps-judicial-payment-service'
     ],
     pipelineTriggers([[$class: 'GitHubPushTrigger']])
    ]
@@ -12,7 +12,8 @@
 
  @Library("Infrastructure")
 
- import uk.gov.hmcts.contino.GradleBuilder
+import uk.gov.hmcts.contino.GradleBuilder
+
 def type = "java"
 def product = "jps"
 def component = "judicial-payment-service"
