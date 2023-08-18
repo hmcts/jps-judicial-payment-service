@@ -19,6 +19,7 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+@org.hibernate.annotations.Immutable
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor

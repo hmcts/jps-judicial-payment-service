@@ -53,7 +53,7 @@ public class SittingRecordController {
 
         String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
 
-        final int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        final long totalRecordCount = sittingRecordService.getTotalRecordCount(
             sittingRecordSearchRequest,
             hmctsServiceCode
         );

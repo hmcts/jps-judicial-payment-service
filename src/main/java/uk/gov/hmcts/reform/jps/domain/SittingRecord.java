@@ -2,17 +2,17 @@ package uk.gov.hmcts.reform.jps.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,7 +25,8 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @ToString
 @Entity
 @Table(name = "sitting_record")
@@ -65,47 +66,52 @@ public class SittingRecord {
     private boolean pm;
 
     @ToString.Exclude
-    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "sittingRecord",
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
     public String getCreatedByUserId() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+        return getFirstStatusHistory()
+            .map(StatusHistory::getChangedByUserId)
+            .orElse(null);
     }
 
     public String getCreatedByUserName() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByName() : null;
+        return getFirstStatusHistory()
+            .map(StatusHistory::getChangedByName)
+            .orElse(null);
     }
 
     public LocalDateTime getCreatedDateTime() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
+        return getFirstStatusHistory()
+            .map(StatusHistory::getChangedDateTime)
+            .orElse(null);
     }
 
     public String getChangedByUserId() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+        return getLatestStatusHistory()
+            .map(StatusHistory::getChangedByUserId)
+            .orElse(null);
     }
 
     public String getChangedByUserName() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByName() : null;
+        return getLatestStatusHistory()
+            .map(StatusHistory::getChangedByName)
+            .orElse(null);
     }
 
     public LocalDateTime getChangedByDateTime() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
+        return getLatestStatusHistory()
+            .map(StatusHistory::getChangedDateTime)
+            .orElse(null);
     }
 
-    public StatusHistory getFirstStatusHistory() {
-        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    public Optional<StatusHistory> getFirstStatusHistory() {
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId));
     }
 
-    public StatusHistory getLatestStatusHistory() {
-        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    public Optional<StatusHistory> getLatestStatusHistory() {
+        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId));
     }
 
     public void addStatusHistory(StatusHistory statusHistory) {
@@ -137,5 +143,4 @@ public class SittingRecord {
             || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
             && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
     }
-
 }

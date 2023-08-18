@@ -1,12 +1,12 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
@@ -17,8 +17,6 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
-import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,6 +39,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 
+@Transactional
 class SittingRecordServiceITest extends BaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
@@ -48,16 +47,15 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private SittingRecordRepository sittingRecordRepository;
     @Autowired
-    private StatusHistoryRepository statusHistoryRepository;
+    private SittingRecordService sittingRecordService;
+    @Autowired
+    private StatusHistoryService statusHistoryService;
     @Autowired
     private ObjectMapper objectMapper;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
-    private SittingRecordService sittingRecordService;
-    private StatusHistoryService statusHistoryService;
-    private LocationService locationService;
-    private ServiceService serviceService;
+
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -66,11 +64,6 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
-    @BeforeEach
-    void beforeEach() {
-        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
-        statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
-    }
 
     @Test
     @Sql(scripts = {"classpath:sql/reset_database.sql"})
@@ -228,7 +221,7 @@ class SittingRecordServiceITest extends BaseTest {
             .dateRangeTo(LocalDate.now())
             .build();
 
-        int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        long totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
             HMCTS_SERVICE_CODE
         );

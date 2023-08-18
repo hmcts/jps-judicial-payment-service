@@ -11,18 +11,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
+import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
+import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
 
@@ -30,6 +34,7 @@ import static java.time.LocalDate.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -44,6 +49,10 @@ class SittingRecordServiceTest {
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
+    @Mock
+    private LocationService locationService;
+    @Mock
+    private ServiceService serviceService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -62,9 +71,9 @@ class SittingRecordServiceTest {
     void shouldReturnTotalRecordCount() {
         when(sittingRecordRepository.totalRecords(isA(SittingRecordSearchRequest.class),
                                                   isA(String.class)))
-            .thenReturn(10);
+            .thenReturn(10L);
 
-        int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        long totalRecordCount = sittingRecordService.getTotalRecordCount(
             SittingRecordSearchRequest.builder().build(),
             "test"
         );
@@ -78,7 +87,21 @@ class SittingRecordServiceTest {
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
         when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
                                                   isA(String.class)))
-            .thenReturn(getDbSittingRecords(2));
+            .thenReturn(getDbSittingRecords(2).stream());
+
+        when(locationService.getCourtVenues(anyString()))
+            .thenReturn(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build())
+            );
+        when(serviceService.findService(anyString()))
+            .thenReturn(Optional.of(Service.builder()
+                    .accountCenterCode("123")
+                        .build())
+            );
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
             SittingRecordSearchRequest.builder().build(),
@@ -99,7 +122,21 @@ class SittingRecordServiceTest {
 
         when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
                                           isA(String.class)))
-            .thenReturn(dbSittingRecords);
+            .thenReturn(dbSittingRecords.stream());
+
+        when(locationService.getCourtVenues(anyString()))
+            .thenReturn(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build())
+            );
+        when(serviceService.findService(anyString()))
+            .thenReturn(Optional.of(Service.builder()
+                                        .accountCenterCode("123")
+                                        .build())
+            );
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
             SittingRecordSearchRequest.builder().build(),
@@ -120,7 +157,20 @@ class SittingRecordServiceTest {
 
         when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
                                           isA(String.class)))
-            .thenReturn(dbSittingRecords);
+            .thenReturn(dbSittingRecords.stream());
+        when(locationService.getCourtVenues(anyString()))
+            .thenReturn(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build())
+            );
+        when(serviceService.findService(anyString()))
+            .thenReturn(Optional.of(Service.builder()
+                                        .accountCenterCode("123")
+                                        .build())
+            );
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
             SittingRecordSearchRequest.builder().build(),
@@ -189,7 +239,7 @@ class SittingRecordServiceTest {
                 .am(true)
                 .pm(true)
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<SittingRecord> getDomainSittingRecords(int limit) {

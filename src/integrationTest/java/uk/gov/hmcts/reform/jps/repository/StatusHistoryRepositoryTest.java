@@ -142,7 +142,11 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         persistedSittingRecord.addStatusHistory(statusHistoryPublished);
         historyRepository.save(statusHistoryPublished);
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
-        persistedStatusHistoryRecorded = persistedSittingRecord.getFirstStatusHistory();
+        Optional<StatusHistory> firstStatusHistory = persistedSittingRecord.getFirstStatusHistory();
+        assertThat(firstStatusHistory)
+            .isPresent()
+            .map(StatusHistory::getStatusId)
+            .hasValue(StatusId.RECORDED.name());
 
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryAsc(persistedSittingRecord.getId()).get(0);
@@ -161,7 +165,12 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         persistedSittingRecord.addStatusHistory(statusHistorySubmitted);
         historyRepository.save(statusHistorySubmitted);
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
-        persistedStatusHistoryRecorded = persistedSittingRecord.getFirstStatusHistory();
+        Optional<StatusHistory> latestStatusHistory = persistedSittingRecord.getLatestStatusHistory();
+        assertThat(latestStatusHistory)
+            .isPresent()
+            .map(StatusHistory::getStatusId)
+            .hasValue(StatusId.SUBMITTED.name());
+
 
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryDesc(persistedSittingRecord.getId()).get(0);
@@ -329,13 +338,15 @@ class StatusHistoryRepositoryTest extends AbstractTest {
             userName,
             sittingRecord
         );
-        StatusHistory persistedStatusHistory1 = historyRepository.save(statusHistory);
-        sittingRecord.addStatusHistory(persistedStatusHistory1);
+        StatusHistory persistedStatusHistory = historyRepository.save(statusHistory);
+        sittingRecord.addStatusHistory(persistedStatusHistory);
 
-        SittingRecord persistedSittingRecord1 = recordRepository.save(sittingRecord);
-        persistedStatusHistory1 = persistedSittingRecord1.getLatestStatusHistory();
-        assertEquals(statusId, persistedStatusHistory1.getStatusId());
-        return persistedSittingRecord1;
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        assertThat(persistedSittingRecord.getLatestStatusHistory())
+            .isPresent()
+            .map(StatusHistory::getStatusId)
+            .hasValue(statusId);
+        return persistedSittingRecord;
     }
 }
 

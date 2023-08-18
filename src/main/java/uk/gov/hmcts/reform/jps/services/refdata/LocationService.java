@@ -18,14 +18,6 @@ import java.util.function.BiPredicate;
 public class LocationService {
     private final LocationServiceClient regionServiceClient;
 
-    public Optional<CourtVenue> getCourtVenue(String hmctsServiceCode, String epimmsId) {
-        return getCourtVenue(
-            getLocationApiResponse(hmctsServiceCode),
-            epimmsId,
-            (court, epimmId) -> court.getEpimmsId().equals(epimmId)
-        );
-    }
-
     private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo,
                                                String value,
                                                BiPredicate<CourtVenue, String> predicate) {
@@ -34,11 +26,6 @@ public class LocationService {
             .findAny();
     }
 
-    public String getVenueName(String hmctsServiceCode, String epimmsId) {
-        return getCourtVenue(hmctsServiceCode, epimmsId)
-            .map(CourtVenue::getVenueName)
-            .orElse("");
-    }
 
     public void setRegionName(String hmctsServiceCode,
                               List<SittingRecord> sittingRecords) {
@@ -81,4 +68,8 @@ public class LocationService {
         return regionServiceClient.getCourtVenue(hmctsServiceCode);
     }
 
+    public List<CourtVenue> getCourtVenues(String hmctsServiceCode) {
+        return getLocationApiResponse(hmctsServiceCode).getCourtVenues().stream()
+                .toList();
+    }
 }
