@@ -369,7 +369,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value(true),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),

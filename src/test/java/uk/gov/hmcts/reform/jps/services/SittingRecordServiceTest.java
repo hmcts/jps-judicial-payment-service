@@ -110,6 +110,8 @@ class SittingRecordServiceTest {
 
         assertEquals(sittingRecords.get(0), getDomainSittingRecords(2).get(0));
         assertEquals(sittingRecords.get(1), getDomainSittingRecords(2).get(1));
+        verify(locationService).getCourtVenues(anyString());
+        verify(serviceService).findService(anyString());
     }
 
 
@@ -146,6 +148,8 @@ class SittingRecordServiceTest {
 
         assertThat(sittingRecords).hasSize(1);
         assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
+        verify(locationService).getCourtVenues(anyString());
+        verify(serviceService).findService(anyString());
     }
 
     @Test
@@ -180,6 +184,8 @@ class SittingRecordServiceTest {
 
         assertThat(sittingRecords).hasSize(1);
         assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
+        verify(locationService).getCourtVenues(anyString());
+        verify(serviceService).findService(anyString());
     }
 
 
