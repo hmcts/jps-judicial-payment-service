@@ -57,7 +57,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
 
-  @S-003.6 @Functional1 #AC05
+  @S-003.6 @Functional #AC05
   Scenario: Negative response - Return 403 Forbidden error if jps-joh-admin tries to access the endpoint
     Given a user with the IDAM role of "jps-joh-admin"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
@@ -93,7 +93,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "409 Conflict" status code
 
-  @S-003.9 @Functional1 #AC08
+  @S-003.9 @Functional #AC08
   Scenario: Negative response - Return 409 Conflict for jps-admin when trying to delete a record that is not in 'Submitted' status
     Given a user with the IDAM role of "jps-admin"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
