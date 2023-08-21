@@ -14,9 +14,6 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
-
 @Data
 @Builder
 @AllArgsConstructor
@@ -44,8 +41,8 @@ public class SittingRecord {
     private String payrollId;
     private String accountCode;
     private Long fee;
-    private String am;
-    private String pm;
+    private Boolean am;
+    private Boolean pm;
     private LocalDateTime createdDateTime;
     private String createdByUserId;
     private String createdByUserName;
@@ -144,19 +141,19 @@ public class SittingRecord {
 
         return (sittingRecord.getId().equals(this.getSittingRecordId())
             && (null == this.getAm() && !sittingRecord.isAm()
-            || null != this.getAm() && this.getAm().equals(AM.name()) && sittingRecord.isAm())
+            || null != this.getAm() && sittingRecord.isAm())
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
             && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && (null == this.getPm() && !sittingRecord.isPm()
-            || null != this.getPm() && this.getPm().equals(PM.name()) && sittingRecord.isPm())
+            || null != this.getPm() && sittingRecord.isPm())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
             && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
-            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories())
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size());
     }
 
 }

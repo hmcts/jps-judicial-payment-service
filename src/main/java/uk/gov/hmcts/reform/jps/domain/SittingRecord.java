@@ -32,6 +32,7 @@ import javax.persistence.Table;
 @Table(name = "sitting_record")
 public class SittingRecord {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sitting_record_ID")
@@ -139,8 +140,7 @@ public class SittingRecord {
             && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
-            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
-            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size())
+            && sittingRecord.getStatusHistories().containsAll(this.getStatusHistories());
     }
 }

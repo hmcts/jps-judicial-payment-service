@@ -41,8 +41,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 @ExtendWith(MockitoExtension.class)
 class SittingRecordServiceTest {
@@ -254,8 +252,8 @@ class SittingRecordServiceTest {
                     .personalCode("001")
                     .contractTypeId(count)
                     .judgeRoleTypeId("HighCourt")
-                    .am(AM.name())
-                    .pm(PM.name())
+                    .am(true)
+                    .pm(true)
                     .build())
             .collect(Collectors.toList());
     }

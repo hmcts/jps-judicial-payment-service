@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -155,7 +156,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
@@ -226,7 +227,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
@@ -297,7 +298,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
@@ -368,7 +369,7 @@ class SittingRecordControllerITest extends BaseTest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
+                jsonPath("$.sittingRecords[0].am").value(true),
                 jsonPath("$.sittingRecords[0].pm").isEmpty(),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),

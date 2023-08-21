@@ -19,6 +19,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import static javax.persistence.FetchType.LAZY;
+
 @org.hibernate.annotations.Immutable
 @Builder
 @NoArgsConstructor()
@@ -30,8 +32,7 @@ import javax.persistence.Table;
 @Table(name = "status_history")
 public class StatusHistory {
 
-    public static final String FIND_ALL_RECORDING_USERS = "FIND_ALL_RECORDING_USERS";
-
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_history_id")
@@ -39,7 +40,7 @@ public class StatusHistory {
 
     @JsonIgnore
     @ToString.Exclude
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = LAZY)
     @JoinColumn(name = "sitting_record_id")
     private SittingRecord sittingRecord;
 

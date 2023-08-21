@@ -21,8 +21,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import javax.transaction.Transactional;
 
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import static java.lang.Boolean.TRUE;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
@@ -49,27 +48,27 @@ public class SittingRecordService {
             return dbSittingRecords
                  .map(sittingRecord -> SittingRecord.builder()
                      .accountCode(accountCode)
-                    .am(sittingRecord.isAm() ? AM.name() : null)
-                    .changedByUserId(sittingRecord.getChangedByUserId())
-                    .changedByUserName(sittingRecord.getChangedByUserName())
-                    .changedDateTime(sittingRecord.getChangedByDateTime())
-                    .contractTypeId(sittingRecord.getContractTypeId())
-                    .createdByUserId(sittingRecord.getCreatedByUserId())
-                    .createdByUserName(sittingRecord.getCreatedByUserName())
-                    .createdDateTime(sittingRecord.getCreatedDateTime())
-                    .epimmsId(sittingRecord.getEpimmsId())
-                    .hmctsServiceId(sittingRecord.getHmctsServiceId())
-                    .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
-                    .personalCode(sittingRecord.getPersonalCode())
-                    .pm(sittingRecord.isPm() ? PM.name() : null)
-                    .regionId(sittingRecord.getRegionId())
-                    .sittingDate(sittingRecord.getSittingDate())
-                    .sittingRecordId(sittingRecord.getId())
-                    .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
-                    .statusId(sittingRecord.getStatusId())
-                    .venueName(getVenueName(courtVenues, sittingRecord.getEpimmsId()))
-                    .build()
-                )
+                     .am(sittingRecord.isAm() ? TRUE : null)
+                     .changedByUserId(sittingRecord.getChangedByUserId())
+                     .changedByUserName(sittingRecord.getChangedByUserName())
+                     .changedDateTime(sittingRecord.getChangedByDateTime())
+                     .contractTypeId(sittingRecord.getContractTypeId())
+                     .createdByUserId(sittingRecord.getCreatedByUserId())
+                     .createdByUserName(sittingRecord.getCreatedByUserName())
+                     .createdDateTime(sittingRecord.getCreatedDateTime())
+                     .epimmsId(sittingRecord.getEpimmsId())
+                     .hmctsServiceId(sittingRecord.getHmctsServiceId())
+                     .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
+                     .personalCode(sittingRecord.getPersonalCode())
+                     .pm(sittingRecord.isPm() ? TRUE : null)
+                     .regionId(sittingRecord.getRegionId())
+                     .sittingDate(sittingRecord.getSittingDate())
+                     .sittingRecordId(sittingRecord.getId())
+                     .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
+                     .statusId(sittingRecord.getStatusId())
+                     .venueName(getVenueName(courtVenues, sittingRecord.getEpimmsId()))
+                     .build()
+                 )
                 .toList();
         }
     }
