@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -33,13 +34,13 @@ public class Fee {
     private String judgeRoleId;
 
     @Column(name = "standard_fee")
-    private Integer standardFee;
+    private BigDecimal standardFee;
 
     @Column(name = "higher_threshold_fee")
-    private Integer higherThresholdFee;
+    private BigDecimal higherThresholdFee;
 
     @Column(name = "london_weighted_fee")
-    private Integer londonWeightedFee;
+    private BigDecimal londonWeightedFee;
 
     @Column(name = "effective_from")
     private LocalDate effectiveFrom;
