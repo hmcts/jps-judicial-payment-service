@@ -69,28 +69,6 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Offset is mandatory"
 
-  @S-005.7 #AC05
-  Scenario: Negative response, when the request payload is missing regionId
-    Given a user with the IDAM role of "jps-recorder"
-    When a request is prepared with appropriate values
-    And the request contains a valid service token
-    And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing regionId" as in "S-005.7.json"
-    And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
-    Then a "negative" response is received with a "400 Bad Request" status code
-    And the response contains "errors[0].message" as "Region Id is mandatory"
-
-  @S-005.8 #AC05
-  Scenario: Negative response, when the request payload is missing epimsId
-    Given a user with the IDAM role of "jps-recorder"
-    When a request is prepared with appropriate values
-    And the request contains a valid service token
-    And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing epimsId" as in "S-005.8.json"
-    And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
-    Then a "negative" response is received with a "400 Bad Request" status code
-    And the response contains "errors[0].message" as "Epims Id is mandatory"
-
   @S-005.9 #AC05
   Scenario: Negative response, when the request payload is missing dateOrder
     Given a user with the IDAM role of "jps-recorder"

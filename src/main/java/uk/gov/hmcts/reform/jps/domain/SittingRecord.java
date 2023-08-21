@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -71,50 +70,41 @@ public class SittingRecord {
 
     public String getCreatedByUserId() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
     public String getCreatedByUserName() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByName() : null;
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
     }
 
     public LocalDateTime getCreatedDateTime() {
         StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
     }
 
-    public String getChangeByUserId() {
+    public String getChangedByUserId() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByUserId() : null;
+        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
     }
 
-    public String getChangeByUserName() {
+    public String getChangedByUserName() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeByName() : null;
+        return null != statusHistory ? statusHistory.getChangedByName() : null;
     }
 
-    public LocalDateTime getChangeByDateTime() {
+    public LocalDateTime getChangedByDateTime() {
         StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangeDateTime() : null;
+        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
     }
 
     public StatusHistory getFirstStatusHistory() {
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId))
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
 
     public StatusHistory getLatestStatusHistory() {
-        List<StatusHistory> statusHistoriesCopy = statusHistories.stream()
-            .sorted(Comparator.comparingLong(StatusHistory::getId).reversed())
-            .toList();
-        Optional<StatusHistory> optStatHistory = statusHistoriesCopy.stream().findFirst();
-        return optStatHistory.isPresent() ? optStatHistory.get() : null;
+        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
     }
-
 
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);

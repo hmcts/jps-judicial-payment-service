@@ -6,4 +6,6 @@ import uk.gov.hmcts.reform.jps.domain.Service;
 
 @Repository
 public interface ServiceRepository extends JpaRepository<Service, Long> {
+
+    public Service findByHmctsServiceId(String hmctsServiceId);
 }
