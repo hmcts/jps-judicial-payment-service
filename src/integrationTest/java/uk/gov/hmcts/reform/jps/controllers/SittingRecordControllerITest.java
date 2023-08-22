@@ -41,6 +41,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
 
 
+@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")

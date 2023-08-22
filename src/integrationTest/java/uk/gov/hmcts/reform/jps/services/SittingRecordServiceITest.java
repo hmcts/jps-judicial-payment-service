@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,6 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
-import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -50,6 +50,8 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private SittingRecordRepository sittingRecordRepository;
     @Autowired
+    private StatusHistoryRepository statusHistoryRepository;
+    @Autowired
     private SittingRecordService sittingRecordService;
     @Autowired
     private StatusHistoryService statusHistoryService;
@@ -59,10 +61,6 @@ class SittingRecordServiceITest extends BaseTest {
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
 
-    @Autowired
-    private StatusHistoryService statusHistoryService;
-    @Autowired
-    private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -343,7 +341,7 @@ class SittingRecordServiceITest extends BaseTest {
         StatusHistory statusHistoryCreated1 = sittingRecord.getStatusHistories().get(0);
         LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
         LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
-        assertTrue(statusHistoryCreated1.equals(actual.getFirstStatusHistory()));
+        assertEquals(statusHistoryCreated1, actual.getFirstStatusHistory());
 
     }
 

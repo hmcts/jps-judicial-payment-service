@@ -11,9 +11,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
-import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
@@ -41,10 +41,9 @@ import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.Assert.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -52,8 +51,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -63,8 +60,6 @@ class SittingRecordServiceTest {
 
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
-    private static final LocalDateTime CURRENT_DATE_TIME = now();
-
     private static final Long ID = 1L;
 
     @Mock
@@ -76,9 +71,6 @@ class SittingRecordServiceTest {
 
     @Mock
     private SecurityUtils securityUtils;
-
-    @Mock
-    UserInfo userInfo;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -263,12 +255,10 @@ class SittingRecordServiceTest {
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
             StatusHistory::getChangedDateTime));
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
 
-        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
+        assertThat(optionalStatusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("DELETED");
 
     }
 
@@ -289,13 +279,10 @@ class SittingRecordServiceTest {
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
             StatusHistory::getChangedDateTime));
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
 
-        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
-
+        assertThat(optionalStatusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("DELETED");
     }
 
     @Test
@@ -315,13 +302,9 @@ class SittingRecordServiceTest {
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
             StatusHistory::getChangedDateTime));
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
-
-        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
-
+        assertThat(optionalStatusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("DELETED");
     }
 
     @Test
@@ -335,13 +318,14 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ForbiddenException.class, () -> {
-            sittingRecordService.deleteSittingRecord(ID);
-        });
+        Exception exception = assertThrows(ForbiddenException.class, () ->
+            sittingRecordService.deleteSittingRecord(ID)
+        );
 
-        StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
-
-        assertThat(statusHistory.getStatusId()).isEqualTo("RECORDED");
+        Optional<StatusHistory> statusHistory = sittingRecord.getLatestStatusHistory();
+        assertThat(statusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("RECORDED");
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
     }
 
@@ -355,9 +339,9 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+        );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
 
@@ -371,9 +355,9 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+        );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
 
@@ -387,9 +371,9 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+        );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
 
