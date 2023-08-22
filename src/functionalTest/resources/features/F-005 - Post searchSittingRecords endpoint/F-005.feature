@@ -4,11 +4,11 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
   @S-005.1 #AC01
   Scenario: Success response when the request contains all the fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the given hmctsServiceCode exists in the database
+    And a record for the given hmctsServiceCode exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "payload matching data from existing record" as in "F-005_allFields.json"
+    And the request body contains the "payload matching data from existing record" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
@@ -16,11 +16,11 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
   @S-005.2 #AC02
   Scenario: Success response when the request contains only the mandatory fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the given hmctsServiceCode exists in the database
+    And a record for the given hmctsServiceCode exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "payload matching data from existing record" as in "S-005.2.json"
+    And the request body contains the "payload matching data from existing record" as in "S-005.2"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the response returns the matching sitting records
@@ -31,7 +31,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BFA1"
-    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the "recordCount" is 0
@@ -42,7 +42,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as ""
-    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "hmctsServiceCode is mandatory"
@@ -53,7 +53,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing pageSize" as in "S-005.5.json"
+    And the request body contains the "payload missing pageSize" as in "S-005.5"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Page size is mandatory"
@@ -64,7 +64,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing offset" as in "S-005.6.json"
+    And the request body contains the "payload missing offset" as in "S-005.6"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Offset is mandatory"
@@ -75,7 +75,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing dateOrder" as in "S-005.9.json"
+    And the request body contains the "payload missing dateOrder" as in "S-005.9"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Date order is mandatory"
@@ -86,7 +86,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing dateRange" as in "S-005.10.json"
+    And the request body contains the "payload missing dateRange" as in "S-005.10"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Date range to is mandatory"
@@ -98,7 +98,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "403 Forbidden" status code
 
@@ -108,6 +108,6 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains an invalid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload with all the fields" as in "F-005_allFields.json"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "403 Forbidden" status code

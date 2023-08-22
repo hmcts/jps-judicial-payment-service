@@ -18,7 +18,6 @@ import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
-import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -41,6 +40,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 
+
 class SittingRecordServiceITest extends BaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
@@ -54,10 +54,11 @@ class SittingRecordServiceITest extends BaseTest {
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
-    private SittingRecordService sittingRecordService;
+
+    @Autowired
     private StatusHistoryService statusHistoryService;
-    private LocationService locationService;
-    private ServiceService serviceService;
+    @Autowired
+    private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -68,8 +69,8 @@ class SittingRecordServiceITest extends BaseTest {
 
     @BeforeEach
     void beforeEach() {
-        sittingRecordService = new SittingRecordService(sittingRecordRepository, locationService, serviceService);
-        statusHistoryService = new StatusHistoryService(sittingRecordRepository, statusHistoryRepository);
+        statusHistoryRepository.deleteAll();
+        sittingRecordRepository.deleteAll();
     }
 
     @Test
