@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -140,20 +141,20 @@ public class SittingRecord {
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
         return (sittingRecord.getId().equals(this.getSittingRecordId())
-            && (null == this.getAm() && !sittingRecord.isAm()
-            || null != this.getAm() && sittingRecord.isAm())
+            && (Objects.nonNull(this.getAm()) && this.getAm().equals(sittingRecord.isAm()))
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
             && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
-            && (null == this.getPm() && !sittingRecord.isPm()
-            || null != this.getPm() && sittingRecord.isPm())
+            && (Objects.nonNull(this.getPm()) && this.getPm().equals(sittingRecord.isPm()))
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.getRegionId().equals(this.getRegionId())
-            && sittingRecord.getStatusId().equals(this.getStatusId())
-            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
-            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories())
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size());
+            && (Objects.isNull(sittingRecord.getStatusHistories())
+                && Objects.isNull(this.getStatusHistories())
+                || (Objects.nonNull(sittingRecord.getStatusHistories())
+                && Objects.nonNull(this.getStatusHistories())
+                && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
+                && this.getStatusHistories().containsAll(sittingRecord.getStatusHistories()))));
     }
 
 }

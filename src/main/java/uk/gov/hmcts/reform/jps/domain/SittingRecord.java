@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -140,7 +141,11 @@ public class SittingRecord {
             && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
             && sittingRecord.getStatusId().equals(this.getStatusId())
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size())
-            && sittingRecord.getStatusHistories().containsAll(this.getStatusHistories());
+            && (Objects.isNull(sittingRecord.getStatusHistories())
+                && Objects.isNull(this.getStatusHistories())
+                || (Objects.nonNull(sittingRecord.getStatusHistories())
+                && Objects.nonNull(this.getStatusHistories())
+                && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
+                && sittingRecord.getStatusHistories().containsAll(this.getStatusHistories()))));
     }
 }

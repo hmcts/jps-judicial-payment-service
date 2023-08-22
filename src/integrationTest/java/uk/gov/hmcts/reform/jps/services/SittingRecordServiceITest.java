@@ -87,7 +87,6 @@ class SittingRecordServiceITest extends BaseTest {
 
 
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
-
         assertThat(response).hasSize(1);
         LOGGER.debug("actual:        {}", actual);
         LOGGER.debug("sittingRecord: {}", sittingRecord);

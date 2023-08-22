@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -19,9 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javax.transaction.Transactional;
 
-import static java.lang.Boolean.TRUE;
 
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
@@ -48,7 +47,7 @@ public class SittingRecordService {
             return dbSittingRecords
                  .map(sittingRecord -> SittingRecord.builder()
                      .accountCode(accountCode)
-                     .am(sittingRecord.isAm() ? TRUE : null)
+                     .am(sittingRecord.isAm())
                      .changedByUserId(sittingRecord.getChangedByUserId())
                      .changedByUserName(sittingRecord.getChangedByUserName())
                      .changedDateTime(sittingRecord.getChangedByDateTime())
@@ -60,7 +59,7 @@ public class SittingRecordService {
                      .hmctsServiceId(sittingRecord.getHmctsServiceId())
                      .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
                      .personalCode(sittingRecord.getPersonalCode())
-                     .pm(sittingRecord.isPm() ? TRUE : null)
+                     .pm(sittingRecord.isPm())
                      .regionId(sittingRecord.getRegionId())
                      .sittingDate(sittingRecord.getSittingDate())
                      .sittingRecordId(sittingRecord.getId())
