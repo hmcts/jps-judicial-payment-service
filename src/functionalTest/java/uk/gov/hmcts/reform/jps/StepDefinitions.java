@@ -7,8 +7,8 @@ import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.jps.config.Endpoints;
@@ -25,8 +25,10 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -46,6 +48,8 @@ public class StepDefinitions extends TestVariables {
             recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
             submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
             publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
+            adminAccessToken = idamTokenGenerator.authenticateUser(adminUsername, adminPassword);
+            johAdminAccessToken = idamTokenGenerator.authenticateUser(johAdminUsername, johAdminPassword);
             invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
 
             ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
@@ -64,17 +68,21 @@ public class StepDefinitions extends TestVariables {
             accessToken  = submitterAccessToken;
         } else if (role.equalsIgnoreCase("jps-publisher")) {
             accessToken  = publisherAccessToken;
+        } else if (role.equalsIgnoreCase("jps-admin")) {
+            accessToken  = adminAccessToken;
+        } else if (role.equalsIgnoreCase("jps-joh-admin")) {
+            accessToken  = johAdminAccessToken;
         } else if (role.equalsIgnoreCase("ccd-import")) {
             accessToken  = invalidAccessToken;
         }
     }
 
-    @Given("a record for the given hmctsServiceCode exists in the database")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+    @Given("a record for the given hmctsServiceCode exists in the database with the payload {string}")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabaseWithThePayload(String payload) throws IOException {
         randomDate = RandomDateGenerator.generateRandomDate().toString();
 
         String body = new
-            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-004_allFields.json")));
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
         body = body.replace("2023-04-10", randomDate);
 
         RestAssured.baseURI = testUrl;
@@ -84,6 +92,29 @@ public class StepDefinitions extends TestVariables {
             .body(body).log().all()
             .when().post("/recordSittingRecords/ABA5")
             .then().log().all().assertThat().statusCode(201);
+    }
+
+    @Given("a search is done on the hmctsServiceCode {string}, with the payload {string} to get the {string}")
+    public void searchIsDoneOnTheHmctsServiceCodeWithThePayloadToGetThe(String serviceCode, String payload, String
+        attribute) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
+        body = body.replace("2023-03-10", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        ValidatableResponse response = given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/sitting-records/searchSittingRecords/" + serviceCode)
+            .then().log().all().assertThat().statusCode(200);
+
+        recordAttribute = propertiesReader.getJsonPath(response, attribute);
+    }
+
+    @Given("the existing record is in Submitted state")
+    public void theExistingRecordIsInSubmittedState() {
+        // Write code here after IJPS-62 is ready
     }
 
     @When("a request is prepared with appropriate values")
@@ -107,12 +138,17 @@ public class StepDefinitions extends TestVariables {
 
     @When("the request contains the {string} as {string}")
     public void theRequestContainsTheAs(String pathParam, String value) {
+        if (value.equalsIgnoreCase("id of the previously created record")) {
+            value = recordAttribute;
+        }
+
         given = request.pathParam(pathParam,value);
     }
 
     @When("the request body contains the {string} as in {string}")
     public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
-        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName)));
+        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName
+                                                                  + ".json")));
         if (description.equalsIgnoreCase("payload matching data from existing record")) {
             body = body.replace("2023-03-10", randomDate);
             body = body.replace("2023-05-12", randomDate);
@@ -136,26 +172,6 @@ public class StepDefinitions extends TestVariables {
         }
     }
 
-    @When("the request body contains the {string} as {string}")
-    public void the_request_body_contains_the_as(String field, String value) {
-        given.body(field, ObjectMapperType.valueOf(value));
-    }
-
-    @Then("the response has all the fields returned with correct values")
-    public void the_response_has_all_the_fields_returned_with_correct_values() {
-        response.then().assertThat().body("hmctsServiceCode",equalTo("<hmctsServiceCode>"))
-            .body("feeId",equalTo("<feeId>"))
-            .body("feeDescription",equalTo("<feeDescription>"))
-            .body("judgeRoleTypeId",equalTo("<judgeRoleTypeId>"))
-            .body("standardFee",equalTo(1234))
-            .body("londonWeightedFee",equalTo(6869));
-    }
-
-    @Then("the response is empty")
-    public void the_response_is_empty() {
-        response.then().assertThat().body("isEmpty()", Matchers.is(true));
-    }
-
     @Then("a {string} response is received with a {string} status code")
     public void responseIsReceivedWithStatusCode(String responseType, String responseCode) {
         response.then().log().all().extract().response().asString();
@@ -171,6 +187,10 @@ public class StepDefinitions extends TestVariables {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
             } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
+            } else if (responseCode.equalsIgnoreCase("409 Conflict")) {
+                assertThat(response.getStatusCode()).isEqualTo(CONFLICT.value());
+            } else if (responseCode.equalsIgnoreCase("404 Not Found")) {
+                assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND.value());
             }
         }
     }

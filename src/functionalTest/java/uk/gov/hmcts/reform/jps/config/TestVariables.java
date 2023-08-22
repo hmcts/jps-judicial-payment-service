@@ -16,18 +16,24 @@ public class TestVariables {
     protected static final String adminPassword;
     protected static final String invalidUsername;
     protected static final String invalidPassword;
+    protected static final String johAdminUsername;
+    protected static final String johAdminPassword;
     protected static String accessToken;
     protected static String recorderAccessToken;
     protected static String submitterAccessToken;
     protected static String publisherAccessToken;
+    protected static String adminAccessToken;
+    protected static String johAdminAccessToken;
     protected static String invalidAccessToken;
     protected static String validS2sToken;
     protected static String invalidS2sToken;
     protected static String judgeRoleTypeId = RandomStringUtils.randomAlphabetic(10);
     protected static String randomDate;
+    protected static String recordAttribute;
+    protected static PropertiesReader propertiesReader = new PropertiesReader(
+        "src/functionalTest/resources/test-config.properties");
 
     static {
-        PropertiesReader propertiesReader = new PropertiesReader("src/functionalTest/resources/test-config.properties");
         testUrl = propertiesReader.getProperty("test-url");
         recorderUsername = propertiesReader.getProperty("idam.recorder.username");
         recorderPassword = propertiesReader.getProperty("idam.recorder.password");
@@ -37,6 +43,8 @@ public class TestVariables {
         publisherPassword = propertiesReader.getProperty("idam.publisher.password");
         adminUsername = propertiesReader.getProperty("idam.admin.username");
         adminPassword = propertiesReader.getProperty("idam.admin.password");
+        johAdminUsername = propertiesReader.getProperty("idam.johAdmin.username");
+        johAdminPassword = propertiesReader.getProperty("idam.johAdmin.password");
         invalidUsername = propertiesReader.getProperty("idam.invalid.username");
         invalidPassword = propertiesReader.getProperty("idam.invalid.password");
     }

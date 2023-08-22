@@ -17,6 +17,8 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -39,6 +41,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
 import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 
+
 @Transactional
 class SittingRecordServiceITest extends BaseTest {
 
@@ -56,6 +59,10 @@ class SittingRecordServiceITest extends BaseTest {
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
 
+    @Autowired
+    private StatusHistoryService statusHistoryService;
+    @Autowired
+    private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -64,6 +71,11 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
+    @BeforeEach
+    void beforeEach() {
+        statusHistoryRepository.deleteAll();
+        sittingRecordRepository.deleteAll();
+    }
 
     @Test
     @Sql(scripts = {"classpath:sql/reset_database.sql"})

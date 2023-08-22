@@ -44,6 +44,7 @@ public class SittingRecordController {
     private final LocationService regionService;
     private final JudicialUserDetailsService judicialUserDetailsService;
 
+
     @PostMapping(
         path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
     )
@@ -88,4 +89,5 @@ public class SittingRecordController {
                       .sittingRecords(sittingRecords)
                       .build());
     }
+
 }

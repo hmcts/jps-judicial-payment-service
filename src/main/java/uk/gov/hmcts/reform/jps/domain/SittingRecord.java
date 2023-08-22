@@ -69,7 +69,7 @@ public class SittingRecord {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
     public String getCreatedByUserId() {
