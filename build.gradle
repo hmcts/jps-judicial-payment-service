@@ -32,6 +32,7 @@ def versions = [
   tomcatEmbedded  : '9.0.75',
   mapstruct       : '1.5.3.Final',
   lombok          : '1.18.28',
+  mockito         : '5.2.0',
   flyway          : '9.15.2',
   postgresql      : '42.6.0'
 ]
@@ -93,7 +94,7 @@ configurations {
   cftlibRuntimeClasspath.extendsFrom(runtimeClasspath)
 }
 
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
   options.annotationProcessorGeneratedSourcesDirectory = file("src/generated/java")
 }
@@ -103,7 +104,7 @@ tasks.withType(JavaExec).configureEach {
   javaLauncher.set(javaToolchains.launcherFor(java.toolchain))
 }
 
-tasks.withType(Test) {
+tasks.withType(Test).configureEach {
   useJUnitPlatform()
 
   testLogging {
@@ -150,7 +151,7 @@ task smoke(type: Test) {
   }
 }
 
-task functional(type: Test) {
+tasks.register('functional', Test) {
   description = "Runs functional tests"
   testClassesDirs = sourceSets.functionalTest.output.classesDirs
   classpath = sourceSets.functionalTest.runtimeClasspath
@@ -192,7 +193,7 @@ cucumberReports {
   notFailingStatuses = ["skipped", "passed"]
 }
 
-task integration(type: Test) {
+tasks.register('integration', Test) {
   description = "Runs integration tests"
   group = "Verification"
   testClassesDirs = sourceSets.integrationTest.output.classesDirs
@@ -362,14 +363,14 @@ dependencies {
   integrationTestImplementation group: 'org.testcontainers', name: 'postgresql', version: versions.testcontainers
   integrationTestImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
   integrationTestAnnotationProcessor group: 'org.projectlombok', name: 'lombok', version: versions.lombok
-  testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.11.1'
+  testImplementation group: 'org.mockito', name: 'mockito-inline',  version: versions.mockito
 
   testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '7.11.1'
   testImplementation group: 'junit', name: 'junit', version: '4.13.2'
   testImplementation group: 'net.javacrumbs.json-unit', name: 'json-unit-assertj', version: '2.36.0'
   testImplementation group: 'org.testcontainers', name: 'postgresql', version: '1.17.6'
   testImplementation group: 'org.springframework.cloud', name: 'spring-cloud-starter-contract-stub-runner', version: '3.1.0'
-  testImplementation group: 'org.mockito', name: 'mockito-inline', version: '3.11.1'
+  testImplementation group: 'org.mockito', name: 'mockito-inline', version: versions.mockito
   testImplementation group: 'org.projectlombok', name: 'lombok', version: versions.lombok
 }
 
@@ -448,7 +449,7 @@ flyway {
   baselineOnMigrate = true
 }
 
-task migratePostgresDatabase(type: FlywayMigrateTask) {
+tasks.register('migratePostgresDatabase', FlywayMigrateTask) {
   baselineOnMigrate = true
   if (project.hasProperty("dburl")) {
     url = "jdbc:postgresql://${dburl}"

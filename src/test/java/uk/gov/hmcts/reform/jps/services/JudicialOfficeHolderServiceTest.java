@@ -3,15 +3,16 @@ package uk.gov.hmcts.reform.jps.services;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.jps.domain.JohPayroll;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
-import uk.gov.hmcts.reform.jps.repository.JudicialOfficeHolderRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -21,38 +22,55 @@ import static org.mockito.Mockito.when;
 class JudicialOfficeHolderServiceTest {
 
     @MockBean
-    private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
-
-    @Autowired
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
     /**
-     * Method under test: {@link JudicialOfficeHolderService#findJudicialOfficeHolder(Long)}.
+     * Method under test: {@link JudicialOfficeHolderService#findById(Long)}.
      */
     @Test
     void testFindJudicialOfficeHolderById() {
         final String Personal_Code = "PersonalCode345";
-        JudicialOfficeHolder judicialOfficeHolder = new JudicialOfficeHolder();
-        judicialOfficeHolder.setId(1L);
-        judicialOfficeHolder.setPersonalCode(Personal_Code);
+        JudicialOfficeHolder judicialOfficeHolder = createJudicialOfficeHolder(1L, Personal_Code);
+        JohPayroll johPayroll = createJohPayroll(1L, LocalDate.now(), "jr1111", "pr11222");
+        judicialOfficeHolder.addJohPayroll(johPayroll);
+        johPayroll.setJudicialOfficeHolder(judicialOfficeHolder);
         Optional<JudicialOfficeHolder> ofResult = Optional.of(judicialOfficeHolder);
-        when(judicialOfficeHolderRepository.findById(Mockito.<Long>any())).thenReturn(ofResult);
-        assertSame(judicialOfficeHolder, judicialOfficeHolderService.findJudicialOfficeHolder(1L));
-        verify(judicialOfficeHolderRepository).findById(Mockito.<Long>any());
+        when(judicialOfficeHolderService.findById(1L)).thenReturn(ofResult);
+        assertEquals(judicialOfficeHolder.getId(), judicialOfficeHolderService.findById(1L).get().getId());
+        verify(judicialOfficeHolderService).findById(Mockito.<Long>any());
     }
 
     /**
-     * Method under test: {@link JudicialOfficeHolderService#findJudicialOfficeHolder(String)}.
+     * Method under test: {@link JudicialOfficeHolderService#findByPersonalCode(String)}.
      */
     @Test
     void testFindJudicialOfficeHolderByPersonalCode() {
         final String Personal_Code = "PersonalCode777";
-        JudicialOfficeHolder judicialOfficeHolder = new JudicialOfficeHolder();
-        judicialOfficeHolder.setId(1L);
-        judicialOfficeHolder.setPersonalCode(Personal_Code);
-        when(judicialOfficeHolderRepository.findByPersonalCode(Mockito.<String>any())).thenReturn(judicialOfficeHolder);
-        assertSame(judicialOfficeHolder, judicialOfficeHolderService.findJudicialOfficeHolder(Personal_Code));
-        verify(judicialOfficeHolderRepository).findByPersonalCode(Mockito.<String>any());
+        JudicialOfficeHolder judicialOfficeHolder = createJudicialOfficeHolder(1L, Personal_Code);
+        JohPayroll johPayroll = createJohPayroll(1L, LocalDate.now(), "jr1111", "pr11222");
+        judicialOfficeHolder.addJohPayroll(johPayroll);
+        johPayroll.setJudicialOfficeHolder(judicialOfficeHolder);
+        when(judicialOfficeHolderService.findByPersonalCode(Personal_Code)).thenReturn(judicialOfficeHolder);
+        assertSame(judicialOfficeHolder, judicialOfficeHolderService.findByPersonalCode(Personal_Code));
+        verify(judicialOfficeHolderService).findByPersonalCode(Mockito.<String>any());
     }
+
+
+    private JudicialOfficeHolder createJudicialOfficeHolder(Long id, String personalCode) {
+        return JudicialOfficeHolder.builder()
+            .id(id)
+            .personalCode(personalCode)
+            .build();
+    }
+
+    private JohPayroll createJohPayroll(Long id, LocalDate effectiveDate, String judgeRoleTypeId, String payrollId) {
+        return JohPayroll.builder()
+            .id(id)
+            .effectiveStartDate(effectiveDate)
+            .judgeRoleTypeId(judgeRoleTypeId)
+            .payrollId(payrollId)
+            .build();
+    }
+
 }
 
