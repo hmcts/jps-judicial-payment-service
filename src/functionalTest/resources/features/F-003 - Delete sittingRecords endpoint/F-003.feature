@@ -5,7 +5,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Success response - Return 200 success with Sitting Record update status as deleted for jps-recorder
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -16,7 +16,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Success response - Return 200 success with Sitting Record update status as deleted for jps-submitter
     Given a user with the IDAM role of "jps-submitter"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -28,7 +28,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     Given a user with the IDAM role of "jps-admin"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
     And the existing record is in Submitted state
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -50,7 +50,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Negative response - Return 403 Forbidden error if jps-publisher tries to access the endpoint
     Given a user with the IDAM role of "jps-publisher"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -61,7 +61,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Negative response - Return 403 Forbidden error if jps-joh-admin tries to access the endpoint
     Given a user with the IDAM role of "jps-joh-admin"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -74,7 +74,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
     And the existing record is in Submitted state
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -86,7 +86,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     Given a user with the IDAM role of "jps-submitter"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
     And the existing record is in Submitted state
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -97,7 +97,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Negative response - Return 409 Conflict for jps-admin when trying to delete a record that is not in 'Submitted' status
     Given a user with the IDAM role of "jps-admin"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -119,7 +119,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Negative response - Return 403 Forbidden when user doesn't have a valid role
     Given a user with the IDAM role of "ccd-import"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
@@ -130,7 +130,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Negative response - Return 401 Unauthorised when the request is missing the s2s token
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
@@ -140,7 +140,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
   Scenario: Negative response - Return 403 Forbidden when the request is passing an invalid service token
     Given a user with the IDAM role of "jps-recorder"
     And a record for the given hmctsServiceCode exists in the database with the payload "F-003_CreateRecord"
-    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-003_searchRecord" to get the "sittingRecords[0].sittingRecordId"
     When a request is prepared with appropriate values
     And the request contains an invalid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
