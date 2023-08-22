@@ -339,8 +339,9 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
+        Long id = sittingRecord.getId();
         Exception exception = assertThrows(ConflictException.class, () ->
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+            sittingRecordService.deleteSittingRecord(id)
         );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
@@ -355,8 +356,9 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
+        Long id = sittingRecord.getId();
         Exception exception = assertThrows(ConflictException.class, () ->
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+            sittingRecordService.deleteSittingRecord(id)
         );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
@@ -371,8 +373,9 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
+        Long id = sittingRecord.getId();
         Exception exception = assertThrows(ConflictException.class, () ->
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId())
+            sittingRecordService.deleteSittingRecord(id)
         );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
