@@ -146,6 +146,7 @@ public class SittingRecord {
                 || (Objects.nonNull(sittingRecord.getStatusHistories())
                 && Objects.nonNull(this.getStatusHistories())
                 && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
-                && sittingRecord.getStatusHistories().containsAll(this.getStatusHistories()))));
+                && Objects.deepEquals(this.getStatusHistories().toArray(),
+                                  sittingRecord.getStatusHistories().toArray()))));
     }
 }
