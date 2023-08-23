@@ -12,7 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -46,7 +45,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -162,7 +160,7 @@ class SittingRecordControllerTest {
         List<RecordingUser> recordingUsers = generateRecordingUsers();
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
-            .thenReturn(sittingRecords.size());
+            .thenReturn(Long.valueOf(sittingRecords.size()));
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
         when(statusHistoryService.findRecordingUsers(anyString(), anyString(), anyList(), any(), any()))
@@ -206,7 +204,7 @@ class SittingRecordControllerTest {
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        )).thenReturn(2);
+        )).thenReturn(2L);
 
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
@@ -232,6 +230,18 @@ class SittingRecordControllerTest {
         assertEquals(0, sittingRecordSearchResponse.getSittingRecords().size());
         verify(regionService, never()).setRegionName(SSCS, sittingRecords);
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
+    }
+
+    private List<RecordingUser> generateRecordingUsers() {
+        RecordingUser recUser1 = RecordingUser.builder()
+            .userId("10011")
+            .userName("User One")
+            .build();
+        RecordingUser recUser2 = RecordingUser.builder()
+            .userId("10022")
+            .userName("User Two")
+            .build();
+        return List.of(recUser1, recUser2);
     }
 
     @Test
@@ -269,18 +279,6 @@ class SittingRecordControllerTest {
             );
     }
 
-    private List<RecordingUser> generateRecordingUsers() {
-        RecordingUser recUser1 = RecordingUser.builder()
-            .userId("10011")
-            .userName("User One")
-            .build();
-        RecordingUser recUser2 = RecordingUser.builder()
-            .userId("10022")
-            .userName("User Two")
-            .build();
-        return List.of(recUser1, recUser2);
-    }
-
     private List<SittingRecord> generateSittingRecords() {
         long idSittingRecord = 0;
         long idStatusHistory = 0;
@@ -295,7 +293,7 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord1 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC1")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11222L)
             .contractTypeName("Contract Type 1")
             .crownServantFlag(Boolean.TRUE)
@@ -308,7 +306,7 @@ class SittingRecordControllerTest {
             .payrollId("PR1")
             .personalCode("PC1")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC1")
             .regionName("East Coast US1")
             .sittingDate(LocalDate.now().minusDays(2))
@@ -347,7 +345,7 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord2 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC2")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11333L)
             .contractTypeName("Contract Type 2")
             .crownServantFlag(Boolean.FALSE)
@@ -360,7 +358,7 @@ class SittingRecordControllerTest {
             .payrollId("PR2")
             .personalCode("PC2")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC2")
             .regionName("East Coast US2")
             .sittingDate(LocalDate.now().minusDays(1))

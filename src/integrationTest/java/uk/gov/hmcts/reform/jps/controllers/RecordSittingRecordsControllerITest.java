@@ -10,6 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -19,6 +20,7 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
@@ -27,6 +29,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -35,6 +38,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
@@ -98,7 +102,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[0].statusId").value("RECORDED"),
+                jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -109,7 +113,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[1].statusId").value("RECORDED"),
+                jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -120,7 +124,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].statusId").value("RECORDED")
+                jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
             ).andReturn();
 
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
@@ -142,7 +146,6 @@ public class RecordSittingRecordsControllerITest {
         }
     }
 
-
     @Test
     @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
@@ -150,62 +153,66 @@ public class RecordSittingRecordsControllerITest {
         String requestJson =  Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);
 
         mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
-                                                  .contentType(MediaType.APPLICATION_JSON)
-                                                  .content(requestJson))
-            .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.message").value("008 could not insert"),
-                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
-                jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852650"),
-                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918600"),
-                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
-                jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
-                jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
-                jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
-                jsonPath("$.errorRecords[0].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
-                jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[0].statusId").value("RECORDED"),
-                jsonPath("$.errorRecords[0].createdDateTime").exists(),
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson))
+                .andDo(print())
+                .andExpectAll(
+                        status().isBadRequest(),
+                        jsonPath("$.message").value("008 could not insert"),
+                        jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
+                        jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852650"),
+                        jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918600"),
+                        jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
+                        jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
+                        jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
+                        jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
+                        jsonPath("$.errorRecords[0].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
+                        jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
+                        jsonPath("$.errorRecords[0].statusId").value("RECORDED"),
+                        jsonPath("$.errorRecords[0].createdDateTime").exists(),
 
-                jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
-                jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852650"),
-                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918600"),
-                jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Test"),
-                jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
-                jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
-                jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
-                jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
-                jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[1].statusId").value("RECORDED"),
-                jsonPath("$.errorRecords[1].createdDateTime").exists(),
+                        jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
+                        jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852650"),
+                        jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918600"),
+                        jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Test"),
+                        jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
+                        jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
+                        jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
+                        jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
+                        jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
+                        jsonPath("$.errorRecords[1].statusId").value("RECORDED"),
+                        jsonPath("$.errorRecords[1].createdDateTime").exists(),
 
-                jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
-                jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852650"),
-                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918600"),
-                jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
-                jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
-                jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
-                jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
-                jsonPath("$.errorRecords[2].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
-                jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].statusId").value("RECORDED"),
-                jsonPath("$.errorRecords[2].createdDateTime").exists()
-            );
+                        jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
+                        jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852650"),
+                        jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918600"),
+                        jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
+                        jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
+                        jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
+                        jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
+                        jsonPath("$.errorRecords[2].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
+                        jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
+                        jsonPath("$.errorRecords[2].statusId").value("RECORDED"),
+                        jsonPath("$.errorRecords[2].createdDateTime").exists()
+                );
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {JPS_PUBLISHER, JPS_ADMIN})
     void shouldReturnUnauthorizedStatusWhenUserIsUnauthorized() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .content(requestJson))
-            .andDo(print())
-            .andExpect(status().isUnauthorized());
+        assertThatThrownBy(() -> mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(requestJson))
+                        .andDo(print())
+                        .andReturn())
+                .hasCauseInstanceOf(AccessDeniedException.class);
+
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenRequestIsEmpty() throws Exception {
         String requestJson = "{}";
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -232,7 +239,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    @WithMockUser(authorities = {JPS_PUBLISHER, JPS_ADMIN})
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
@@ -250,6 +257,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("recordMandatoryFieldsMissing.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)

@@ -85,4 +85,8 @@ public class LocationService {
         return regionServiceClient.getCourtVenue(hmctsServiceCode);
     }
 
+    public List<CourtVenue> getCourtVenues(String hmctsServiceCode) {
+        return getLocationApiResponse(hmctsServiceCode).getCourtVenues().stream()
+                .toList();
+    }
 }

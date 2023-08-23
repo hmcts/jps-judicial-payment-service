@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
@@ -51,6 +52,8 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
+
+@Transactional
 class SittingRecordServiceITest extends BaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
@@ -60,14 +63,14 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private StatusHistoryRepository statusHistoryRepository;
     @Autowired
+    private SittingRecordService sittingRecordService;
+    @Autowired
+    private StatusHistoryService statusHistoryService;
+    @Autowired
     private ObjectMapper objectMapper;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
-    @Autowired
-    private SittingRecordService sittingRecordService;
-    @Autowired
-    private StatusHistoryService statusHistoryService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -83,6 +86,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED,2L, USER_ID, USER_NAME);
 
@@ -103,7 +107,6 @@ class SittingRecordServiceITest extends BaseTest {
 
 
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
-
         assertThat(response).hasSize(1);
         LOGGER.debug("actual:        {}", actual);
         LOGGER.debug("sittingRecord: {}", sittingRecord);
@@ -111,6 +114,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
 
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED, 2L, USER_ID, USER_NAME);
@@ -139,6 +143,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnOffset10RecordsOnwardsInAscendingOrder() {
         int recordCount = 25;
         String reasonId = "1";
@@ -176,6 +181,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
         int recordCount = 22;
         String reasonId = "1";
@@ -217,6 +223,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
     void shouldReturnTotalRecordCounts() {
         int recordCount = 25;
         String reasonId = "1";
@@ -233,7 +240,7 @@ class SittingRecordServiceITest extends BaseTest {
             .dateRangeTo(LocalDate.now())
             .build();
 
-        int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        long totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
             HMCTS_SERVICE_CODE
         );
@@ -242,7 +249,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
+    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -293,6 +300,70 @@ class SittingRecordServiceITest extends BaseTest {
             .allMatch(m -> LocalDateTime.now().minusMinutes(5).isBefore(m.getChangedDateTime()));
     }
 
+    @Test
+    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    void shouldReturnQueriedRecordsCreatedByGivenUser() {
+        final String Bruce_Wayne = "Bruce Wayne";
+        final String Clark_Kent = "Clark Kent";
+        final String Peter_Parker = "Peter Parker";
+        final String Bruce_Wayne_ID = "bruce-100011";
+        final String Clark_Kent_ID = "clark-100022";
+        final String Peter_Parker_ID = "peter-10033";
+
+        SittingRecord sittingRecord = createAndSaveSittingRecord(StatusId.RECORDED.name(),2L, Bruce_Wayne_ID,
+                                                                 Bruce_Wayne);
+
+        StatusHistory statusHistorySubmitted1 = createStatusHistory("SUBMITTED", Clark_Kent_ID, Clark_Kent);
+        statusHistoryService.saveStatusHistory(statusHistorySubmitted1, sittingRecord);
+        assertThat(sittingRecord.getId()).isNotNull();
+        assertEquals(sittingRecord.getStatusHistories().size(), 2);
+
+        StatusHistory statusHistoryDeleted1 = createStatusHistory("DELETED", Peter_Parker_ID, Peter_Parker);
+        statusHistoryService.saveStatusHistory(statusHistoryDeleted1, sittingRecord);
+        assertThat(sittingRecord.getId()).isNotNull();
+        assertEquals(sittingRecord.getStatusHistories().size(), 3);
+
+        createAndSaveSittingRecord(StatusId.RECORDED.name(), 2L, Peter_Parker_ID, Peter_Parker);
+
+        SittingRecord sittingRecord3 = createAndSaveSittingRecord(StatusId.RECORDED.name(), 1L, Clark_Kent_ID,
+                                                                  Clark_Kent);
+        StatusHistory statusHistorySubmitted3 = createStatusHistory(StatusId.SUBMITTED.name(),
+                                                                    Bruce_Wayne_ID, Bruce_Wayne);
+        statusHistoryService.saveStatusHistory(statusHistorySubmitted3, sittingRecord3);
+
+        int recordCount = 22;
+        SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
+            .pageSize(10)
+            .offset(0)
+            .regionId(sittingRecord.getRegionId())
+            .epimmsId(sittingRecord.getEpimmsId())
+            .dateOrder(ASCENDING)
+            .dateRangeFrom(LocalDate.now().minusDays(recordCount))
+            .dateRangeTo(LocalDate.now())
+            .createdByUserId(Bruce_Wayne_ID)
+            .build();
+
+        List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
+            recordSearchRequest,
+            sittingRecord.getHmctsServiceId()
+        );
+
+        uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
+
+        LOGGER.debug("changedByUserId:{}", actual.getChangedByUserId());
+        LOGGER.debug("actual:{}", actual);
+        LOGGER.debug("actual.statusHistories:{}", actual.getStatusHistories());
+
+        assertEquals(Bruce_Wayne_ID, actual.getCreatedByUserId());
+        assertThat(response).hasSize(1);
+
+        assertTrue(actual.equalsDomainObject(sittingRecord));
+        StatusHistory statusHistoryCreated1 = sittingRecord.getStatusHistories().get(0);
+        LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
+        LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
+        assertEquals(statusHistoryCreated1, actual.getFirstStatusHistory());
+
+    }
 
     private SittingRecord createAndSaveSittingRecord(StatusId statusId, Long counter, String userId, String userName) {
         SittingRecord sittingRecord = createSittingRecord(statusId,  counter, userId, userName);

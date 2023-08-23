@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.controllers.util.Utility;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -28,7 +27,11 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import static java.util.Collections.emptyList;
+import static java.util.List.of;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 
 @RestController
@@ -40,6 +43,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class SittingRecordController {
+    public static final List<String> VALID_STATUS_IDS = of(RECORDED.name(), PUBLISHED.name(), SUBMITTED.name());
     private final SittingRecordService sittingRecordService;
     private final StatusHistoryService statusHistoryService;
     private final LocationService regionService;
@@ -63,7 +67,7 @@ public class SittingRecordController {
 
         String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
 
-        final int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        final long totalRecordCount = sittingRecordService.getTotalRecordCount(
             sittingRecordSearchRequest,
             hmctsServiceCode
         );
@@ -85,7 +89,7 @@ public class SittingRecordController {
                     statusHistoryService.findRecordingUsers(
                         hmctsServiceCode,
                         sittingRecordSearchRequest.getRegionId(),
-                        List.of(StatusId.RECORDED, StatusId.PUBLISHED, StatusId.SUBMITTED),
+                        VALID_STATUS_IDS,
                         sittingRecordSearchRequest.getDateRangeFrom(),
                         sittingRecordSearchRequest.getDateRangeTo()
                     );

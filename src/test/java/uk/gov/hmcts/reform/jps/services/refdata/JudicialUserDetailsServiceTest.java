@@ -5,6 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiRequest;
 import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiResponse;
@@ -26,15 +27,25 @@ class JudicialUserDetailsServiceTest {
 
     @Test
     void setJudicialFullNameWhenJudicialDetailsFound() {
+        JudicialOfficeHolder judicialOfficeHolder1 = JudicialOfficeHolder.builder()
+            .personalCode("1")
+            .build();
+        JudicialOfficeHolder judicialOfficeHolder2 = JudicialOfficeHolder.builder()
+            .personalCode("2")
+            .build();
+        JudicialOfficeHolder judicialOfficeHolder3 = JudicialOfficeHolder.builder()
+            .personalCode("3")
+            .build();
+
         List<SittingRecord> sittingRecords = List.of(
             SittingRecord.builder()
-                .personalCode("1")
+                .personalCode(judicialOfficeHolder1.getPersonalCode())
                 .build(),
             SittingRecord.builder()
-                .personalCode("2")
+                .personalCode(judicialOfficeHolder2.getPersonalCode())
                 .build(),
             SittingRecord.builder()
-                .personalCode("3")
+                .personalCode(judicialOfficeHolder3.getPersonalCode())
                 .build()
         );
         List<String> personalCodes = List.of(
@@ -54,7 +65,6 @@ class JudicialUserDetailsServiceTest {
                                                                   .personalCode(personalCodes)
                                                                   .build()))
             .thenReturn(response);
-
 
         judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
 
