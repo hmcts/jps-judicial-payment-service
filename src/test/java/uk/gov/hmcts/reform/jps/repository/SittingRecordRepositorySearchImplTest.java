@@ -18,6 +18,7 @@ import uk.gov.hmcts.reform.jps.model.Duration;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 
 import java.time.LocalDate;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
@@ -399,8 +400,9 @@ class SittingRecordRepositorySearchImplTest {
             .thenReturn(sittingRecord);
         when(entityManager.createQuery(countCriteriaQuery))
             .thenReturn(longTypedQuery);
-        when(longTypedQuery.getSingleResult()).thenReturn(10L);
+        when(longTypedQuery.getResultStream()).thenReturn(Stream.of(10L));
 
+        when(sittingRecord.<String>get(SittingRecord_.ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
@@ -424,7 +426,7 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-        int totalRecords = sittingRecordRepositorySearch.totalRecords(
+        long totalRecords = sittingRecordRepositorySearch.totalRecords(
             SittingRecordSearchRequest.builder()
                 .offset(5)
                 .pageSize(10)
@@ -464,10 +466,11 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.createQuery(Long.class)).thenReturn(countCriteriaQuery);
         when(countCriteriaQuery.from(SittingRecord.class)).thenReturn(sittingRecord);
         when(entityManager.createQuery(countCriteriaQuery)).thenReturn(longTypedQuery);
-        when(longTypedQuery.getSingleResult()).thenReturn(10L);
+        when(longTypedQuery.getResultStream()).thenReturn(Stream.of(10L));
         when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class)))
             .thenReturn(predicate);
 
+        when(sittingRecord.<String>get(SittingRecord_.ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
@@ -501,7 +504,7 @@ class SittingRecordRepositorySearchImplTest {
             .duration(Duration.FULL_DAY)
             .build();
 
-        int totalRecords = sittingRecordRepositorySearch.totalRecords(recordSearchRequest, SSCS);
+        long totalRecords = sittingRecordRepositorySearch.totalRecords(recordSearchRequest, SSCS);
 
         assertThat(totalRecords).isEqualTo(10);
 

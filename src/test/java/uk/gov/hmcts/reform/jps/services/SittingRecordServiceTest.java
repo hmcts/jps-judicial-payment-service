@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
@@ -21,7 +22,9 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
+import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
+import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -38,8 +41,9 @@ import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.times;
@@ -47,8 +51,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -58,18 +60,17 @@ class SittingRecordServiceTest {
 
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
-    private static final LocalDateTime CURRENT_DATE_TIME = now();
-
     private static final Long ID = 1L;
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
+    @Mock
+    private LocationService locationService;
+    @Mock
+    private ServiceService serviceService;
 
     @Mock
     private SecurityUtils securityUtils;
-
-    @Mock
-    UserInfo userInfo;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -88,9 +89,9 @@ class SittingRecordServiceTest {
     void shouldReturnTotalRecordCount() {
         when(sittingRecordRepository.totalRecords(isA(SittingRecordSearchRequest.class),
                                                   isA(String.class)))
-            .thenReturn(10);
+            .thenReturn(10L);
 
-        int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        long totalRecordCount = sittingRecordService.getTotalRecordCount(
             SittingRecordSearchRequest.builder().build(),
             "test"
         );
@@ -104,7 +105,21 @@ class SittingRecordServiceTest {
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
         when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
                                                   isA(String.class)))
-            .thenReturn(getDbSittingRecords(2));
+            .thenReturn(getDbSittingRecords(2).stream());
+
+        when(locationService.getCourtVenues(anyString()))
+            .thenReturn(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build())
+            );
+        when(serviceService.findService(anyString()))
+            .thenReturn(Optional.of(Service.builder()
+                    .accountCenterCode("123")
+                        .build())
+            );
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
             SittingRecordSearchRequest.builder().build(),
@@ -115,51 +130,9 @@ class SittingRecordServiceTest {
 
         assertEquals(sittingRecords.get(0), getDomainSittingRecords(2).get(0));
         assertEquals(sittingRecords.get(1), getDomainSittingRecords(2).get(1));
+        verify(locationService).getCourtVenues(anyString());
+        verify(serviceService).findService(anyString());
     }
-
-
-    @Test
-    void shouldReturnSittingRecordsWhenRecordPresentInDbWithAmNull() {
-        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = getDbSittingRecords(1);
-        dbSittingRecords.get(0).setAm(false);
-
-        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
-                                          isA(String.class)))
-            .thenReturn(dbSittingRecords);
-
-        List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
-            SittingRecordSearchRequest.builder().build(),
-            "test"
-        );
-
-        List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
-        domainSittingRecords.get(0).setAm(null);
-
-        assertThat(sittingRecords).hasSize(1);
-        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
-    }
-
-    @Test
-    void shouldReturnSittingRecordsWhenRecordPresentInDbWithPmNull() {
-        List<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = getDbSittingRecords(1);
-        dbSittingRecords.get(0).setPm(false);
-
-        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
-                                          isA(String.class)))
-            .thenReturn(dbSittingRecords);
-
-        List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
-            SittingRecordSearchRequest.builder().build(),
-            "test"
-        );
-
-        List<SittingRecord> domainSittingRecords = getDomainSittingRecords(1);
-        domainSittingRecords.get(0).setPm(null);
-
-        assertThat(sittingRecords).hasSize(1);
-        assertEquals(sittingRecords.get(0), domainSittingRecords.get(0));
-    }
-
 
     @Test
     void shouldSaveSittingRecordsWhenRequestIsValid() throws IOException {
@@ -215,7 +188,7 @@ class SittingRecordServiceTest {
                 .am(true)
                 .pm(true)
                 .build())
-            .collect(Collectors.toList());
+            .toList();
     }
 
     private List<SittingRecord> getDomainSittingRecords(int limit) {
@@ -230,8 +203,8 @@ class SittingRecordServiceTest {
                     .personalCode("001")
                     .contractTypeId(count)
                     .judgeRoleTypeId("HighCourt")
-                    .am(AM.name())
-                    .pm(PM.name())
+                    .am(true)
+                    .pm(true)
                     .build())
             .collect(Collectors.toList());
     }
@@ -282,12 +255,10 @@ class SittingRecordServiceTest {
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
             StatusHistory::getChangedDateTime));
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
 
-        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
+        assertThat(optionalStatusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("DELETED");
 
     }
 
@@ -308,13 +279,10 @@ class SittingRecordServiceTest {
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
             StatusHistory::getChangedDateTime));
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
 
-        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
-
+        assertThat(optionalStatusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("DELETED");
     }
 
     @Test
@@ -334,13 +302,9 @@ class SittingRecordServiceTest {
         Optional<StatusHistory> optionalStatusHistory
             = sittingRecord.getStatusHistories().stream().max(Comparator.comparing(
             StatusHistory::getChangedDateTime));
-        StatusHistory statusHistory = null;
-        if (optionalStatusHistory != null && !optionalStatusHistory.isEmpty()) {
-            statusHistory = optionalStatusHistory.get();
-        }
-
-        assertThat(statusHistory.getStatusId()).isEqualTo("DELETED");
-
+        assertThat(optionalStatusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("DELETED");
     }
 
     @Test
@@ -354,13 +318,14 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ForbiddenException.class, () -> {
-            sittingRecordService.deleteSittingRecord(ID);
-        });
+        Exception exception = assertThrows(ForbiddenException.class, () ->
+            sittingRecordService.deleteSittingRecord(ID)
+        );
 
-        StatusHistory statusHistory = sittingRecord.getLatestStatusHistory();
-
-        assertThat(statusHistory.getStatusId()).isEqualTo("RECORDED");
+        Optional<StatusHistory> statusHistory = sittingRecord.getLatestStatusHistory();
+        assertThat(statusHistory)
+            .map(StatusHistory::getStatusId)
+            .hasValue("RECORDED");
         assertEquals("User IDAM ID does not match the oldest Changed by IDAM ID ", exception.getMessage());
     }
 
@@ -374,9 +339,10 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Long id = sittingRecord.getId();
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(id)
+        );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
 
@@ -390,9 +356,10 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Long id = sittingRecord.getId();
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(id)
+        );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
 
@@ -406,9 +373,10 @@ class SittingRecordServiceTest {
         when(sittingRecordRepository.findRecorderSittingRecord(sittingRecord.getId(), DELETED.name()))
                 .thenReturn(Optional.of(sittingRecord));
 
-        Exception exception = assertThrows(ConflictException.class, () -> {
-            sittingRecordService.deleteSittingRecord(sittingRecord.getId());
-        });
+        Long id = sittingRecord.getId();
+        Exception exception = assertThrows(ConflictException.class, () ->
+            sittingRecordService.deleteSittingRecord(id)
+        );
         assertEquals("Sitting Record Status ID is in wrong state", exception.getMessage());
     }
 

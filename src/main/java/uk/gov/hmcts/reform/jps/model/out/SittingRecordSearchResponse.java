@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SittingRecordSearchResponse {
-    private int recordCount;
+    private long recordCount;
     private List<RecordingUser> recordingUsers;
     private List<SittingRecord> sittingRecords;
 }

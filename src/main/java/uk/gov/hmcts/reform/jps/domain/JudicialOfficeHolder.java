@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.EqualsBuilder;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +30,7 @@ import javax.persistence.Table;
 @Table(name = "judicial_office_holder")
 public class JudicialOfficeHolder {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "local_joh_record_id")
@@ -41,7 +40,6 @@ public class JudicialOfficeHolder {
     private String personalCode;
 
     @ToString.Exclude
-    @LazyCollection(LazyCollectionOption.FALSE)
     @OneToMany(mappedBy = "judicialOfficeHolder",
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<JohPayroll> johPayrolls = new ArrayList<>();

@@ -3,11 +3,13 @@ package uk.gov.hmcts.reform.jps.services;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+@Transactional
 public class JudicialOfficeHolderServiceITest extends BaseTest {
 
     @Autowired

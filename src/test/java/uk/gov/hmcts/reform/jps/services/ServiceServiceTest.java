@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.jps.services;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
@@ -11,8 +10,10 @@ import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.repository.ServiceRepository;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -32,9 +33,13 @@ class ServiceServiceTest {
     @Test
     void testFindService() {
         Service service = createService();
-        when(serviceRepository.findByHmctsServiceId(Mockito.<String>any())).thenReturn(service);
-        assertSame(service, serviceService.findService("42"));
-        verify(serviceRepository).findByHmctsServiceId(Mockito.<String>any());
+        when(serviceRepository.findByHmctsServiceId(anyString()))
+            .thenReturn(Optional.of(service));
+
+        assertThat(serviceService.findService("42"))
+            .isPresent()
+            .hasValue(service);
+        verify(serviceRepository).findByHmctsServiceId(anyString());
     }
 
     private Service createService() {

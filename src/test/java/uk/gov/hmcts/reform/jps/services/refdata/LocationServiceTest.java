@@ -138,4 +138,40 @@ class LocationServiceTest {
             .isInstanceOf(InvalidLocationException.class)
             .hasMessage("invalid location");
     }
+
+    @Test
+    void shouldReturnCourtVenuesWhenServiceCodeIsValid() {
+        LocationApiResponse locationApiResponse = LocationApiResponse.builder()
+            .serviceCode("serviceCode")
+            .courtVenues(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build(),
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("two")
+                    .build(),
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("three")
+                    .build()
+            ))
+            .build();
+        List<SittingRecordRequest> sittingRecords = List.of(
+            SittingRecordRequest.builder()
+                .epimmsId("1")
+                .build()
+        );
+
+        when(locationServiceClient.getCourtVenue("serviceCode"))
+            .thenReturn(locationApiResponse);
+
+        List<CourtVenue> courtVenues = locationService.getCourtVenues("serviceCode");
+        assertThat(courtVenues)
+            .hasSize(3);
+    }
 }

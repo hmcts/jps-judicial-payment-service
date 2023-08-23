@@ -7,8 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.LazyCollection;
-import org.hibernate.annotations.LazyCollectionOption;
 
 import java.time.LocalDate;
 import javax.persistence.Column;
@@ -20,6 +18,8 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import static javax.persistence.FetchType.LAZY;
+
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
@@ -30,6 +30,7 @@ import javax.persistence.Table;
 @Table(name = "joh_payroll")
 public class JohPayroll {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "joh_payroll_id")
@@ -37,8 +38,7 @@ public class JohPayroll {
 
     @JsonIgnore
     @ToString.Exclude
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = LAZY)
     @JoinColumn(name = "local_joh_record_id")
     private JudicialOfficeHolder judicialOfficeHolder;
 

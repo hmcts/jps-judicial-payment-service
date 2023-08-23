@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
@@ -41,6 +42,7 @@ import static uk.gov.hmcts.reform.jps.model.DateOrder.ASCENDING;
 import static uk.gov.hmcts.reform.jps.model.DateOrder.DESCENDING;
 
 
+@Transactional
 class SittingRecordServiceITest extends BaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
@@ -50,15 +52,15 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private StatusHistoryRepository statusHistoryRepository;
     @Autowired
+    private SittingRecordService sittingRecordService;
+    @Autowired
+    private StatusHistoryService statusHistoryService;
+    @Autowired
     private ObjectMapper objectMapper;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
 
-    @Autowired
-    private StatusHistoryService statusHistoryService;
-    @Autowired
-    private SittingRecordService sittingRecordService;
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String USER_NAME = "John Doe";
     private static final String USER_NAME_FIXED = "Recorder";
@@ -95,7 +97,6 @@ class SittingRecordServiceITest extends BaseTest {
 
 
         uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
-
         assertThat(response).hasSize(1);
         LOGGER.debug("actual:        {}", actual);
         LOGGER.debug("sittingRecord: {}", sittingRecord);
@@ -229,7 +230,7 @@ class SittingRecordServiceITest extends BaseTest {
             .dateRangeTo(LocalDate.now())
             .build();
 
-        int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        long totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
             HMCTS_SERVICE_CODE
         );
@@ -340,7 +341,7 @@ class SittingRecordServiceITest extends BaseTest {
         StatusHistory statusHistoryCreated1 = sittingRecord.getStatusHistories().get(0);
         LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
         LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
-        assertTrue(statusHistoryCreated1.equals(actual.getFirstStatusHistory()));
+        assertEquals(statusHistoryCreated1, actual.getFirstStatusHistory());
 
     }
 

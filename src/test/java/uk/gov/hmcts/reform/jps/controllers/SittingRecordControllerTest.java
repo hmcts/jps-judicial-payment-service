@@ -157,7 +157,7 @@ class SittingRecordControllerTest {
         List<RecordingUser> recordingUsers = generateRecordingUsers();
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
-            .thenReturn(sittingRecords.size());
+            .thenReturn(Long.valueOf(sittingRecords.size()));
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
         when(statusHistoryService.findRecordingUsers(anyString(), anyString(), anyList(), any(), any()))
@@ -201,7 +201,7 @@ class SittingRecordControllerTest {
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        )).thenReturn(2);
+        )).thenReturn(2L);
 
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
@@ -255,7 +255,7 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord1 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC1")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11222L)
             .contractTypeName("Contract Type 1")
             .crownServantFlag(Boolean.TRUE)
@@ -268,7 +268,7 @@ class SittingRecordControllerTest {
             .payrollId("PR1")
             .personalCode("PC1")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC1")
             .regionName("East Coast US1")
             .sittingDate(LocalDate.now().minusDays(2))
@@ -307,7 +307,7 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord2 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC2")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11333L)
             .contractTypeName("Contract Type 2")
             .crownServantFlag(Boolean.FALSE)
@@ -320,7 +320,7 @@ class SittingRecordControllerTest {
             .payrollId("PR2")
             .personalCode("PC2")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC2")
             .regionName("East Coast US2")
             .sittingDate(LocalDate.now().minusDays(1))
