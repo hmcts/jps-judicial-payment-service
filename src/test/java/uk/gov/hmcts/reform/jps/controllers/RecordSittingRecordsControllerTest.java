@@ -12,6 +12,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.shaded.com.google.common.io.Resources;
@@ -28,6 +29,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
@@ -39,6 +41,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -64,7 +69,7 @@ class RecordSittingRecordsControllerTest {
     private LocationService regionService;
 
     @ParameterizedTest
-    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,200,4918178",
+    @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178",
         "recordSittingRecords.json,201,4918500"})
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
                                                       int responseCode,
@@ -75,11 +80,10 @@ class RecordSittingRecordsControllerTest {
                                                   .content(requestJson))
             .andDo(print())
             .andExpectAll(
-                jsonPath("$.message").value("success"),
-                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
+                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2022-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[0].postedRecord.personalCode").value(personalCode),
-                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Tester"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
@@ -89,7 +93,7 @@ class RecordSittingRecordsControllerTest {
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918179"),
                 jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
@@ -100,7 +104,7 @@ class RecordSittingRecordsControllerTest {
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918180"),
                 jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
@@ -137,10 +141,10 @@ class RecordSittingRecordsControllerTest {
             .andExpectAll(
                 status().isBadRequest(),
                 jsonPath("$.message").value("008 could not insert"),
-                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2023-05-11"),
+                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2022-05-11"),
                 jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
                 jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918500"),
-                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Tester"),
                 jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
@@ -148,7 +152,7 @@ class RecordSittingRecordsControllerTest {
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918179"),
                 jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
@@ -157,7 +161,74 @@ class RecordSittingRecordsControllerTest {
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
-                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918178"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918180"),
+                jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name())
+            ).andReturn();
+
+        verify(sittingRecordService).checkDuplicateRecords(anyList());
+        verify(sittingRecordService, never()).saveSittingRecords(eq(TEST_SERVICE),
+                                                        anyList(),
+                                                        eq("Recorder"),
+                                                        eq("d139a314-eb40-45f4-9e7a-9e13f143cc3a"));
+        verify(regionService).setRegionId(eq(TEST_SERVICE),
+                                          anyList());
+    }
+
+    @Test
+    void shouldRepondWithBadRequestWhenInvalidLocationRecordFound() throws Exception {
+        doAnswer(invocation -> {
+            List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(0);
+            sittingRecordWrappers.stream()
+                .skip(2)
+                .forEach(
+                    sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD)
+                );
+            return null;
+        }).when(sittingRecordService).checkDuplicateRecords(anyList());
+
+        doAnswer(invocation -> {
+            List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(1);
+            sittingRecordWrappers.stream()
+                .limit(2)
+                .forEach(
+                    sittingRecordWrapper -> sittingRecordWrapper.setErrorCode(INVALID_LOCATION)
+                );
+            return null;
+        }).when(regionService).setRegionId(anyString(), anyList());
+
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(
+                status().isBadRequest(),
+                jsonPath("$.message").value("008 could not insert"),
+                jsonPath("$.errorRecords[0].postedRecord.sittingDate").value("2022-05-11"),
+                jsonPath("$.errorRecords[0].postedRecord.epimmsId").value("852649"),
+                jsonPath("$.errorRecords[0].postedRecord.personalCode").value("4918500"),
+                jsonPath("$.errorRecords[0].postedRecord.judgeRoleTypeId").value("Tester"),
+                jsonPath("$.errorRecords[0].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[0].postedRecord.pm").value("true"),
+                jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
+                jsonPath("$.errorRecords[0].errorCode").value(INVALID_LOCATION.name()),
+
+                jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
+                jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
+                jsonPath("$.errorRecords[1].postedRecord.personalCode").value("4918179"),
+                jsonPath("$.errorRecords[1].postedRecord.judgeRoleTypeId").value("Judge"),
+                jsonPath("$.errorRecords[1].postedRecord.contractTypeId").value("1"),
+                jsonPath("$.errorRecords[1].postedRecord.pm").value("false"),
+                jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
+                jsonPath("$.errorRecords[1].errorCode").value(INVALID_LOCATION.name()),
+
+                jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
+                jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
+                jsonPath("$.errorRecords[2].postedRecord.personalCode").value("4918180"),
                 jsonPath("$.errorRecords[2].postedRecord.judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[2].postedRecord.contractTypeId").value("1"),
                 jsonPath("$.errorRecords[2].postedRecord.pm").value("true"),
@@ -202,6 +273,24 @@ class RecordSittingRecordsControllerTest {
         verify(sittingRecordService, never()).checkDuplicateRecords(any());
         verify(sittingRecordService, never()).saveSittingRecords(any(), any(), any(), any());
         verify(regionService, never()).setRegionId(any(), any());
+    }
+
+    @Test
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
+    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                          jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            )
+            .andReturn();
+
+        assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
     }
 
     @Test

@@ -15,8 +15,9 @@ import java.util.List;
 
 import static java.time.Month.JUNE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
-import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 public class StatusHistoryServiceITest extends BaseTest {
     @Autowired
@@ -27,14 +28,14 @@ public class StatusHistoryServiceITest extends BaseTest {
 
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldUpdateWithStatusHistoryWhenDbRecordPresent() {
         List<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> dbRecord
-            = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+            = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
             LocalDate.of(2023, Month.MAY, 11),
             "852649",
             "4918178",
-            DELETED
+            List.of(DELETED, CLOSED)
         ).stream().toList();
 
         SittingRecordWrapper wrapper = SittingRecordWrapper.builder().build();
@@ -45,8 +46,8 @@ public class StatusHistoryServiceITest extends BaseTest {
         statusHistoryService.updateFromStatusHistory(wrapper, sittingRecordDuplicateCheckFields);
         assertThat(wrapper.getCreatedByName()).isEqualTo("Recorder");
         assertThat(wrapper.getCreatedDateTime().toLocalDate())
-            .isEqualTo(LocalDateTime.of(2023, JUNE, 29, 11, 40, 30, 490419)
+            .isEqualTo(LocalDateTime.of(2023, JUNE, 27, 11, 40, 30, 490419)
                            .toLocalDate());
-        assertThat(wrapper.getStatusId()).isEqualTo(PUBLISHED);
+        assertThat(wrapper.getStatusId()).isEqualTo(RECORDED);
     }
 }

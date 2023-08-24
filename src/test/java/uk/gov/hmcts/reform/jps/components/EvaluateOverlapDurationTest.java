@@ -49,7 +49,8 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
     @ParameterizedTest
     @CsvSource({"SUBMITTED,INVALID_DUPLICATE_RECORD",
-        "RECORDED,POTENTIAL_DUPLICATE_RECORD"})
+        "RECORDED,INVALID_DUPLICATE_RECORD",
+        "PUBLISHED,INVALID_DUPLICATE_RECORD"})
     void shouldSetDuplicateWhenRecordStatusIsSubmittedAndDbPmIntersects(StatusId statusId,
                                                                                ErrorCode errorCode) throws IOException {
         String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
@@ -96,7 +97,8 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
     @ParameterizedTest
     @CsvSource({"SUBMITTED,INVALID_DUPLICATE_RECORD",
-        "RECORDED,POTENTIAL_DUPLICATE_RECORD"})
+        "RECORDED,INVALID_DUPLICATE_RECORD",
+        "PUBLISHED,INVALID_DUPLICATE_RECORD"})
     void shouldSetDuplicateWhenRecordStatusIsSubmittedAndDbAmIntersects(StatusId statusId,
                                                                                ErrorCode errorCode) throws IOException {
         String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
@@ -143,7 +145,8 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
     @ParameterizedTest
     @CsvSource({"SUBMITTED,INVALID_DUPLICATE_RECORD",
-        "RECORDED,POTENTIAL_DUPLICATE_RECORD"})
+        "RECORDED,INVALID_DUPLICATE_RECORD",
+        "PUBLISHED,INVALID_DUPLICATE_RECORD"})
     void shouldSetDuplicateWhenRecordStatusIsSubmittedAndRequestPmIntersects(StatusId statusId,
                                                                                ErrorCode errorCode) throws IOException {
         String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
@@ -183,7 +186,8 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
     @ParameterizedTest
     @CsvSource({"SUBMITTED,INVALID_DUPLICATE_RECORD",
-        "RECORDED,POTENTIAL_DUPLICATE_RECORD"})
+        "RECORDED,INVALID_DUPLICATE_RECORD",
+        "PUBLISHED,INVALID_DUPLICATE_RECORD"})
     void shouldSetDuplicateWhenRecordStatusIsSubmittedAndRequestAmIntersects(StatusId statusId,
                                                                                ErrorCode errorCode) throws IOException {
         String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
