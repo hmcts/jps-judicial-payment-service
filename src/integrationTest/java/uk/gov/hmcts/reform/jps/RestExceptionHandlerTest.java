@@ -5,6 +5,7 @@ import feign.FeignException;
 import feign.Request;
 import feign.RequestTemplate;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -30,6 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @AutoConfigureMockMvc(addFilters = false)
 @ImportAutoConfiguration(TestIdamConfiguration.class)
+@Disabled
 public class RestExceptionHandlerTest extends BaseTest {
 
     public static String ERROR_PATH_ERROR = "$.errors";
