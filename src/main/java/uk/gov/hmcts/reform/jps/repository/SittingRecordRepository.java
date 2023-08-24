@@ -10,7 +10,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
-
+import java.util.Collection;
 import java.util.Optional;
 
 @Repository
@@ -28,13 +28,13 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
              and sr.statusId <> :statusId
              and sh.statusId = 'RECORDED'
         """)
-    Optional<SittingRecord> findRecorderSittingRecord(Long id, String statusId);
+    Optional<SittingRecord> findRecorderSittingRecord(Long id, StatusId statusId);
 
     Streamable<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields>
-        findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+        findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
             LocalDate sittingDate,
             String epimmsId,
             String personalCode,
-            StatusId statusId
+            Collection<StatusId> statusId
         );
 }

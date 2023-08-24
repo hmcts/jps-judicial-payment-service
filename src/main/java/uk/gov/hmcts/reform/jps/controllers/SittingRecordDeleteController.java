@@ -20,13 +20,12 @@ import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
 import java.util.Optional;
 
-import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
-import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
-import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
-
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
+import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
 
 
 @RestController
@@ -59,7 +58,7 @@ public class SittingRecordDeleteController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @DeleteMapping(
-        path = {"", "/{sittingRecordId}"}
+        path = {"/{sittingRecordId}"}
     )
     @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
     public ResponseEntity<String> deleteSittingRecord(

@@ -20,7 +20,6 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -145,7 +144,7 @@ public class SittingRecord {
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
-            && sittingRecord.getStatusId().equals(this.getStatusId())
+            && sittingRecord.getStatusId() == this.getStatusId()
             && (Objects.isNull(sittingRecord.getStatusHistories())
                 && Objects.isNull(this.getStatusHistories())
                 || (Objects.nonNull(sittingRecord.getStatusHistories())

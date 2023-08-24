@@ -38,6 +38,7 @@ import static java.time.Month.MARCH;
 import static java.time.Month.MAY;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
@@ -48,9 +49,11 @@ import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 
 @Transactional
@@ -86,7 +89,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED,2L, USER_ID, USER_NAME);
 
@@ -114,7 +117,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
 
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED, 2L, USER_ID, USER_NAME);
@@ -143,7 +146,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnOffset10RecordsOnwardsInAscendingOrder() {
         int recordCount = 25;
         String reasonId = "1";
@@ -181,7 +184,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
         int recordCount = 22;
         String reasonId = "1";
@@ -223,7 +226,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnTotalRecordCounts() {
         int recordCount = 25;
         String reasonId = "1";
@@ -249,7 +252,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -301,7 +304,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
         final String Bruce_Wayne = "Bruce Wayne";
         final String Clark_Kent = "Clark Kent";
@@ -310,24 +313,24 @@ class SittingRecordServiceITest extends BaseTest {
         final String Clark_Kent_ID = "clark-100022";
         final String Peter_Parker_ID = "peter-10033";
 
-        SittingRecord sittingRecord = createAndSaveSittingRecord(StatusId.RECORDED.name(),2L, Bruce_Wayne_ID,
+        SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED,2L, Bruce_Wayne_ID,
                                                                  Bruce_Wayne);
 
-        StatusHistory statusHistorySubmitted1 = createStatusHistory("SUBMITTED", Clark_Kent_ID, Clark_Kent);
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(SUBMITTED, Clark_Kent_ID, Clark_Kent);
         statusHistoryService.saveStatusHistory(statusHistorySubmitted1, sittingRecord);
         assertThat(sittingRecord.getId()).isNotNull();
         assertEquals(sittingRecord.getStatusHistories().size(), 2);
 
-        StatusHistory statusHistoryDeleted1 = createStatusHistory("DELETED", Peter_Parker_ID, Peter_Parker);
+        StatusHistory statusHistoryDeleted1 = createStatusHistory(DELETED, Peter_Parker_ID, Peter_Parker);
         statusHistoryService.saveStatusHistory(statusHistoryDeleted1, sittingRecord);
         assertThat(sittingRecord.getId()).isNotNull();
         assertEquals(sittingRecord.getStatusHistories().size(), 3);
 
-        createAndSaveSittingRecord(StatusId.RECORDED.name(), 2L, Peter_Parker_ID, Peter_Parker);
+        createAndSaveSittingRecord(RECORDED, 2L, Peter_Parker_ID, Peter_Parker);
 
-        SittingRecord sittingRecord3 = createAndSaveSittingRecord(StatusId.RECORDED.name(), 1L, Clark_Kent_ID,
+        SittingRecord sittingRecord3 = createAndSaveSittingRecord(RECORDED, 1L, Clark_Kent_ID,
                                                                   Clark_Kent);
-        StatusHistory statusHistorySubmitted3 = createStatusHistory(StatusId.SUBMITTED.name(),
+        StatusHistory statusHistorySubmitted3 = createStatusHistory(SUBMITTED,
                                                                     Bruce_Wayne_ID, Bruce_Wayne);
         statusHistoryService.saveStatusHistory(statusHistorySubmitted3, sittingRecord3);
 
@@ -408,7 +411,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatch() throws IOException {
         recordSittingRecords("recordSittingRecords.json");
 
@@ -439,7 +442,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldSetPotentialDuplicateRecordAndInvalidLocationWhenJudgeRoleTypeIdDoesntMatchAndLocationIsInvalid()
         throws IOException {
         recordSittingRecords("recordSittingRecords.json");
@@ -757,6 +760,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
+    @Sql(scripts = {RESET_DATABASE})
     void shouldSetInvalidDuplicateRecordWhenStatusNotRecordedAndDurationIntersect() throws IOException {
         repoRecordSittingRecords("recordSittingRecords.json", PUBLISHED);
 
@@ -858,7 +862,7 @@ class SittingRecordServiceITest extends BaseTest {
                 recordSittingRecordWrapper.setCreatedDateTime(LocalDateTime.now());
 
                 Arrays.stream(StatusId.values())
-                    .filter(statusId1 -> statusId1 != DELETED)
+                    .filter(statusId1 -> statusId1 != DELETED && statusId1 != CLOSED)
                     .forEach(statusId1 -> {
                         StatusHistory statusHistory = StatusHistory.builder()
                             .statusId(statusId1)

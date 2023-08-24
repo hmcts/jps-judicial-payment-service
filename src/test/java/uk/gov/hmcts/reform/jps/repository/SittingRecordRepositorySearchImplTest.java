@@ -35,7 +35,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.JUDGE_ROLE_TYPE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PERSONAL_CODE;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
@@ -129,7 +128,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }
@@ -186,7 +185,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }
@@ -459,7 +458,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2))
             .equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
@@ -521,7 +520,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED.name()));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
     }

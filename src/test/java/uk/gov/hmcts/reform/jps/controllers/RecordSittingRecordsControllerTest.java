@@ -41,6 +41,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
@@ -274,7 +276,7 @@ class RecordSittingRecordsControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder", "jps-submitter"})
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")

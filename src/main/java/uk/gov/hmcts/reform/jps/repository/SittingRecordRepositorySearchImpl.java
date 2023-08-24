@@ -170,7 +170,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID),
                                                 recordSearchRequest.getCreatedByUserId()));
             predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
-                                                StatusId.RECORDED.name()));
+                                                StatusId.RECORDED));
         }
 
     }

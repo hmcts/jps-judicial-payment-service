@@ -33,10 +33,9 @@ import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -169,11 +168,11 @@ public class SittingRecordService {
         SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
 
         try (Stream<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> stream
-                     = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+                     = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
                 sittingRecordRequest.getSittingDate(),
                 sittingRecordRequest.getEpimmsId(),
                 sittingRecordRequest.getPersonalCode(),
-                DELETED
+                List.of(DELETED, CLOSED)
         ).stream()) {
             stream.forEach(sittingRecordDuplicateCheckFields ->
                     duplicateCheckerService
@@ -186,7 +185,7 @@ public class SittingRecordService {
     @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "','" + JPS_ADMIN + "')")
     public void deleteSittingRecord(Long sittingRecordId) {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
-            = sittingRecordRepository.findRecorderSittingRecord(sittingRecordId, DELETED.name())
+            = sittingRecordRepository.findRecorderSittingRecord(sittingRecordId, DELETED)
             .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
 
         if (securityUtils.getUserInfo().getRoles().contains("jps-recorder")) {
@@ -200,7 +199,7 @@ public class SittingRecordService {
 
     private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.DELETED.name())
+            .statusId(StatusId.DELETED)
             .changedDateTime(LocalDateTime.now())
             .changedByUserId(securityUtils.getUserInfo().getUid())
             .changedByName(securityUtils.getUserInfo().getName())
@@ -214,7 +213,7 @@ public class SittingRecordService {
     private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
                             StatusId recorded) {
 
-        if (sittingRecord.getStatusId().equals(recorded.name())) {
+        if (sittingRecord.getStatusId() == recorded) {
             deleteSittingRecord(sittingRecord);
         } else {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
@@ -224,7 +223,7 @@ public class SittingRecordService {
     private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         if (sittingRecord.getStatusId() == RECORDED) {
             StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
-                .filter(statusHistory -> statusHistory.getStatusId().equals(RECORDED.name()))
+                .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
                 .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
                     securityUtils.getUserInfo().getUid()))
                 .findAny()

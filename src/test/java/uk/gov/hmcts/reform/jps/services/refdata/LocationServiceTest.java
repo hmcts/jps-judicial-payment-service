@@ -6,7 +6,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
-import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
@@ -108,12 +107,9 @@ class LocationServiceTest {
         locationService.setRegionId("serviceCode",
                                     sittingRecordWrappers);
 
-        assertThat(sittingRecordRequest)
-            .extracting(SittingRecord_.REGION_ID, SittingRecord_.EPIMMS_ID)
-            .contains(
-                tuple("2", "2"),
-                tuple("1", "1")
-            );
+        assertThat(sittingRecordWrappers)
+            .map(SittingRecordWrapper::getRegionId)
+            .contains("2", "1");
     }
 
 
@@ -173,11 +169,6 @@ class LocationServiceTest {
                     .build()
             ))
             .build();
-        List<SittingRecordRequest> sittingRecords = List.of(
-            SittingRecordRequest.builder()
-                .epimmsId("1")
-                .build()
-        );
 
         when(locationServiceClient.getCourtVenue("serviceCode"))
             .thenReturn(locationApiResponse);

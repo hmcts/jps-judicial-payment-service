@@ -127,10 +127,7 @@ public class SittingRecord {
             && ((null == sittingRecord.getRegionId() && null == this.getRegionId())
             || (null != sittingRecord.getRegionId() && null != this.getRegionId()
             && sittingRecord.getRegionId().equals(this.getRegionId())))
-
-            && ((null == sittingRecord.getStatusId() && null == this.getStatusId())
-            || (null != sittingRecord.getStatusId() && null != this.getStatusId()
-            && sittingRecord.getStatusId().equals(this.getStatusId()))));
+            && sittingRecord.getStatusId() == this.getStatusId());
     }
 
     public boolean equalsDomainObject(Object object) {
