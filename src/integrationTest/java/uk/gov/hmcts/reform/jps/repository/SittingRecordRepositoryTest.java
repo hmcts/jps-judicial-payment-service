@@ -15,14 +15,14 @@ import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -33,22 +33,10 @@ class SittingRecordRepositoryTest extends AbstractTest {
     @Autowired
     private SittingRecordRepository recordRepository;
 
-    @Autowired
-    private StatusHistoryRepository historyRepository;
-
-    @Autowired
-    private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
-
     private StatusHistory statusHistoryRecorded;
 
     private static final String PERSONAL_CODE = "001";
 
-    @BeforeEach
-    void setUp() {
-        judicialOfficeHolderRepository.deleteAll();
-        recordRepository.deleteAll();
-        historyRepository.deleteAll();
-    }
 
     @Test
     void shouldSaveSittingRecord() {
@@ -199,7 +187,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturnRecordsToBeSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
             .regionId("4")
@@ -209,11 +197,13 @@ class SittingRecordRepositoryTest extends AbstractTest {
             .build();
 
 
-        List<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
+        Stream<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             "BBA3"
         );
+
         assertThat(recordsToSubmit)
+            .isNotEmpty()
             .hasSize(4)
             .contains(2L, 3L, 5L, 6L);
     }

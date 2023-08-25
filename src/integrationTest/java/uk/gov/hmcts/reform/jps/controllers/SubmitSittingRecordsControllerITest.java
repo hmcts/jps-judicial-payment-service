@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 
 @SpringBootTest
@@ -33,7 +33,7 @@ class SubmitSittingRecordsControllerITest {
     private MockMvc mockMvc;
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @WithMockUser(authorities = {"jps-submitter"})
     void shouldReturnRecordCountOfSubmittedRecordsWhenRecordsAreSubmitted() throws Exception {
         String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
@@ -80,7 +80,7 @@ class SubmitSittingRecordsControllerITest {
     @Test
     @WithMockUser(authorities = {"jps-submitter"})
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
-        mockMvc.perform(post("/submitSittingRecords/")
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
             .andDo(print())

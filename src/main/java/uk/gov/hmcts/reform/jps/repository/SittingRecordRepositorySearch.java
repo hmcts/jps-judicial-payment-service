@@ -13,8 +13,8 @@ public interface SittingRecordRepositorySearch {
     long totalRecords(SittingRecordSearchRequest recordSearchRequest,
                           String hmctsServiceCode);
 
-    List<Long> findRecordsToSubmit(SubmitSittingRecordRequest recordSearchRequest,
-                                            String hmctsServiceCode);
+    Stream<Long> findRecordsToSubmit(SubmitSittingRecordRequest recordSearchRequest,
+                                   String hmctsServiceCode);
 }
 
 

@@ -46,6 +46,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
@@ -53,11 +54,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -529,7 +529,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
                                                          hmctsServiceCode))
-            .thenReturn(sittingRecordIds);
+            .thenReturn(sittingRecordIds.stream());
 
         int countSubmitted = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
@@ -569,7 +569,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
                                                          hmctsServiceCode))
-            .thenReturn(Collections.emptyList());
+            .thenReturn(Stream.empty());
 
         int countSubmitted = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
@@ -634,9 +634,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         List<SittingRecordWrapper> sittingRecordWrappers =
                 recordSittingRecordRequest.getRecordedSittingRecords().stream()
                         .map(SittingRecordWrapper::new)
-                        .peek(sittingRecordWrapper -> {
-                            sittingRecordWrapper.setSittingRecordId(sittingRecordId);
-                        })
+                        .peek(sittingRecordWrapper ->
+                            sittingRecordWrapper.setSittingRecordId(sittingRecordId)
+                        )
                         .toList();
 
         sittingRecordService.saveSittingRecords("SSC_ID",

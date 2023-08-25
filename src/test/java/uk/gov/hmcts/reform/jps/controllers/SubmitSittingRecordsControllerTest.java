@@ -90,7 +90,7 @@ class SubmitSittingRecordsControllerTest {
 
     @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
-        mockMvc.perform(post("/submitSittingRecords/")
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content("{}"))
             .andDo(print())

@@ -38,6 +38,16 @@ import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESP
 public class SubmitSittingRecordsController {
     private final SittingRecordService sittingRecordService;
 
+    @Operation(description = "Root not to be displayed", hidden = true)
+    @PostMapping(
+        path = {""}
+    )
+    @PreAuthorize("hasAuthority('jps-submitter')")
+    public ResponseEntity<String> submitSittingRecords() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateServiceCode(Optional.empty()));
+    }
+
     @Operation(description = "Submit sitting records")
     @ApiResponse(responseCode = "200",
         content = @Content(schema = @Schema(implementation = SubmitSittingRecordResponse.class)),

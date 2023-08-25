@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.TRUE;
@@ -242,22 +243,25 @@ public class SittingRecordService {
     @Transactional
     public int submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
                                     String hmctsServiceCode) {
-
-        List<Long> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
+        AtomicInteger counter = new AtomicInteger();
+        try (Stream<Long> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             hmctsServiceCode
-        );
+        )) {
 
-        recordsToSubmit.forEach(sittingRecordId -> {
-            statusHistoryService.insertRecord(sittingRecordId,
-                                              SUBMITTED,
-                                              submitSittingRecordRequest.getSubmittedByIdamId(),
-                                              submitSittingRecordRequest.getSubmittedByName());
+            recordsToSubmit.forEach(sittingRecordId -> {
+                statusHistoryService.insertRecord(
+                    sittingRecordId,
+                    SUBMITTED,
+                    submitSittingRecordRequest.getSubmittedByIdamId(),
+                    submitSittingRecordRequest.getSubmittedByName()
+                );
 
-            sittingRecordRepository.updateToSubmitted(sittingRecordId);
-        });
-
-        return recordsToSubmit.size();
+                sittingRecordRepository.updateToSubmitted(sittingRecordId);
+                counter.incrementAndGet();
+            });
+        }
+        return counter.intValue();
     }
 
     private String getAccountCode(String hmctsServiceCode) {

@@ -48,10 +48,8 @@ import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PM;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.REGION_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.SITTING_DATE;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.STATUS_HISTORIES;
-import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.CHANGE_BY_USER_ID;
+import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.CHANGED_BY_USER_ID;
 import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.STATUS_ID;
-import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.JUDGE_ROLE_TYPE_ID;
-import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PERSONAL_CODE;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @ExtendWith(MockitoExtension.class)
@@ -553,7 +551,7 @@ class SittingRecordRepositorySearchImplTest {
     }
 
     @Test
-    void verifyFindRecordsToSubmitCriteriaQueryIsIntialisedCorrectlyWhenRequestHasAllValuesSetWithoutChangeByUserId() {
+    void verifyFindRecordsToSubmitCriteriaQueryIsIntialisedCorrectlyWhenRequestHasAllValuesSetWithoutChangedByUserId() {
 
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
@@ -631,8 +629,8 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.join(STATUS_HISTORIES, JoinType.INNER))
             .thenReturn(statusHistories);
 
-        when(statusHistories.<String>get(CHANGE_BY_USER_ID)).thenReturn(attributePath);
-        when(criteriaBuilder.equal(attributePath, CHANGE_BY_USER_ID))
+        when(statusHistories.<String>get(CHANGED_BY_USER_ID)).thenReturn(attributePath);
+        when(criteriaBuilder.equal(attributePath, CHANGED_BY_USER_ID))
             .thenReturn(mock(ComparisonPredicate.class));
 
         when(statusHistories.<String>get(STATUS_ID)).thenReturn(attributePath);
@@ -647,7 +645,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .personalCode(PERSONAL_CODE)
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .duration(Duration.FULL_DAY)
-                                               .createdByUserId(CHANGE_BY_USER_ID)
+                                               .createdByUserId(CHANGED_BY_USER_ID)
                                                .build(), SSCS);
 
         verify(entityManager)
@@ -659,7 +657,7 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
-        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CHANGE_BY_USER_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CHANGED_BY_USER_ID));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
         verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));

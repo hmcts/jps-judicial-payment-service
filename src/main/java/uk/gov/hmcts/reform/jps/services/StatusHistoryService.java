@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -76,9 +77,9 @@ public class StatusHistoryService {
                                .id(sittingRecordId)
                                .build())
             .statusId(statusId)
-            .changeByUserId(changedByUserId)
-            .changeByName(changedByUserName)
-            .changeDateTime(LocalDateTime.now())
+            .changedByUserId(changedByUserId)
+            .changedByName(changedByUserName)
+            .changedDateTime(LocalDateTime.now())
             .build();
         statusHistoryRepository.save(statusHistory);
     }
