@@ -100,7 +100,7 @@ public class StepDefinitions extends TestVariables {
         attribute) throws IOException {
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
-        body = body.replace("2023-03-10", randomDate);
+        body = body.replace("dateToBeReplaced", randomDate);
 
         RestAssured.baseURI = testUrl;
         ValidatableResponse response = given().header("Content-Type", "application/json")
