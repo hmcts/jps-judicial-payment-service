@@ -108,7 +108,7 @@ class LocationServiceTest {
                                     sittingRecordWrappers);
 
         assertThat(sittingRecordWrappers)
-            .extracting("regionId")
+            .map(SittingRecordWrapper::getRegionId)
             .contains("2", "1");
     }
 
@@ -145,5 +145,36 @@ class LocationServiceTest {
         assertThat(sittingRecordWrappers)
             .extracting("errorCode")
             .contains(INVALID_LOCATION);
+    }
+
+    @Test
+    void shouldReturnCourtVenuesWhenServiceCodeIsValid() {
+        LocationApiResponse locationApiResponse = LocationApiResponse.builder()
+            .serviceCode("serviceCode")
+            .courtVenues(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build(),
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("two")
+                    .build(),
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("three")
+                    .build()
+            ))
+            .build();
+
+        when(locationServiceClient.getCourtVenue("serviceCode"))
+            .thenReturn(locationApiResponse);
+
+        List<CourtVenue> courtVenues = locationService.getCourtVenues("serviceCode");
+        assertThat(courtVenues)
+            .hasSize(3);
     }
 }

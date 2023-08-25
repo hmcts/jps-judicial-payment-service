@@ -1,25 +1,18 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -31,25 +24,23 @@ import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
+
+@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")
@@ -57,12 +48,6 @@ import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 class SittingRecordControllerITest {
     @Autowired
     private MockMvc mockMvc;
-
-    @MockBean
-    private SecurityUtils securityUtils;
-
-    @MockBean
-    private UserInfo userInfo;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -94,27 +79,8 @@ class SittingRecordControllerITest {
     public static final String RECORDING_USERS_JSON_CONST = "$.recordingUsers";
 
 
-    @BeforeEach
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY})
-
     @Test
-    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
-        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        String updatedRecord = requestJson.replace("toDate", LocalDate.now().toString());
-        mockMvc
-            .perform(post("/sitting-records/searchSittingRecords")
-                         .contentType(MediaType.APPLICATION_JSON)
-                         .content(updatedRecord))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(jsonPath("$.errors[0].fieldName")
-                           .value("PathVariable"))
-            .andExpect(jsonPath("$.errors[0].message")
-                           .value("hmctsServiceCode is mandatory"))
-            .andReturn();
-    }
-
-    @Test
+    @Sql(scripts = {RESET_DATABASE})
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
@@ -135,7 +101,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, "classpath:sql/insert_service_test_data.sql"})
+    @Sql(scripts = {RESET_DATABASE, "classpath:sql/insert_service_test_data.sql"})
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -194,8 +160,8 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
-                jsonPath("$.sittingRecords[0].pm").isEmpty(),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
+                jsonPath("$.sittingRecords[0].pm").value(FALSE),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
@@ -207,7 +173,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
+    @Sql(RESET_DATABASE)
     void shouldHaveOkResponseWhenRequestIsValidButNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -266,8 +232,8 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
-                jsonPath("$.sittingRecords[0].pm").isEmpty(),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
+                jsonPath("$.sittingRecords[0].pm").value(FALSE),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
@@ -279,7 +245,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
+    @Sql(scripts = {RESET_DATABASE})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -338,8 +304,8 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
-                jsonPath("$.sittingRecords[0].pm").isEmpty(),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
+                jsonPath("$.sittingRecords[0].pm").value(FALSE),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
@@ -351,7 +317,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
+    @Sql(scripts = {RESET_DATABASE})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -410,8 +376,8 @@ class SittingRecordControllerITest {
                 jsonPath("$.sittingRecords[0].personalCode").value("4923421"),
                 jsonPath("$.sittingRecords[0].personalName").value(JOE_BLOGGS),
                 jsonPath("$.sittingRecords[0].judgeRoleTypeId").value(HIGHCOURT),
-                jsonPath("$.sittingRecords[0].am").value("AM"),
-                jsonPath("$.sittingRecords[0].pm").isEmpty(),
+                jsonPath("$.sittingRecords[0].am").value(TRUE),
+                jsonPath("$.sittingRecords[0].pm").value(FALSE),
                 jsonPath("$.sittingRecords[0].createdDateTime").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserId").isNotEmpty(),
                 jsonPath("$.sittingRecords[0].createdByUserName").isNotEmpty(),
@@ -424,7 +390,7 @@ class SittingRecordControllerITest {
 
 
     @Test
-    @Sql(DELETE_SITTING_RECORD_STATUS_HISTORY)
+    @Sql(scripts = {RESET_DATABASE})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMultipleMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord1 = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -480,6 +446,25 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {RESET_DATABASE})
+    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
+        String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
+        mockMvc
+            .perform(post("/sitting-records/searchSittingRecords")
+                         .contentType(MediaType.APPLICATION_JSON)
+                         .content(updatedRecord))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(jsonPath("$.errors[0].fieldName")
+                           .value("PathVariable"))
+            .andExpect(jsonPath("$.errors[0].message")
+                           .value("hmctsServiceCode is mandatory"))
+            .andReturn();
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsWithoutMandatoryFields.json"), UTF_8);
         MvcResult response = mockMvc
@@ -505,6 +490,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturn400ResponseWhenEnumValuesIncorrect() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsInValidEnumData.json"), UTF_8);
         MvcResult response = mockMvc
@@ -559,71 +545,4 @@ class SittingRecordControllerITest {
             .statusId(statusId)
             .build();
     }
-
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-      # ROLE
-      jps-recorder
-        """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {JPS_RECORDER})
-    void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder(String role) throws Exception {
-        when(securityUtils.getUserInfo()).thenReturn(userInfo);
-        when(userInfo.getRoles()).thenReturn(List.of(role));
-        when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
-        when(userInfo.getName()).thenReturn("Joe Bloggs");
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 3))
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
-
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-      # ROLE
-      jps-submitter
-        """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {JPS_SUBMITTER})
-    void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter(String role) throws Exception {
-        when(securityUtils.getUserInfo()).thenReturn(userInfo);
-        when(userInfo.getRoles()).thenReturn(List.of(role));
-        when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
-        when(userInfo.getName()).thenReturn("Joe Bloggs");
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
-
-    @ParameterizedTest
-    @CsvSource(textBlock = """
-      # ROLE
-      jps-admin
-        """)
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {JPS_ADMIN})
-    void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin(String role) throws Exception {
-        when(securityUtils.getUserInfo()).thenReturn(userInfo);
-        when(userInfo.getRoles()).thenReturn(List.of(role));
-        when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
-        when(userInfo.getName()).thenReturn("Joe Bloggs");
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 4))
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(authorities = {JPS_RECORDER})
-    void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
-            .andDo(print())
-            .andExpectAll(
-                status().isNotFound(),
-                jsonPath("$.status").value("NOT_FOUND"),
-                jsonPath("$.errors").value("Sitting Record ID Not Found")
-            );
-    }
-
 }

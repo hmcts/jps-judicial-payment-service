@@ -15,6 +15,7 @@ import java.util.List;
 
 import static java.time.Month.JUNE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -27,14 +28,14 @@ public class StatusHistoryServiceITest extends BaseTest {
 
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldUpdateWithStatusHistoryWhenDbRecordPresent() {
         List<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> dbRecord
-            = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNot(
+            = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
             LocalDate.of(2023, Month.MAY, 11),
             "852649",
             "4918178",
-            DELETED
+            List.of(DELETED, CLOSED)
         ).stream().toList();
 
 

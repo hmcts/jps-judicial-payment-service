@@ -34,6 +34,7 @@ class JudicialUserDetailsServiceTest {
     @InjectMocks
     private JudicialUserDetailsService judicialUserDetailsService;
 
+
     @BeforeEach
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
@@ -56,6 +57,8 @@ class JudicialUserDetailsServiceTest {
                                                                   .build()))
             .thenReturn(response);
     }
+
+
 
     @Test
     void setJudicialFullNameWhenJudicialDetailsFound() {

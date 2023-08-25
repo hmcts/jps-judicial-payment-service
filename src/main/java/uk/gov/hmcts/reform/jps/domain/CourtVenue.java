@@ -24,6 +24,7 @@ import javax.persistence.Table;
 @Table(name = "court_venue")
 public class CourtVenue {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "local_court_venue_record_id")

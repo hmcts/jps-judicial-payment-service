@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.AbstractTest;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
@@ -30,8 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -43,6 +45,8 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     @Autowired
     private StatusHistoryRepository historyRepository;
     @Autowired
+    private JudicialOfficeHolderRepository johRepository;
+    @Autowired
     private SittingRecordRepository recordRepository;
 
     private SittingRecord persistedSittingRecord;
@@ -50,11 +54,20 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     private StatusHistory statusHistoryRecorded;
     private StatusHistory statusHistorySubmitted;
 
+    private static final String PERSONAL_CODE = "001";
+
     @BeforeEach
     public void setUp() {
+        johRepository.deleteAll();
         historyRepository.deleteAll();
         recordRepository.deleteAll();
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2));
+
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode("001")
+            .build();
+        johRepository.save(judicialOfficeHolder);
+
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         statusHistoryRecorded = createStatusHistory(
             sittingRecord.getStatusId(),
             "john_doe",
@@ -94,7 +107,6 @@ class StatusHistoryRepositoryTest extends AbstractTest {
 
     @Test
     void shouldReturnEmptyWhenHistoryNotFound() {
-
         Optional<StatusHistory> optionalSettingHistoryToUpdate = historyRepository.findById(100L);
         assertThat(optionalSettingHistoryToUpdate).isEmpty();
     }
@@ -136,7 +148,11 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         persistedSittingRecord.addStatusHistory(statusHistoryPublished);
         historyRepository.save(statusHistoryPublished);
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
-        persistedStatusHistoryRecorded = persistedSittingRecord.getFirstStatusHistory();
+        Optional<StatusHistory> firstStatusHistory = persistedSittingRecord.getFirstStatusHistory();
+        assertThat(firstStatusHistory)
+            .isPresent()
+            .map(StatusHistory::getStatusId)
+            .hasValue(StatusId.RECORDED);
 
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryAsc(persistedSittingRecord.getId()).get(0);
@@ -155,7 +171,12 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         persistedSittingRecord.addStatusHistory(statusHistorySubmitted);
         historyRepository.save(statusHistorySubmitted);
         persistedSittingRecord = recordRepository.save(persistedSittingRecord);
-        persistedStatusHistoryRecorded = persistedSittingRecord.getFirstStatusHistory();
+        Optional<StatusHistory> latestStatusHistory = persistedSittingRecord.getLatestStatusHistory();
+        assertThat(latestStatusHistory)
+            .isPresent()
+            .map(StatusHistory::getStatusId)
+            .hasValue(StatusId.SUBMITTED);
+
 
         StatusHistory statusHistoryFound = historyRepository
             .findStatusHistoryDesc(persistedSittingRecord.getId()).get(0);
@@ -277,40 +298,31 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         List<SittingRecord> sittingRecords = new ArrayList<>();
 
         SittingRecord sittingRecord = createNewSittingRecord(LocalDate.now().minusDays(2),
-                                                             "john_doe", "John Doe"
-        );
-        sittingRecord = updateSittingRecordToSubmitted(sittingRecord, "matt_doe", "Matthew Doe"
-        );
+                                                             "john_doe", "John Doe");
+        sittingRecord = updateSittingRecordToSubmitted(sittingRecord, "matt_doe", "Matthew Doe");
         sittingRecords.add(sittingRecord);
 
         SittingRecord sittingRecord2 = createNewSittingRecord(LocalDate.now().minusDays(2),
-                                                              "john_smith", "John Smith"
-        );
-        sittingRecord2 = updateSittingRecordToSubmitted(sittingRecord2, "matt_smith", "Matthew Smith"
-        );
-        sittingRecord2 = updateSittingRecordToPublished(sittingRecord2, "matt_smith", "Matthew Smith"
-        );
+                                                              "john_smith", "John Smith");
+        sittingRecord2 = updateSittingRecordToSubmitted(sittingRecord2, "matt_smith", "Matthew Smith");
+        sittingRecord2 = updateSittingRecordToPublished(sittingRecord2, "matt_smith", "Matthew Smith");
         sittingRecords.add(sittingRecord2);
 
         SittingRecord sittingRecord3 = createNewSittingRecord(LocalDate.now().minusDays(2),
-                                                              "john_jones", "John Jones"
-        );
-        sittingRecord3 = updateSittingRecordToSubmitted(sittingRecord3, "matt_jones", "Matthew Jones"
-        );
+                                                              "john_jones", "John Jones");
+        sittingRecord3 = updateSittingRecordToSubmitted(sittingRecord3, "matt_jones", "Matthew Jones");
         sittingRecords.add(sittingRecord3);
 
         SittingRecord sittingRecord4 = createNewSittingRecord(LocalDate.now().minusDays(2),
-                                                              "john_james", "John James"
-        );
-        sittingRecord4 = updateSittingRecordToPublished(sittingRecord4, "steve_james", "Steve James"
-        );
+                                                              "john_james", "John James");
+        sittingRecord4 = updateSittingRecordToPublished(sittingRecord4, "steve_james", "Steve James");
         sittingRecords.add(sittingRecord4);
 
         return sittingRecords;
     }
 
     private SittingRecord createNewSittingRecord(LocalDate localDate, String userId, String userName) {
-        SittingRecord sittingRecord = createSittingRecord(localDate);
+        SittingRecord sittingRecord = createSittingRecord(localDate, PERSONAL_CODE);
         StatusHistory statusHistoryCreated1 = createStatusHistory(
             sittingRecord.getStatusId(),
             userId,
@@ -326,8 +338,7 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     }
 
     private SittingRecord updateSittingRecordToPublished(SittingRecord sittingRecord, String userId, String userName) {
-        return updateSittingRecord(sittingRecord, StatusId.PUBLISHED, userId, userName
-        );
+        return updateSittingRecord(sittingRecord, StatusId.PUBLISHED, userId, userName);
     }
 
     private SittingRecord updateSittingRecord(SittingRecord sittingRecord, StatusId statusId, String userId,
@@ -338,20 +349,30 @@ class StatusHistoryRepositoryTest extends AbstractTest {
             userName,
             sittingRecord
         );
-        StatusHistory persistedStatusHistory1 = historyRepository.save(statusHistory);
-        sittingRecord.addStatusHistory(persistedStatusHistory1);
+        StatusHistory persistedStatusHistory = historyRepository.save(statusHistory);
+        sittingRecord.addStatusHistory(persistedStatusHistory);
 
-        SittingRecord persistedSittingRecord1 = recordRepository.save(sittingRecord);
-        persistedStatusHistory1 = persistedSittingRecord1.getLatestStatusHistory();
-        assertEquals(statusId, persistedStatusHistory1.getStatusId());
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        assertThat(persistedSittingRecord.getLatestStatusHistory())
+            .isPresent()
+            .map(StatusHistory::getStatusId)
+            .hasValue(statusId);
         return persistedSittingRecord;
     }
 
     @Test
     void shouldReturnLastRecordedStatusHistoryWhenMultipleRecordsPresentForASittingRecord() {
-        SittingRecord sittingRecord = createSittingRecord();
+        SittingRecord sittingRecord =  createSittingRecord(
+            LocalDate.now().minusDays(2),
+            "001"
+        );
         Arrays.stream(StatusId.values())
-            .map(this::createStatusHistory)
+            .map(statusId -> createStatusHistory(
+                statusId,
+                "jp-recorder",
+                "John Doe",
+                sittingRecord
+            ))
             .forEach(sittingRecord::addStatusHistory);
 
         SittingRecord savedSittingRecord = recordRepository.save(sittingRecord);
@@ -374,11 +395,19 @@ class StatusHistoryRepositoryTest extends AbstractTest {
     }
 
     @Test
-    @Sql(scripts = DELETE_SITTING_RECORD_STATUS_HISTORY)
+    @Sql(scripts = RESET_DATABASE)
     void shouldReturnFirstRecordedStatusHistoryWhenMultipleRecordsPresentForASittingRecord() {
-        SittingRecord sittingRecord = createSittingRecord();
+        SittingRecord sittingRecord =  createSittingRecord(
+            LocalDate.now().minusDays(2),
+            "001"
+        );
         Arrays.stream(StatusId.values())
-            .map(this::createStatusHistory)
+            .map(statusId -> createStatusHistory(
+                statusId,
+                "jp-recorder",
+                "John Doe",
+                sittingRecord
+                ))
             .forEach(sittingRecord::addStatusHistory);
 
         SittingRecord savedSittingRecord = recordRepository.save(sittingRecord);
@@ -398,29 +427,6 @@ class StatusHistoryRepositoryTest extends AbstractTest {
         assertThat(firstStatusHistory)
             .isPresent()
             .hasValue(firstSavedStatusHistory.get());
-    }
-
-    SittingRecord createSittingRecord() {
-        return SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(RECORDED)
-            .regionId("1")
-            .epimmsId("123")
-            .hmctsServiceId("ssc_id")
-            .personalCode("001")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .build();
-    }
-
-    StatusHistory createStatusHistory(StatusId statusId) {
-        return  StatusHistory.builder()
-            .statusId(statusId)
-            .changedDateTime(LocalDateTime.now())
-            .changedByUserId("jp-recorder")
-            .changedByName("John Doe")
-            .build();
     }
 }
 

@@ -25,6 +25,7 @@ import javax.persistence.Table;
 @Table(name = "service")
 public class Service {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "local_service_record_id")

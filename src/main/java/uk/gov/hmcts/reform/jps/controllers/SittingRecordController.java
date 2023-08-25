@@ -28,7 +28,11 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import static java.util.Collections.emptyList;
+import static java.util.List.of;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 
 @RestController
@@ -40,6 +44,7 @@ import static org.springframework.http.ResponseEntity.ok;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class SittingRecordController {
+    public static final List<StatusId> VALID_STATUS_IDS = of(RECORDED, PUBLISHED, SUBMITTED);
     private final SittingRecordService sittingRecordService;
     private final StatusHistoryService statusHistoryService;
     private final LocationService regionService;
@@ -63,7 +68,7 @@ public class SittingRecordController {
 
         String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
 
-        final int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        final long totalRecordCount = sittingRecordService.getTotalRecordCount(
             sittingRecordSearchRequest,
             hmctsServiceCode
         );
@@ -85,7 +90,7 @@ public class SittingRecordController {
                     statusHistoryService.findRecordingUsers(
                         hmctsServiceCode,
                         sittingRecordSearchRequest.getRegionId(),
-                        List.of(StatusId.RECORDED, StatusId.PUBLISHED, StatusId.SUBMITTED),
+                        VALID_STATUS_IDS,
                         sittingRecordSearchRequest.getDateRangeFrom(),
                         sittingRecordSearchRequest.getDateRangeTo()
                     );
