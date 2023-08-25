@@ -1,9 +1,9 @@
 package uk.gov.hmcts.reform.jps.model;
 
 public enum StatusId {
-    CLOSED,
-    DELETED,
     RECORDED,
+    SUBMITTED,
     PUBLISHED,
-    SUBMITTED
+    CLOSED,
+    DELETED
 }

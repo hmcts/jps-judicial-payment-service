@@ -8,10 +8,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDateTime;
+import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -45,7 +49,9 @@ public class StatusHistory {
     private SittingRecord sittingRecord;
 
     @Column(name = "status_id")
-    private String statusId;
+    @Enumerated(EnumType.STRING)
+    @Basic(optional = false)
+    private StatusId statusId;
 
     @Column(name = "changed_date_time")
     private LocalDateTime changedDateTime;

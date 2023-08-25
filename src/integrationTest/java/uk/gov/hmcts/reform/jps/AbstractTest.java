@@ -18,7 +18,7 @@ public class AbstractTest {
     protected SittingRecord createSittingRecord(LocalDate sittingDate, String personalCode) {
         return SittingRecord.builder()
             .sittingDate(sittingDate)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .regionId(REGION_ID)
             .epimmsId(EPIMMS_ID)
             .hmctsServiceId(SSC_ID)
@@ -29,7 +29,7 @@ public class AbstractTest {
             .build();
     }
 
-    protected StatusHistory createStatusHistory(String statusId, String userId,
+    protected StatusHistory createStatusHistory(StatusId statusId, String userId,
                                                 String userName, SittingRecord sittingRecord) {
         return StatusHistory.builder()
             .statusId(statusId)

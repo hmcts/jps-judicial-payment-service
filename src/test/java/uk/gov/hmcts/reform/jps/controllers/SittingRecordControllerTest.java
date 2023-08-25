@@ -241,6 +241,17 @@ class SittingRecordControllerTest {
         return List.of(recUser1, recUser2);
     }
 
+    @Test
+    void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
+            .andDo(print())
+            .andExpectAll(
+                status().isBadRequest(),
+                jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                jsonPath("$.errors[0].message").value("sittingRecordId is mandatory")
+            );
+    }
+
     private List<SittingRecord> generateSittingRecords() {
         long idSittingRecord = 0;
         long idStatusHistory = 0;

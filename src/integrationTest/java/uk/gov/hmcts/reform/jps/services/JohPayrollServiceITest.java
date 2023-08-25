@@ -40,7 +40,7 @@ class JohPayrollServiceITest extends BaseTest {
      * Method under test: {@link JohPayrollService#findById(Long)}.
      */
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void testFindJohPayroll() {
 
         JudicialOfficeHolder judicialOfficeHolder = createJudicialOfficeHolder("PersonalCode1");
@@ -70,7 +70,7 @@ class JohPayrollServiceITest extends BaseTest {
      * Method under test: {@link JohPayrollService#save(JohPayroll)}.
      */
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void testSaveJohPayroll() {
 
         JohPayroll johPayroll = createJohPayroll(LocalDate.of(1970, 1, 1),

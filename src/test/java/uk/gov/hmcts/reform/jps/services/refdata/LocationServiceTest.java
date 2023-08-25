@@ -5,8 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
-import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
+import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
@@ -16,8 +15,8 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 
 @ExtendWith(MockitoExtension.class)
 class LocationServiceTest {
@@ -97,23 +96,25 @@ class LocationServiceTest {
                 .build()
         );
 
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            sittingRecordRequest.stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
         when(locationServiceClient.getCourtVenue("serviceCode"))
             .thenReturn(locationApiResponse);
 
         locationService.setRegionId("serviceCode",
-                                    sittingRecordRequest);
+                                    sittingRecordWrappers);
 
-        assertThat(sittingRecordRequest)
-            .extracting(SittingRecord_.REGION_ID, SittingRecord_.EPIMMS_ID)
-            .contains(
-                tuple("2", "2"),
-                tuple("1", "1")
-            );
+        assertThat(sittingRecordWrappers)
+            .map(SittingRecordWrapper::getRegionId)
+            .contains("2", "1");
     }
 
 
     @Test
-    void shouldThrowInvalidLocationExceptionWhenRegionDetailsNotFound() {
+    void shouldSetInvalidLocationWhenRegionDetailsNotFound() {
         LocationApiResponse locationApiResponse = LocationApiResponse.builder()
             .serviceCode("serviceCode")
             .courtVenues(List.of(
@@ -124,19 +125,26 @@ class LocationServiceTest {
                     .build()
             ))
             .build();
-        List<SittingRecordRequest> sittingRecords = List.of(
+        List<SittingRecordRequest> sittingRecordRequest = List.of(
             SittingRecordRequest.builder()
                 .epimmsId("3")
                 .build()
         );
 
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            sittingRecordRequest.stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
         when(locationServiceClient.getCourtVenue("serviceCode"))
             .thenReturn(locationApiResponse);
 
-        assertThatThrownBy(() -> locationService.setRegionId("serviceCode",
-                                                             sittingRecords))
-            .isInstanceOf(InvalidLocationException.class)
-            .hasMessage("invalid location");
+        locationService.setRegionId("serviceCode",
+                                    sittingRecordWrappers);
+
+        assertThat(sittingRecordWrappers)
+            .extracting("errorCode")
+            .contains(INVALID_LOCATION);
     }
 
     @Test
@@ -161,11 +169,6 @@ class LocationServiceTest {
                     .build()
             ))
             .build();
-        List<SittingRecordRequest> sittingRecords = List.of(
-            SittingRecordRequest.builder()
-                .epimmsId("1")
-                .build()
-        );
 
         when(locationServiceClient.getCourtVenue("serviceCode"))
             .thenReturn(locationApiResponse);

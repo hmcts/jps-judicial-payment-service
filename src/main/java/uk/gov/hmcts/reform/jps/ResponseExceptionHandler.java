@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps;
 
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import uk.gov.hmcts.reform.jps.exceptions.ApiError;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
-import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
 import uk.gov.hmcts.reform.jps.exceptions.MissingPathVariableException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.exceptions.ServiceException;
@@ -130,19 +130,18 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-
-    @ExceptionHandler(InvalidLocationException.class)
-    protected ResponseEntity<Object> handleInvalidLocationExceptionException(InvalidLocationException exception) {
-        ModelValidationError error = new ModelValidationError(
-            of(new FieldError("invalidLocation", exception.getMessage()))
-        );
-        return badRequest().body(error);
-    }
-
     @ExceptionHandler(UnknownValueException.class)
     protected ResponseEntity<Object> handleUnknowValueException(UnknownValueException exception) {
         ModelValidationError error = new ModelValidationError(
             of(new FieldError(exception.field, exception.getMessage()))
+        );
+        return badRequest().body(error);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    protected ResponseEntity<Object> handleDataIntegrityViolationException() {
+        ModelValidationError error = new ModelValidationError(
+            of(new FieldError("Bad request", "008 could not insert"))
         );
         return badRequest().body(error);
     }

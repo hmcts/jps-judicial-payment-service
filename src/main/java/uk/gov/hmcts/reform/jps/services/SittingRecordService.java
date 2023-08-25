@@ -9,13 +9,15 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
-import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
+import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
@@ -27,24 +29,29 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static java.lang.Boolean.TRUE;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+
 @Service
 @Slf4j
+@RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SittingRecordService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordService.class);
 
     private final SittingRecordRepository sittingRecordRepository;
-
-    private final LocationService locationService;
-
-    private final ServiceService serviceService;
-
-
+    private final DuplicateCheckerService duplicateCheckerService;
     private final SecurityUtils securityUtils;
+    private final LocationService locationService;
+    private final ServiceService serviceService;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -103,56 +110,82 @@ public class SittingRecordService {
 
     @Transactional
     public void saveSittingRecords(String hmctsServiceCode,
-                                   RecordSittingRecordRequest recordSittingRecordRequest) {
-        recordSittingRecordRequest.getRecordedSittingRecords()
-            .forEach(recordSittingRecord -> {
+                                   List<SittingRecordWrapper> sittingRecordWrappers,
+                                   String recordedByName,
+                                   String recordedByIdamId) {
+        LOGGER.debug("saveSittingRecords");
+        sittingRecordWrappers
+            .forEach(recordSittingRecordWrapper -> {
+                SittingRecordRequest recordSittingRecord = recordSittingRecordWrapper.getSittingRecordRequest();
+                if (POTENTIAL_DUPLICATE_RECORD == recordSittingRecordWrapper.getErrorCode()
+                        && TRUE.equals(recordSittingRecord.getReplaceDuplicate())) {
+                    uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
+                            = sittingRecordRepository.findById(recordSittingRecordWrapper.getSittingRecordId())
+                            .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
+
+                    deleteSittingRecord(sittingRecord);
+                }
 
                 uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord =
                     uk.gov.hmcts.reform.jps.domain.SittingRecord.builder()
-                        .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getAm).orElse(false))
                         .contractTypeId(recordSittingRecord.getContractTypeId())
                         .epimmsId(recordSittingRecord.getEpimmsId())
                         .hmctsServiceId(hmctsServiceCode)
                         .personalCode(recordSittingRecord.getPersonalCode())
                         .judgeRoleTypeId(recordSittingRecord.getJudgeRoleTypeId())
-                        .personalCode(recordSittingRecord.getPersonalCode())
+                        .am(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
+                            .map(DurationBoolean::getAm).orElse(false))
                         .pm(Optional.ofNullable(recordSittingRecord.getDurationBoolean())
-                                .map(DurationBoolean::getPm).orElse(false))
-                        .regionId(recordSittingRecord.getRegionId())
+                            .map(DurationBoolean::getPm).orElse(false))
+                        .regionId(recordSittingRecordWrapper.getRegionId())
                         .sittingDate(recordSittingRecord.getSittingDate())
-                        .statusId(StatusId.RECORDED.name())
+                        .statusId(RECORDED)
                         .build();
 
-                recordSittingRecord.setCreatedDateTime(LocalDateTime.now());
+
+                recordSittingRecordWrapper.setCreatedDateTime(LocalDateTime.now());
 
                 StatusHistory statusHistory = StatusHistory.builder()
-                    .changedByName(recordSittingRecordRequest.getRecordedByName())
-                    .changedByUserId(recordSittingRecordRequest.getRecordedByIdamId())
-                    .changedDateTime(recordSittingRecord.getCreatedDateTime())
-                    .statusId(StatusId.RECORDED.name())
+                    .changedByName(recordedByName)
+                    .changedByUserId(recordedByIdamId)
+                    .changedDateTime(recordSittingRecordWrapper.getCreatedDateTime())
+                    .statusId(RECORDED)
                     .build();
 
                 sittingRecord.addStatusHistory(statusHistory);
-                save(sittingRecord);
+                sittingRecordRepository.save(sittingRecord);
             });
     }
 
-    public void save(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
-        sittingRecordRepository.save(sittingRecord);
+    public void checkDuplicateRecords(List<SittingRecordWrapper> sittingRecordWrappers) {
+        sittingRecordWrappers.stream()
+            .filter(sittingRecordWrapper ->
+                            VALID == sittingRecordWrapper.getErrorCode())
+            .forEach(this::checkDuplicateRecords);
     }
 
-    private String getAccountCode(String hmctsServiceCode) {
-        return serviceService.findService(hmctsServiceCode)
-            .map(uk.gov.hmcts.reform.jps.domain.Service::getAccountCenterCode)
-            .orElse(null);
+    private void checkDuplicateRecords(SittingRecordWrapper sittingRecordWrapper) {
+        SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
+
+        try (Stream<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> stream
+                     = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
+                sittingRecordRequest.getSittingDate(),
+                sittingRecordRequest.getEpimmsId(),
+                sittingRecordRequest.getPersonalCode(),
+                List.of(DELETED, CLOSED)
+        ).stream()) {
+            stream.forEach(sittingRecordDuplicateCheckFields ->
+                    duplicateCheckerService
+                            .evaluate(sittingRecordWrapper,
+                                    sittingRecordDuplicateCheckFields));
+        }
     }
 
     @Transactional
-    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter', 'jps-admin')")
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "','" + JPS_ADMIN + "')")
     public void deleteSittingRecord(Long sittingRecordId) {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
-            = sittingRecordRepository.findRecorderSittingRecord(sittingRecordId, DELETED.name())
+            = sittingRecordRepository.findRecorderSittingRecord(sittingRecordId, DELETED)
             .orElseThrow(() -> new ResourceNotFoundException("Sitting Record ID Not Found"));
 
         if (securityUtils.getUserInfo().getRoles().contains("jps-recorder")) {
@@ -166,21 +199,21 @@ public class SittingRecordService {
 
     private void deleteSittingRecord(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.DELETED.name())
+            .statusId(StatusId.DELETED)
             .changedDateTime(LocalDateTime.now())
             .changedByUserId(securityUtils.getUserInfo().getUid())
             .changedByName(securityUtils.getUserInfo().getName())
             .build();
 
         sittingRecord.addStatusHistory(statusHistory);
-        sittingRecord.setStatusId(DELETED.name());
+        sittingRecord.setStatusId(DELETED);
         sittingRecordRepository.save(sittingRecord);
     }
 
     private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
                             StatusId recorded) {
 
-        if (sittingRecord.getStatusId().equals(recorded.name())) {
+        if (sittingRecord.getStatusId() == recorded) {
             deleteSittingRecord(sittingRecord);
         } else {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
@@ -188,9 +221,9 @@ public class SittingRecordService {
     }
 
     private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
-        if (sittingRecord.getStatusId().equals(RECORDED.name())) {
+        if (sittingRecord.getStatusId() == RECORDED) {
             StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
-                .filter(statusHistory -> statusHistory.getStatusId().equals(RECORDED.name()))
+                .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
                 .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
                     securityUtils.getUserInfo().getUid()))
                 .findAny()
@@ -203,4 +236,10 @@ public class SittingRecordService {
         }
     }
 
+    private String getAccountCode(String hmctsServiceCode) {
+        return serviceService.findService(hmctsServiceCode)
+            .map(uk.gov.hmcts.reform.jps.domain.Service::getAccountCenterCode)
+            .orElse(null);
+
+    }
 }

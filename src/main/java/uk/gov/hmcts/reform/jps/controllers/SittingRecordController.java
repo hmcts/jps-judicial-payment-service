@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.controllers.util.Utility;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
@@ -42,7 +43,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class SittingRecordController {
-    public static final List<String> VALID_STATUS_IDS = of(RECORDED.name(), PUBLISHED.name(), SUBMITTED.name());
+    public static final List<StatusId> VALID_STATUS_IDS = of(RECORDED, PUBLISHED, SUBMITTED);
     private final SittingRecordService sittingRecordService;
     private final StatusHistoryService statusHistoryService;
     private final LocationService regionService;

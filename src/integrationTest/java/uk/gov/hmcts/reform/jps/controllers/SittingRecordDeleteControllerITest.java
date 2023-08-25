@@ -21,8 +21,11 @@ import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
+import static uk.gov.hmcts.reform.jps.BaseTest.SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 
 @Transactional
 @SpringBootTest
@@ -40,8 +43,8 @@ class SittingRecordDeleteControllerITest {
     private UserInfo userInfo;
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-recorder"})
+    @Sql(scripts = {RESET_DATABASE, SITTING_RECORD_STATUS_HISTORY})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldDeleteSittingRecordWhenSittingRecordPresentRecorder() throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of("jps-recorder"));
@@ -55,8 +58,8 @@ class SittingRecordDeleteControllerITest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-submitter"})
+    @Sql(scripts = {RESET_DATABASE, SITTING_RECORD_STATUS_HISTORY})
+    @WithMockUser(authorities = {JPS_SUBMITTER})
     void shouldDeleteSittingRecordWhenSittingRecordPresentSubmitter() throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of("jps-submitter"));
@@ -69,8 +72,8 @@ class SittingRecordDeleteControllerITest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
-    @WithMockUser(authorities = {"jps-admin"})
+    @Sql(scripts = {RESET_DATABASE, SITTING_RECORD_STATUS_HISTORY})
+    @WithMockUser(authorities = {JPS_ADMIN})
     void shouldDeleteSittingRecordWhenSittingRecordPresentAdmin() throws Exception {
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of("jps-admin"));
@@ -83,7 +86,7 @@ class SittingRecordDeleteControllerITest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
             .andDo(print())
@@ -96,7 +99,7 @@ class SittingRecordDeleteControllerITest {
 
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
             .andDo(print())

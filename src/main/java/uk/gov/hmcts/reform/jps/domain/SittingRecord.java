@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -43,7 +46,8 @@ public class SittingRecord {
     private LocalDate sittingDate;
 
     @Column(name = "status_id")
-    private String statusId;
+    @Enumerated(EnumType.STRING)
+    private StatusId statusId;
 
     @Column(name = "region_id")
     private String regionId;
@@ -140,7 +144,7 @@ public class SittingRecord {
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
-            && sittingRecord.getStatusId().equals(this.getStatusId())
+            && sittingRecord.getStatusId() == this.getStatusId()
             && (Objects.isNull(sittingRecord.getStatusHistories())
                 && Objects.isNull(this.getStatusHistories())
                 || (Objects.nonNull(sittingRecord.getStatusHistories())
