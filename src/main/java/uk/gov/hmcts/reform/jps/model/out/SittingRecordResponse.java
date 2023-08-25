@@ -1,4 +1,4 @@
-package uk.gov.hmcts.reform.jps.model.in;
+package uk.gov.hmcts.reform.jps.model.out;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Builder;
@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import uk.gov.hmcts.reform.jps.model.ErrorCode;
 import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

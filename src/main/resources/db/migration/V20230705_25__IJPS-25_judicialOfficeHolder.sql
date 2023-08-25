@@ -4,4 +4,3 @@ CREATE TABLE judicial_office_holder (
     UNIQUE (personal_code)
 );
 
-

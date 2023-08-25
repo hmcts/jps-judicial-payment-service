@@ -4,6 +4,6 @@ public enum StatusId {
     RECORDED,
     SUBMITTED,
     PUBLISHED,
-    DELETED,
-    CLOSED
+    CLOSED,
+    DELETED
 }

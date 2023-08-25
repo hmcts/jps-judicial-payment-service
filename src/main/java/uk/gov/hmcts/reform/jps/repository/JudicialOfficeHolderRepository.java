@@ -10,6 +10,7 @@ import java.util.Optional;
 
 @Repository
 public interface JudicialOfficeHolderRepository extends JpaRepository<JudicialOfficeHolder, Long> {
+
     Optional<JudicialOfficeHolder> findByPersonalCode(String personalCode);
 
     @Query("""

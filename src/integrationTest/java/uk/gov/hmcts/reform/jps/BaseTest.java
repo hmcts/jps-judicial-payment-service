@@ -50,6 +50,9 @@ public class BaseTest {
     public static final String ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY
         = "classpath:sql/add_submit_sitting_record_status_history.sql";
 
+    public static final String SITTING_RECORD_STATUS_HISTORY
+        = "classpath:sql/sitting_record_status_history.sql";
+
     @BeforeEach
     void init() {
         final String hostUrl = "http://localhost:" + wiremockPort;

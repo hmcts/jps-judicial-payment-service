@@ -11,7 +11,7 @@ public class RandomDateGenerator {
     public static LocalDate generateRandomDate() {
         Random random = new Random();
         LocalDate currentDate = LocalDate.now();
-        int daysToSubtract = random.nextInt(1095); //up to 3 years less of current date
+        int daysToSubtract = random.nextInt(3650); //up to 10 years before the current date
 
         return currentDate.minusDays(daysToSubtract);
     }

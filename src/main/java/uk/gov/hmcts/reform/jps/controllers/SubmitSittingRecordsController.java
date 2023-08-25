@@ -38,7 +38,6 @@ import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESP
 public class SubmitSittingRecordsController {
     private final SittingRecordService sittingRecordService;
 
-
     @Operation(description = "Root not to be displayed", hidden = true)
     @PostMapping(
         path = {""}

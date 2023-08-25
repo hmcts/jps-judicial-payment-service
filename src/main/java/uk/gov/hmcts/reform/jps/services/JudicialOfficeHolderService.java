@@ -8,10 +8,23 @@ import uk.gov.hmcts.reform.jps.repository.JudicialOfficeHolderRepository;
 
 import java.util.Optional;
 
-@RequiredArgsConstructor(onConstructor_ = {@Autowired})
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Service
 public class JudicialOfficeHolderService {
+
     private final JudicialOfficeHolderRepository judicialOfficeHolderRepository;
+
+    public Optional<JudicialOfficeHolder> findById(Long johId) {
+        return judicialOfficeHolderRepository.findById(johId);
+    }
+
+    public Optional<JudicialOfficeHolder> findByPersonalCode(String personalCode) {
+        return judicialOfficeHolderRepository.findByPersonalCode(personalCode);
+    }
+
+    public JudicialOfficeHolder save(JudicialOfficeHolder judicialOfficeHolder) {
+        return judicialOfficeHolderRepository.save(judicialOfficeHolder);
+    }
 
     public Optional<Boolean> getCrownServiceFlag(String personalCode) {
         return judicialOfficeHolderRepository.findByPersonalCode(personalCode)

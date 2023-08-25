@@ -8,6 +8,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.domain.JohAttributes;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.util.Collection;
@@ -23,12 +26,79 @@ import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 class JudicialOfficeHolderRepositoryTest {
     @Autowired
     private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
+    @Autowired
+    private SittingRecordRepository recordRepository;
+    private static final String PERSONAL_CODE = "001";
+    private JudicialOfficeHolder persistedJudicialOfficeHolder;
+
+
+
+    @BeforeEach
+    public void setUp() {
+
+        judicialOfficeHolderRepository.deleteAll();
+        recordRepository.deleteAll();
+
+        JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
+            .personalCode(PERSONAL_CODE)
+            .build();
+        LOGGER.debug("judicialOfficeHolder:{}", judicialOfficeHolder);
+        persistedJudicialOfficeHolder = judicialOfficeHolderRepository.save(judicialOfficeHolder);
+
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .epimmsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(PERSONAL_CODE)
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .build();
+
+        StatusHistory statusHistory = StatusHistory.builder()
+            .changedByName("John Doe")
+            .changedByUserId("jp-recorder")
+            .changedDateTime(LocalDateTime.now())
+            .statusId(StatusId.RECORDED)
+            .build();
+        sittingRecord.addStatusHistory(statusHistory);
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
+
+        List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
+        LOGGER.info("list.size:{}", list);
+        assertFalse(list.isEmpty());
+    }
 
     @Test
     @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturnCrownFlagWhenJohAttributesIsEffective() {
         Optional<JudicialOfficeHolder> judicialOfficeHolder
             = judicialOfficeHolderRepository.findByPersonalCode("7918178");
+        assertThat(judicialOfficeHolder)
+            .isPresent()
+            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
+            .contains(true);
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnCrownFlagWhenJohAttributesIsBothEffectiveAndNonEffective() {
+        Optional<JudicialOfficeHolder> judicialOfficeHolder
+            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributes("9928178");
+
+        Optional<JohAttributes> isJohAttributes = judicialOfficeHolder.stream()
+            .map(JudicialOfficeHolder::getJohAttributes)
+            .flatMap(Collection::stream)
+            .filter(johAttributes -> LocalDate.now().isEqual(johAttributes.getEffectiveStartDate()))
+            .findAny();
+
+        assertThat(isJohAttributes)
+            .isPresent();
+
         assertThat(judicialOfficeHolder)
             .isPresent()
             .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
@@ -66,7 +136,7 @@ class JudicialOfficeHolderRepositoryTest {
 
         assertThat(effectiveStartDate)
             .isPresent()
-                .matches(startDate -> LocalDate.now().isBefore(startDate.get()));
+            .matches(startDate -> LocalDate.now().isBefore(startDate.get()));
 
         assertThat(judicialOfficeHolder)
             .isPresent()
