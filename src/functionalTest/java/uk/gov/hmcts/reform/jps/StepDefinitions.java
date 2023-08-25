@@ -78,7 +78,8 @@ public class StepDefinitions extends TestVariables {
     }
 
     @Given("a record for the hmctsServiceCode {string} exists in the database with the payload {string}")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws IOException {
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws
+        IOException {
         randomDate = RandomDateGenerator.generateRandomDate().toString();
 
         String body = new
@@ -147,7 +148,8 @@ public class StepDefinitions extends TestVariables {
 
     @When("the request body contains the {string} as in {string}")
     public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
-        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName + ".json")));
+        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName
+                                                                  + ".json")));
 
         if (description.equalsIgnoreCase("payload with 3 sitting records")) {
             randomDate = RandomDateGenerator.generateRandomDate().toString();
