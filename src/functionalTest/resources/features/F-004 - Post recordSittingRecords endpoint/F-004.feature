@@ -173,14 +173,14 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "AM/PM/Full Day is mandatory"
 
   @S-004.16 #AC07
-  Scenario: Negative response, return 401 Unauthorised, valid JPS role but invalid role for this endpoint
+  Scenario: Negative response, return 403 Forbidden, valid JPS role but invalid role for this endpoint
     Given a user with the IDAM role of "jps-publisher"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
     And the request body contains the "payload with one sitting record" as in "F-004_allFields"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
-    Then a "negative" response is received with a "401 Unauthorised" status code
+    Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-004.17 #AC08
   Scenario: Negative response, return 403 Forbidden when the user has an invalid role
