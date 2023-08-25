@@ -151,7 +151,8 @@ public class StepDefinitions extends TestVariables {
         String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName
                                                                   + ".json")));
 
-        if (description.equalsIgnoreCase("payload with 3 sitting records")) {
+        if (description.equalsIgnoreCase("payload with 3 sitting records") || description.equalsIgnoreCase(
+            "payload with one sitting record")) {
             randomDate = RandomDateGenerator.generateRandomDate().toString();
         }
 
