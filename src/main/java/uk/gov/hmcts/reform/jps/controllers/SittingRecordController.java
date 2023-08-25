@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,9 +50,17 @@ public class SittingRecordController {
     private final LocationService regionService;
     private final JudicialUserDetailsService judicialUserDetailsService;
 
+    @Operation(description = "Root not to be displayed", hidden = true)
+    @PostMapping(
+        path = {"/searchSittingRecords"}
+    )
+    public ResponseEntity<String> searchSittingRecords() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateServiceCode(Optional.empty()));
+    }
 
     @PostMapping(
-        path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
+        path = {"/searchSittingRecords/{hmctsServiceCode}"}
     )
     public ResponseEntity<SittingRecordSearchResponse> searchSittingRecords(
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,

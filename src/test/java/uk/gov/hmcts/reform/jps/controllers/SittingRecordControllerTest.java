@@ -258,7 +258,7 @@ class SittingRecordControllerTest {
 
         StatusHistory statusHistory1 = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .changedByUserId("11233")
             .changedDateTime(LocalDateTime.now())
             .changedByName("Jason Bourne")
@@ -296,21 +296,21 @@ class SittingRecordControllerTest {
 
         StatusHistory statusHistory2a = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .changedByUserId("11244")
             .changedDateTime(LocalDateTime.now().minusDays(2))
             .changedByName("Matt Murdock")
             .build();
         StatusHistory statusHistory2b = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.PUBLISHED.name())
+            .statusId(StatusId.PUBLISHED)
             .changedByUserId("11245")
             .changedDateTime(LocalDateTime.now().minusDays(1))
             .changedByName("Peter Parker")
             .build();
         StatusHistory statusHistory2c = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.SUBMITTED.name())
+            .statusId(StatusId.SUBMITTED)
             .changedByUserId("11246")
             .changedDateTime(LocalDateTime.now())
             .changedByName("Stephen Strange")
