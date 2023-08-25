@@ -12,7 +12,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -20,7 +19,6 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
@@ -42,11 +40,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -56,7 +52,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 
 @WebMvcTest(controllers = {SittingRecordController.class, SittingRecordDeleteController.class},
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
@@ -162,7 +157,7 @@ class SittingRecordControllerTest {
         List<RecordingUser> recordingUsers = generateRecordingUsers();
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
-            .thenReturn(sittingRecords.size());
+            .thenReturn(Long.valueOf(sittingRecords.size()));
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
         when(statusHistoryService.findRecordingUsers(anyString(), anyString(), anyList(), any(), any()))
@@ -206,7 +201,7 @@ class SittingRecordControllerTest {
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        )).thenReturn(2);
+        )).thenReturn(2L);
 
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
@@ -234,41 +229,6 @@ class SittingRecordControllerTest {
         verify(judicialUserDetailsService, never()).setJudicialUserDetails(sittingRecords);
     }
 
-    @Test
-    void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
-            .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                jsonPath("$.errors[0].message").value("sittingRecordId is mandatory")
-            );
-    }
-
-    @Test
-    @WithMockUser(authorities = {JPS_RECORDER})
-    void shouldDeleteSittingRecordWhenSittingRecordPresent() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
-            .andDo(print())
-            .andExpect(status().isOk());
-    }
-
-    @Test
-    @WithMockUser(authorities = {JPS_RECORDER})
-    void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
-        doThrow(new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"))
-            .when(sittingRecordService)
-            .deleteSittingRecord(anyLong());
-
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2000))
-            .andDo(print())
-            .andExpectAll(
-                status().isNotFound(),
-                jsonPath("$.status").value("NOT_FOUND"),
-                jsonPath("$.errors").value("SITTING_RECORD_ID_NOT_FOUND")
-            );
-    }
-
     private List<RecordingUser> generateRecordingUsers() {
         RecordingUser recUser1 = RecordingUser.builder()
             .userId("10011")
@@ -287,7 +247,7 @@ class SittingRecordControllerTest {
 
         StatusHistory statusHistory1 = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.RECORDED)
+            .statusId(StatusId.RECORDED.name())
             .changedByUserId("11233")
             .changedDateTime(LocalDateTime.now())
             .changedByName("Jason Bourne")
@@ -295,7 +255,7 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord1 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC1")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11222L)
             .contractTypeName("Contract Type 1")
             .crownServantFlag(Boolean.TRUE)
@@ -308,7 +268,7 @@ class SittingRecordControllerTest {
             .payrollId("PR1")
             .personalCode("PC1")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC1")
             .regionName("East Coast US1")
             .sittingDate(LocalDate.now().minusDays(2))
@@ -325,21 +285,21 @@ class SittingRecordControllerTest {
 
         StatusHistory statusHistory2a = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.RECORDED)
+            .statusId(StatusId.RECORDED.name())
             .changedByUserId("11244")
             .changedDateTime(LocalDateTime.now().minusDays(2))
             .changedByName("Matt Murdock")
             .build();
         StatusHistory statusHistory2b = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.PUBLISHED)
+            .statusId(StatusId.PUBLISHED.name())
             .changedByUserId("11245")
             .changedDateTime(LocalDateTime.now().minusDays(1))
             .changedByName("Peter Parker")
             .build();
         StatusHistory statusHistory2c = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.SUBMITTED)
+            .statusId(StatusId.SUBMITTED.name())
             .changedByUserId("11246")
             .changedDateTime(LocalDateTime.now())
             .changedByName("Stephen Strange")
@@ -347,7 +307,7 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord2 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC2")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11333L)
             .contractTypeName("Contract Type 2")
             .crownServantFlag(Boolean.FALSE)
@@ -360,7 +320,7 @@ class SittingRecordControllerTest {
             .payrollId("PR2")
             .personalCode("PC2")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC2")
             .regionName("East Coast US2")
             .sittingDate(LocalDate.now().minusDays(1))

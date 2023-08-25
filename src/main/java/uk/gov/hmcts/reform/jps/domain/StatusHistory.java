@@ -3,19 +3,15 @@ package uk.gov.hmcts.reform.jps.domain;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDateTime;
-import javax.persistence.Basic;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -23,17 +19,20 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
+import static javax.persistence.FetchType.LAZY;
+
+@org.hibernate.annotations.Immutable
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
 @ToString
+@Setter
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {
 
-    public static final String FIND_ALL_RECORDING_USERS = "FIND_ALL_RECORDING_USERS";
-
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "status_history_id")
@@ -41,14 +40,12 @@ public class StatusHistory {
 
     @JsonIgnore
     @ToString.Exclude
-    @ManyToOne(fetch = FetchType.EAGER, optional = false)
+    @ManyToOne(optional = false, fetch = LAZY)
     @JoinColumn(name = "sitting_record_id")
     private SittingRecord sittingRecord;
 
     @Column(name = "status_id")
-    @Enumerated(EnumType.STRING)
-    @Basic(optional = false)
-    private StatusId statusId;
+    private String statusId;
 
     @Column(name = "changed_date_time")
     private LocalDateTime changedDateTime;

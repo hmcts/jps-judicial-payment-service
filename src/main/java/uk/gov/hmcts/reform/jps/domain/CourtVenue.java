@@ -2,8 +2,9 @@ package uk.gov.hmcts.reform.jps.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.Column;
@@ -16,12 +17,14 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @ToString
 @Entity
 @Table(name = "court_venue")
 public class CourtVenue {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "local_court_venue_record_id")

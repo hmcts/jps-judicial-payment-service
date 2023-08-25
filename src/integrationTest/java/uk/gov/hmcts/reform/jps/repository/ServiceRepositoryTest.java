@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -8,11 +10,13 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.domain.Service;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
@@ -22,19 +26,31 @@ class ServiceRepositoryTest {
     private ServiceRepository serviceRepository;
 
     private static final String HMCTS_SERVICE_ID = "BB4";
+    private static Service service;
+
+    @BeforeAll
+    void beforeAll() {
+        service = serviceRepository
+            .save(
+                Service.builder()
+                     .hmctsServiceId(HMCTS_SERVICE_ID)
+                     .serviceName("TestService")
+                     .accountCenterCode("123")
+                     .onboardingStartDate(LocalDate.now())
+                     .retentionTimeInMonths(2)
+                     .closeRecordedRecordAfterTimeInMonths(2)
+                     .build());
+    }
 
     @Test
     void shouldSaveService() {
-        Service persistedService = getPersistedService();
-
-        assertThat(persistedService).isNotNull();
-        assertThat(persistedService.getId()).isNotNull();
+        assertThat(service)
+            .isNotNull()
+            .matches(persistedService -> Objects.nonNull(persistedService.getId()));
     }
 
     @Test
     void shouldUpdateServiceWhenRecordIsPresent() {
-        Service service = getPersistedService();
-
         Optional<Service> optionalServiceToUpdate = serviceRepository
             .findById(service.getId());
         assertTrue(optionalServiceToUpdate.isPresent());
@@ -57,7 +73,6 @@ class ServiceRepositoryTest {
 
     @Test
     void shouldDeleteSelectedRecord() {
-        Service service = getPersistedService();
         Optional<Service> optionalServiceToUpdate = serviceRepository
             .findById(service.getId());
         assertTrue(optionalServiceToUpdate.isPresent());
@@ -71,30 +86,13 @@ class ServiceRepositoryTest {
 
     @Test
     void shouldSuccessfullyFindServiceByHmctsServiceId() {
-        getPersistedService();
-
         assertThat(serviceRepository.findByHmctsServiceId(HMCTS_SERVICE_ID))
             .isPresent();
     }
 
     @Test
     void shouldFailToFindServiceByHmctsServiceId() {
-        getPersistedService();
-
         assertThat(serviceRepository.findByHmctsServiceId("FFGHJHUJ"))
             .isEmpty();
-    }
-
-    private Service getPersistedService() {
-        Service service = Service.builder()
-            .hmctsServiceId(HMCTS_SERVICE_ID)
-            .serviceName("TestService")
-            .accountCenterCode("123")
-            .onboardingStartDate(LocalDate.now())
-            .retentionTimeInMonths(2)
-            .closeRecordedRecordAfterTimeInMonths(2)
-            .build();
-
-        return serviceRepository.save(service);
     }
 }
