@@ -15,10 +15,10 @@ public class TestVariables {
     protected static final String publisherPassword;
     protected static final String adminUsername;
     protected static final String adminPassword;
-    protected static final String invalidUsername;
-    protected static final String invalidPassword;
     protected static final String johAdminUsername;
     protected static final String johAdminPassword;
+    protected static final String invalidUsername;
+    protected static final String invalidPassword;
     protected static String accessToken;
     protected static String recorderAccessToken;
     protected static String submitterAccessToken;

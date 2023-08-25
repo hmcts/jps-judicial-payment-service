@@ -7,7 +7,6 @@ import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
 import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
@@ -26,12 +25,7 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.HttpStatus.CONFLICT;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.FORBIDDEN;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.OK;
-import static org.springframework.http.HttpStatus.UNAUTHORIZED;
+import static org.springframework.http.HttpStatus.*;
 
 public class StepDefinitions extends TestVariables {
 
@@ -80,6 +74,7 @@ public class StepDefinitions extends TestVariables {
 
     @Given("a record for the hmctsServiceCode {string} exists in the database with the payload {string}")
     public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws IOException {
+        randomDate = RandomDateGenerator.generateRandomDate().toString();
 
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
@@ -171,6 +166,11 @@ public class StepDefinitions extends TestVariables {
         } else if (method.equalsIgnoreCase("DELETE")) {
             response = given.when().delete(resourceAPI.getResource());
         }
+    }
+
+    @Then("the response is empty")
+    public void theResponseIsEmpty() {
+        response.then().assertThat().body("isEmpty()", Matchers.is(true));
     }
 
     @Then("a {string} response is received with a {string} status code")
