@@ -1,19 +1,27 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
 import uk.gov.hmcts.reform.jps.model.Duration;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
@@ -23,48 +31,63 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 
 public class SittingRecordRepositorySearchImpl implements SittingRecordRepositorySearch {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordRepositorySearchImpl.class);
+
     @PersistenceContext
     private EntityManager entityManager;
 
-    private <T,V> void updateCriteriaQuery(
+
+    private <T> void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
         CriteriaBuilder criteriaBuilder,
         CriteriaQuery<T> criteriaQuery,
-        Root<V> sittingRecord,
+        Root<SittingRecord> sittingRecord,
         Consumer<List<Predicate>> predicateConsumer) {
 
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("hmctsServiceId"), hmctsServiceCode));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("regionId"), recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.equal(sittingRecord.get("epimsId"), recordSearchRequest.getEpimsId()));
-        predicates.add(criteriaBuilder.between(sittingRecord.get("sittingDate"),
+        final List<Predicate> predicates = new ArrayList<>();
+        predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
+
+        predicates.add(criteriaBuilder.between(sittingRecord.get(SittingRecord_.SITTING_DATE),
                                                recordSearchRequest.getDateRangeFrom(),
                                                recordSearchRequest.getDateRangeTo()));
 
+        Optional.ofNullable(recordSearchRequest.getRegionId())
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.REGION_ID), value)));
+
+        Optional.ofNullable(recordSearchRequest.getEpimmsId())
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.EPIMMS_ID), value)));
+
         Optional.ofNullable(recordSearchRequest.getPersonalCode())
-            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("personalCode"), value)));
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.PERSONAL_CODE), value)));
 
         Optional.ofNullable(recordSearchRequest.getJudgeRoleTypeId())
-            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("judgeRoleTypeId"), value)));
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.JUDGE_ROLE_TYPE_ID), value)));
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
-            .ifPresent(value -> predicates.add(criteriaBuilder.equal(sittingRecord.get("statusId"), value.name())));
+            .ifPresent(value -> predicates.add(criteriaBuilder.equal(
+                sittingRecord.get(SittingRecord_.STATUS_ID), value)));
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
         if (duration.isPresent()) {
             if (duration.get().equals(FULL_DAY)) {
-                predicates.add(criteriaBuilder.equal(sittingRecord.get("am"), true));
-                predicates.add(criteriaBuilder.equal(sittingRecord.get("pm"), true));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.AM), true));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.PM), true));
             } else if (duration.get().equals(AM)) {
-                predicates.add(criteriaBuilder.equal(sittingRecord.get("am"), true));
-                predicates.add(criteriaBuilder.equal(sittingRecord.get("pm"), false));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.AM), true));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.PM), false));
             } else if (duration.get().equals(PM)) {
-                predicates.add(criteriaBuilder.equal(sittingRecord.get("pm"), true));
-                predicates.add(criteriaBuilder.equal(sittingRecord.get("am"), false));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.PM), true));
+                predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.AM), false));
             }
         }
+
+        addJoinCriteria(recordSearchRequest, criteriaBuilder, predicates,sittingRecord);
 
         predicateConsumer.accept(predicates);
 
@@ -73,66 +96,83 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     }
 
     @Override
-    public List<SittingRecord> find(
+    public Stream<SittingRecord> find(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
+        try {
+            // create the outer query
+            CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+            CriteriaQuery<SittingRecord> cq = cb.createQuery(SittingRecord.class);
+            Root<SittingRecord> root = cq.from(SittingRecord.class);
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<SittingRecord> criteriaQuery = criteriaBuilder.createQuery(SittingRecord.class);
-        Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
-        criteriaQuery.select(sittingRecord);
-
-        updateCriteriaQuery(recordSearchRequest,
-                            hmctsServiceCode,
-                            criteriaBuilder,
-                            criteriaQuery,
-                            sittingRecord,
-                            predicates -> {
-                                Optional.ofNullable(recordSearchRequest.getCreatedByUserId())
-                                    .ifPresent(value ->
-                                                   predicates.add(criteriaBuilder.equal(
-                                                       sittingRecord.get("createdByUserId"),
-                                                       value
-                                                   )));
-
-                                if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
-                                    criteriaQuery.orderBy(criteriaBuilder.asc(sittingRecord.get("sittingDate")));
-                                } else {
-                                    criteriaQuery.orderBy(criteriaBuilder.desc(sittingRecord.get("sittingDate")));
-                                }
-                            }
-                            );
-
-        TypedQuery<SittingRecord> typedQuery = entityManager.createQuery(criteriaQuery)
-            .setMaxResults(recordSearchRequest.getPageSize())
-            .setFirstResult(recordSearchRequest.getOffset());
-
-        return typedQuery.getResultList();
+            updateCriteriaQuery(
+                recordSearchRequest,
+                hmctsServiceCode,
+                cb,
+                cq,
+                root,
+                predicates -> {
+                    if (recordSearchRequest.getDateOrder().equals(DateOrder.ASCENDING)) {
+                        LOGGER.debug("DateOrder: {}", DateOrder.ASCENDING);
+                        cq.orderBy(cb.asc(root.get(SittingRecord_.SITTING_DATE)));
+                    } else {
+                        LOGGER.debug("DateOrder: {}", DateOrder.DESCENDING);
+                        cq.orderBy(cb.desc(root.get(SittingRecord_.SITTING_DATE)));
+                    }
+                }
+            );
+            return entityManager.createQuery(cq)
+                .setMaxResults(recordSearchRequest.getPageSize())
+                .setFirstResult(recordSearchRequest.getOffset())
+                .getResultStream();
+        } finally {
+            entityManager.close();
+        }
     }
 
     @Override
-    public int totalRecords(
-        SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode) {
+    public long totalRecords(SittingRecordSearchRequest recordSearchRequest,
+                            String hmctsServiceCode) {
+        try {
+            CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+            CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+            Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
 
-        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
-        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
-        Root<SittingRecord> sittingRecord = criteriaQuery.from(SittingRecord.class);
+            criteriaQuery.select(criteriaBuilder.count(sittingRecord.get(SittingRecord_.ID)));
 
-        criteriaQuery.select(criteriaBuilder.count(sittingRecord));
+            updateCriteriaQuery(
+                recordSearchRequest,
+                hmctsServiceCode,
+                criteriaBuilder,
+                criteriaQuery,
+                sittingRecord,
+                predicates -> {
+                }
+            );
 
-        updateCriteriaQuery(recordSearchRequest,
-                            hmctsServiceCode,
-                            criteriaBuilder,
-                            criteriaQuery,
-                            sittingRecord,
-                            predicates ->
-                                Optional.ofNullable(recordSearchRequest.getCreatedByUserId())
-                                    .ifPresent(value ->
-                                       predicates.add(criteriaBuilder.equal(sittingRecord.get("createdByUserId"),
-                                            value)))
-        );
-
-        return entityManager.createQuery(criteriaQuery).getSingleResult().intValue();
+            return entityManager.createQuery(criteriaQuery).getResultStream()
+                .findAny()
+                .orElse(0L);
+        } finally {
+            entityManager.close();
+        }
     }
+
+    public void addJoinCriteria(SittingRecordSearchRequest recordSearchRequest,
+                                          CriteriaBuilder criteriaBuilder,
+                                          final List<Predicate> predicate,
+                                          Root<SittingRecord> sittingRecord) {
+
+        if (Objects.nonNull(recordSearchRequest.getCreatedByUserId())
+            && !recordSearchRequest.getCreatedByUserId().isEmpty()) {
+            Join<Object, Object> joinStatusHistory =
+                sittingRecord.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
+            predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID),
+                                                recordSearchRequest.getCreatedByUserId()));
+            predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
+                                                StatusId.RECORDED));
+        }
+
+    }
+
 }

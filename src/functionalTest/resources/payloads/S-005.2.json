@@ -2,8 +2,6 @@
   "pageSize": "1",
   "offset": "0",
   "dateOrder": "ASCENDING",
-  "regionId": "1",
-  "epimsId": "229786",
-  "dateRangeFrom": "2023-03-10",
-  "dateRangeTo": "2023-05-12"
+  "dateRangeFrom": "dateToBeReplaced",
+  "dateRangeTo": "dateToBeReplaced"
 }

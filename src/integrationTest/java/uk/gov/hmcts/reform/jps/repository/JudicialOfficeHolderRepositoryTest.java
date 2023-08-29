@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,45 +32,45 @@ class JudicialOfficeHolderRepositoryTest {
     private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
     @Autowired
     private SittingRecordRepository recordRepository;
-    private SittingRecord persistedSittingRecord;
     private static final String PERSONAL_CODE = "001";
-
+    private JudicialOfficeHolder persistedJudicialOfficeHolder;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(JudicialOfficeHolderRepositoryTest.class);
 
     @BeforeEach
     public void setUp() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId("recorded")
-            .regionId("1")
-            .epimsId("123")
-            .hmctsServiceId("ssc_id")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .build();
 
-        StatusHistory statusHistory = StatusHistory.builder()
-            .statusId("recorded")
-            .changeDateTime(LocalDateTime.now())
-            .changeByUserId("jp-recorder")
-            .changeByName("John Doe")
-            .build();
-        sittingRecord.addStatusHistory(statusHistory);
+        judicialOfficeHolderRepository.deleteAll();
+        recordRepository.deleteAll();
 
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(PERSONAL_CODE)
             .build();
-        sittingRecord.setJudicialOfficeHolder(judicialOfficeHolder);
-        judicialOfficeHolder.addSittingRecord(sittingRecord);
-        LOGGER.info("judicialOfficeHolder:{}", judicialOfficeHolder);
-        LOGGER.info("sittingRecord:{}", sittingRecord);
+        LOGGER.debug("judicialOfficeHolder:{}", judicialOfficeHolder);
+        persistedJudicialOfficeHolder = judicialOfficeHolderRepository.save(judicialOfficeHolder);
 
-        persistedSittingRecord = recordRepository.save(sittingRecord);
-        judicialOfficeHolderRepository.save(judicialOfficeHolder);
+        SittingRecord sittingRecord = SittingRecord.builder()
+            .am(true)
+            .contractTypeId(2L)
+            .epimmsId("123")
+            .hmctsServiceId("ssc_id")
+            .judgeRoleTypeId("HighCourt")
+            .personalCode(PERSONAL_CODE)
+            .personalCode(judicialOfficeHolder.getPersonalCode())
+            .regionId("1")
+            .sittingDate(LocalDate.now().minusDays(2))
+            .build();
+
+        StatusHistory statusHistory = StatusHistory.builder()
+            .changedByName("John Doe")
+            .changedByUserId("jp-recorder")
+            .changedDateTime(LocalDateTime.now())
+            .statusId(StatusId.RECORDED)
+            .build();
+        sittingRecord.addStatusHistory(statusHistory);
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
-
 
         List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
         LOGGER.info("list.size:{}", list);
@@ -83,10 +84,12 @@ class JudicialOfficeHolderRepositoryTest {
         assertNotNull(list);
         assertFalse(list.isEmpty());
         JudicialOfficeHolder judicialOfficeHolder = list.get(0);
-        assertEquals(judicialOfficeHolder.getId(), 1L);
+        assertEquals(judicialOfficeHolder.getId(), persistedJudicialOfficeHolder.getId());
         assertEquals(judicialOfficeHolder.getPersonalCode(), PERSONAL_CODE);
 
-        assertEquals(persistedSittingRecord.getJudicialOfficeHolder(), judicialOfficeHolder);
+        SittingRecord persistedSittingRecord = recordRepository.findAll().get(0);
+
+        assertEquals(PERSONAL_CODE, persistedSittingRecord.getPersonalCode());
     }
 
 }

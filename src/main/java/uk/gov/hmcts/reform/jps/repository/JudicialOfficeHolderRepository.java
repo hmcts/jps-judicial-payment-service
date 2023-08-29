@@ -6,4 +6,7 @@ import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
 @Repository
 public interface JudicialOfficeHolderRepository extends JpaRepository<JudicialOfficeHolder, Long> {
+
+    public JudicialOfficeHolder findByPersonalCode(String personalCode);
+
 }

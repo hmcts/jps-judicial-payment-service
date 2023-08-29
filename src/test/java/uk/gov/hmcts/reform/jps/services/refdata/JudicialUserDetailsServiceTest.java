@@ -55,7 +55,6 @@ class JudicialUserDetailsServiceTest {
                                                                   .build()))
             .thenReturn(response);
 
-
         judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
 
         assertThat(sittingRecords)
