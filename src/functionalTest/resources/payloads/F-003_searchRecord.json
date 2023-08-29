@@ -10,7 +10,6 @@
   "duration": "FULL_DAY",
   "dateRangeFrom": "dateToBeReplaced",
   "dateRangeTo": "dateToBeReplaced",
-  "statusId": "RECORDED",
   "medicalMembersOnly": false,
   "includeFees": false
 }

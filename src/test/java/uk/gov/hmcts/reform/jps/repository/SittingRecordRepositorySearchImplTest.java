@@ -16,6 +16,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
 import uk.gov.hmcts.reform.jps.model.Duration;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
 import java.util.stream.Stream;
@@ -23,6 +24,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -35,8 +38,18 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.AM;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.HMCTS_SERVICE_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.JUDGE_ROLE_TYPE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PERSONAL_CODE;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PM;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.REGION_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.SITTING_DATE;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.STATUS_HISTORIES;
+import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.CHANGED_BY_USER_ID;
+import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.STATUS_ID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,6 +69,8 @@ class SittingRecordRepositorySearchImplTest {
     private CriteriaQuery<Long> countCriteriaQuery;
     @Mock
     private Root<SittingRecord> sittingRecord;
+    @Mock
+    private Join<Object, Object> statusHistories;
     @Mock
     private TypedQuery<SittingRecord> typedQuery;
     @Mock
@@ -535,4 +550,123 @@ class SittingRecordRepositorySearchImplTest {
         when(typedQuery.setFirstResult(OFF_SET)).thenReturn(typedQuery);
     }
 
+    @Test
+    void verifyFindRecordsToSubmitCriteriaQueryIsIntialisedCorrectlyWhenRequestHasAllValuesSetWithoutChangedByUserId() {
+
+        when(entityManager.getCriteriaBuilder())
+            .thenReturn(criteriaBuilder);
+        when(criteriaBuilder.createQuery(Long.class))
+            .thenReturn(countCriteriaQuery);
+        when(countCriteriaQuery.from(SittingRecord.class))
+            .thenReturn(sittingRecord);
+        when(entityManager.createQuery(countCriteriaQuery))
+            .thenReturn(longTypedQuery);
+
+        when(sittingRecord.<String>get(SITTING_DATE)).thenReturn(attributePath);
+
+        when(sittingRecord.<String>get(ID)).thenReturn(attributePath);
+
+        setPredicate(HMCTS_SERVICE_ID, SSCS);
+        setPredicate(REGION_ID, REGION_ID);
+        setPredicate(EPIMMS_ID, EPIMMS_ID);
+        setPredicate(PERSONAL_CODE, PERSONAL_CODE);
+
+        setPredicate(JUDGE_ROLE_TYPE_ID, JUDGE_ROLE_TYPE_ID);
+        setPredicate(STATUS_ID, RECORDED);
+        setPredicate(AM, true);
+        setPredicate(PM, true);
+
+        sittingRecordRepositorySearch.findRecordsToSubmit(SubmitSittingRecordRequest.builder()
+                                               .regionId(REGION_ID)
+                                               .epimmsId(EPIMMS_ID)
+                                               .dateRangeFrom(LocalDate.now().minusDays(2))
+                                               .dateRangeTo(LocalDate.now())
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
+                                               .duration(Duration.FULL_DAY)
+                                               .build(), SSCS);
+
+        verify(entityManager)
+            .getCriteriaBuilder();
+
+
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(REGION_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(RECORDED));
+        verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
+        verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
+    }
+
+    @Test
+    void verifyFindRecordsToSubmitCriteriaQueryIsIntialisedCorrectlyWhenRequestHasAllValuesSet() {
+
+        when(entityManager.getCriteriaBuilder())
+            .thenReturn(criteriaBuilder);
+        when(criteriaBuilder.createQuery(Long.class))
+            .thenReturn(countCriteriaQuery);
+        when(countCriteriaQuery.from(SittingRecord.class))
+            .thenReturn(sittingRecord);
+        when(entityManager.createQuery(countCriteriaQuery))
+            .thenReturn(longTypedQuery);
+
+        when(sittingRecord.<String>get(SITTING_DATE)).thenReturn(attributePath);
+
+        when(sittingRecord.<String>get(ID)).thenReturn(attributePath);
+
+        setPredicate(HMCTS_SERVICE_ID, SSCS);
+        setPredicate(REGION_ID, REGION_ID);
+        setPredicate(EPIMMS_ID, EPIMMS_ID);
+        setPredicate(PERSONAL_CODE, PERSONAL_CODE);
+
+        setPredicate(JUDGE_ROLE_TYPE_ID, JUDGE_ROLE_TYPE_ID);
+        setPredicate(STATUS_ID, RECORDED);
+        setPredicate(AM, true);
+        setPredicate(PM, true);
+
+        when(sittingRecord.join(STATUS_HISTORIES, JoinType.INNER))
+            .thenReturn(statusHistories);
+
+        when(statusHistories.<String>get(CHANGED_BY_USER_ID)).thenReturn(attributePath);
+        when(criteriaBuilder.equal(attributePath, CHANGED_BY_USER_ID))
+            .thenReturn(mock(ComparisonPredicate.class));
+
+        when(statusHistories.<String>get(STATUS_ID)).thenReturn(attributePath);
+        when(criteriaBuilder.equal(attributePath, RECORDED))
+            .thenReturn(mock(ComparisonPredicate.class));
+
+        sittingRecordRepositorySearch.findRecordsToSubmit(SubmitSittingRecordRequest.builder()
+                                               .regionId(REGION_ID)
+                                               .epimmsId(EPIMMS_ID)
+                                               .dateRangeFrom(LocalDate.now().minusDays(2))
+                                               .dateRangeTo(LocalDate.now())
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
+                                               .duration(Duration.FULL_DAY)
+                                               .createdByUserId(CHANGED_BY_USER_ID)
+                                               .build(), SSCS);
+
+        verify(entityManager)
+            .getCriteriaBuilder();
+
+
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(REGION_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(CHANGED_BY_USER_ID));
+        verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(RECORDED));
+        verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
+        verify(criteriaBuilder).between(any(), eq(LocalDate.now().minusDays(2)), eq(LocalDate.now()));
+    }
+
+
+    private <T> void setPredicate(String key, T value) {
+        when(sittingRecord.<String>get(key)).thenReturn(attributePath);
+        when(criteriaBuilder.equal(attributePath, value))
+            .thenReturn(mock(ComparisonPredicate.class));
+    }
 }

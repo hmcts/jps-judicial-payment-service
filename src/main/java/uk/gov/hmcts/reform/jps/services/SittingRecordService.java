@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
@@ -27,6 +28,7 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.TRUE;
@@ -52,6 +54,8 @@ public class SittingRecordService {
     private final SecurityUtils securityUtils;
     private final LocationService locationService;
     private final ServiceService serviceService;
+    private final StatusHistoryService statusHistoryService;
+
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -234,6 +238,30 @@ public class SittingRecordService {
         } else {
             throw new ConflictException("Sitting Record Status ID is in wrong state");
         }
+    }
+
+    @Transactional
+    public int submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                    String hmctsServiceCode) {
+        AtomicInteger counter = new AtomicInteger();
+        try (Stream<Long> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        )) {
+
+            recordsToSubmit.forEach(sittingRecordId -> {
+                statusHistoryService.insertRecord(
+                    sittingRecordId,
+                    SUBMITTED,
+                    submitSittingRecordRequest.getSubmittedByIdamId(),
+                    submitSittingRecordRequest.getSubmittedByName()
+                );
+
+                sittingRecordRepository.updateToSubmitted(sittingRecordId);
+                counter.incrementAndGet();
+            });
+        }
+        return counter.intValue();
     }
 
     private String getAccountCode(String hmctsServiceCode) {

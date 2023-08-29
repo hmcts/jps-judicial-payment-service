@@ -3,6 +3,7 @@ package uk.gov.hmcts.reform.jps.services;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -13,9 +14,9 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import javax.transaction.Transactional;
 
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -64,5 +65,22 @@ public class StatusHistoryService {
             sittingRecordWrapper.setCreatedDateTime(firstStatusHistoryRecorded.getChangedDateTime());
             sittingRecordWrapper.setStatusId(sittingRecordDuplicateCheckFields.getStatusId());
         });
+    }
+
+    @Transactional
+    public void insertRecord(Long sittingRecordId,
+                             StatusId statusId,
+                             String changedByUserId,
+                             String changedByUserName) {
+        StatusHistory statusHistory = StatusHistory.builder()
+            .sittingRecord(SittingRecord.builder()
+                               .id(sittingRecordId)
+                               .build())
+            .statusId(statusId)
+            .changedByUserId(changedByUserId)
+            .changedByName(changedByUserName)
+            .changedDateTime(LocalDateTime.now())
+            .build();
+        statusHistoryRepository.save(statusHistory);
     }
 }

@@ -2,7 +2,6 @@ package uk.gov.hmcts.reform.jps.controllers;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -42,7 +41,6 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class SittingRecordController {
     public static final List<StatusId> VALID_STATUS_IDS = of(RECORDED, PUBLISHED, SUBMITTED);
     private final SittingRecordService sittingRecordService;
