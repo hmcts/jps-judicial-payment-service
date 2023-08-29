@@ -8,8 +8,8 @@
   "judgeRoleTypeId": "Judge",
   "createdByUserId": "a452a3f9-1885-4c28-946c-2946f47be5ce",
   "duration": "FULL_DAY",
-  "dateRangeFrom": "2023-03-10",
-  "dateRangeTo": "2023-03-10",
+  "dateRangeFrom": "dateToBeReplaced",
+  "dateRangeTo": "dateToBeReplaced",
   "statusId": "RECORDED",
   "medicalMembersOnly": false,
   "includeFees": false
