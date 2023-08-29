@@ -80,20 +80,30 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Date order is mandatory"
 
-  @S-005.10 @Ignore #AC05
-  Scenario: Negative response, when the request payload is missing dateRange
+  @S-005.10 #AC05
+  Scenario: Negative response, when the request payload is missing dateRangeFrom
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "payload missing dateRange" as in "S-005.10"
+    And the request body contains the "payload missing dateRangeFrom" as in "S-005.10"
+    And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "errors[0].message" as "Date range from is mandatory"
+
+  @S-005.11 #AC05
+  Scenario: Negative response, when the request payload is missing dateRangeTo
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "BBA3"
+    And the request body contains the "payload missing dateRangeTo" as in "S-005.11"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "Date range to is mandatory"
-    And the response contains "errors[1].message" as "Date range from is mandatory"
 
-  @S-005.11 #AC06
-  Scenario: Negative response, when the request user doesn't have permissions
+  @S-005.12 #AC06
+  Scenario: Negative response, return 403 Forbidden when the user has an invalid role for JPS
     Given a user with the IDAM role of "ccd-import"
     When a request is prepared with appropriate values
     And the request contains a valid service token
@@ -102,7 +112,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "403 Forbidden" status code
 
-  @S-005.12 #AC07
+  @S-005.13 #AC07
   Scenario: Negative response, when the service token is invalid
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -111,3 +121,12 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the request body contains the "payload with all the fields" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "403 Forbidden" status code
+
+  @S-005.14
+  Scenario: Negative response, return 401 Unauthorised when the request is missing the service token
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains the "hmctsServiceCode" as "BBA3"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
+    And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "401 Unauthorised" status code

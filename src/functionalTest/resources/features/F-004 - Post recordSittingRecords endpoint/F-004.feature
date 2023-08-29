@@ -194,7 +194,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
   @S-004.18 #AC08
   Scenario: Negative response, return 401 Unauthorised when the request is missing the service token
-    Given a user with the IDAM role of "ccd-import"
+    Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
     And the request contains the "hmctsServiceCode" as "ABA5"
     And the request body contains the "payload with one sitting record" as in "F-004_allFields"
@@ -203,7 +203,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
   @S-004.19 #AC09
   Scenario: Negative response, return 403 Forbidden when the request uses an invalid service token
-    Given a user with the IDAM role of "ccd-import"
+    Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
     And the request contains an invalid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -224,11 +224,11 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "message" as "008 could not insert"
     And the response contains "errorRecords[0].errorCode" as "POTENTIAL_DUPLICATE_RECORD"
 
-  @S-004.21 @Ignore @PossibleDuplicates #AC03 Ignore until IJPS-62 is ready
+  @S-004.21 @PossibleDuplicates #AC03
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when judgeRoleTypeId doesn't match and existing record is Submitted
     Given a user with the IDAM role of "jps-recorder"
     And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
-    And the existing record is in Submitted state
+    And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -237,12 +237,13 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
     And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].statusId" as "SUBMITTED"
 
-  @S-004.22 @Ignore @PossibleDuplicates #AC04 Ignore until IJPS-62 is ready
+  @S-004.22 @PossibleDuplicates #AC04
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when existing record is Submitted
     Given a user with the IDAM role of "jps-recorder"
     And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
-    And the existing record is in Submitted state
+    And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -251,6 +252,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
     And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].statusId" as "SUBMITTED"
 
   @S-004.23 @PossibleDuplicates #AC05
   Scenario: Positive response, Return 201 - Success when period doesn't match with existing record
@@ -266,11 +268,11 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].statusId" as "RECORDED"
     And the response contains "errorRecords[0].createdByName" as "Recorder"
 
-  @S-004.24 @Ignore @PossibleDuplicates #AC06 Ignore until IJPS-62 is ready
+  @S-004.24 @PossibleDuplicates #AC06
   Scenario: Negative response, Return 400 - Invalid Location when one of the records has an invalid location for the given serviceCode
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
-    And the existing record is in Submitted state
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-004.2"
+    And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -279,8 +281,10 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
     And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
     And the response contains "errorRecords[1].errorCode" as "INVALID_LOCATION"
     And the response contains "errorRecords[2].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[2].statusId" as "SUBMITTED"
 
   @S-004.25 @PossibleDuplicates #AC07
   Scenario: Negative response, Return 400 - 008 could not insert with multiple errors
