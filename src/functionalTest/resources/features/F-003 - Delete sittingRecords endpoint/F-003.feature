@@ -1,7 +1,7 @@
 @F-003 @Functional
 Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
 
-  @S-003.2 #AC01
+  @S-003.1 #AC01
   Scenario: Success response - Return 200 success with Sitting Record update status as deleted for jps-recorder
     Given a user with the IDAM role of "jps-recorder"
     And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-003_createRecord"
