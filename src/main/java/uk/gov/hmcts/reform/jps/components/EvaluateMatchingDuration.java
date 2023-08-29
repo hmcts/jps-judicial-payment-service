@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.jps.services.StatusHistoryService;
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
-import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -48,17 +47,17 @@ public class EvaluateMatchingDuration implements DuplicateChecker {
             if (sittingRecordDuplicateCheckFields.getJudgeRoleTypeId()
                 .equals(sittingRecordWrapper.getSittingRecordRequest().getJudgeRoleTypeId())) {
                 sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
+                statusHistoryService.updateFromStatusHistory(
+                    sittingRecordWrapper,
+                    sittingRecordDuplicateCheckFields);
             } else {
                 SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
-                if (TRUE.equals(sittingRecordRequest.getReplaceDuplicate())) {
-                    sittingRecordWrapper.setErrorCode(VALID);
-                } else {
-                    sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+                sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+                if (!TRUE.equals(sittingRecordRequest.getReplaceDuplicate())) {
+                    statusHistoryService.updateFromStatusHistory(
+                        sittingRecordWrapper,
+                        sittingRecordDuplicateCheckFields);
                 }
-            }
-
-            if (sittingRecordWrapper.getErrorCode() != VALID) {
-                statusHistoryService.updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
             }
         } else if (sittingRecordDuplicateCheckFields.getStatusId() != DELETED) {
             sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);

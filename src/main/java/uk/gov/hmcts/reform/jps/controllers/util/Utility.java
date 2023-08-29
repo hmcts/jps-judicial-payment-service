@@ -11,4 +11,9 @@ public class Utility {
         return serviceCode
             .orElseThrow(() -> new MissingPathVariableException("hmctsServiceCode is mandatory"));
     }
+
+    public Long validateSittingRecordId(Optional<Long> sittingRecordId) {
+        return sittingRecordId
+            .orElseThrow(() -> new MissingPathVariableException("sittingRecordId is mandatory"));
+    }
 }

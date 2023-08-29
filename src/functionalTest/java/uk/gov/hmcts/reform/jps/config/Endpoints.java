@@ -5,6 +5,7 @@ public enum Endpoints {
     Test("/test"),
     RecordSittingRecords("/recordSittingRecords/{hmctsServiceCode}"),
     SearchSittingRecords("/sitting-records/searchSittingRecords/{hmctsServiceCode}"),
+    SittingRecord("/sittingRecord/{sittingRecordId}"),
     SubmitSittingRecords("/submitSittingRecords/{hmctsServiceCode}");
     public String resource;
 

@@ -23,6 +23,7 @@ public class EvaluateDuplicate implements DuplicateChecker {
             && sittingRecordDuplicateCheckFields.getSittingDate().isEqual(sittingRecordRequest.getSittingDate())
             && sittingRecordDuplicateCheckFields.getPersonalCode()
             .equals(sittingRecordRequest.getPersonalCode())) {
+            sittingRecordWrapper.setSittingRecordId(sittingRecordDuplicateCheckFields.getId());
             duplicateChecker.evaluate(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
         }
     }

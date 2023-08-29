@@ -22,24 +22,29 @@ import uk.gov.hmcts.reform.jps.model.ErrorCode;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
-import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordResponse;
-import uk.gov.hmcts.reform.jps.model.in.SittingRecordResponse;
+import uk.gov.hmcts.reform.jps.model.out.RecordSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.model.out.SittingRecordResponse;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
+import static java.util.Objects.nonNull;
+import static java.util.function.Predicate.not;
 import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.ResponseEntity.status;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_200;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_400;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
+import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
@@ -52,11 +57,21 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @Slf4j
 public class RecordSittingRecordsController {
+
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
 
+    @Operation(description = "Root not to be displayed", hidden = true)
+    @PostMapping(
+        path = {""}
+    )
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
+    public ResponseEntity<String> recordSittingRecords() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateServiceCode(Optional.empty()));
+    }
 
-    @Operation(description = "To create a new sitting record")
+    @Operation(description = "Create a new sitting record")
     @ApiResponse(responseCode = "201",
         content = @Content(schema = @Schema(implementation = RecordSittingRecordResponse.class)),
         description = "Successfully created sitting record")
@@ -66,9 +81,9 @@ public class RecordSittingRecordsController {
     @ApiResponse(responseCode = "403", description = RESPONSE_403, content = @Content)
 
     @PostMapping(
-        path = {"", "/{hmctsServiceCode}"}
+        path = { "/{hmctsServiceCode}"}
     )
-    @PreAuthorize("hasAnyAuthority('jps-recorder', 'jps-submitter')")
+    @PreAuthorize("hasAnyAuthority('" + JPS_RECORDER + "','" + JPS_SUBMITTER + "')")
     public ResponseEntity<RecordSittingRecordResponse> recordSittingRecords(
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
         @Valid @RequestBody RecordSittingRecordRequest recordSittingRecordRequest) {
@@ -84,11 +99,15 @@ public class RecordSittingRecordsController {
                                   sittingRecordWrappers);
 
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+        Optional<ErrorCode> errorCodeCheck = checkForErrors(
+            sittingRecordWrappers,
+            not(sittingRecordWrapper ->
+                    POTENTIAL_DUPLICATE_RECORD == sittingRecordWrapper.getErrorCode()
+                    && nonNull(sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate())
+                        && sittingRecordWrapper.getSittingRecordRequest().getReplaceDuplicate()
+            )
+        );
 
-        Optional<ErrorCode> errorCodeCheck = sittingRecordWrappers.stream()
-            .map(SittingRecordWrapper::getErrorCode)
-            .filter(errorCode -> errorCode != VALID)
-            .findAny();
 
         if (errorCodeCheck.isPresent()) {
             return status(HttpStatus.BAD_REQUEST)
@@ -107,17 +126,8 @@ public class RecordSittingRecordsController {
                                                     recordSittingRecordRequest.getRecordedByName(),
                                                     recordSittingRecordRequest.getRecordedByIdamId()
             );
-            HttpStatus httpStatus = sittingRecordWrappers.stream()
-                .filter(wrapper ->
-                            Boolean.TRUE
-                                .equals(wrapper.getSittingRecordRequest().getReplaceDuplicate()))
-                .findAny()
-                .map(sittingRecordWrapper -> OK)
-                .orElse(CREATED);
-
-            return status(httpStatus)
+            return status(CREATED)
                 .body(RecordSittingRecordResponse.builder()
-                          .message("success")
                           .errorRecords(generateResponse(sittingRecordWrappers,
                                                          errorCode -> VALID,
                                                          sittingRecordWrapper ->
@@ -128,6 +138,17 @@ public class RecordSittingRecordsController {
                 );
         }
     }
+
+
+    private Optional<ErrorCode> checkForErrors(List<SittingRecordWrapper> sittingRecordWrappers,
+                                                      Predicate<SittingRecordWrapper> predicate) {
+        return sittingRecordWrappers.stream()
+            .filter(predicate)
+            .map(SittingRecordWrapper::getErrorCode)
+            .filter(errorCode -> errorCode != VALID)
+            .findAny();
+    }
+
 
     private List<SittingRecordResponse> generateResponse(
         List<SittingRecordWrapper> sittingRecordWrappers,

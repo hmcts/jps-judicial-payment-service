@@ -15,6 +15,7 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
     private static final String ROLE_SUBMITTER = "jps-submitter";
     private static final String ROLE_RECORDER = "jps-recorder";
     private static final String ROLE_ADMIN = "jps-admin";
+    private static final String ROLE_JOH_ADMIN = "jps-JOH-admin";
     private static final String ROLE_CCD_IMPORT = "ccd-import";
 
     @Override
@@ -29,6 +30,7 @@ public class CftLibConfig extends ContainersBootstrap implements CFTLibConfigure
         lib.createIdamUser("jps-publisher-role@gmail.com", ROLE_PUBLISHER);
         lib.createIdamUser("jps-recorder-role@gmail.com", ROLE_RECORDER);
         lib.createIdamUser("jps-admin-role@gmail.com", ROLE_ADMIN);
+        lib.createIdamUser("jps-JOH-admin-role@gmail.com", ROLE_JOH_ADMIN);
         LOGGER.info("Finished creating Idam users......................");
     }
 }

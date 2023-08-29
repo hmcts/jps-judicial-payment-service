@@ -7,7 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 @Data
 @NoArgsConstructor(force = true)
-@RequiredArgsConstructor(onConstructor = @__(@Autowired))
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
+
 public class DurationBoolean {
     private final Boolean am;
     private final Boolean pm;

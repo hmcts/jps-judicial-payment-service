@@ -4,19 +4,24 @@
   <suppress>
     <notes>False Positives
       CVE-2016-1000027 - https://github.com/spring-projects/spring-framework/issues/24434#issuecomment-579669626
+      CVE-2023-35116 - https://nvd.nist.gov/vuln/detail/CVE-2023-35116
     </notes>
     <cve>CVE-2016-1000027</cve>
+    <cve>CVE-2023-35116</cve>
   </suppress>
   <!--End of false positives section -->
 
   <!--Please add all the temporary suppression under the below section-->
   <!--End of temporary suppression section -->
   <suppress>
-    <cve>CVE-2023-24998</cve>
     <cve>CVE-2022-1471</cve>
     <cve>CVE-2023-1370</cve>
     <cve>CVE-2023-20883</cve>
+    <cve>CVE-2023-24998</cve>
+    <cve>CVE-2023-34034</cve>
+    <cve>CVE-2023-34981</cve>
     <cve>CVE-2023-35116</cve>
+    <cve>CVE-2023-34034</cve>
     <cve>CVE-2023-34981</cve>
   </suppress>
 </suppressions>

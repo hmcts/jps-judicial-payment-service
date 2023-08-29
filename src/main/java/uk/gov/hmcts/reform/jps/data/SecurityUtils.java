@@ -12,6 +12,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.security.idam.IdamRepository;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,6 +59,10 @@ public class SecurityUtils {
 
     public String getUserId() {
         return getUserInfo().getUid();
+    }
+
+    public List<String> getUserRoles() {
+        return getUserInfo().getRoles();
     }
 
     public String getUserToken() {

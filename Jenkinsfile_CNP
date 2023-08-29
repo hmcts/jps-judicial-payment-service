@@ -37,7 +37,11 @@ def secrets = [
     secret('idam-jps-publisher-username', 'JPS_PUBLISHER_USERNAME'),
     secret('idam-jps-publisher-password', 'JPS_PUBLISHER_PASSWORD'),
     secret('idam-jps-invalid-username', 'JPS_INVALID_USERNAME'),
-    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD')
+    secret('idam-jps-invalid-password', 'JPS_INVALID_PASSWORD'),
+    secret('idam-jps-admin-username', 'JPS_ADMIN_USERNAME'),
+    secret('idam-jps-admin-password', 'JPS_ADMIN_PASSWORD'),
+    secret('idam-jps-joh-admin-username', 'JPS_JOH_ADMIN_USERNAME'),
+    secret('idam-jps-joh-admin-password', 'JPS_JOH_ADMIN_PASSWORD')
   ],
   's2s-${env}': [
 

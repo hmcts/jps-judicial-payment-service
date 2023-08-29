@@ -3,7 +3,7 @@ package uk.gov.hmcts.reform.jps.services.refdata;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import uk.gov.hmcts.reform.jps.exceptions.InvalidLocationException;
+import uk.gov.hmcts.reform.jps.model.ErrorCode;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
@@ -17,6 +17,29 @@ import java.util.function.BiPredicate;
 @Service
 public class LocationService {
     private final LocationServiceClient regionServiceClient;
+
+    public Optional<CourtVenue> getCourtVenue(String hmctsServiceCode, String epimmsId) {
+        return getCourtVenue(
+            getLocationApiResponse(hmctsServiceCode),
+            epimmsId,
+            (court, paraEpimmsId) -> court.getEpimmsId().equals(paraEpimmsId)
+        );
+    }
+
+    private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo,
+                                               String value,
+                                               BiPredicate<CourtVenue, String> predicate) {
+        return serviceCourtInfo.getCourtVenues().stream()
+            .filter(courtVenue -> predicate.test(courtVenue, value))
+            .findAny();
+    }
+
+
+    public String getVenueName(String hmctsServiceCode, String epimmsId) {
+        return getCourtVenue(hmctsServiceCode, epimmsId)
+            .map(CourtVenue::getVenueName)
+            .orElse("");
+    }
 
     public void setRegionName(String hmctsServiceCode,
                               List<SittingRecord> sittingRecords) {
@@ -50,16 +73,20 @@ public class LocationService {
                 sittingRecordWrapper.getSittingRecordRequest().getEpimmsId(),
                 (court, epimmsId) -> court.getEpimmsId().equals(epimmsId)
             );
-            sittingRecordWrapper.setRegionId(courtVenue.map(CourtVenue::getRegionId)
-                                                 .orElseThrow(InvalidLocationException::new));
+            if (courtVenue.isPresent()) {
+                sittingRecordWrapper.setRegionId(courtVenue.get().getRegionId());
+            } else {
+                sittingRecordWrapper.setErrorCode(ErrorCode.INVALID_LOCATION);
+            }
         });
     }
 
-    private Optional<CourtVenue> getCourtVenue(LocationApiResponse serviceCourtInfo,
-                                               String value,
-                                               BiPredicate<CourtVenue, String> predicate) {
-        return serviceCourtInfo.getCourtVenues().stream()
-            .filter(coutVenue -> predicate.test(coutVenue, value))
-            .findAny();
+    private LocationApiResponse getLocationApiResponse(String hmctsServiceCode) {
+        return regionServiceClient.getCourtVenue(hmctsServiceCode);
+    }
+
+    public List<CourtVenue> getCourtVenues(String hmctsServiceCode) {
+        return getLocationApiResponse(hmctsServiceCode).getCourtVenues().stream()
+                .toList();
     }
 }

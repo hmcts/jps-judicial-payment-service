@@ -6,45 +6,46 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
+import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.JpsRole;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.DELETE_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
-class SittingRecordRepositoryTest {
+class SittingRecordRepositoryTest extends AbstractTest {
 
 
     @Autowired
     private SittingRecordRepository recordRepository;
 
+    private StatusHistory statusHistoryRecorded;
+
+    private static final String PERSONAL_CODE = "001";
+
 
     @Test
     void shouldSaveSittingRecord() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(RECORDED)
-            .regionId("1")
-            .epimmsId("123")
-            .hmctsServiceId("ssc_id")
-            .personalCode("001")
-            .contractTypeId(2L)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
-            .build();
-
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   JpsRole.ROLE_RECORDER.name(),
+                                                   "John Doe",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
         assertThat(persistedSittingRecord).isNotNull();
         assertThat(persistedSittingRecord.getId()).isNotNull();
@@ -53,19 +54,13 @@ class SittingRecordRepositoryTest {
 
     @Test
     void shouldUpdateSittingRecordWhenRecordIsPresent() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(RECORDED)
-            .regionId("1")
-            .epimmsId("123")
-            .hmctsServiceId("ssc_id")
-            .personalCode("001")
-            .contractTypeId(2L)
-            .pm(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("555")
-            .build();
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   "555",
+                                                   "John Doe 555",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
+
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
         Optional<SittingRecord> optionalSettingRecordToUpdate = recordRepository
@@ -74,8 +69,15 @@ class SittingRecordRepositoryTest {
 
         SittingRecord settingRecordToUpdate = optionalSettingRecordToUpdate.get();
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
-        settingRecordToUpdate.setChangeDateTime(LocalDateTime.now());
-        settingRecordToUpdate.setChangeByUserId("jp-submitter");
+
+        StatusHistory statusHistory = StatusHistory.builder()
+            .statusId(StatusId.SUBMITTED)
+            .changedDateTime(LocalDateTime.now())
+            .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
+            .changedByName("John Doe")
+            .sittingRecord(settingRecordToUpdate)
+            .build();
+        settingRecordToUpdate.addStatusHistory(statusHistory);
 
         SittingRecord updatedSittingRecord = recordRepository.save(settingRecordToUpdate);
         assertThat(updatedSittingRecord).isNotNull();
@@ -90,20 +92,12 @@ class SittingRecordRepositoryTest {
 
     @Test
     void shouldDeleteSelectedRecord() {
-        SittingRecord sittingRecord = SittingRecord.builder()
-            .sittingDate(LocalDate.now().minusDays(2))
-            .statusId(RECORDED)
-            .regionId("1")
-            .epimmsId("123")
-            .hmctsServiceId("ssc_id")
-            .personalCode("001")
-            .contractTypeId(2L)
-            .am(true)
-            .pm(true)
-            .judgeRoleTypeId("HighCourt")
-            .createdDateTime(LocalDateTime.now())
-            .createdByUserId("jp-recorder")
-            .build();
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
+        StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
+                                                   JpsRole.ROLE_RECORDER.getValue(),
+                                                   "John Doe",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded1);
 
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
 
@@ -119,7 +113,81 @@ class SittingRecordRepositoryTest {
     }
 
     @Test
-    @Sql(scripts = {DELETE_SITTING_RECORD_STATUS_HISTORY, ADD_SITTING_RECORD_STATUS_HISTORY})
+    void shouldFindCreatedByUserId() {
+        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
+        String createdByUserId = recordRepository.findCreatedByUserId(persistedSittingRecord.getId());
+
+        assertNotNull(createdByUserId, "Could not find created by user id.");
+        assertEquals(statusHistoryRecorded.getChangedByUserId(), createdByUserId,
+                     "Not the expected CREATED BY USER ID!");
+    }
+
+    private SittingRecord createSittingRecordWithSeveralStatus() {
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
+        statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
+                                                    JpsRole.ROLE_RECORDER.getValue(),
+                                                    "John Doe",
+                                                    sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded);
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(StatusId.SUBMITTED,
+                                                   JpsRole.ROLE_RECORDER.getValue(),
+                                                   "Matthew Doe",
+                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistorySubmitted1);
+
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED,
+                                                     JpsRole.ROLE_RECORDER.getValue(),
+                                                     "Mark Doe",
+                                                     sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryPublished);
+
+        return sittingRecord;
+    }
+
+    @Test
+    void shouldReturnSittingRecordWithStatusHistoryOfRecorderWhenStatusIsNotDeleted() {
+        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
+        Optional<SittingRecord> recorderSittingRecord = recordRepository.findRecorderSittingRecord(
+            persistedSittingRecord.getId(),
+            StatusId.DELETED
+        );
+        assertThat(recorderSittingRecord)
+            .isPresent()
+            .map(SittingRecord::getStatusId)
+            .contains(StatusId.PUBLISHED);
+        assertThat(recorderSittingRecord)
+            .map(SittingRecord::getStatusHistories)
+            .hasValue(persistedSittingRecord.getStatusHistories());
+    }
+
+    @Test
+    void shouldNotReturnSittingRecordWithStatusHistoryOfRecorderWhenStatusIsDeleted() {
+        SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
+        StatusHistory statusHistory = createStatusHistory(
+            StatusId.DELETED,
+            JpsRole.ROLE_RECORDER.name(),
+            "John Doe",
+            sittingRecord
+        );
+        sittingRecord.addStatusHistory(statusHistory);
+
+        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
+
+        Optional<SittingRecord> recorderSittingRecord = recordRepository.findRecorderSittingRecord(
+            persistedSittingRecord.getId(),
+            StatusId.DELETED
+        );
+        assertThat(recorderSittingRecord).isEmpty();
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturnRecordsToBeSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
             .regionId("4")
@@ -129,12 +197,14 @@ class SittingRecordRepositoryTest {
             .build();
 
 
-        List<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
+        Stream<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             "BBA3"
         );
+
         assertThat(recordsToSubmit)
-            .hasSize(1)
-            .contains(2L);
+            .isNotEmpty()
+            .hasSize(4)
+            .contains(2L, 3L, 5L, 6L);
     }
 }
