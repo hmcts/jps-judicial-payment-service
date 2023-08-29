@@ -77,8 +77,11 @@ public class StepDefinitions extends TestVariables {
         }
     }
 
-    @Given("a record for the given hmctsServiceCode exists in the database")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+    @Given("a record for the hmctsServiceCode {string} exists in the database with the payload {string}")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws
+        IOException {
+        randomDate = RandomDateGenerator.generateRandomDate().toString();
+
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
         body = body.replace("dateToBeReplaced", randomDate);
@@ -90,6 +93,21 @@ public class StepDefinitions extends TestVariables {
             .body(body).log().all()
             .when().post("/recordSittingRecords/" + serviceCode)
             .then().log().all().assertThat().statusCode(201);
+    }
+
+    @Given("a call to submit the existing record with the payload {string}")
+    public void theExistingRecordIsInSubmittedState(String payload) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
+        body = body.replace("dateToBeReplaced", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        given().header("Content-Type", "application/json")
+            .header("Authorization", submitterAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/submitSittingRecords/ABA5")
+            .then().log().all().assertThat().statusCode(200).body("recordsSubmitted", equalTo(1));
     }
 
     @Given("a search is done on the hmctsServiceCode {string}, with the payload {string} to get the {string}")
@@ -108,11 +126,6 @@ public class StepDefinitions extends TestVariables {
             .then().log().all().assertThat().statusCode(200);
 
         recordAttribute = propertiesReader.getJsonPath(response, attribute);
-    }
-
-    @Given("the existing record is in Submitted state")
-    public void theExistingRecordIsInSubmittedState() {
-        // Write code here after IJPS-62 is ready
     }
 
     @When("a request is prepared with appropriate values")
