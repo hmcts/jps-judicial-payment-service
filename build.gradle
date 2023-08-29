@@ -310,8 +310,6 @@ dependencies {
   implementation group: 'com.github.hmcts.java-logging', name: 'logging', version: '6.0.1'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-api'
   implementation group: 'org.apache.logging.log4j', name: 'log4j-to-slf4j'
-  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceAuthVersion
-  implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
   implementation group: 'javax.inject', name: 'javax.inject', version: '1'
   implementation group: 'io.jsonwebtoken', name: 'jjwt', version:'0.9.1'
 
@@ -328,7 +326,7 @@ dependencies {
   implementation group: 'io.github.openfeign', name: 'feign-core', version: '12.1'
   implementation group: 'io.github.openfeign', name: 'feign-jackson', version: '12.1'
 
-  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: '4.0.0'
+  implementation group: 'uk.gov.hmcts.reform', name: 'service-auth-provider-client', version: versions.serviceAuthVersion
   implementation group: 'uk.gov.hmcts.reform', name: 'idam-client', version: '2.0.0'
 
   testImplementation group: 'com.github.hmcts', name: 'ccd-test-definitions', version: '7.0.0'

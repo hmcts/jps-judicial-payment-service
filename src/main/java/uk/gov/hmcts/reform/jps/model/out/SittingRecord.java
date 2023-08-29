@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -23,7 +24,7 @@ import java.util.Objects;
 public class SittingRecord {
     private Long sittingRecordId;
     private LocalDate sittingDate;
-    private String statusId;
+    private StatusId statusId;
     private String regionId;
     private String regionName;
     private String epimmsId;
@@ -126,10 +127,7 @@ public class SittingRecord {
             && ((null == sittingRecord.getRegionId() && null == this.getRegionId())
             || (null != sittingRecord.getRegionId() && null != this.getRegionId()
             && sittingRecord.getRegionId().equals(this.getRegionId())))
-
-            && ((null == sittingRecord.getStatusId() && null == this.getStatusId())
-            || (null != sittingRecord.getStatusId() && null != this.getStatusId()
-            && sittingRecord.getStatusId().equals(this.getStatusId()))));
+            && sittingRecord.getStatusId() == this.getStatusId());
     }
 
     public boolean equalsDomainObject(Object object) {

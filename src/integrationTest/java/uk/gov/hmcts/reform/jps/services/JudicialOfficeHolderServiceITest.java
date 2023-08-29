@@ -16,7 +16,7 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldObtainSaveJudicialOfficeHolder() {
         final String Personal_Code = "PC111";
         JudicialOfficeHolder persistedJudicialOfficeHolder = createAndSaveJudicialOfficeHolder(Personal_Code);
@@ -30,7 +30,7 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {"classpath:sql/reset_database.sql"})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldObtainSavedJudicialOfficeHolderByPersonalCode() {
         final String Personal_Code = "PC111";
         JudicialOfficeHolder persistedJudicialOfficeHolder = createAndSaveJudicialOfficeHolder(Personal_Code);

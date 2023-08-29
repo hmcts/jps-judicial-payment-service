@@ -1,0 +1,34 @@
+{
+  "recordedByIdamId": "d139a314-eb40-45f4-9e7a-9e13f143cc3a",
+  "recordedByName": "Recorder",
+  "recordedSittingRecords": [
+    {
+      "sittingDate": "2022-05-11",
+      "epimmsId": "852649",
+      "personalCode": "4918178",
+      "judgeRoleTypeId": "Tester",
+      "contractTypeId": "1",
+      "am": false,
+      "pm": true,
+      "replaceDuplicate": true
+    },
+    {
+      "sittingDate": "2023-04-10",
+      "epimmsId": "852649",
+      "personalCode": "4918179",
+      "judgeRoleTypeId": "Judge",
+      "contractTypeId": "1",
+      "am": true,
+      "pm": false
+    },
+    {
+      "sittingDate": "2023-03-09",
+      "epimmsId": "852649",
+      "personalCode": "4918180",
+      "judgeRoleTypeId": "Judge",
+      "contractTypeId": "1",
+      "am": true,
+      "pm": true
+    }
+  ]
+}

@@ -3,34 +3,31 @@
   "recordedByName": "Submitter",
   "recordedSittingRecords": [
     {
-      "sittingDate": "2023-04-10",
+      "sittingDate": "dateToBeReplaced",
       "epimmsId": "229786",
       "personalCode": "4918178",
       "contractTypeId": "2",
       "judgeRoleTypeId": "Judge",
       "am": false,
-      "pm": true,
-      "replaceDuplicate": false
+      "pm": true
     },
     {
-      "sittingDate": "2023-04-11",
+      "sittingDate": "dateToBeReplaced",
       "epimmsId": "229786",
-      "personalCode": "4918178",
+      "personalCode": "4927250",
       "contractTypeId": "1",
       "judgeRoleTypeId": "Judge",
       "am": true,
-      "pm": true,
-      "replaceDuplicate": false
+      "pm": true
     },
     {
-      "sittingDate": "2023-04-12",
+      "sittingDate": "dateToBeReplaced",
       "epimmsId": "229786",
       "personalCode": "4918178",
       "contractTypeId": "3",
       "judgeRoleTypeId": "Judge",
       "am": true,
-      "pm": false,
-      "replaceDuplicate": true
+      "pm": false
     }
   ]
 }

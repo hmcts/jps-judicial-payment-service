@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -17,14 +16,13 @@ import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
-import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
-import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 
 
 @WebMvcTest(controllers = {SittingRecordDeleteController.class},
@@ -36,19 +34,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SittingRecordDeleteControllerTest {
 
     @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
     private MockMvc mockMvc;
     @MockBean
     private SittingRecordService sittingRecordService;
-    @MockBean
-    private LocationService regionService;
-    @MockBean
-    private JudicialUserDetailsService judicialUserDetailsService;
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldDeleteSittingRecordWhenSittingRecordPresent() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord/{sittingRecordId}", 2))
             .andDo(print())
@@ -56,7 +47,7 @@ class SittingRecordDeleteControllerTest {
     }
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
             .andDo(print())
@@ -69,7 +60,7 @@ class SittingRecordDeleteControllerTest {
 
 
     @Test
-    @WithMockUser(authorities = {"jps-recorder"})
+    @WithMockUser(authorities = {JPS_RECORDER})
     void shouldThrowSittingRecordNotFoundWhenSittingRecordNotFoundInDb() throws Exception {
         doThrow(new ResourceNotFoundException("SITTING_RECORD_ID_NOT_FOUND"))
             .when(sittingRecordService)

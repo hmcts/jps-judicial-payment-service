@@ -70,7 +70,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         Optional.ofNullable(recordSearchRequest.getStatusId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
-                sittingRecord.get(SittingRecord_.STATUS_ID), value.name())));
+                sittingRecord.get(SittingRecord_.STATUS_ID), value)));
 
         Optional<Duration> duration = Optional.ofNullable(recordSearchRequest.getDuration());
 
@@ -170,7 +170,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID),
                                                 recordSearchRequest.getCreatedByUserId()));
             predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
-                                                StatusId.RECORDED.name()));
+                                                StatusId.RECORDED));
         }
 
     }

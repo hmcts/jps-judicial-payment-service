@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @NoArgsConstructor(force = true)
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings("serial")

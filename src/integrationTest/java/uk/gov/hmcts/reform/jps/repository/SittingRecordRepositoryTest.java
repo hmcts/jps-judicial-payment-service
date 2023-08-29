@@ -78,7 +78,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
 
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED.name())
+            .statusId(StatusId.SUBMITTED)
             .changedDateTime(LocalDateTime.now())
             .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
             .changedByName("John Doe")
@@ -139,13 +139,13 @@ class SittingRecordRepositoryTest extends AbstractTest {
                                                     "John Doe",
                                                     sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded);
-        StatusHistory statusHistorySubmitted1 = createStatusHistory(StatusId.SUBMITTED.name(),
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(StatusId.SUBMITTED,
                                                    JpsRole.ROLE_RECORDER.getValue(),
                                                    "Matthew Doe",
                                                    sittingRecord);
         sittingRecord.addStatusHistory(statusHistorySubmitted1);
 
-        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED.name(),
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED,
                                                      JpsRole.ROLE_RECORDER.getValue(),
                                                      "Mark Doe",
                                                      sittingRecord);
@@ -162,12 +162,12 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
         Optional<SittingRecord> recorderSittingRecord = recordRepository.findRecorderSittingRecord(
             persistedSittingRecord.getId(),
-            StatusId.DELETED.name()
+            StatusId.DELETED
         );
         assertThat(recorderSittingRecord)
             .isPresent()
             .map(SittingRecord::getStatusId)
-            .contains(StatusId.PUBLISHED.name());
+            .contains(StatusId.PUBLISHED);
         assertThat(recorderSittingRecord)
             .map(SittingRecord::getStatusHistories)
             .hasValue(persistedSittingRecord.getStatusHistories());
@@ -177,7 +177,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     void shouldNotReturnSittingRecordWithStatusHistoryOfRecorderWhenStatusIsDeleted() {
         SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
         StatusHistory statusHistory = createStatusHistory(
-            StatusId.DELETED.name(),
+            StatusId.DELETED,
             JpsRole.ROLE_RECORDER.name(),
             "John Doe",
             sittingRecord
@@ -188,7 +188,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
         Optional<SittingRecord> recorderSittingRecord = recordRepository.findRecorderSittingRecord(
             persistedSittingRecord.getId(),
-            StatusId.DELETED.name()
+            StatusId.DELETED
         );
         assertThat(recorderSittingRecord).isEmpty();
     }

@@ -63,7 +63,7 @@ class JudicialOfficeHolderRepositoryTest {
             .changedByName("John Doe")
             .changedByUserId("jp-recorder")
             .changedDateTime(LocalDateTime.now())
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .build();
         sittingRecord.addStatusHistory(statusHistory);
 

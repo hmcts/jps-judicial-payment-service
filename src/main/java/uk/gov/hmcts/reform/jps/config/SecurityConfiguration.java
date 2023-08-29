@@ -23,6 +23,11 @@ import uk.gov.hmcts.reform.authorisation.filters.ServiceAuthFilter;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_JOH_ADMIN;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_PUBLISHER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 
 @Configuration
 @EnableWebSecurity
@@ -41,10 +46,10 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private final JwtAuthenticationConverter jwtAuthenticationConverter;
 
     private static final String[] AUTH_ALLOWED_LIST = {
-        "/swagger-resources/**",
+        "/swagger",
+        "/swagger-ui.html",
         "/swagger-ui/**",
-        "/webjars/**",
-        "/v2/api-docs",
+        "/v3/api-docs/**",
         "/health",
         "/health/liveness",
         "/health/readiness",
@@ -77,12 +82,11 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
             .logout().disable()
             .authorizeRequests()
                 .mvcMatchers("/**")
-                    .hasAnyAuthority("",
-                                     "jps-recorder",
-                                     "jps-submitter",
-                                     "jps-publisher",
-                                     "jps-JOH-admin",
-                                     "jps-admin"
+                    .hasAnyAuthority(JPS_RECORDER,
+                                     JPS_SUBMITTER,
+                                     JPS_PUBLISHER,
+                                     JPS_JOH_ADMIN,
+                                     JPS_ADMIN
                                      )
                 .anyRequest()
                     .authenticated()
