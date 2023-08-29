@@ -22,17 +22,16 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
-import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Stream;
 import java.util.function.BiPredicate;
+import java.util.stream.Stream;
 
 import static java.lang.Boolean.TRUE;
 import static java.util.function.Predicate.not;
@@ -258,7 +257,7 @@ public class SittingRecordService {
         List<RecordSubmitFields> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             hmctsServiceCode
-        )) {
+        );
 
         if (!recordsToSubmit.isEmpty()) {
             List<Long> updatedRecords = getUpdatedRecords(
@@ -325,7 +324,7 @@ public class SittingRecordService {
             || crownServiceFlag.map(Boolean.FALSE::equals).orElse(false);
     }
 
-    private String getAccountCode(String hmctsServiceCode){
+    private String getAccountCode(String hmctsServiceCode) {
         return serviceService.findService(hmctsServiceCode)
             .map(uk.gov.hmcts.reform.jps.domain.Service::getAccountCenterCode)
             .orElse(null);

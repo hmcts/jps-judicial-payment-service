@@ -10,10 +10,9 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.hibernate.annotations.Formula;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import javax.persistence.CascadeType;
-import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;

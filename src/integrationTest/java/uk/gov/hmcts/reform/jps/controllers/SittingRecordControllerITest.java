@@ -13,8 +13,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
-import uk.gov.hmcts.reform.idam.client.models.UserInfo;
-import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -40,12 +38,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
-import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
-import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
-import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 
 @Transactional

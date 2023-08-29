@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.repository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
@@ -13,7 +14,9 @@ import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -29,21 +32,14 @@ class JudicialOfficeHolderRepositoryTest {
     @Autowired
     private SittingRecordRepository recordRepository;
     private static final String PERSONAL_CODE = "001";
-    private JudicialOfficeHolder persistedJudicialOfficeHolder;
-
 
 
     @BeforeEach
     public void setUp() {
-
-        judicialOfficeHolderRepository.deleteAll();
-        recordRepository.deleteAll();
-
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(PERSONAL_CODE)
             .build();
-        LOGGER.debug("judicialOfficeHolder:{}", judicialOfficeHolder);
-        persistedJudicialOfficeHolder = judicialOfficeHolderRepository.save(judicialOfficeHolder);
+        judicialOfficeHolderRepository.save(judicialOfficeHolder);
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .am(true)
@@ -65,12 +61,10 @@ class JudicialOfficeHolderRepositoryTest {
             .build();
         sittingRecord.addStatusHistory(statusHistory);
 
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
+        recordRepository.save(sittingRecord);
 
         List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
-        LOGGER.info("list.size:{}", list);
-        assertFalse(list.isEmpty());
+        assertThat(list).isNotEmpty();
     }
 
     @Test
@@ -142,27 +136,6 @@ class JudicialOfficeHolderRepositoryTest {
             .isPresent()
             .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
             .isEmpty();
-    }
-
-    @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
-    void shouldReturnCrownFlagWhenJohAttributesIsBothEffectiveAndNonEffective() {
-        Optional<JudicialOfficeHolder> judicialOfficeHolder
-            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributes("9928178");
-
-        Optional<JohAttributes> isJohAttributes = judicialOfficeHolder.stream()
-            .map(JudicialOfficeHolder::getJohAttributes)
-            .flatMap(Collection::stream)
-            .filter(johAttributes -> LocalDate.now().isEqual(johAttributes.getEffectiveStartDate()))
-            .findAny();
-
-        assertThat(isJohAttributes)
-            .isPresent();
-
-        assertThat(judicialOfficeHolder)
-            .isPresent()
-            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
-            .contains(true);
     }
 }
 

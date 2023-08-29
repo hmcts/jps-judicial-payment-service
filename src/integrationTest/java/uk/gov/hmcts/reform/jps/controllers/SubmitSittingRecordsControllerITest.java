@@ -12,6 +12,7 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -29,12 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
-import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
-
+@Transactional
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
 @AutoConfigureWireMock(port = 0, stubs = "classpath:/wiremock-stubs")
@@ -45,8 +44,6 @@ class SubmitSittingRecordsControllerITest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     @Autowired
     private SittingRecordRepository sittingRecordRepository;
 

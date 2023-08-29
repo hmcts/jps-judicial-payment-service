@@ -24,7 +24,6 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
-import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -33,8 +32,8 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
-import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -49,7 +48,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
@@ -71,10 +69,8 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
-import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
@@ -554,7 +550,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
                                                          hmctsServiceCode))
-            .thenReturn(sittingRecordIds.stream());
+            .thenReturn(sittingRecordIds);
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
@@ -624,7 +620,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
                                                          hmctsServiceCode))
-            .thenReturn(Stream.empty());
+            .thenReturn(Collections.emptyList());
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
