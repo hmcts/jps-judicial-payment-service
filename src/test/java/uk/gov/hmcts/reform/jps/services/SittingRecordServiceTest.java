@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -382,7 +381,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .thenReturn(Optional.of(sittingRecord));
 
         Long id = sittingRecord.getId();
-        Exception exception = assertThrows(ConflictException.class, () ->
+        Exception exception = assertThrows(ForbiddenException.class, () ->
             sittingRecordService.deleteSittingRecord(id)
         );
         assertThat(exception.getMessage())
@@ -400,7 +399,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .thenReturn(Optional.of(sittingRecord));
 
         Long id = sittingRecord.getId();
-        Exception exception = assertThrows(ConflictException.class, () ->
+        Exception exception = assertThrows(ForbiddenException.class, () ->
             sittingRecordService.deleteSittingRecord(id)
         );
         assertThat(exception.getMessage())
@@ -418,7 +417,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .thenReturn(Optional.of(sittingRecord));
 
         Long id = sittingRecord.getId();
-        Exception exception = assertThrows(ConflictException.class, () ->
+        Exception exception = assertThrows(ForbiddenException.class, () ->
             sittingRecordService.deleteSittingRecord(id)
         );
         assertThat(exception.getMessage())
