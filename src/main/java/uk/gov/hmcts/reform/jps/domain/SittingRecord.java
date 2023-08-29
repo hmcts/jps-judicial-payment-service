@@ -120,6 +120,7 @@ public class SittingRecord {
         return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId));
     }
 
+
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
         this.setStatusId(statusHistory.getStatusId());
@@ -152,5 +153,9 @@ public class SittingRecord {
                 && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
                 && Objects.deepEquals(this.getStatusHistories().toArray(),
                                   sittingRecord.getStatusHistories().toArray()))));
+    }
+
+    public JudicialOfficeHolder getJudicialOfficeHolder() {
+        return JudicialOfficeHolder.builder().build();
     }
 }

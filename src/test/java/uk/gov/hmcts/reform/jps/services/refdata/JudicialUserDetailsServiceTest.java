@@ -34,7 +34,6 @@ class JudicialUserDetailsServiceTest {
     @InjectMocks
     private JudicialUserDetailsService judicialUserDetailsService;
 
-
     @BeforeEach
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
@@ -58,7 +57,31 @@ class JudicialUserDetailsServiceTest {
             .thenReturn(response);
     }
 
+    @Test
+    void setJudicialFullNameWhenJudicialDetailsFound() {
+        List<SittingRecord> sittingRecords = List.of(
+            SittingRecord.builder()
+                .personalCode("4918500")
+                .build(),
+            SittingRecord.builder()
+                .personalCode("4918179")
+                .build(),
+            SittingRecord.builder()
+                .personalCode("4918180")
+                .build()
+        );
 
+        judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
+
+        assertThat(sittingRecords)
+            .map(SittingRecord::getPersonalCode, SittingRecord::getPersonalName)
+            .contains(
+                tuple("4918179", "N/A"),
+                tuple("4918500", "First Judge"),
+                tuple("4918180", "Third Judge")
+            );
+
+    }
 
     @Test
     void setJudicialFullNameWhenJudicialDetailsFound() {

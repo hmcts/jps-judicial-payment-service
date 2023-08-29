@@ -29,6 +29,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
@@ -46,6 +47,7 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
+import java.util.stream.Stream;
 
 import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
@@ -56,6 +58,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.never;
@@ -97,6 +100,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private ServiceService serviceService;
 
+    @Mock
+    private StatusHistoryService statusHistoryService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
@@ -104,6 +110,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
+    @Captor
+    private ArgumentCaptor<Long> sittingRecordIdCaptor;
 
     @BeforeEach
     void setUp() {
@@ -509,6 +517,79 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         verify(duplicateCheckerService, never()).evaluate(any(), any());
+    }
+
+    @Test
+    void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+        String hmctsServiceCode = "BBA3";
+        List<Long> sittingRecordIds = List.of(1L, 100L, 200L);
+        SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
+            .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .submittedByName("submitter")
+            .regionId("4")
+            .dateRangeFrom(LocalDate.parse("2023-05-11"))
+            .dateRangeTo(LocalDate.parse("2023-05-11"))
+            .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .build();
+
+        when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
+                                                         hmctsServiceCode))
+            .thenReturn(sittingRecordIds.stream());
+
+        int countSubmitted = sittingRecordService.submitSittingRecords(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        );
+        verify(statusHistoryService, times(3))
+            .insertRecord(sittingRecordIdCaptor.capture(),
+                          eq(SUBMITTED),
+                          eq(submitSittingRecordRequest.getSubmittedByIdamId()),
+                          eq(submitSittingRecordRequest.getSubmittedByName()));
+
+        assertThat(countSubmitted)
+            .isEqualTo(3);
+
+        assertThat(sittingRecordIdCaptor.getAllValues())
+            .containsAll(sittingRecordIds);
+
+        verify(sittingRecordRepository, times(3))
+            .updateToSubmitted(sittingRecordIdCaptor.capture());
+
+        assertThat(sittingRecordIdCaptor.getAllValues())
+            .containsAll(sittingRecordIds);
+
+    }
+
+    @Test
+    void shouldReturnZeroRecordsSubmittedWhenNoRecordFound() {
+        String hmctsServiceCode = "BBA3";
+        SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
+            .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .submittedByName("submitter")
+            .regionId("4")
+            .dateRangeFrom(LocalDate.parse("2023-05-11"))
+            .dateRangeTo(LocalDate.parse("2023-05-11"))
+            .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .build();
+
+        when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
+                                                         hmctsServiceCode))
+            .thenReturn(Stream.empty());
+
+        int countSubmitted = sittingRecordService.submitSittingRecords(
+            submitSittingRecordRequest,
+            hmctsServiceCode
+        );
+        verify(statusHistoryService, never())
+            .insertRecord(anyLong(),
+                          eq(SUBMITTED),
+                          eq(submitSittingRecordRequest.getSubmittedByIdamId()),
+                          eq(submitSittingRecordRequest.getSubmittedByName()));
+
+        verify(sittingRecordRepository, never())
+            .updateToSubmitted(any());
+
+        assertThat(countSubmitted).isZero();
     }
 
     @Test

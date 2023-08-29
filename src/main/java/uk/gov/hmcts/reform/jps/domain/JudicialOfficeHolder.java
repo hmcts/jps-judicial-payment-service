@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.apache.commons.lang3.builder.EqualsBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,29 +43,35 @@ public class JudicialOfficeHolder {
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<JohPayroll> johPayrolls = new ArrayList<>();
 
+    @OneToMany(mappedBy = "judicialOfficeHolder", orphanRemoval = true, cascade = {CascadeType.ALL})
+    private final List<JohAttributes> johAttributes = new ArrayList<>();
+
     public void addJohPayroll(JohPayroll johPayroll) {
         this.johPayrolls.add(johPayroll);
         johPayroll.setJudicialOfficeHolder(this);
     }
+
+    public void addJohAttributes(JohAttributes johAttributes) {
+        this.johAttributes.add(johAttributes);
+        johAttributes.setJudicialOfficeHolder(this);
+    }
+
 
     @Override
     public boolean equals(Object o) {
         if (this == o) {
             return true;
         }
-
-        if (!(o instanceof JudicialOfficeHolder that)) {
+        if (o instanceof JudicialOfficeHolder that) {
+            return Objects.equals(id, that.id) && Objects.equals(personalCode, that.personalCode) && Objects.equals(
+                johPayrolls, that.johPayrolls) && Objects.equals(johAttributes, that.johAttributes);
+        } else {
             return false;
         }
-
-        return new EqualsBuilder().append(id, that.id).append(personalCode, that.personalCode).append(
-            johPayrolls.size(),
-            that.johPayrolls.size()
-        ).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this);
+        return Objects.hash(id, personalCode, johPayrolls, johAttributes);
     }
 }

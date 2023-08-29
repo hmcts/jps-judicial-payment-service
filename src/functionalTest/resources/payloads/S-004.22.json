@@ -1,16 +1,15 @@
 {
-  "recordedByIdamId": "a452a3f9-1885-4c28-946c-2946f47be5ce",
-  "recordedByName": "jps recorder",
+  "recordedByIdamId": "d139a314-eb40-45f4-9e7a-9e13f143cc3a",
+  "recordedByName": "Recorder",
   "recordedSittingRecords": [
     {
-      "sittingDate": "2023-04-10",
+      "sittingDate": "dateToBeReplaced",
       "epimmsId": "229786",
       "personalCode": "4918178",
       "contractTypeId": "2",
       "judgeRoleTypeId": "Judge",
       "am": true,
-      "pm": true,
-      "replaceDuplicate": false
+      "pm": false
     }
   ]
 }

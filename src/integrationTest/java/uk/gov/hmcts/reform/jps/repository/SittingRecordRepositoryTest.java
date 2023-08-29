@@ -1,49 +1,42 @@
 package uk.gov.hmcts.reform.jps.repository;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
 import uk.gov.hmcts.reform.jps.model.StatusId;
+import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
 class SittingRecordRepositoryTest extends AbstractTest {
 
+
     @Autowired
     private SittingRecordRepository recordRepository;
-
-    @Autowired
-    private StatusHistoryRepository historyRepository;
-
-    @Autowired
-    private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
 
     private StatusHistory statusHistoryRecorded;
 
     private static final String PERSONAL_CODE = "001";
 
-    @BeforeEach
-    void setUp() {
-        judicialOfficeHolderRepository.deleteAll();
-        recordRepository.deleteAll();
-        historyRepository.deleteAll();
-    }
 
     @Test
     void shouldSaveSittingRecord() {
@@ -191,5 +184,27 @@ class SittingRecordRepositoryTest extends AbstractTest {
             StatusId.DELETED
         );
         assertThat(recorderSittingRecord).isEmpty();
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnRecordsToBeSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+        SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
+            .regionId("4")
+            .dateRangeFrom(LocalDate.parse("2023-05-11"))
+            .dateRangeTo(LocalDate.parse("2023-05-11"))
+            .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
+            .build();
+
+
+        Stream<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
+            submitSittingRecordRequest,
+            "BBA3"
+        );
+
+        assertThat(recordsToSubmit)
+            .isNotEmpty()
+            .hasSize(4)
+            .contains(2L, 3L, 5L, 6L);
     }
 }
