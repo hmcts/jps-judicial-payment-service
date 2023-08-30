@@ -330,11 +330,13 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
     And the response contains "errorRecords[0].errorCode" as "POTENTIAL_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
     And the response contains "errorRecords[0].am" as "true"
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
     And the response contains "errorRecords[1].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
     And the response contains "errorRecords[1].am" as "true"
     And the response contains "errorRecords[1].pm" as "false"
     And the response contains "errorRecords[1].judgeRoleTypeId" as "Judge"
