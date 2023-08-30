@@ -43,6 +43,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
@@ -78,22 +79,26 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     private static final String USER_ID = UUID.randomUUID().toString();
     private static final String UPDATED_BY_USER_ID = UUID.randomUUID().toString();
-    private static final Long ID = 1L;
 
+    private static final Long ID = new Random().nextLong();
     public static final String HMCTS_SERVICE_CODE = "test";
     public static final String EPIMMS_ID = "epimms001";
     public static final String LOCATION = "Sutton Social Security";
 
     @Mock
     private SittingRecordRepository sittingRecordRepository;
-    @Mock
-    private LocationService locationService;
-    @Mock
-    private ServiceService serviceService;
-    @Mock
-    private DuplicateCheckerService duplicateCheckerService;
+
     @Mock
     private SecurityUtils securityUtils;
+
+    @Mock
+    private DuplicateCheckerService duplicateCheckerService;
+
+    @Mock
+    private LocationService locationService;
+
+    @Mock
+    private ServiceService serviceService;
 
     @Mock
     private StatusHistoryService statusHistoryService;
@@ -227,7 +232,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .sittingDate(LocalDate.now().minusDays(2))
                 .statusId(RECORDED)
                 .regionId("1")
-                .epimmsId("epims001")
+                .epimmsId(EPIMMS_ID)
                 .hmctsServiceId("sscs")
                 .personalCode("001")
                 .contractTypeId(count)
@@ -245,7 +250,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                     .sittingDate(LocalDate.now().minusDays(2))
                     .statusId(RECORDED)
                     .regionId("1")
-                    .epimmsId("epims001")
+                    .epimmsId(EPIMMS_ID)
                     .hmctsServiceId("sscs")
                     .personalCode("001")
                     .contractTypeId(count)

@@ -30,8 +30,8 @@ import static javax.persistence.FetchType.LAZY;
 @NoArgsConstructor()
 @AllArgsConstructor
 @Getter
-@ToString
 @Setter
+@ToString
 @Entity
 @Table(name = "status_history")
 public class StatusHistory {
@@ -62,6 +62,7 @@ public class StatusHistory {
     @Column(name = "changed_by_name")
     private String changedByName;
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -87,6 +88,4 @@ public class StatusHistory {
         ).append(id).append(sittingRecord).append(statusId).append(changedDateTime).append(changedByUserId).append(
             changedByName).toHashCode();
     }
-
-
 }

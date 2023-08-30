@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 
 @Component
 public class EvaluateDuplicate implements DuplicateChecker {
+
     private DuplicateChecker duplicateChecker;
 
     @Override

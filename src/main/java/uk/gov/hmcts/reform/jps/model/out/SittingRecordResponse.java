@@ -27,4 +27,8 @@ public class SittingRecordResponse implements Serializable {
     private final String createdByName;
     private final LocalDateTime createdDateTime;
     private final StatusId statusId;
+    private final Boolean am;
+    private final Boolean pm;
+    private final String judgeRoleTypeId;
+    private final String judgeRoleTypeName;
 }

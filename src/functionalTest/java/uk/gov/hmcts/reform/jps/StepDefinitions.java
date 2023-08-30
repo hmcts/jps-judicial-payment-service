@@ -251,7 +251,11 @@ public class StepDefinitions extends TestVariables {
 
     @Then("the response contains {string} as {string}")
     public void theResponseContainsAs(String attribute, String value) {
-        response.then().assertThat().body(attribute,Matchers.equalTo(value));
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            response.then().assertThat().body(attribute, Matchers.equalTo(Boolean.parseBoolean(value)));
+        } else {
+            response.then().assertThat().body(attribute, Matchers.equalTo(value));
+        }
     }
 
     @Then("the response contains {int} {string}")
