@@ -61,7 +61,6 @@ public class JudicialOfficeHolder {
     )
     private Boolean isActiveJohAttributesCrownFlag;
 
-
     public void addJohPayroll(JohPayroll johPayroll) {
         this.johPayrolls.add(johPayroll);
         johPayroll.setJudicialOfficeHolder(this);
@@ -77,19 +76,16 @@ public class JudicialOfficeHolder {
         if (this == o) {
             return true;
         }
-
-        if (!(o instanceof JudicialOfficeHolder that)) {
+        if (o instanceof JudicialOfficeHolder that) {
+            return Objects.equals(id, that.id) && Objects.equals(personalCode, that.personalCode) && Objects.equals(
+                johPayrolls, that.johPayrolls) && Objects.equals(johAttributes, that.johAttributes);
+        } else {
             return false;
         }
-
-        return new EqualsBuilder().append(id, that.id).append(personalCode, that.personalCode).append(
-            johPayrolls.size(),
-            that.johPayrolls.size()
-        ).isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(this);
+        return Objects.hash(id, personalCode, johPayrolls, johAttributes);
     }
 }

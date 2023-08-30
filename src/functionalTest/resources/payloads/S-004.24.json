@@ -8,12 +8,12 @@
       "personalCode": "7007496",
       "contractTypeId": "2",
       "judgeRoleTypeId": "Judge",
-      "am": false,
+      "am": true,
       "pm": true
     },
     {
       "sittingDate": "dateToBeReplaced",
-      "epimmsId": "229786",
+      "epimmsId": "815833",
       "personalCode": "4927250",
       "contractTypeId": "1",
       "judgeRoleTypeId": "Judge",
@@ -25,7 +25,7 @@
       "epimmsId": "229786",
       "personalCode": "4918178",
       "contractTypeId": "3",
-      "judgeRoleTypeId": "Judge",
+      "judgeRoleTypeId": "Medical Member",
       "am": true,
       "pm": false
     }

@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
@@ -17,15 +16,12 @@ import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
-import uk.gov.hmcts.reform.jps.services.StatusHistoryService;
 
 import java.io.IOException;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.VALID;
@@ -34,9 +30,6 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 @ExtendWith(MockitoExtension.class)
 class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
-    @Mock
-    private StatusHistoryService statusHistoryService;
-
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     private EvaluateOverlapDuration evaluateOverlapDuration;
@@ -44,7 +37,7 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
     @BeforeEach
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
-        evaluateOverlapDuration = new EvaluateOverlapDuration(statusHistoryService);
+        evaluateOverlapDuration = new EvaluateOverlapDuration();
     }
 
     @ParameterizedTest
@@ -91,8 +84,6 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecordWrapper.getErrorCode())
             .isEqualTo(errorCode);
-
-        verify(statusHistoryService).updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
     }
 
     @ParameterizedTest
@@ -138,8 +129,6 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecordWrapper.getErrorCode())
             .isEqualTo(errorCode);
-
-        verify(statusHistoryService).updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
     }
 
 
@@ -180,8 +169,6 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecordWrapper.getErrorCode())
             .isEqualTo(errorCode);
-
-        verify(statusHistoryService).updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
     }
 
     @ParameterizedTest
@@ -221,8 +208,6 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecordWrapper.getErrorCode())
             .isEqualTo(errorCode);
-
-        verify(statusHistoryService).updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
     }
 
     @Test
@@ -258,9 +243,6 @@ class EvaluateOverlapDurationTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecordWrapper.getErrorCode())
             .isEqualTo(VALID);
-
-        verify(statusHistoryService, never())
-            .updateFromStatusHistory(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
     }
 
 
