@@ -36,7 +36,6 @@ import java.util.function.UnaryOperator;
 import javax.validation.Valid;
 
 import static java.lang.Boolean.TRUE;
-import static java.util.Objects.nonNull;
 import static java.util.function.Predicate.not;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.ResponseEntity.status;
@@ -113,7 +112,7 @@ public class RecordSittingRecordsController {
         if (errorCodeCheck.isPresent()) {
             judicialUserDetailsService.setJudicialUserName(
                     sittingRecordWrappers.stream()
-                            .filter(sittingRecordWrapper -> nonNull(sittingRecordWrapper.getJudgeRoleTypeId()))
+                            .filter(sittingRecordWrapper -> sittingRecordWrapper.getErrorCode() != VALID)
                             .toList()
             );
 
