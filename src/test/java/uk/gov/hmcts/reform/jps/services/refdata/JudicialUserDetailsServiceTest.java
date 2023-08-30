@@ -5,6 +5,8 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -20,6 +22,9 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.ArgumentMatchers.isA;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
@@ -33,15 +38,17 @@ class JudicialUserDetailsServiceTest {
 
     @InjectMocks
     private JudicialUserDetailsService judicialUserDetailsService;
+    List<String> personalCodes;
+    List<JudicialUserDetailsApiResponse> response;
 
     @BeforeEach
     void setUp() {
         objectMapper.registerModule(new JavaTimeModule());
 
-        List<String> personalCodes = List.of(
+        personalCodes = List.of(
             "4918500", "4918179", "4918180"
         );
-        List<JudicialUserDetailsApiResponse> response = List.of(
+        response = List.of(
             JudicialUserDetailsApiResponse.builder()
                 .personalCode("4918500")
                 .fullName("First Judge")
@@ -51,14 +58,14 @@ class JudicialUserDetailsServiceTest {
                 .fullName("Third Judge")
                 .build()
         );
-        when(judicialUserServiceClient.getJudicialUserDetails(JudicialUserDetailsApiRequest.builder()
-                                                                  .personalCode(personalCodes)
-                                                                  .build()))
-            .thenReturn(response);
     }
 
     @Test
     void setJudicialFullNameWhenJudicialDetailsFound() {
+        when(judicialUserServiceClient.getJudicialUserDetails(JudicialUserDetailsApiRequest.builder()
+                                                                  .personalCode(personalCodes)
+                                                                  .build()))
+            .thenReturn(response);
         List<SittingRecord> sittingRecords = List.of(
             SittingRecord.builder()
                 .personalCode("4918500")
@@ -85,6 +92,10 @@ class JudicialUserDetailsServiceTest {
 
     @Test
     void setJudicialFullNameWhenJudicialDetailsFoundInTheSittingRecordWrapper() throws IOException {
+        when(judicialUserServiceClient.getJudicialUserDetails(JudicialUserDetailsApiRequest.builder()
+                                                                  .personalCode(personalCodes)
+                                                                  .build()))
+            .thenReturn(response);
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
 
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -110,5 +121,13 @@ class JudicialUserDetailsServiceTest {
                 tuple("Tester", "First Judge"),
                 tuple("Judge", "Third Judge")
             );
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void shouldNotInvokeJudicialClientWhenInvalidList(List<SittingRecordWrapper> sittingRecordWrappers) {
+        judicialUserDetailsService.setJudicialUserName(sittingRecordWrappers);
+        verify(judicialUserServiceClient,never())
+            .getJudicialUserDetails(isA(JudicialUserDetailsApiRequest.class));
     }
 }

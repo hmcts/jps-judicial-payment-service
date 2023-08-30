@@ -10,6 +10,7 @@ import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiRequ
 import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiResponse;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static java.util.stream.Collectors.collectingAndThen;
@@ -46,27 +47,29 @@ public class JudicialUserDetailsService {
     }
 
     public void setJudicialUserName(List<SittingRecordWrapper> recordsToBeUpdatedByJudgeName) {
-        JudicialUserDetailsApiRequest judicialUsersApiRequest = recordsToBeUpdatedByJudgeName.stream()
+        if (Objects.nonNull(recordsToBeUpdatedByJudgeName) && !recordsToBeUpdatedByJudgeName.isEmpty()) {
+            JudicialUserDetailsApiRequest judicialUsersApiRequest = recordsToBeUpdatedByJudgeName.stream()
                 .map(SittingRecordWrapper::getSittingRecordRequest)
                 .map(SittingRecordRequest::getPersonalCode)
                 .collect(collectingAndThen(
-                        toList(),
-                        personalCodes -> JudicialUserDetailsApiRequest.builder()
-                                .personalCode(personalCodes)
-                                .build()
+                    toList(),
+                    personalCodes -> JudicialUserDetailsApiRequest.builder()
+                        .personalCode(personalCodes)
+                        .build()
                 ));
 
-        List<JudicialUserDetailsApiResponse> judicialUserDetails = judicialUserServiceClient.getJudicialUserDetails(
+            List<JudicialUserDetailsApiResponse> judicialUserDetails = judicialUserServiceClient.getJudicialUserDetails(
                 judicialUsersApiRequest);
 
-        recordsToBeUpdatedByJudgeName.forEach(sittingRecordWrapper -> {
-            String personalName = getJudgeName(
+            recordsToBeUpdatedByJudgeName.forEach(sittingRecordWrapper -> {
+                String personalName = getJudgeName(
                     sittingRecordWrapper.getSittingRecordRequest().getPersonalCode(),
                     judicialUserDetails
-            );
+                );
 
-            sittingRecordWrapper.setJudgeRoleTypeName(personalName);
-        });
+                sittingRecordWrapper.setJudgeRoleTypeName(personalName);
+            });
+        }
     }
 
     private String getJudgeName(String personalCode,
