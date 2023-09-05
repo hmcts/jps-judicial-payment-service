@@ -314,7 +314,11 @@ public class SittingRecordService {
     private boolean filterRecordsToClose(RecordSubmitFields recordSubmitFields, Boolean crownFlagEmpty) {
         Optional<Boolean> crownServiceFlag = Optional.empty();
         if (recordSubmitFields.getContractTypeId() == 6L) {
-            crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(recordSubmitFields.getPersonalCode());
+            crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(
+                recordSubmitFields.getPersonalCode(),
+                recordSubmitFields.getSittingDate()
+            );
+
             if (crownServiceFlag.isEmpty()) {
                 return crownFlagEmpty;
             }
