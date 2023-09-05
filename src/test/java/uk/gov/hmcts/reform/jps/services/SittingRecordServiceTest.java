@@ -541,11 +541,11 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             getRecordSubmitFields(400L, 6L, "999", now.minusDays(6))
         );
 
-        when(judicialOfficeHolderService.getCrownServiceFlag(eq("123"), eq(now.minusDays(2))))
+        when(judicialOfficeHolderService.getCrownServiceFlag("123", now.minusDays(2)))
             .thenReturn(Optional.of(true));
-        when(judicialOfficeHolderService.getCrownServiceFlag(eq("789"), eq(now.minusDays(5))))
+        when(judicialOfficeHolderService.getCrownServiceFlag("789", now.minusDays(5)))
             .thenReturn(Optional.of(false));
-        when(judicialOfficeHolderService.getCrownServiceFlag(eq("999"), eq(now.minusDays(6))))
+        when(judicialOfficeHolderService.getCrownServiceFlag("999", now.minusDays(6)))
             .thenReturn(Optional.empty());
 
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()

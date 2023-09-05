@@ -270,13 +270,13 @@ public class SittingRecordService {
 
             submittedCount = updatedRecords.size();
 
-            recordsToSubmit = recordsToSubmit.stream()
+            List<RecordSubmitFields> recordsToClose = recordsToSubmit.stream()
                     .filter(not(recordSubmitFields -> updatedRecords.contains(recordSubmitFields.getId())))
                     .toList();
 
             closedCount = getUpdatedRecords(
                 submitSittingRecordRequest,
-                recordsToSubmit,
+                recordsToClose,
                 CLOSED,
                 filter,
                 false
