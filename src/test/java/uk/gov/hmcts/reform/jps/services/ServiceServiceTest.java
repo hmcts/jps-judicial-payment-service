@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps.services;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -26,13 +28,25 @@ class ServiceServiceTest {
 
     @Autowired
     private ServiceService serviceService;
+    private Service service;
+
+    @BeforeEach
+    void beforeEach() {
+        service = new Service();
+        service.setAccountCenterCode("3");
+        service.setCloseRecordedRecordAfterTimeInMonths(1);
+        service.setHmctsServiceId("42");
+        service.setId(1L);
+        service.setOnboardingStartDate(LocalDate.of(1970, 1, 1));
+        service.setRetentionTimeInMonths(1);
+        service.setServiceName("Service Name");
+    }
 
     /**
      * Method under test: {@link ServiceService#findService(String)}.
      */
     @Test
     void testFindService() {
-        Service service = createService();
         when(serviceRepository.findByHmctsServiceId(anyString()))
             .thenReturn(Optional.of(service));
 
@@ -42,16 +56,24 @@ class ServiceServiceTest {
         verify(serviceRepository).findByHmctsServiceId(anyString());
     }
 
-    private Service createService() {
-        Service service = new Service();
-        service.setAccountCenterCode("3");
-        service.setCloseRecordedRecordAfterTimeInMonths(1);
-        service.setHmctsServiceId("42");
-        service.setId(1L);
-        service.setOnboardingStartDate(LocalDate.of(1970, 1, 1));
-        service.setRetentionTimeInMonths(1);
-        service.setServiceName("Service Name");
-        return service;
+    @Test
+    void shouldReturnOnBoardedServiceWhenPresent() {
+        when(serviceRepository.findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(
+            anyString(),
+            any()))
+            .thenReturn(Optional.of(service));
+        assertThat(serviceService.isServiceOnboarded("42"))
+            .isTrue();
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalWhenServiceIsNotOnboarded() {
+        when(serviceRepository.findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(
+            anyString(),
+            any()))
+            .thenReturn(Optional.empty());
+        assertThat(serviceService.isServiceOnboarded("33"))
+            .isFalse();
     }
 }
 

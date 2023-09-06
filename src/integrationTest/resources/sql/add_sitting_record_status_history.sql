@@ -44,3 +44,5 @@ INSERT INTO public.status_history (status_history_id, sitting_record_id, status_
 VALUES (nextval('status_history_status_history_id_seq'), 9, 'RECORDED', '2022-05-11 11:40:30.430090', 'd139a314-eb40-45f4-9e7a-9e13f143cc3a', 'Recorder');
 INSERT INTO public.status_history (status_history_id, sitting_record_id, status_id, changed_date_time, changed_by_user_id, changed_by_name)
 VALUES (nextval('status_history_status_history_id_seq'), 10, 'RECORDED', '2023-06-27 11:40:30.430090', 'd139a314-eb40-45f4-9e7a-9e13f143cc3a', 'Recorder')
+
+

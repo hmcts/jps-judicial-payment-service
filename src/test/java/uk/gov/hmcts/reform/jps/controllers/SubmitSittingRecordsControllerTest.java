@@ -15,6 +15,7 @@ import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
+import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
 import static org.mockito.ArgumentMatchers.anyString;
@@ -22,6 +23,7 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
@@ -40,11 +42,16 @@ class SubmitSittingRecordsControllerTest {
     @MockBean
     private SittingRecordService sittingRecordService;
 
+    @MockBean
+    private ServiceService serviceService;
+
     @Autowired
     private MockMvc mockMvc;
 
     @Test
     void shouldReturnRecordCountOfSubmittedRecordsWhenRecordsAreSubmitted() throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(true);
         when(sittingRecordService.submitSittingRecords(isA(SubmitSittingRecordRequest.class),
                                                        anyString()))
             .thenReturn(3);
@@ -61,17 +68,21 @@ class SubmitSittingRecordsControllerTest {
     }
 
     @Test
-    void shouldThrowWhenRecordsAreSubmitted() throws Exception {
+    void shouldReturn400WhenHmctsServiceNotOnboarded() throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(false);
+
         String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/submitSittingRecords/")
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
             .andDo(print())
-            .andExpectAll(
-                status().isBadRequest(),
-                jsonPath("$.errors[0].fieldName").value("PathVariable"),
-                jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
-            );
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
+            .andReturn();
     }
 
     @Test

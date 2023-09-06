@@ -3,6 +3,9 @@ package uk.gov.hmcts.reform.jps.repository;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -12,6 +15,7 @@ import uk.gov.hmcts.reform.jps.domain.Service;
 import java.time.LocalDate;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,6 +26,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 @ActiveProfiles("itest")
 class ServiceRepositoryTest {
 
+    public static final String TEST_SERVICE = "TestService";
     @Autowired
     private ServiceRepository serviceRepository;
 
@@ -34,7 +39,7 @@ class ServiceRepositoryTest {
             .save(
                 Service.builder()
                      .hmctsServiceId(HMCTS_SERVICE_ID)
-                     .serviceName("TestService")
+                     .serviceName(TEST_SERVICE)
                      .accountCenterCode("123")
                      .onboardingStartDate(LocalDate.now())
                      .retentionTimeInMonths(2)
@@ -94,5 +99,31 @@ class ServiceRepositoryTest {
     void shouldFailToFindServiceByHmctsServiceId() {
         assertThat(serviceRepository.findByHmctsServiceId("FFGHJHUJ"))
             .isEmpty();
+    }
+
+    @Test
+    void shouldFindServiceWhenServiceIsOnboarded() {
+        assertThat(serviceRepository.findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(
+            HMCTS_SERVICE_ID,
+            LocalDate.now()))
+            .isPresent()
+            .map(Service::getServiceName)
+            .hasValue(TEST_SERVICE);
+    }
+
+    @ParameterizedTest
+    @MethodSource("provideOnBoardingParameters")
+    void shouldReturnEmptyServiceWhenServiceIsNotOnboarded(String serviceName, LocalDate onBoarded) {
+        assertThat(serviceRepository.findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(
+            serviceName,
+            onBoarded))
+            .isEmpty();
+    }
+
+    private static Stream<Arguments> provideOnBoardingParameters() {
+        return Stream.of(
+            Arguments.of(HMCTS_SERVICE_ID, LocalDate.now().minusDays(2)),
+            Arguments.of("TEST", LocalDate.now())
+        );
     }
 }
