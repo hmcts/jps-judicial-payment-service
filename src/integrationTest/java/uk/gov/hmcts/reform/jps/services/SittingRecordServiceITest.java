@@ -392,7 +392,7 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistory createStatusHistory(StatusId statusId, String userId, String userName) {
         return StatusHistory.builder()
             .statusId(statusId)
-            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
+            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS))
             .changedByUserId(userId)
             .changedByName(userName)
             .build();
