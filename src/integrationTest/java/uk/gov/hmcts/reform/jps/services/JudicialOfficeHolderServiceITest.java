@@ -1,12 +1,15 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -54,6 +57,36 @@ public class JudicialOfficeHolderServiceITest extends BaseTest {
                      judicialOfficeHolder.getJohPayrolls().size())
             .hasValue(persistedJudicialOfficeHolder.getJohPayrolls().size());
 
+    }
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # SITTING_DATE,       CROWN_FLAG
+      '2023-09-04',         false
+      '2023-09-03',         true
+        """)
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnLatestRecordCrownFlagWhenMoreThanOneJohAttributePresent(LocalDate sittingDate, boolean crownFlag) {
+        Optional<Boolean> crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(
+            "9938178",
+            sittingDate
+        );
+
+        assertThat(crownServiceFlag)
+            .hasValue(crownFlag);
+    }
+
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnEmptyCrownFlagWhenNoJohAttributePresent() {
+        Optional<Boolean> crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(
+            "999999",
+            LocalDate.now()
+        );
+
+        assertThat(crownServiceFlag)
+            .isEmpty();
     }
 
     private JudicialOfficeHolder createAndSaveJudicialOfficeHolder(String personalCode) {

@@ -6,6 +6,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
 @Repository
@@ -15,9 +16,11 @@ public interface JudicialOfficeHolderRepository extends JpaRepository<JudicialOf
 
     @Query("""
         select jfh from JudicialOfficeHolder jfh
-        inner join fetch jfh.johAttributes
+        inner join fetch jfh.johAttributes a
         where jfh.personalCode = :personalCode
+        and a.effectiveStartDate <= :dateEqualOrBefore
         """)
-    Optional<JudicialOfficeHolder> findJudicialOfficeHolderWithJohAttributes(
-        @Param("personalCode") String personalCode);
+    Optional<JudicialOfficeHolder> findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+        @Param("personalCode") String personalCode,
+        @Param("dateEqualOrBefore") LocalDate dateEqualOrBefore);
 }

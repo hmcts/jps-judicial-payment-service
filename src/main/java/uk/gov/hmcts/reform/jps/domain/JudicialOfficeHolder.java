@@ -5,7 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Formula;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -37,23 +37,14 @@ public class JudicialOfficeHolder {
     @Column(name = "personal_code")
     private String personalCode;
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "judicialOfficeHolder",
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<JohPayroll> johPayrolls = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "judicialOfficeHolder", orphanRemoval = true, cascade = {CascadeType.ALL})
     private final Set<JohAttributes> johAttributes = new HashSet<>();
-
-    @Formula("""
-        (select j.crown_servant_flag
-        from joh_attributes j
-        where j.local_joh_record_id = local_joh_record_id
-        and j.effective_start_date <= current_date
-        order by j.effective_start_date desc
-        limit 1)
-        """
-    )
-    private Boolean isActiveJohAttributesCrownFlag;
 
     public void addJohPayroll(JohPayroll johPayroll) {
         this.johPayrolls.add(johPayroll);

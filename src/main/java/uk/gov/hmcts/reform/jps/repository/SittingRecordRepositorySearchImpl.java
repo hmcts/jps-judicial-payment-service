@@ -217,7 +217,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         criteriaQuery.multiselect(
             sittingRecord.get(ID),
             sittingRecord.get(CONTRACT_TYPE_ID),
-            sittingRecord.get(PERSONAL_CODE));
+            sittingRecord.get(PERSONAL_CODE),
+            sittingRecord.get(SITTING_DATE));
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get(HMCTS_SERVICE_ID),

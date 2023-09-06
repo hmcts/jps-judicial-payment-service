@@ -1,7 +1,10 @@
 package uk.gov.hmcts.reform.jps.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,9 +18,10 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
@@ -67,74 +71,48 @@ class JudicialOfficeHolderRepositoryTest {
         assertThat(list).isNotEmpty();
     }
 
-    @Test
+    @ParameterizedTest
+    @MethodSource("crownFlagForSittingDate")
     @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
-    void shouldReturnCrownFlagWhenJohAttributesIsEffective() {
+    void shouldReturnCrownFlagWhenJohAttributesIsEffective(
+        String personalCode,
+        LocalDate sittingDate,
+        boolean crownFlag) {
+
         Optional<JudicialOfficeHolder> judicialOfficeHolder
-            = judicialOfficeHolderRepository.findByPersonalCode("7918178");
-        assertThat(judicialOfficeHolder)
-            .isPresent()
-            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
-            .contains(true);
+            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+            personalCode,
+                sittingDate);
+
+
+        assertThat(judicialOfficeHolder.stream())
+            .flatMap(JudicialOfficeHolder::getJohAttributes)
+            .extracting(JohAttributes::isCrownServantFlag)
+            .containsOnly(crownFlag);
     }
 
-    @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
-    void shouldReturnCrownFlagWhenJohAttributesIsBothEffectiveAndNonEffective() {
-        Optional<JudicialOfficeHolder> judicialOfficeHolder
-            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributes("9928178");
-
-        Optional<JohAttributes> isJohAttributes = judicialOfficeHolder.stream()
-            .map(JudicialOfficeHolder::getJohAttributes)
-            .flatMap(Collection::stream)
-            .filter(johAttributes -> LocalDate.now().isEqual(johAttributes.getEffectiveStartDate()))
-            .findAny();
-
-        assertThat(isJohAttributes)
-            .isPresent();
-
-        assertThat(judicialOfficeHolder)
-            .isPresent()
-            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
-            .contains(true);
+    private static Stream<Arguments> crownFlagForSittingDate() {
+        return Stream.of(
+            Arguments.of("7918178", LocalDate.of(2023, Month.APRIL, 27), true),
+            Arguments.of("9928178", LocalDate.now(), false)
+        );
     }
 
-    @Test
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # PERSONAL_CODE
+      '8918178'
+      '9918178'
+        """)
     @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
-    void shouldReturnEmptyCrownFlagWhenJohAttributesIsMissing() {
+    void shouldReturnEmptyCrownFlagWhenJohAttributesIsMissingOrNotEffective(String personalCode) {
         Optional<JudicialOfficeHolder> judicialOfficeHolder
-            = judicialOfficeHolderRepository.findByPersonalCode("8918178");
-        assertThat(judicialOfficeHolder)
-            .isPresent()
+            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+            personalCode,
+            LocalDate.now());
+
+        assertThat(judicialOfficeHolder.stream())
             .map(JudicialOfficeHolder::getJohAttributes)
-            .map(johAttributes -> johAttributes.isEmpty());
-
-        assertThat(judicialOfficeHolder)
-            .isPresent()
-            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
-            .isEmpty();
-    }
-
-    @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
-    void shouldReturnEmptyCrownFlagWhenJohAttributesIsNotEffective() {
-        Optional<JudicialOfficeHolder> judicialOfficeHolder
-            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributes("9918178");
-
-        Optional<LocalDate> effectiveStartDate = judicialOfficeHolder.stream()
-            .map(JudicialOfficeHolder::getJohAttributes)
-            .flatMap(Collection::stream)
-            .filter(johAttributes1 -> johAttributes1.getId().equals(3L))
-            .map(JohAttributes::getEffectiveStartDate)
-            .findAny();
-
-        assertThat(effectiveStartDate)
-            .isPresent()
-            .matches(startDate -> LocalDate.now().isBefore(startDate.get()));
-
-        assertThat(judicialOfficeHolder)
-            .isPresent()
-            .map(JudicialOfficeHolder::getIsActiveJohAttributesCrownFlag)
             .isEmpty();
     }
 }

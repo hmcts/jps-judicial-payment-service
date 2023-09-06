@@ -118,7 +118,10 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Captor
     private ArgumentCaptor<Long> records;
     @Captor
-    private ArgumentCaptor<String> data;
+    private ArgumentCaptor<String> personalCode;
+
+    @Captor
+    private ArgumentCaptor<LocalDate> sittingDate;
 
     @BeforeEach
     void setUp() {
@@ -528,20 +531,21 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Test
     void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+        LocalDate now = LocalDate.now();
         String hmctsServiceCode = "BBA3";
         List<RecordSubmitFields> sittingRecordIds = List.of(
-            getRecordSubmitFields(1L, 6L, "123"),
-            getRecordSubmitFields(100L, 2L, "243"),
-            getRecordSubmitFields(200L, 3L, "567"),
-            getRecordSubmitFields(300L, 6L, "789"),
-            getRecordSubmitFields(400L, 6L, "999")
+            getRecordSubmitFields(1L, 6L, "123", now.minusDays(2)),
+            getRecordSubmitFields(100L, 2L, "243", now.minusDays(3)),
+            getRecordSubmitFields(200L, 3L, "567", now.minusDays(4)),
+            getRecordSubmitFields(300L, 6L, "789", now.minusDays(5)),
+            getRecordSubmitFields(400L, 6L, "999", now.minusDays(6))
         );
 
-        when(judicialOfficeHolderService.getCrownServiceFlag("123"))
+        when(judicialOfficeHolderService.getCrownServiceFlag("123", now.minusDays(2)))
             .thenReturn(Optional.of(true));
-        when(judicialOfficeHolderService.getCrownServiceFlag("789"))
+        when(judicialOfficeHolderService.getCrownServiceFlag("789", now.minusDays(5)))
             .thenReturn(Optional.of(false));
-        when(judicialOfficeHolderService.getCrownServiceFlag("999"))
+        when(judicialOfficeHolderService.getCrownServiceFlag("999", now.minusDays(6)))
             .thenReturn(Optional.empty());
 
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
@@ -593,21 +597,36 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         verify(sittingRecordRepository, times(4))
             .updateRecordedStatus(anyLong(), isA(StatusId.class));
         verify(judicialOfficeHolderService, times(5))
-            .getCrownServiceFlag(data.capture());
+            .getCrownServiceFlag(personalCode.capture(), sittingDate.capture());
 
-        assertThat(data.getAllValues())
+        assertThat(personalCode.getAllValues())
             .containsExactlyInAnyOrder("123",
                                        "789",
                                        "999",
                                        "789",
                                        "999");
+
+        assertThat(sittingDate.getAllValues())
+            .containsExactlyInAnyOrder(now.minusDays(2),
+                                       now.minusDays(5),
+                                       now.minusDays(6),
+                                       now.minusDays(5),
+                                       now.minusDays(6));
+
+
     }
 
-    private static RecordSubmitFields getRecordSubmitFields(long id, long contractTypeId, String number) {
+    private static RecordSubmitFields getRecordSubmitFields(
+        long id,
+        long contractTypeId,
+        String number,
+        LocalDate sittingDate) {
+
         return RecordSubmitFields.builder()
             .id(id)
             .contractTypeId(contractTypeId)
             .personalCode(number)
+            .sittingDate(sittingDate)
             .build();
     }
 
