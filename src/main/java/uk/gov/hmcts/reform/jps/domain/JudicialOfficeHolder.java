@@ -2,14 +2,15 @@ package uk.gov.hmcts.reform.jps.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
+import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -20,11 +21,9 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Builder
-@NoArgsConstructor()
+@NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
 @Entity
 @Table(name = "judicial_office_holder")
 public class JudicialOfficeHolder {
@@ -43,8 +42,9 @@ public class JudicialOfficeHolder {
         cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
     private final List<JohPayroll> johPayrolls = new ArrayList<>();
 
+    @ToString.Exclude
     @OneToMany(mappedBy = "judicialOfficeHolder", orphanRemoval = true, cascade = {CascadeType.ALL})
-    private final List<JohAttributes> johAttributes = new ArrayList<>();
+    private final Set<JohAttributes> johAttributes = new HashSet<>();
 
     public void addJohPayroll(JohPayroll johPayroll) {
         this.johPayrolls.add(johPayroll);
@@ -54,24 +54,5 @@ public class JudicialOfficeHolder {
     public void addJohAttributes(JohAttributes johAttributes) {
         this.johAttributes.add(johAttributes);
         johAttributes.setJudicialOfficeHolder(this);
-    }
-
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o instanceof JudicialOfficeHolder that) {
-            return Objects.equals(id, that.id) && Objects.equals(personalCode, that.personalCode) && Objects.equals(
-                johPayrolls, that.johPayrolls) && Objects.equals(johAttributes, that.johAttributes);
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, personalCode, johPayrolls, johAttributes);
     }
 }

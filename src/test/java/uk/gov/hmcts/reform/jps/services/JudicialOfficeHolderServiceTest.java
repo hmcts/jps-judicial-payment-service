@@ -12,8 +12,9 @@ import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import java.time.LocalDate;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -50,9 +51,11 @@ class JudicialOfficeHolderServiceTest {
         JohPayroll johPayroll = createJohPayroll(1L, LocalDate.now(), "jr1111", "pr11222");
         judicialOfficeHolder.addJohPayroll(johPayroll);
         johPayroll.setJudicialOfficeHolder(judicialOfficeHolder);
-        when(judicialOfficeHolderService.findByPersonalCode(Personal_Code)).thenReturn(judicialOfficeHolder);
-        assertSame(judicialOfficeHolder, judicialOfficeHolderService.findByPersonalCode(Personal_Code));
-        verify(judicialOfficeHolderService).findByPersonalCode(Mockito.<String>any());
+        when(judicialOfficeHolderService.findByPersonalCode(Personal_Code))
+            .thenReturn(Optional.of(judicialOfficeHolder));
+        assertThat(judicialOfficeHolderService.findByPersonalCode(Personal_Code))
+            .hasValue(judicialOfficeHolder);
+        verify(judicialOfficeHolderService).findByPersonalCode(anyString());
     }
 
 

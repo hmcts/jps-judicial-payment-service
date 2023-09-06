@@ -60,7 +60,6 @@ public class SittingRecord {
 
     @Column(name = "personal_code", nullable = false)
     private String personalCode;
-
     @Column(name = "contract_type_id")
     private Long contractTypeId;
 
@@ -153,9 +152,5 @@ public class SittingRecord {
                 && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
                 && Objects.deepEquals(this.getStatusHistories().toArray(),
                                   sittingRecord.getStatusHistories().toArray()))));
-    }
-
-    public JudicialOfficeHolder getJudicialOfficeHolder() {
-        return JudicialOfficeHolder.builder().build();
     }
 }
