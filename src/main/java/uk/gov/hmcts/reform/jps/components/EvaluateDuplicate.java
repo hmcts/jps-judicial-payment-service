@@ -20,8 +20,7 @@ public class EvaluateDuplicate implements DuplicateChecker {
                             SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
                                 sittingRecordDuplicateCheckFields) {
         SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
-        if (sittingRecordDuplicateCheckFields.getEpimmsId().equals(sittingRecordRequest.getEpimmsId())
-            && sittingRecordDuplicateCheckFields.getSittingDate().isEqual(sittingRecordRequest.getSittingDate())
+        if (sittingRecordDuplicateCheckFields.getSittingDate().isEqual(sittingRecordRequest.getSittingDate())
             && sittingRecordDuplicateCheckFields.getPersonalCode()
             .equals(sittingRecordRequest.getPersonalCode())) {
             sittingRecordWrapper.setSittingRecordId(sittingRecordDuplicateCheckFields.getId());

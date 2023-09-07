@@ -39,7 +39,10 @@ public class EvaluateMatchingDuration implements DuplicateChecker {
                                              SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
                                                  sittingRecordDuplicateCheckFields) {
         if (sittingRecordDuplicateCheckFields.getStatusId() == RECORDED) {
-            if (sittingRecordDuplicateCheckFields.getJudgeRoleTypeId()
+            if (!sittingRecordDuplicateCheckFields.getEpimmsId()
+                .equals(sittingRecordWrapper.getSittingRecordRequest().getEpimmsId())) {
+                sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+            } else if (sittingRecordDuplicateCheckFields.getJudgeRoleTypeId()
                 .equals(sittingRecordWrapper.getSittingRecordRequest().getJudgeRoleTypeId())) {
                 sittingRecordWrapper.setErrorCode(INVALID_DUPLICATE_RECORD);
             } else {
