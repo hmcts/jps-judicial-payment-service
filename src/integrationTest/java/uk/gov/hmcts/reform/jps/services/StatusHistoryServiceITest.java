@@ -38,12 +38,10 @@ public class StatusHistoryServiceITest extends BaseTest {
             List.of(DELETED, CLOSED)
         ).stream().toList();
 
-
         SittingRecordWrapper wrapper = SittingRecordWrapper.builder().build();
 
         SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields
             sittingRecordDuplicateCheckFields = dbRecord.get(0);
-
 
         statusHistoryService.updateFromStatusHistory(wrapper, sittingRecordDuplicateCheckFields);
         assertThat(wrapper.getCreatedByName()).isEqualTo("Recorder");

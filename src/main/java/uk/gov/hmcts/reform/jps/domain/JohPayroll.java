@@ -1,12 +1,10 @@
 package uk.gov.hmcts.reform.jps.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
 
 import java.time.LocalDate;
 import javax.persistence.Column;
@@ -23,21 +21,17 @@ import static javax.persistence.FetchType.LAZY;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Getter
-@Setter
-@ToString
+@Data
+@EqualsAndHashCode(exclude = "judicialOfficeHolder")
 @Entity
 @Table(name = "joh_payroll")
 public class JohPayroll {
 
-    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "joh_payroll_id")
     private Long id;
 
-    @JsonIgnore
-    @ToString.Exclude
     @ManyToOne(optional = false, fetch = LAZY)
     @JoinColumn(name = "local_joh_record_id")
     private JudicialOfficeHolder judicialOfficeHolder;

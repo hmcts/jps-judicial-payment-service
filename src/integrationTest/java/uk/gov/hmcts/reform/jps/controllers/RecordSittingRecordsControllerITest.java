@@ -139,7 +139,7 @@ public class RecordSittingRecordsControllerITest {
         if (checkStatusHistory) {
             List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
             assertThat(statusHistories)
-                .filteredOn(statusHistory -> statusHistory.getSittingRecord().getId() == 9)
+                .filteredOn(statusHistory -> statusHistory.getSittingRecord().getId() == 10)
                 .extracting("statusId")
                 .containsExactlyInAnyOrder(RECORDED, DELETED);
         }
@@ -239,7 +239,7 @@ public class RecordSittingRecordsControllerITest {
 
     @Test
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
-    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+    void shouldReturn400WhenHmctsServiceCodeNotSet() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
                                                   .contentType(MediaType.APPLICATION_JSON)

@@ -25,4 +25,8 @@ public class SittingRecordWrapper {
     private StatusId statusId;
     private boolean delete;
     private String regionId;
+    private Boolean am;
+    private Boolean pm;
+    private String judgeRoleTypeId;
+    private String judgeRoleTypeName;
 }

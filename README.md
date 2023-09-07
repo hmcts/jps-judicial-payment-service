@@ -1,3 +1,5 @@
+[![API v1_internal](https://img.shields.io/badge/API%20Docs-e140ad.svg)](https://hmcts.github.io/cnp-api-docs/swagger.html?url=https://hmcts.github.io/cnp-api-docs/specs/jps-judicial-payment-service.json)
+
 # Spring Boot application template
 
 ## Purpose

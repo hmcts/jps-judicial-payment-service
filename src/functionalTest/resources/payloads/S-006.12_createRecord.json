@@ -1,0 +1,16 @@
+{
+  "recordedByIdamId": "a452a3f9-1885-4c28-946c-2946f47be5ce",
+  "recordedByName": "jps recorder",
+  "recordedSittingRecords": [
+    {
+      "sittingDate": "dateToBeReplaced",
+      "epimmsId": "229786",
+      "personalCode": "4918178",
+      "contractTypeId": "1",
+      "judgeRoleTypeId": "Judge",
+      "am": true,
+      "pm": true,
+      "replaceDuplicate": false
+    }
+  ]
+}

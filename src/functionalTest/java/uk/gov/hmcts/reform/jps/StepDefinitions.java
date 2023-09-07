@@ -95,6 +95,21 @@ public class StepDefinitions extends TestVariables {
             .then().log().all().assertThat().statusCode(201);
     }
 
+    @Given("a call to submit the existing record with the payload {string}")
+    public void theExistingRecordIsInSubmittedState(String payload) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
+        body = body.replace("dateToBeReplaced", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        given().header("Content-Type", "application/json")
+            .header("Authorization", submitterAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/submitSittingRecords/ABA5")
+            .then().log().all().assertThat().statusCode(200).body("recordsSubmitted", equalTo(1));
+    }
+
     @Given("a search is done on the hmctsServiceCode {string}, with the payload {string} to get the {string}")
     public void searchIsDoneOnTheHmctsServiceCodeWithThePayloadToGetThe(String serviceCode, String payload, String
         attribute) throws IOException {
@@ -111,11 +126,6 @@ public class StepDefinitions extends TestVariables {
             .then().log().all().assertThat().statusCode(200);
 
         recordAttribute = propertiesReader.getJsonPath(response, attribute);
-    }
-
-    @Given("the existing record is in Submitted state")
-    public void theExistingRecordIsInSubmittedState() {
-        // Write code here after IJPS-62 is ready
     }
 
     @When("a request is prepared with appropriate values")
@@ -241,7 +251,11 @@ public class StepDefinitions extends TestVariables {
 
     @Then("the response contains {string} as {string}")
     public void theResponseContainsAs(String attribute, String value) {
-        response.then().assertThat().body(attribute,Matchers.equalTo(value));
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            response.then().assertThat().body(attribute, Matchers.equalTo(Boolean.parseBoolean(value)));
+        } else {
+            response.then().assertThat().body(attribute, Matchers.equalTo(value));
+        }
     }
 
     @Then("the response contains {int} {string}")

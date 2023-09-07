@@ -5,7 +5,7 @@
     {
       "sittingDate": "dateToBeReplaced",
       "epimmsId": "229786",
-      "personalCode": "4918178",
+      "personalCode": "7007496",
       "contractTypeId": "2",
       "judgeRoleTypeId": "Judge",
       "am": false,
@@ -24,7 +24,7 @@
       "sittingDate": "dateToBeReplaced",
       "epimmsId": "229786",
       "personalCode": "4918178",
-      "contractTypeId": "3",
+      "contractTypeId": "2",
       "judgeRoleTypeId": "Judge",
       "am": true,
       "pm": false
