@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
@@ -225,7 +224,7 @@ public class SittingRecordService {
         if (sittingRecord.getStatusId() == recorded) {
             deleteSittingRecord(sittingRecord);
         } else {
-            throw new ConflictException("Sitting Record Status ID is in wrong state");
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
         }
     }
 
@@ -241,7 +240,7 @@ public class SittingRecordService {
 
             deleteSittingRecord(recordedStatusHistory.getSittingRecord());
         } else {
-            throw new ConflictException("Sitting Record Status ID is in wrong state");
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
         }
     }
 

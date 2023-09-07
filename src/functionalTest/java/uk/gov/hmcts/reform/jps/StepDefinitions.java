@@ -25,7 +25,6 @@ import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -206,8 +205,6 @@ public class StepDefinitions extends TestVariables {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
             } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
-            } else if (responseCode.equalsIgnoreCase("409 Conflict")) {
-                assertThat(response.getStatusCode()).isEqualTo(CONFLICT.value());
             } else if (responseCode.equalsIgnoreCase("404 Not Found")) {
                 assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND.value());
             }
