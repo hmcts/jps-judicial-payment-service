@@ -8,14 +8,13 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-
-import static uk.gov.hmcts.reform.jps.model.Duration.AM;
-import static uk.gov.hmcts.reform.jps.model.Duration.PM;
+import java.util.Objects;
 
 @Data
 @Builder
@@ -25,10 +24,10 @@ import static uk.gov.hmcts.reform.jps.model.Duration.PM;
 public class SittingRecord {
     private Long sittingRecordId;
     private LocalDate sittingDate;
-    private String statusId;
+    private StatusId statusId;
     private String regionId;
     private String regionName;
-    private String epimsId;
+    private String epimmsId;
     private String venueName;
     private String hmctsServiceId;
     private String personalCode;
@@ -44,8 +43,8 @@ public class SittingRecord {
     private String payrollId;
     private String accountCode;
     private Long fee;
-    private String am;
-    private String pm;
+    private Boolean am;
+    private Boolean pm;
     private LocalDateTime createdDateTime;
     private String createdByUserId;
     private String createdByUserName;
@@ -73,7 +72,7 @@ public class SittingRecord {
             17,
             37
         ).append(sittingRecordId).append(sittingDate).append(statusId).append(regionId).append(regionName).append(
-            epimsId).append(hmctsServiceId).append(personalCode).append(personalName).append(contractTypeId).append(
+            epimmsId).append(hmctsServiceId).append(personalCode).append(personalName).append(contractTypeId).append(
             judgeRoleTypeId).append(am).append(pm).append(statusHistories).toHashCode();
     }
 
@@ -98,9 +97,9 @@ public class SittingRecord {
             || (null != sittingRecord.getContractTypeId() && null != this.getContractTypeId()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())))
 
-            && ((null == sittingRecord.getEpimsId() && null == this.getEpimsId())
-            || (null != sittingRecord.getEpimsId() && null != this.getEpimsId()
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())))
+            && ((null == sittingRecord.getEpimmsId() && null == this.getEpimmsId())
+            || (null != sittingRecord.getEpimmsId() && null != this.getEpimmsId()
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())))
 
             && ((null == sittingRecord.getPersonalCode() && null == this.getPersonalCode())
             || (null != sittingRecord.getPersonalCode() && null != this.getPersonalCode()
@@ -128,10 +127,7 @@ public class SittingRecord {
             && ((null == sittingRecord.getRegionId() && null == this.getRegionId())
             || (null != sittingRecord.getRegionId() && null != this.getRegionId()
             && sittingRecord.getRegionId().equals(this.getRegionId())))
-
-            && ((null == sittingRecord.getStatusId() && null == this.getStatusId())
-            || (null != sittingRecord.getStatusId() && null != this.getStatusId()
-            && sittingRecord.getStatusId().equals(this.getStatusId()))));
+            && sittingRecord.getStatusId() == this.getStatusId());
     }
 
     public boolean equalsDomainObject(Object object) {
@@ -143,20 +139,21 @@ public class SittingRecord {
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
         return (sittingRecord.getId().equals(this.getSittingRecordId())
-            && (null == this.getAm() && !sittingRecord.isAm()
-            || null != this.getAm() && this.getAm().equals(AM.name()) && sittingRecord.isAm())
+            && (Objects.nonNull(this.getAm()) && this.getAm().equals(sittingRecord.isAm()))
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
-            && (null == this.getPm() && !sittingRecord.isPm()
-            || null != this.getPm() && this.getPm().equals(PM.name()) && sittingRecord.isPm())
+            && (Objects.nonNull(this.getPm()) && this.getPm().equals(sittingRecord.isPm()))
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
             && sittingRecord.getRegionId().equals(this.getRegionId())
-            && sittingRecord.getStatusId().equals(this.getStatusId())
-            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
-            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+            && (Objects.isNull(sittingRecord.getStatusHistories())
+                && Objects.isNull(this.getStatusHistories())
+                || (Objects.nonNull(sittingRecord.getStatusHistories())
+                && Objects.nonNull(this.getStatusHistories())
+                && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
+                && Objects.deepEquals(this.getStatusHistories().toArray(),
+                sittingRecord.getStatusHistories().toArray()))));
     }
 
 }

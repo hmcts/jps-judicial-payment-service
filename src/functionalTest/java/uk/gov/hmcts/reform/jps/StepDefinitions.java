@@ -7,8 +7,8 @@ import io.cucumber.java.en.When;
 import io.restassured.RestAssured;
 import io.restassured.builder.RequestSpecBuilder;
 import io.restassured.http.ContentType;
-import io.restassured.mapper.ObjectMapperType;
 import io.restassured.response.Response;
+import io.restassured.response.ValidatableResponse;
 import io.restassured.specification.RequestSpecification;
 import org.hamcrest.Matchers;
 import uk.gov.hmcts.reform.jps.config.Endpoints;
@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 import static org.springframework.http.HttpStatus.OK;
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
@@ -46,6 +47,8 @@ public class StepDefinitions extends TestVariables {
             recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
             submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
             publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
+            adminAccessToken = idamTokenGenerator.authenticateUser(adminUsername, adminPassword);
+            johAdminAccessToken = idamTokenGenerator.authenticateUser(johAdminUsername, johAdminPassword);
             invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
 
             ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
@@ -64,26 +67,64 @@ public class StepDefinitions extends TestVariables {
             accessToken  = submitterAccessToken;
         } else if (role.equalsIgnoreCase("jps-publisher")) {
             accessToken  = publisherAccessToken;
+        } else if (role.equalsIgnoreCase("jps-admin")) {
+            accessToken  = adminAccessToken;
+        } else if (role.equalsIgnoreCase("jps-joh-admin")) {
+            accessToken  = johAdminAccessToken;
         } else if (role.equalsIgnoreCase("ccd-import")) {
             accessToken  = invalidAccessToken;
         }
     }
 
-    @Given("a record for the given hmctsServiceCode exists in the database")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase() throws IOException {
+    @Given("a record for the hmctsServiceCode {string} exists in the database with the payload {string}")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws
+        IOException {
         randomDate = RandomDateGenerator.generateRandomDate().toString();
 
         String body = new
-            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/F-004_allFields.json")));
-        body = body.replace("2023-04-10", randomDate);
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
+        body = body.replace("dateToBeReplaced", randomDate);
 
         RestAssured.baseURI = testUrl;
         given().header("Content-Type","application/json")
             .header("Authorization", recorderAccessToken)
             .header("ServiceAuthorization", validS2sToken)
             .body(body).log().all()
-            .when().post("/recordSittingRecords/ABA5")
+            .when().post("/recordSittingRecords/" + serviceCode)
             .then().log().all().assertThat().statusCode(201);
+    }
+
+    @Given("a call to submit the existing record with the payload {string}")
+    public void theExistingRecordIsInSubmittedState(String payload) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
+        body = body.replace("dateToBeReplaced", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        given().header("Content-Type", "application/json")
+            .header("Authorization", submitterAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/submitSittingRecords/ABA5")
+            .then().log().all().assertThat().statusCode(200).body("recordsSubmitted", equalTo(1));
+    }
+
+    @Given("a search is done on the hmctsServiceCode {string}, with the payload {string} to get the {string}")
+    public void searchIsDoneOnTheHmctsServiceCodeWithThePayloadToGetThe(String serviceCode, String payload, String
+        attribute) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
+        body = body.replace("dateToBeReplaced", randomDate);
+
+        RestAssured.baseURI = testUrl;
+        ValidatableResponse response = given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/sitting-records/searchSittingRecords/" + serviceCode)
+            .then().log().all().assertThat().statusCode(200);
+
+        recordAttribute = propertiesReader.getJsonPath(response, attribute);
     }
 
     @When("a request is prepared with appropriate values")
@@ -107,16 +148,24 @@ public class StepDefinitions extends TestVariables {
 
     @When("the request contains the {string} as {string}")
     public void theRequestContainsTheAs(String pathParam, String value) {
+        if (value.equalsIgnoreCase("id of the previously created record")) {
+            value = recordAttribute;
+        }
+
         given = request.pathParam(pathParam,value);
     }
 
     @When("the request body contains the {string} as in {string}")
     public void theRequestBodyContainsThe(String description, String fileName) throws IOException {
-        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName)));
-        if (description.equalsIgnoreCase("payload matching data from existing record")) {
-            body = body.replace("2023-03-10", randomDate);
-            body = body.replace("2023-05-12", randomDate);
+        String body = new String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + fileName
+                                                                  + ".json")));
+
+        if (description.equalsIgnoreCase("payload with 3 sitting records") || description.equalsIgnoreCase(
+            "payload with one sitting record")) {
+            randomDate = RandomDateGenerator.generateRandomDate().toString();
         }
+
+        body = body.replace("dateToBeReplaced", randomDate);
 
         given.body(body);
     }
@@ -136,23 +185,8 @@ public class StepDefinitions extends TestVariables {
         }
     }
 
-    @When("the request body contains the {string} as {string}")
-    public void the_request_body_contains_the_as(String field, String value) {
-        given.body(field, ObjectMapperType.valueOf(value));
-    }
-
-    @Then("the response has all the fields returned with correct values")
-    public void the_response_has_all_the_fields_returned_with_correct_values() {
-        response.then().assertThat().body("hmctsServiceCode",equalTo("<hmctsServiceCode>"))
-            .body("feeId",equalTo("<feeId>"))
-            .body("feeDescription",equalTo("<feeDescription>"))
-            .body("judgeRoleTypeId",equalTo("<judgeRoleTypeId>"))
-            .body("standardFee",equalTo(1234))
-            .body("londonWeightedFee",equalTo(6869));
-    }
-
     @Then("the response is empty")
-    public void the_response_is_empty() {
+    public void theResponseIsEmpty() {
         response.then().assertThat().body("isEmpty()", Matchers.is(true));
     }
 
@@ -171,6 +205,8 @@ public class StepDefinitions extends TestVariables {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
             } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
+            } else if (responseCode.equalsIgnoreCase("404 Not Found")) {
+                assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND.value());
             }
         }
     }
@@ -186,7 +222,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0].statusId",equalTo("RECORDED"))
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
-            .body("sittingRecords[0].epimsId",equalTo("229786"))
+            .body("sittingRecords[0].epimmsId",equalTo("229786"))
             .body("sittingRecords[0].venueName",equalTo("Barnet"))
             .body("sittingRecords[0].hmctsServiceId",equalTo("ABA5"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
@@ -200,8 +236,8 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0]", Matchers.hasKey("payrollId"))
             .body("sittingRecords[0]", Matchers.hasKey("accountCode"))
             .body("sittingRecords[0]", Matchers.hasKey("fee"))
-            .body("sittingRecords[0].am",equalTo("AM"))
-            .body("sittingRecords[0].pm",equalTo("PM"))
+            .body("sittingRecords[0].am",equalTo(true))
+            .body("sittingRecords[0].pm",equalTo(false))
             .body("sittingRecords[0].createdDateTime",Matchers.notNullValue())
             .body("sittingRecords[0].createdByUserId",equalTo("d139a314-eb40-45f4-9e7a-9e13f143cc3a"))
             .body("sittingRecords[0].createdByUserName",equalTo("Recorder"))
@@ -212,7 +248,11 @@ public class StepDefinitions extends TestVariables {
 
     @Then("the response contains {string} as {string}")
     public void theResponseContainsAs(String attribute, String value) {
-        response.then().assertThat().body(attribute,Matchers.equalTo(value));
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            response.then().assertThat().body(attribute, Matchers.equalTo(Boolean.parseBoolean(value)));
+        } else {
+            response.then().assertThat().body(attribute, Matchers.equalTo(value));
+        }
     }
 
     @Then("the response contains {int} {string}")

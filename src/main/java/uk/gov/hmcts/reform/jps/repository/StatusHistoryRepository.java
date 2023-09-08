@@ -1,14 +1,18 @@
 package uk.gov.hmcts.reform.jps.repository;
 
 import feign.Param;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.RecordingUser;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Long>, SittingRecordRepositorySearch {
@@ -31,9 +35,12 @@ public interface StatusHistoryRepository extends JpaRepository<StatusHistory, Lo
         )
     List<RecordingUser> findRecordingUsers(@Param("hmctsServiceId") String hmctsServiceId,
                                            @Param("regionId") String regionId,
-                                           @Param("statusIds") List<String> statusIds,
+                                           @Param("statusIds") List<StatusId> statusIds,
                                            @Param("startDate") LocalDate startDate,
                                            @Param("endDate") LocalDate endDate
     );
 
+    Optional<StatusHistory> findFirstBySittingRecord(SittingRecord sittingRecord, Sort sort);
+
+    Optional<StatusHistory> findBySittingRecordAndStatusId(SittingRecord sittingRecord, StatusId statusId);
 }

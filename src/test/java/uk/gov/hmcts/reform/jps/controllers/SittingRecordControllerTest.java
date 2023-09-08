@@ -53,7 +53,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 
-@WebMvcTest(controllers = SittingRecordController.class,
+@WebMvcTest(controllers = {SittingRecordController.class, SittingRecordDeleteController.class},
     excludeFilters = {@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
             classes = {SecurityConfiguration.class,
                 JwtGrantedAuthoritiesConverter.class})})
@@ -157,7 +157,7 @@ class SittingRecordControllerTest {
         List<RecordingUser> recordingUsers = generateRecordingUsers();
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
-            .thenReturn(sittingRecords.size());
+            .thenReturn(Long.valueOf(sittingRecords.size()));
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
         when(statusHistoryService.findRecordingUsers(anyString(), anyString(), anyList(), any(), any()))
@@ -201,7 +201,7 @@ class SittingRecordControllerTest {
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
-        )).thenReturn(2);
+        )).thenReturn(2L);
 
         List<SittingRecord> sittingRecords = Collections.emptyList();
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
@@ -241,13 +241,24 @@ class SittingRecordControllerTest {
         return List.of(recUser1, recUser2);
     }
 
+    @Test
+    void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
+            .andDo(print())
+            .andExpectAll(
+                status().isBadRequest(),
+                jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                jsonPath("$.errors[0].message").value("sittingRecordId is mandatory")
+            );
+    }
+
     private List<SittingRecord> generateSittingRecords() {
         long idSittingRecord = 0;
         long idStatusHistory = 0;
 
         StatusHistory statusHistory1 = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .changedByUserId("11233")
             .changedDateTime(LocalDateTime.now())
             .changedByName("Jason Bourne")
@@ -255,11 +266,11 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord1 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC1")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11222L)
             .contractTypeName("Contract Type 1")
             .crownServantFlag(Boolean.TRUE)
-            .epimsId("EP1")
+            .epimmsId("EP1")
             .fee(10234L)
             .hmctsServiceId("HMCTS1")
             .judgeRoleTypeId("JR1")
@@ -268,7 +279,7 @@ class SittingRecordControllerTest {
             .payrollId("PR1")
             .personalCode("PC1")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC1")
             .regionName("East Coast US1")
             .sittingDate(LocalDate.now().minusDays(2))
@@ -285,21 +296,21 @@ class SittingRecordControllerTest {
 
         StatusHistory statusHistory2a = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.RECORDED.name())
+            .statusId(StatusId.RECORDED)
             .changedByUserId("11244")
             .changedDateTime(LocalDateTime.now().minusDays(2))
             .changedByName("Matt Murdock")
             .build();
         StatusHistory statusHistory2b = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.PUBLISHED.name())
+            .statusId(StatusId.PUBLISHED)
             .changedByUserId("11245")
             .changedDateTime(LocalDateTime.now().minusDays(1))
             .changedByName("Peter Parker")
             .build();
         StatusHistory statusHistory2c = StatusHistory.builder()
             .id(++idStatusHistory)
-            .statusId(StatusId.SUBMITTED.name())
+            .statusId(StatusId.SUBMITTED)
             .changedByUserId("11246")
             .changedDateTime(LocalDateTime.now())
             .changedByName("Stephen Strange")
@@ -307,11 +318,11 @@ class SittingRecordControllerTest {
         SittingRecord sittingRecord2 = SittingRecord.builder()
             .sittingRecordId(++idSittingRecord)
             .accountCode("AC2")
-            .am(Boolean.TRUE.toString())
+            .am(Boolean.TRUE)
             .contractTypeId(11333L)
             .contractTypeName("Contract Type 2")
             .crownServantFlag(Boolean.FALSE)
-            .epimsId("EP2")
+            .epimmsId("EP2")
             .fee(20123L)
             .hmctsServiceId("HMCTS2")
             .judgeRoleTypeId("JR2")
@@ -320,7 +331,7 @@ class SittingRecordControllerTest {
             .payrollId("PR2")
             .personalCode("PC2")
             .personalName("Personal Name")
-            .pm(Boolean.TRUE.toString())
+            .pm(Boolean.TRUE)
             .regionId("EC2")
             .regionName("East Coast US2")
             .sittingDate(LocalDate.now().minusDays(1))

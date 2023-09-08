@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -20,10 +21,11 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 
 @ContextConfiguration(classes = {StatusHistoryService.class})
 @ExtendWith(SpringExtension.class)
-class StatusHistoryServiceTest {
+class StatusHistoryServiceTest extends BaseEvaluateDuplicate {
     @MockBean
     private SittingRecordRepository sittingRecordRepository;
 
@@ -42,9 +44,9 @@ class StatusHistoryServiceTest {
                                                           1L, "JRT1", "PC1", true,
                                                           "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                          StatusId.RECORDED.name());
+                                                          StatusId.RECORDED);
         StatusHistory statusHistory = createStatusHistory("Jason Bourne", "11233",
-                                                          LocalDateTime.now(),  1L, StatusId.RECORDED.name());
+                                                          LocalDateTime.now(),  1L, StatusId.RECORDED);
         statusHistory.setSittingRecord(sittingRecord);
         sittingRecord.addStatusHistory(statusHistory);
 
@@ -52,9 +54,9 @@ class StatusHistoryServiceTest {
                                                            2L, "42", "PC1", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory2 = createStatusHistory("Matt Murdock", "11244",
-                                                          LocalDateTime.now(),  2L, StatusId.RECORDED.name());
+                                                          LocalDateTime.now(),  2L, StatusId.RECORDED);
         statusHistory2.setSittingRecord(sittingRecord2);
         sittingRecord2.addStatusHistory(statusHistory2);
 
@@ -62,9 +64,9 @@ class StatusHistoryServiceTest {
                                                            3L, "42", "PC1", true,
                                                            "us-east-2",
                                                             LocalDate.of(1970, 1, 1),
-                                                           "42");
+                                                           RECORDED);
         StatusHistory statusHistory3 = createStatusHistory("Stephen Strange", "11255",
-                                                           LocalDateTime.now(),  3L, StatusId.RECORDED.name());
+                                                           LocalDateTime.now(),  3L, StatusId.RECORDED);
         statusHistory3.setSittingRecord(sittingRecord3);
         sittingRecord3.addStatusHistory(statusHistory3);
 
@@ -74,9 +76,9 @@ class StatusHistoryServiceTest {
                                                            4L, "42", "PC1", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory4 = createStatusHistory("Bruce Wayne", "11266",
-                                                          LocalDateTime.now(),  4L, StatusId.RECORDED.name());
+                                                          LocalDateTime.now(),  4L, StatusId.RECORDED);
         statusHistory4.setSittingRecord(sittingRecord4);
         sittingRecord4.addStatusHistory(statusHistory4);
 
@@ -84,10 +86,10 @@ class StatusHistoryServiceTest {
                                                            5L, "JRT5", "PC5", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory5 = createStatusHistory("Lois Lane", "11277",
                                                          LocalDate.of(1970, 1, 1).atStartOfDay(),
-                                                           5L, StatusId.RECORDED.name());
+                                                           5L, StatusId.RECORDED);
         statusHistory5.setSittingRecord(sittingRecord5);
         sittingRecord5.addStatusHistory(statusHistory5);
         when(statusHistoryRepository.save(Mockito.any())).thenReturn(statusHistory5);
@@ -96,10 +98,10 @@ class StatusHistoryServiceTest {
                                                            6L, "JRT5", "PC5", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory6 = createStatusHistory("Lois Lane", "11277",
                                                            LocalDate.of(1970, 1, 1).atStartOfDay(),
-                                                           6L, StatusId.RECORDED.name());
+                                                           6L, StatusId.RECORDED);
         statusHistory4.setSittingRecord(sittingRecord6);
         sittingRecord4.addStatusHistory(statusHistory6);
 
@@ -107,10 +109,10 @@ class StatusHistoryServiceTest {
                                                            7L, "JRT5", "PC5", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory7 = createStatusHistory("Lois Lane", "11277",
                                                            LocalDate.of(1970, 1, 1).atStartOfDay(),
-                                                           7L, StatusId.RECORDED.name());
+                                                           7L, StatusId.RECORDED);
         statusHistory7.setSittingRecord(sittingRecord7);
         sittingRecord7.addStatusHistory(statusHistory7);
 
@@ -118,10 +120,10 @@ class StatusHistoryServiceTest {
                                                            8L, "JRT5", "PC5", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory8 = createStatusHistory("Lois Lane", "11277",
                                                            LocalDate.of(1970, 1, 1).atStartOfDay(),
-                                                           8L, StatusId.RECORDED.name());
+                                                           8L, StatusId.RECORDED);
         statusHistory8.setSittingRecord(sittingRecord8);
         sittingRecord8.addStatusHistory(statusHistory8);
 
@@ -129,10 +131,10 @@ class StatusHistoryServiceTest {
                                                            9L, "JRT5", "PC5", true,
                                                            "us-east-2",
                                                            LocalDate.of(1970, 1, 1),
-                                                           StatusId.RECORDED.name());
+                                                           StatusId.RECORDED);
         StatusHistory statusHistory9 = createStatusHistory("Lois Lane", "11277",
                                                            LocalDate.of(1970, 1, 1).atStartOfDay(),
-                                                           9L, StatusId.RECORDED.name());
+                                                           9L, StatusId.RECORDED);
         statusHistory9.setSittingRecord(sittingRecord9);
         sittingRecord9.addStatusHistory(statusHistory9);
 
@@ -142,12 +144,12 @@ class StatusHistoryServiceTest {
         SittingRecord sittingRecordRetrieved = statusHistory9.getSittingRecord();
         assertSame(sittingRecord9, sittingRecordRetrieved);
         assertEquals(2, sittingRecordRetrieved.getStatusHistories().size());
-        assertEquals(StatusId.RECORDED.name(), sittingRecordRetrieved.getStatusId());
+        assertEquals(StatusId.RECORDED, sittingRecordRetrieved.getStatusId());
     }
 
     private StatusHistory createStatusHistory(String changedByName, String changedByUserId,
                                               LocalDateTime changedDateTime,
-                                              Long id, String statusId) {
+                                              Long id, StatusId statusId) {
 
         StatusHistory statusHistory = new StatusHistory();
         statusHistory.setChangedByName(changedByName);
@@ -159,13 +161,13 @@ class StatusHistoryServiceTest {
     }
 
 
-    private SittingRecord createSittingRecord(Boolean am, Long contractTypeId, String epimsId, String hmctsServiceId,
+    private SittingRecord createSittingRecord(Boolean am, Long contractTypeId, String epimmsId, String hmctsServiceId,
                                                Long id, String judgeRoleTypeId, String personalCode, Boolean pm,
-                                               String regionId, LocalDate sittingDate, String statusId) {
+                                               String regionId, LocalDate sittingDate, StatusId statusId) {
         SittingRecord sittingRecord = new SittingRecord();
         sittingRecord.setAm(am);
         sittingRecord.setContractTypeId(contractTypeId);
-        sittingRecord.setEpimsId(epimsId);
+        sittingRecord.setEpimmsId(epimmsId);
         sittingRecord.setHmctsServiceId(hmctsServiceId);
         sittingRecord.setId(id);
         sittingRecord.setJudgeRoleTypeId(judgeRoleTypeId);

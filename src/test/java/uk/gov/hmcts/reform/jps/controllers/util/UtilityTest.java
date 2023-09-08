@@ -18,9 +18,9 @@ class UtilityTest {
 
     @Test
     void shouldMissingPathVariableExceptionWhenCodeIsEmpty() {
-        assertThatThrownBy(() -> Utility.validateServiceCode(Optional.empty()))
+        Optional<String> empty = Optional.empty();
+        assertThatThrownBy(() -> Utility.validateServiceCode(empty))
             .isInstanceOf(MissingPathVariableException.class)
             .hasMessage("hmctsServiceCode is mandatory");
     }
-
 }

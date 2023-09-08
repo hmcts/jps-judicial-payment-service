@@ -1,7 +1,7 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +27,11 @@ import java.util.Optional;
 import javax.validation.Valid;
 
 import static java.util.Collections.emptyList;
+import static java.util.List.of;
 import static org.springframework.http.ResponseEntity.ok;
+import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 
 @RestController
@@ -37,15 +41,24 @@ import static org.springframework.http.ResponseEntity.ok;
     produces = MediaType.APPLICATION_JSON_VALUE
 )
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-@Slf4j
 public class SittingRecordController {
+    public static final List<StatusId> VALID_STATUS_IDS = of(RECORDED, PUBLISHED, SUBMITTED);
     private final SittingRecordService sittingRecordService;
     private final StatusHistoryService statusHistoryService;
     private final LocationService regionService;
     private final JudicialUserDetailsService judicialUserDetailsService;
 
+    @Operation(description = "Root not to be displayed", hidden = true)
     @PostMapping(
-        path = {"/searchSittingRecords", "/searchSittingRecords/{hmctsServiceCode}"}
+        path = {"/searchSittingRecords"}
+    )
+    public ResponseEntity<String> searchSittingRecords() {
+        return ResponseEntity.badRequest()
+            .body(Utility.validateServiceCode(Optional.empty()));
+    }
+
+    @PostMapping(
+        path = {"/searchSittingRecords/{hmctsServiceCode}"}
     )
     public ResponseEntity<SittingRecordSearchResponse> searchSittingRecords(
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
@@ -53,7 +66,7 @@ public class SittingRecordController {
 
         String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
 
-        final int totalRecordCount = sittingRecordService.getTotalRecordCount(
+        final long totalRecordCount = sittingRecordService.getTotalRecordCount(
             sittingRecordSearchRequest,
             hmctsServiceCode
         );
@@ -75,7 +88,7 @@ public class SittingRecordController {
                     statusHistoryService.findRecordingUsers(
                         hmctsServiceCode,
                         sittingRecordSearchRequest.getRegionId(),
-                        List.of(StatusId.RECORDED.name(), StatusId.PUBLISHED.name(), StatusId.SUBMITTED.name()),
+                        VALID_STATUS_IDS,
                         sittingRecordSearchRequest.getDateRangeFrom(),
                         sittingRecordSearchRequest.getDateRangeTo()
                     );
@@ -88,4 +101,5 @@ public class SittingRecordController {
                       .sittingRecords(sittingRecords)
                       .build());
     }
+
 }

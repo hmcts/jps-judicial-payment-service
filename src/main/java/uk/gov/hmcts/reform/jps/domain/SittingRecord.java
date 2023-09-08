@@ -2,19 +2,24 @@ package uk.gov.hmcts.reform.jps.domain;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -24,12 +29,14 @@ import javax.persistence.Table;
 @Builder
 @NoArgsConstructor()
 @AllArgsConstructor
-@Data
+@Getter
+@Setter
 @ToString
 @Entity
 @Table(name = "sitting_record")
 public class SittingRecord {
 
+    @Getter
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "sitting_record_ID")
@@ -39,20 +46,20 @@ public class SittingRecord {
     private LocalDate sittingDate;
 
     @Column(name = "status_id")
-    private String statusId;
+    @Enumerated(EnumType.STRING)
+    private StatusId statusId;
 
     @Column(name = "region_id")
     private String regionId;
 
-    @Column(name =  "epims_id")
-    private String epimsId;
+    @Column(name =  "epimms_id")
+    private String epimmsId;
 
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
 
-    @Column(name = "personal_code")
+    @Column(name = "personal_code", nullable = false)
     private String personalCode;
-
     @Column(name = "contract_type_id")
     private Long contractTypeId;
 
@@ -65,46 +72,53 @@ public class SittingRecord {
 
     @ToString.Exclude
     @OneToMany(mappedBy = "sittingRecord",
-        cascade = {CascadeType.PERSIST, CascadeType.REMOVE}, fetch = FetchType.EAGER)
+        cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE})
     private final List<StatusHistory> statusHistories = new ArrayList<>();
 
     public String getCreatedByUserId() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+        return getFirstStatusHistory()
+            .map(StatusHistory::getChangedByUserId)
+            .orElse(null);
     }
 
     public String getCreatedByUserName() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByName() : null;
+        return getFirstStatusHistory()
+            .map(StatusHistory::getChangedByName)
+            .orElse(null);
     }
 
     public LocalDateTime getCreatedDateTime() {
-        StatusHistory statusHistory = getFirstStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
+        return getFirstStatusHistory()
+            .map(StatusHistory::getChangedDateTime)
+            .orElse(null);
     }
 
     public String getChangedByUserId() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByUserId() : null;
+        return getLatestStatusHistory()
+            .map(StatusHistory::getChangedByUserId)
+            .orElse(null);
     }
 
     public String getChangedByUserName() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedByName() : null;
+        return getLatestStatusHistory()
+            .map(StatusHistory::getChangedByName)
+            .orElse(null);
     }
 
     public LocalDateTime getChangedByDateTime() {
-        StatusHistory statusHistory = getLatestStatusHistory();
-        return null != statusHistory ? statusHistory.getChangedDateTime() : null;
+        return getLatestStatusHistory()
+            .map(StatusHistory::getChangedDateTime)
+            .orElse(null);
     }
 
-    public StatusHistory getFirstStatusHistory() {
-        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    public Optional<StatusHistory> getFirstStatusHistory() {
+        return statusHistories.stream().min(Comparator.comparingLong(StatusHistory::getId));
     }
 
-    public StatusHistory getLatestStatusHistory() {
-        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId)).orElse(null);
+    public Optional<StatusHistory> getLatestStatusHistory() {
+        return statusHistories.stream().max(Comparator.comparingLong(StatusHistory::getId));
     }
+
 
     public void addStatusHistory(StatusHistory statusHistory) {
         this.statusHistories.add(statusHistory);
@@ -121,16 +135,22 @@ public class SittingRecord {
         uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord
             = (uk.gov.hmcts.reform.jps.domain.SittingRecord) object;
 
-        return (sittingRecord.getId() == this.getId()
+        return (sittingRecord.getId().equals(this.getId())
+            && sittingRecord.isAm() == this.isAm()
             && sittingRecord.getContractTypeId().equals(this.getContractTypeId())
-            && sittingRecord.getEpimsId().equals(this.getEpimsId())
+            && sittingRecord.getEpimmsId().equals(this.getEpimmsId())
             && sittingRecord.getPersonalCode().equals(this.getPersonalCode())
             && sittingRecord.getHmctsServiceId().equals(this.getHmctsServiceId())
             && sittingRecord.getJudgeRoleTypeId().equals(this.getJudgeRoleTypeId())
+            && sittingRecord.isPm() == this.isPm()
             && sittingRecord.getRegionId().equals(this.getRegionId())
-            && sittingRecord.getStatusId().equals(this.getStatusId())
-            && (null == sittingRecord.getStatusHistories() && null == this.getStatusHistories()
-            || null != sittingRecord.getStatusHistories() && null != this.getStatusHistories()
-            && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()));
+            && sittingRecord.getStatusId() == this.getStatusId()
+            && (Objects.isNull(sittingRecord.getStatusHistories())
+                && Objects.isNull(this.getStatusHistories())
+                || (Objects.nonNull(sittingRecord.getStatusHistories())
+                && Objects.nonNull(this.getStatusHistories())
+                && sittingRecord.getStatusHistories().size() == this.getStatusHistories().size()
+                && Objects.deepEquals(this.getStatusHistories().toArray(),
+                                  sittingRecord.getStatusHistories().toArray()))));
     }
 }
