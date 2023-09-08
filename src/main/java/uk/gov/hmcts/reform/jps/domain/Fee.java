@@ -42,7 +42,7 @@ public class Fee {
     @Column(name = "london_weighted_fee")
     private BigDecimal londonWeightedFee;
 
-    @Column(name = "effective_from")
+    @Column(name = "effective_start_date")
     private LocalDate effectiveFrom;
 
     @Column(name = "fee_created_date")
