@@ -459,8 +459,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             RECORDED
         );
 
-        when(sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
-            any(), any(), any(), anyList())
+        when(sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+            any(), any(), anyList())
         ).thenReturn(Streamable.of(List.of(sittingRecordDuplicateCheckFields)));
 
 
@@ -505,8 +505,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         List<SittingRecordDuplicateCheckFields> dbSittingRecordDuplicateCheckFields = Collections.emptyList();
 
-        when(sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
-            any(), any(), any(), anyList())
+        when(sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+            any(), any(),  anyList())
         ).thenReturn(Streamable.of(dbSittingRecordDuplicateCheckFields));
 
         List<SittingRecordWrapper> sittingRecordWrappers =

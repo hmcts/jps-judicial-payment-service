@@ -33,9 +33,8 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
     Optional<SittingRecord> findRecorderSittingRecord(Long id, StatusId statusId);
 
     Streamable<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields>
-        findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
+        findBySittingDateAndPersonalCodeAndStatusIdNotIn(
             LocalDate sittingDate,
-            String epimmsId,
             String personalCode,
             Collection<StatusId> statusId
         );
