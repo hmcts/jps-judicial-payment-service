@@ -535,9 +535,9 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .containsExactly(tuple(VALID, null, null),
-                      tuple(VALID, null, null),
-                      tuple(VALID, null, null)
+            .containsExactly(tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED)
             );
     }
 

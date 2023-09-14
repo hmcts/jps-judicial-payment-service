@@ -176,9 +176,8 @@ public class SittingRecordService {
         SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
 
         try (Stream<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> stream
-                     = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
+                     = sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
                 sittingRecordRequest.getSittingDate(),
-                sittingRecordRequest.getEpimmsId(),
                 sittingRecordRequest.getPersonalCode(),
                 List.of(DELETED, CLOSED)
         ).stream()) {
