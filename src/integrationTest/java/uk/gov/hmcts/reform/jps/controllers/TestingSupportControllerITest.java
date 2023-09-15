@@ -2,6 +2,7 @@ package uk.gov.hmcts.reform.jps.controllers;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -27,6 +28,7 @@ import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @SpringBootTest
 @AutoConfigureMockMvc(addFilters = false)
+@ConditionalOnProperty(prefix = "testing", value = "support.enabled", havingValue = "true")
 class TestingSupportControllerITest {
 
     @Autowired
