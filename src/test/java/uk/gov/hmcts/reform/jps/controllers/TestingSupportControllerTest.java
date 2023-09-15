@@ -1,8 +1,8 @@
 package uk.gov.hmcts.reform.jps.controllers;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -44,7 +44,7 @@ import static org.testcontainers.shaded.com.google.common.io.Resources.getResour
     excludeFilters = @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE,
         classes = {SecurityConfiguration.class, JwtGrantedAuthoritiesConverter.class}))
 @AutoConfigureMockMvc(addFilters = false)
-@ConditionalOnProperty(prefix = "testing", value = "support.enabled", havingValue = "true")
+@EnabledIfEnvironmentVariable(named = "testing.support.enabled", matches = "true")
 class TestingSupportControllerTest {
 
     @Autowired
