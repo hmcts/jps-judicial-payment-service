@@ -130,3 +130,25 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the request body contains the "payload with all the fields" as in "F-005_allFields"
     And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "401 Unauthorised" status code
+
+  @S-005.15 #AC01
+  Scenario: Negative response, when the request has a hmctsServiceId passed that is not found (not in the service table)
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA4"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
+    And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
+
+  @S-005.16 #AC02
+  Scenario: Negative response, when the request has a hmctsServiceId passed but it is not yet on-boarded
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA3"
+    And the request body contains the "payload with all the fields" as in "F-005_allFields"
+    And a call is submitted to the "SearchSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
