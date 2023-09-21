@@ -485,7 +485,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     }
 
     @Test
-    void shouldInvokeDuplicateCheckerOncePerSittingRecordRequestWhenMoreThanOneMatchingRecordsFoundInDb() throws IOException {
+    void shouldInvokeDuplicateCheckerOncePerSittingRecordRequestWhenMoreThanOneMatchingRecordsFoundInDb()
+        throws IOException {
         String requestJson = Resources.toString(getResource("recordSittingRecordsOnePotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
