@@ -145,7 +145,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
     And the "recordsClosed" is 1
     And the "recordsSubmitted" is 1
 
-  @S-006.14 @Ignore #AC03 IJPS-77 --Ignoring until test endpoint is created to populated judicial_office_holder and JOH_attributes tables
+  @S-006.14 #AC03 IJPS-77
   Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 when record has Contract_type_id=6 and crown_servant_flag set to false
     Given a user with the IDAM role of "jps-submitter"
     And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.14_createRecord"
@@ -158,7 +158,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
     And the "recordsClosed" is 1
     And the "recordsSubmitted" is 0
 
-  @S-006.15 @Ignore #AC04 IJPS-77 --Ignoring until test endpoint is created to populated judicial_office_holder and JOH_attributes tables
+  @S-006.15 #AC04 IJPS-77
   Scenario: Success response - Return 200 success with recordsSubmitted value incremented by 1 when record has Contract_type_id=6 and crown_servant_flag set to true
     Given a user with the IDAM role of "jps-submitter"
     And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.15_createRecord"
