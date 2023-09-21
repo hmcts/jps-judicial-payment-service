@@ -181,10 +181,15 @@ public class SittingRecordService {
                 sittingRecordRequest.getPersonalCode(),
                 List.of(DELETED, CLOSED)
         ).stream()) {
-            stream.forEach(sittingRecordDuplicateCheckFields ->
-                    duplicateCheckerService
+            stream
+                .forEach(sittingRecordDuplicateCheckFields -> {
+                    if (VALID == sittingRecordWrapper.getErrorCode()) {
+                        duplicateCheckerService
                             .evaluate(sittingRecordWrapper,
-                                    sittingRecordDuplicateCheckFields));
+                                      sittingRecordDuplicateCheckFields);
+                    }
+                }
+            );
         }
     }
 

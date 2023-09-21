@@ -61,6 +61,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -481,6 +482,71 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         verify(duplicateCheckerService, times(3)).evaluate(any(), any());
+    }
+
+    @Test
+    void shouldInvokeDuplicateCheckerOncePerSittingRecordRequestWhenMoreThanOneMatchingRecordsFoundInDb() throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecordsOnePotentialDuplicate.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields firstDbRecord
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            sittingRecordRequest.getEpimmsId(),
+            sittingRecordRequest.getPersonalCode(),
+            sittingRecordRequest.getDurationBoolean().getAm(),
+            sittingRecordRequest.getDurationBoolean().getPm(),
+            "3",
+            RECORDED
+        );
+
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields secondDbRecord
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            sittingRecordRequest.getEpimmsId(),
+            sittingRecordRequest.getPersonalCode(),
+            !sittingRecordRequest.getDurationBoolean().getAm(),
+            !sittingRecordRequest.getDurationBoolean().getPm(),
+            "14",
+            RECORDED
+        );
+
+        when(sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+            any(), any(), anyList())
+        ).thenReturn(
+            Streamable.of(
+                List.of(
+                    firstDbRecord,
+                    secondDbRecord
+                )
+            )
+        );
+
+        doAnswer(invocation -> {
+            SittingRecordWrapper sittingRecordWrapper = invocation.getArgument(0);
+            sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+            return null;
+        }).when(duplicateCheckerService).evaluate(
+                isA(SittingRecordWrapper.class),
+                isA(SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields.class));
+
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        verify(duplicateCheckerService, times(1))
+            .evaluate(
+                isA(SittingRecordWrapper.class),
+                isA(SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields.class)
+            );
     }
 
     @Test
