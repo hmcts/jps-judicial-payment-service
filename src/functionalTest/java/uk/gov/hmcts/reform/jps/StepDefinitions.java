@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps;
 
-import io.cucumber.java.Before;
+import io.cucumber.java.AfterAll;
+import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,6 +21,8 @@ import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,27 +39,49 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification request;
     RequestSpecification given;
     Response response;
+    static String JOH_KEY = "JOH";
 
-    private static boolean isSetupExecuted = false;
+    static Map<String,String> responses = new HashMap<>();
 
-    @Before
-    public void setup() throws InterruptedException {
-        if (!isSetupExecuted) {
+    @BeforeAll
+    public static void setUpDB() throws IOException, InterruptedException {
 
-            IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-            recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
-            submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
-            publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
-            adminAccessToken = idamTokenGenerator.authenticateUser(adminUsername, adminPassword);
-            johAdminAccessToken = idamTokenGenerator.authenticateUser(johAdminUsername, johAdminPassword);
-            invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
+        recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+        submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
+        publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
+        adminAccessToken = idamTokenGenerator.authenticateUser(adminUsername, adminPassword);
+        johAdminAccessToken = idamTokenGenerator.authenticateUser(johAdminUsername, johAdminPassword);
+        invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
 
-            ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
-            validS2sToken = serviceAuthenticationGenerator.generate();
-            invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
+        ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+        validS2sToken = serviceAuthenticationGenerator.generate();
+        invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
 
-            isSetupExecuted = true;
-        }
+        String body = new
+            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/setup/addJOHs.json")));
+
+        RestAssured.baseURI = testUrl;
+        Response response1 = given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post("/testing-support/save-judicial-office-holders")
+            .then().log().all().assertThat().statusCode(201)
+            .extract().response();
+
+        responses.put(JOH_KEY,response1.getBody().asString());
+    }
+
+    @AfterAll
+    public static void tearDownDB() {
+        RestAssured.baseURI = testUrl;
+        given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(responses.get(JOH_KEY)).log().all()
+            .when().post("/testing-support/delete-judicial-office-holders")
+            .then().log().all().assertThat().statusCode(200);
     }
 
     @Given("a user with the IDAM role of {string}")
