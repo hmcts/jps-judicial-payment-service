@@ -52,6 +52,17 @@ public class BaseTest {
 
     public static final String SITTING_RECORD_STATUS_HISTORY
         = "classpath:sql/sitting_record_status_history.sql";
+    public static final String INSERT_COURT_VENUE
+        = "classpath:sql/insert_court_venue.sql";
+    public static final String INSERT_FEE
+        = "classpath:sql/insert_fee.sql";
+
+    public static final String INSERT_SERVICE
+        = "classpath:sql/insert_service_test_data.sql";
+
+    public static final String INSERT_JOH
+        = "classpath:sql/insert_joh.sql";
+
 
     @BeforeEach
     void init() {

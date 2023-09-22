@@ -7,14 +7,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.domain.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_SERVICE;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -94,5 +98,17 @@ class ServiceRepositoryTest {
     void shouldFailToFindServiceByHmctsServiceId() {
         assertThat(serviceRepository.findByHmctsServiceId("FFGHJHUJ"))
             .isEmpty();
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
+    void shouldDeleteRecordsWhenIdsPassed() {
+        List<Long> courtVenueIds = serviceRepository.findAll().stream()
+            .map(Service::getId)
+            .toList();
+        assertThat(courtVenueIds).isNotEmpty();
+        serviceRepository.deleteByIds(courtVenueIds);
+        List<Service> courtVenues = serviceRepository.findAll();
+        assertThat(courtVenues).isEmpty();
     }
 }

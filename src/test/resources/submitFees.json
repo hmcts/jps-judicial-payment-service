@@ -1,0 +1,22 @@
+{
+  "fees": [
+    {
+      "hmctsServiceId": "BBA3",
+      "judgeRoleId": "Judge",
+      "standardFee": 0,
+      "higherThresholdFee": 0,
+      "londonWeightedFee": 0,
+      "effectiveFrom": "2023-09-14",
+      "feeCreatedDate": "2023-09-14"
+    },
+    {
+      "hmctsServiceId": "ABA5",
+      "judgeRoleId": "Health",
+      "standardFee": 0,
+      "higherThresholdFee": 0,
+      "londonWeightedFee": 0,
+      "effectiveFrom": "2023-06-11",
+      "feeCreatedDate": "2023-07-12"
+    }
+  ]
+}

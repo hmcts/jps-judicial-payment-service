@@ -6,15 +6,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.domain.Fee;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_FEE;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -34,7 +38,6 @@ class FeeRepositoryTest {
 
     @BeforeEach
     public void setUp() {
-        feeRepository.deleteAll();
         fee = createFee();
         persistedFee = feeRepository.save(fee);
     }
@@ -71,6 +74,18 @@ class FeeRepositoryTest {
 
         optionalSettingHistoryToUpdate = feeRepository.findById(settingHistoryToDelete.getId());
         assertThat(optionalSettingHistoryToUpdate).isEmpty();
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_FEE})
+    void shouldDeleteRecordsWhenIdsPassed() {
+        List<Long> courtVenueIds = feeRepository.findAll().stream()
+            .map(Fee::getId)
+            .toList();
+        assertThat(courtVenueIds).isNotEmpty();
+        feeRepository.deleteByIds(courtVenueIds);
+        List<Fee> courtVenues = feeRepository.findAll();
+        assertThat(courtVenues).isEmpty();
     }
 
     private Fee createFee() {
