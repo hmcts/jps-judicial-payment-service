@@ -58,31 +58,47 @@ public class StepDefinitions extends TestVariables {
         validS2sToken = serviceAuthenticationGenerator.generate();
         invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
 
-        String body = new
-            String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/setup/addJOHs.json")));
-
         RestAssured.baseURI = testUrl;
-        Response response1 = given().header("Content-Type", "application/json")
-            .header("Authorization", recorderAccessToken)
-            .header("ServiceAuthorization", validS2sToken)
-            .body(body).log().all()
-            .when().post("/testing-support/save-judicial-office-holders")
-            .then().log().all().assertThat().statusCode(201)
-            .extract().response();
-
-        responses.put(JOH_KEY,response1.getBody().asString());
+        createRecords(
+            "./src/functionalTest/resources/payloads/setup/addJOHs.json",
+            "/testing-support/save-judicial-office-holders",
+            JOH_KEY
+        );
     }
 
     @AfterAll
     public static void tearDownDB() {
         RestAssured.baseURI = testUrl;
-        given().header("Content-Type", "application/json")
+        getValidatableResponse(
+            "/testing-support/delete-judicial-office-holders",
+            responses.get(JOH_KEY),
+            200
+        );
+    }
+
+
+    private static void createRecords(String data, String url, String key) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get(data)));
+        Response response = createRecords(url, body, 201);
+
+        responses.put(key,response.getBody().asString());
+    }
+
+    private static Response createRecords(String url, String body, int statusCode) {
+        return getValidatableResponse(url, body, statusCode)
+            .extract().response();
+    }
+
+    private static ValidatableResponse getValidatableResponse(String url, String body, int statusCode) {
+        return given().header("Content-Type", "application/json")
             .header("Authorization", recorderAccessToken)
             .header("ServiceAuthorization", validS2sToken)
-            .body(responses.get(JOH_KEY)).log().all()
-            .when().post("/testing-support/delete-judicial-office-holders")
-            .then().log().all().assertThat().statusCode(200);
+            .body(body).log().all()
+            .when().post(url)
+            .then().log().all().assertThat().statusCode(statusCode);
     }
+
 
     @Given("a user with the IDAM role of {string}")
     public void userWithTheIdamRoleOf(String role) {
