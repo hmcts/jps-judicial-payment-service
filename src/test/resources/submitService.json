@@ -1,0 +1,20 @@
+{
+  "services": [
+    {
+      "hmctsServiceId": "BBA3",
+      "serviceName": "Real Service",
+      "accountCenterCode": "TSTACTR1",
+      "onboardingStartDate": "2023-06-22",
+      "retentionTimeInMonths": 6,
+      "closeRecordedRecordAfterTimeInMonths": 3
+    },
+    {
+      "hmctsServiceId": "ABA5",
+      "serviceName": "Service",
+      "accountCenterCode": "TSTBBC",
+      "onboardingStartDate": "2023-09-13",
+      "retentionTimeInMonths": 9,
+      "closeRecordedRecordAfterTimeInMonths": 6
+    }
+  ]
+}

@@ -224,7 +224,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM matching the exiting record, but judgeRoleTypeId does not match" as in "S-004.20"
+    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM matching the existing record, but judgeRoleTypeId does not match" as in "S-004.20"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
@@ -244,7 +244,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM matching the exiting record, but judgeRoleTypeId does not match" as in "S-004.21"
+    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM matching the existing record, but judgeRoleTypeId does not match" as in "S-004.21"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
@@ -264,7 +264,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM and judgeRoleTypeId matching the exiting record" as in "S-004.22"
+    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM and judgeRoleTypeId matching the existing record" as in "S-004.22"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
@@ -283,7 +283,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "sittingDate, epimmsId, personalCode matching the exiting record, but AM/PM does not match" as in "S-004.23"
+    And the request body contains the "sittingDate, epimmsId, personalCode matching the existing record, but AM/PM does not match" as in "S-004.23"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "201 Created" status code
     And the response contains "errorRecords[0].errorCode" as "VALID"
@@ -370,7 +370,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
-    And the request body contains the "sittingDate, epimmsId, personalCode matching the exiting record, and AM/PM intersect" as in "S-004.27"
+    And the request body contains the "sittingDate, epimmsId, personalCode matching the existing record, and AM/PM intersect" as in "S-004.27"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
@@ -413,3 +413,127 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
+    
+  @S-004.29 @PossibleDuplicates
+  Scenario: When epimmsId is different from existing record - Return 400 - 008 could not insert with errorCode set to "potentialDuplicateRecord" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate, judgeRoleTypeId, personalCode, AM/PM matching the existing record, but epimmsId does not match" as in "S-004.29"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "message" as "008 could not insert"
+    And the response contains "errorRecords[0].errorCode" as "POTENTIAL_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].am" as "true"
+    And the response contains "errorRecords[0].pm" as "false"
+    And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
+    And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+
+  @S-004.30 @PossibleDuplicates
+  Scenario: When epimmsId is different and existing sitting record status is Submitted- Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And a call to submit the existing record with the payload "F-004_submitRecord"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate, judgeRoleTypeId, personalCode, AM/PM matching the existing record, but epimmsId does not match" as in "S-004.30"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "message" as "008 could not insert"
+    And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[0].statusId" as "SUBMITTED"
+    And the response contains "errorRecords[0].am" as "true"
+    And the response contains "errorRecords[0].pm" as "false"
+    And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
+    And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+
+  @S-004.31 @PossibleDuplicates
+  Scenario: When epimmsId and judgeRoleTypeId are different from existing record - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate, personalCode, AM/PM matching the existing record, but epimmsId and judgeRoleTypeId do not match" as in "S-004.31"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "message" as "008 could not insert"
+    And the response contains "errorRecords[0].errorCode" as "POTENTIAL_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].am" as "true"
+    And the response contains "errorRecords[0].pm" as "false"
+    And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
+    And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+
+  @S-004.32 @PossibleDuplicates
+  Scenario: When epimmsId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate, judgeRoleTypeId and personalCode matching the existing record, but epimmsId and AM/PM do not match" as in "S-004.32"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "201 OK" status code
+    And the response contains "errorRecords[0].errorCode" as "VALID"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+
+  @S-004.33 @PossibleDuplicates
+  Scenario: When epimmsId, judgeRoleTypeId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate and personalCode matching the existing record, but epimmsId, judgeRoleTypeId and AM/PM do not match" as in "S-004.33"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "201 OK" status code
+    And the response contains "errorRecords[0].errorCode" as "VALID"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+
+  @S-004.34 @PossibleDuplicates
+  Scenario: When epimmsId is different from existing record and period intersects - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate, judgeRoleTypeId and personalCode matching the existing record, but epimmsId does not match and AM/PM intersects" as in "S-004.34"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "message" as "008 could not insert"
+    And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].am" as "true"
+    And the response contains "errorRecords[0].pm" as "false"
+    And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
+    And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+
+  @S-004.35 @PossibleDuplicates
+  Scenario: When epimmsId and judgeRoleTypeId are different from existing record and period intersects - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
+    Given a user with the IDAM role of "jps-recorder"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate and personalCode matching the existing record, but epimmsId and judgeRoleTypeId do not match and AM/PM intersects" as in "S-004.35"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "message" as "008 could not insert"
+    And the response contains "errorRecords[0].errorCode" as "INVALID_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].am" as "true"
+    And the response contains "errorRecords[0].pm" as "false"
+    And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
+    And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"

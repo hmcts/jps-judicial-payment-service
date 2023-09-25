@@ -12,6 +12,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
     And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "200 OK" status code
     And the "recordsSubmitted" is 1
+    And the "recordsClosed" is 0
 
   @S-006.2 #AC03
   Scenario: Negative response - Return 403 Forbidden, valid JPS role but invalid role for this endpoint
@@ -139,3 +140,81 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
     And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
+  
+  @S-006.12 #AC01 IJPS-77
+  Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 when Contract_type_id=1
+    Given a user with the IDAM role of "jps-submitter"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.12_createRecord"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-006_allFields"
+    And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "200 OK" status code
+    And the "recordsClosed" is 1
+    And the "recordsSubmitted" is 0
+
+  @S-006.13 #AC02 IJPS-77
+  Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 and recordsSubmitted value incremented by 1 when 1 record has Contract_type_id=2 and other has Contract_type_id=1
+    Given a user with the IDAM role of "jps-submitter"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.13_createRecords"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-006_generic"
+    And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "200 OK" status code
+    And the "recordsClosed" is 1
+    And the "recordsSubmitted" is 1
+
+  @S-006.14 #AC03 IJPS-77
+  Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 when record has Contract_type_id=6 and crown_servant_flag set to false
+    Given a user with the IDAM role of "jps-submitter"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.14_createRecord"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-006_generic"
+    And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "200 OK" status code
+    And the "recordsClosed" is 1
+    And the "recordsSubmitted" is 0
+
+  @S-006.15 #AC04 IJPS-77
+  Scenario: Success response - Return 200 success with recordsSubmitted value incremented by 1 when record has Contract_type_id=6 and crown_servant_flag set to true
+    Given a user with the IDAM role of "jps-submitter"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.15_createRecord"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-006_allFields"
+    And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "200 OK" status code
+    And the "recordsClosed" is 0
+    And the "recordsSubmitted" is 1
+
+  @S-006.16 #AC05 IJPS-77
+  Scenario: Success response - Return 200 success with no record updated when effective_start_date is before than sitting_date
+    Given a user with the IDAM role of "jps-submitter"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.16_createRecord"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-006_generic"
+    And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "200 OK" status code
+    And the "recordsClosed" is 0
+    And the "recordsSubmitted" is 0
+
+  @S-006.17 #AC06 IJPS-77
+  Scenario: Success response - Return 200 success with record is not updated when record has Contract_type_id=6 and there is no local_joh_record_id
+    Given a user with the IDAM role of "jps-submitter"
+    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.17_createRecord"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "payload matching data from existing record" as in "F-006_generic"
+    And a call is submitted to the "SubmitSittingRecords" endpoint using a "POST" request
+    Then a "positive" response is received with a "200 OK" status code
+    And the "recordsClosed" is 0
+    And the "recordsSubmitted" is 0

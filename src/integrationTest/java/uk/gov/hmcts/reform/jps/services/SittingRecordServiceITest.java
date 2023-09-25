@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,11 +81,6 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
 
-    @BeforeEach
-    void beforeEach() {
-        statusHistoryRepository.deleteAll();
-        sittingRecordRepository.deleteAll();
-    }
 
     @Test
     @Sql(scripts = {RESET_DATABASE})
@@ -398,7 +392,7 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistory createStatusHistory(StatusId statusId, String userId, String userName) {
         return StatusHistory.builder()
             .statusId(statusId)
-            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.MICROS))
+            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusSeconds(1))
             .changedByUserId(userId)
             .changedByName(userName)
             .build();
@@ -541,9 +535,9 @@ class SittingRecordServiceITest extends BaseTest {
 
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
-            .containsExactly(tuple(VALID, null, null),
-                      tuple(VALID, null, null),
-                      tuple(VALID, null, null)
+            .containsExactly(tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+                      tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED)
             );
     }
 

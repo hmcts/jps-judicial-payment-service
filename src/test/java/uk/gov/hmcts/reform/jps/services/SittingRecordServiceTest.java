@@ -22,8 +22,8 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
+import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
@@ -31,6 +31,7 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
+import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
@@ -47,7 +48,6 @@ import java.util.Random;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.LongStream;
-import java.util.stream.Stream;
 
 import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
@@ -61,6 +61,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -69,6 +70,7 @@ import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_LOCATION;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.POTENTIAL_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -103,6 +105,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private StatusHistoryService statusHistoryService;
 
+    @Mock
+    private JudicialOfficeHolderService judicialOfficeHolderService;
+
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @InjectMocks
@@ -111,7 +116,12 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
     @Captor
-    private ArgumentCaptor<Long> sittingRecordIdCaptor;
+    private ArgumentCaptor<Long> records;
+    @Captor
+    private ArgumentCaptor<String> personalCode;
+
+    @Captor
+    private ArgumentCaptor<LocalDate> sittingDate;
 
     @BeforeEach
     void setUp() {
@@ -395,7 +405,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .thenReturn(Optional.of(sittingRecord));
 
         Long id = sittingRecord.getId();
-        Exception exception = assertThrows(ConflictException.class, () ->
+        Exception exception = assertThrows(ForbiddenException.class, () ->
             sittingRecordService.deleteSittingRecord(id)
         );
         assertThat(exception.getMessage())
@@ -413,7 +423,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .thenReturn(Optional.of(sittingRecord));
 
         Long id = sittingRecord.getId();
-        Exception exception = assertThrows(ConflictException.class, () ->
+        Exception exception = assertThrows(ForbiddenException.class, () ->
             sittingRecordService.deleteSittingRecord(id)
         );
         assertThat(exception.getMessage())
@@ -431,7 +441,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .thenReturn(Optional.of(sittingRecord));
 
         Long id = sittingRecord.getId();
-        Exception exception = assertThrows(ConflictException.class, () ->
+        Exception exception = assertThrows(ForbiddenException.class, () ->
             sittingRecordService.deleteSittingRecord(id)
         );
         assertThat(exception.getMessage())
@@ -459,8 +469,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             RECORDED
         );
 
-        when(sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
-            any(), any(), any(), anyList())
+        when(sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+            any(), any(), anyList())
         ).thenReturn(Streamable.of(List.of(sittingRecordDuplicateCheckFields)));
 
 
@@ -472,6 +482,72 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
 
         verify(duplicateCheckerService, times(3)).evaluate(any(), any());
+    }
+
+    @Test
+    void shouldInvokeDuplicateCheckerOncePerSittingRecordRequestWhenMoreThanOneMatchingRecordsFoundInDb()
+        throws IOException {
+        String requestJson = Resources.toString(getResource("recordSittingRecordsOnePotentialDuplicate.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields firstDbRecord
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            sittingRecordRequest.getEpimmsId(),
+            sittingRecordRequest.getPersonalCode(),
+            sittingRecordRequest.getDurationBoolean().getAm(),
+            sittingRecordRequest.getDurationBoolean().getPm(),
+            "3",
+            RECORDED
+        );
+
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields secondDbRecord
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            sittingRecordRequest.getEpimmsId(),
+            sittingRecordRequest.getPersonalCode(),
+            !sittingRecordRequest.getDurationBoolean().getAm(),
+            !sittingRecordRequest.getDurationBoolean().getPm(),
+            "14",
+            RECORDED
+        );
+
+        when(sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+            any(), any(), anyList())
+        ).thenReturn(
+            Streamable.of(
+                List.of(
+                    firstDbRecord,
+                    secondDbRecord
+                )
+            )
+        );
+
+        doAnswer(invocation -> {
+            SittingRecordWrapper sittingRecordWrapper = invocation.getArgument(0);
+            sittingRecordWrapper.setErrorCode(POTENTIAL_DUPLICATE_RECORD);
+            return null;
+        }).when(duplicateCheckerService).evaluate(
+                isA(SittingRecordWrapper.class),
+                isA(SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields.class));
+
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+        sittingRecordService.checkDuplicateRecords(sittingRecordWrappers);
+
+        verify(duplicateCheckerService, times(1))
+            .evaluate(
+                isA(SittingRecordWrapper.class),
+                isA(SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields.class)
+            );
     }
 
     @Test
@@ -505,8 +581,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         List<SittingRecordDuplicateCheckFields> dbSittingRecordDuplicateCheckFields = Collections.emptyList();
 
-        when(sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
-            any(), any(), any(), anyList())
+        when(sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+            any(), any(),  anyList())
         ).thenReturn(Streamable.of(dbSittingRecordDuplicateCheckFields));
 
         List<SittingRecordWrapper> sittingRecordWrappers =
@@ -521,8 +597,23 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Test
     void shouldReturnCountOfRecordsSubmittedWhenMatchRecordFoundInSittingRecordsTable() {
+        LocalDate now = LocalDate.now();
         String hmctsServiceCode = "BBA3";
-        List<Long> sittingRecordIds = List.of(1L, 100L, 200L);
+        List<RecordSubmitFields> sittingRecordIds = List.of(
+            getRecordSubmitFields(1L, 6L, "123", now.minusDays(2)),
+            getRecordSubmitFields(100L, 2L, "243", now.minusDays(3)),
+            getRecordSubmitFields(200L, 3L, "567", now.minusDays(4)),
+            getRecordSubmitFields(300L, 6L, "789", now.minusDays(5)),
+            getRecordSubmitFields(400L, 6L, "999", now.minusDays(6))
+        );
+
+        when(judicialOfficeHolderService.getCrownServiceFlag("123", now.minusDays(2)))
+            .thenReturn(Optional.of(true));
+        when(judicialOfficeHolderService.getCrownServiceFlag("789", now.minusDays(5)))
+            .thenReturn(Optional.of(false));
+        when(judicialOfficeHolderService.getCrownServiceFlag("999", now.minusDays(6)))
+            .thenReturn(Optional.empty());
+
         SubmitSittingRecordRequest submitSittingRecordRequest = SubmitSittingRecordRequest.builder()
             .submittedByIdamId("b139a314-eb40-45f4-9e7a-9e13f143cc3a")
             .submittedByName("submitter")
@@ -534,30 +625,75 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
                                                          hmctsServiceCode))
-            .thenReturn(sittingRecordIds.stream());
+            .thenReturn(sittingRecordIds);
 
-        int countSubmitted = sittingRecordService.submitSittingRecords(
+        SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
             hmctsServiceCode
         );
-        verify(statusHistoryService, times(3))
-            .insertRecord(sittingRecordIdCaptor.capture(),
+
+        verify(statusHistoryService, times(2))
+            .insertRecord(records.capture(),
                           eq(SUBMITTED),
                           eq(submitSittingRecordRequest.getSubmittedByIdamId()),
                           eq(submitSittingRecordRequest.getSubmittedByName()));
 
-        assertThat(countSubmitted)
-            .isEqualTo(3);
+        assertThat(records.getAllValues())
+            .describedAs("Records submitted")
+            .contains(1L, 100L);
 
-        assertThat(sittingRecordIdCaptor.getAllValues())
-            .containsAll(sittingRecordIds);
+        verify(statusHistoryService, times(2))
+            .insertRecord(records.capture(),
+                          eq(CLOSED),
+                          eq(submitSittingRecordRequest.getSubmittedByIdamId()),
+                          eq(submitSittingRecordRequest.getSubmittedByName()));
 
-        verify(sittingRecordRepository, times(3))
-            .updateToSubmitted(sittingRecordIdCaptor.capture());
+        assertThat(records.getAllValues())
+            .describedAs("Records deleted")
+            .contains(200L);
 
-        assertThat(sittingRecordIdCaptor.getAllValues())
-            .containsAll(sittingRecordIds);
 
+        assertThat(submitSittingRecordResponse.getRecordsSubmitted())
+            .isEqualTo(2);
+
+        assertThat(submitSittingRecordResponse.getRecordsClosed())
+            .isEqualTo(2);
+
+
+        verify(sittingRecordRepository, times(4))
+            .updateRecordedStatus(anyLong(), isA(StatusId.class));
+        verify(judicialOfficeHolderService, times(5))
+            .getCrownServiceFlag(personalCode.capture(), sittingDate.capture());
+
+        assertThat(personalCode.getAllValues())
+            .containsExactlyInAnyOrder("123",
+                                       "789",
+                                       "999",
+                                       "789",
+                                       "999");
+
+        assertThat(sittingDate.getAllValues())
+            .containsExactlyInAnyOrder(now.minusDays(2),
+                                       now.minusDays(5),
+                                       now.minusDays(6),
+                                       now.minusDays(5),
+                                       now.minusDays(6));
+
+
+    }
+
+    private static RecordSubmitFields getRecordSubmitFields(
+        long id,
+        long contractTypeId,
+        String number,
+        LocalDate sittingDate) {
+
+        return RecordSubmitFields.builder()
+            .id(id)
+            .contractTypeId(contractTypeId)
+            .personalCode(number)
+            .sittingDate(sittingDate)
+            .build();
     }
 
     @Test
@@ -574,9 +710,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         when(sittingRecordRepository.findRecordsToSubmit(submitSittingRecordRequest,
                                                          hmctsServiceCode))
-            .thenReturn(Stream.empty());
+            .thenReturn(Collections.emptyList());
 
-        int countSubmitted = sittingRecordService.submitSittingRecords(
+        SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
             hmctsServiceCode
         );
@@ -587,9 +723,12 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                           eq(submitSittingRecordRequest.getSubmittedByName()));
 
         verify(sittingRecordRepository, never())
-            .updateToSubmitted(any());
+            .updateRecordedStatus(any(), isA(StatusId.class));
 
-        assertThat(countSubmitted).isZero();
+        assertThat(submitSittingRecordResponse.getRecordsSubmitted())
+            .isZero();
+        assertThat(submitSittingRecordResponse.getRecordsClosed())
+            .isZero();
     }
 
     @Test

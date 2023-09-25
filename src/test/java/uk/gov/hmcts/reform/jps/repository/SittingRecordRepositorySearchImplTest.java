@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
 import uk.gov.hmcts.reform.jps.model.Duration;
+import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
@@ -38,6 +39,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.AM;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.CONTRACT_TYPE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.HMCTS_SERVICE_ID;
 import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.ID;
@@ -74,6 +76,11 @@ class SittingRecordRepositorySearchImplTest {
     private TypedQuery<SittingRecord> typedQuery;
     @Mock
     private TypedQuery<Long> longTypedQuery;
+
+    @Mock
+    private TypedQuery<RecordSubmitFields> recordSubmitFieldsTypedQuery;
+    @Mock
+    private CriteriaQuery<RecordSubmitFields> searchRecordsToSubmit;
     @Mock
     SingularAttributePath<String> attributePath;
     @Mock
@@ -553,16 +560,18 @@ class SittingRecordRepositorySearchImplTest {
 
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
-        when(criteriaBuilder.createQuery(Long.class))
-            .thenReturn(countCriteriaQuery);
-        when(countCriteriaQuery.from(SittingRecord.class))
+        when(criteriaBuilder.createQuery(RecordSubmitFields.class))
+            .thenReturn(searchRecordsToSubmit);
+        when(searchRecordsToSubmit.from(SittingRecord.class))
             .thenReturn(sittingRecord);
-        when(entityManager.createQuery(countCriteriaQuery))
-            .thenReturn(longTypedQuery);
+        when(entityManager.createQuery(searchRecordsToSubmit))
+            .thenReturn(recordSubmitFieldsTypedQuery);
 
         when(sittingRecord.<String>get(SITTING_DATE)).thenReturn(attributePath);
 
         when(sittingRecord.<String>get(ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(CONTRACT_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
 
         setPredicate(HMCTS_SERVICE_ID, SSCS);
         setPredicate(REGION_ID, REGION_ID);
@@ -603,16 +612,18 @@ class SittingRecordRepositorySearchImplTest {
 
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
-        when(criteriaBuilder.createQuery(Long.class))
-            .thenReturn(countCriteriaQuery);
-        when(countCriteriaQuery.from(SittingRecord.class))
+        when(criteriaBuilder.createQuery(RecordSubmitFields.class))
+            .thenReturn(searchRecordsToSubmit);
+        when(searchRecordsToSubmit.from(SittingRecord.class))
             .thenReturn(sittingRecord);
-        when(entityManager.createQuery(countCriteriaQuery))
-            .thenReturn(longTypedQuery);
+        when(entityManager.createQuery(searchRecordsToSubmit))
+            .thenReturn(recordSubmitFieldsTypedQuery);
 
         when(sittingRecord.<String>get(SITTING_DATE)).thenReturn(attributePath);
 
         when(sittingRecord.<String>get(ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(CONTRACT_TYPE_ID)).thenReturn(attributePath);
+        when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
 
         setPredicate(HMCTS_SERVICE_ID, SSCS);
         setPredicate(REGION_ID, REGION_ID);
