@@ -12,7 +12,7 @@ def product = "jps"
 def component = "judicial-payment-service"
 
 withNightlyPipeline(type, product, component) {
-  enableFortifyScan('jps-aat')
+  enableFortifyScan('ccd-aat')
   afterAlways('fortify-scan') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
   }
