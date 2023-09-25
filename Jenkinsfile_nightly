@@ -9,17 +9,9 @@ properties([
 
 def type = "java"
 def product = "jps"
-def component = "payment-service"
-
-def secrets = [
-  'jps-${env}': [
-    secret('fortify-on-demand-username', 'FORTIFY_USER_NAME'),
-    secret('fortify-on-demand-password', 'FORTIFY_PASSWORD')
-  ]
-]
+def component = "judicial-payment-service"
 
 withNightlyPipeline(type, product, component) {
-  loadVaultSecrets(secrets)
   enableFortifyScan('jps-aat')
   afterAlways('fortify-scan') {
     steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
