@@ -10,14 +10,13 @@ import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
-import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -149,7 +148,6 @@ class SittingRecordRepositoryTest extends AbstractTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldReturnSittingRecordWithStatusHistoryOfRecorderWhenStatusIsNotDeleted() {
         SittingRecord sittingRecord = createSittingRecordWithSeveralStatus();
 
@@ -198,7 +196,8 @@ class SittingRecordRepositoryTest extends AbstractTest {
             .createdByUserId("d139a314-eb40-45f4-9e7a-9e13f143cc3a")
             .build();
 
-        List<RecordSubmitFields> recordsToSubmit = recordRepository.findRecordsToSubmit(
+
+        Stream<Long> recordsToSubmit = recordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             "BBA3"
         );
@@ -206,7 +205,6 @@ class SittingRecordRepositoryTest extends AbstractTest {
         assertThat(recordsToSubmit)
             .isNotEmpty()
             .hasSize(4)
-            .extracting(RecordSubmitFields::getId)
             .contains(2L, 3L, 5L, 6L);
     }
 }

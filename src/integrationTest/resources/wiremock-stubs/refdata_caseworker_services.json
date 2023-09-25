@@ -1,24 +1,18 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/refdata/case-worker/profile/search-by-id",
-    "queryParameters" : {
-      "id" : {
-        "matches" : "^[0-9a-fA-F]{8}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{4}\\b-[0-9a-fA-F]{12}$"
-      }
-    }
+    "url": "/refdata/case-worker/profile/search-by-id?id=08763527-646c-4dc4-8d82-0c3c2ddc7198"
   },
   "response": {
     "status": 200,
     "headers": {
       "Content-Type": "application/json"
     },
-    "transformers": ["response-template"],
     "jsonBody": {
       "first_name": "Jane",
       "last_name": "White",
       "email_id": "string",
-      "case_worker_id": "{{request.query.id}}",
+      "case_worker_id": "08763527-646c-4dc4-8d82-0c3c2ddc7198",
       "services": [
         {
           "service": "string",

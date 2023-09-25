@@ -119,7 +119,3 @@ judicialUsers:
 caseworker:
   api:
     url: ${CASEWORKER_API_URL:http://rd-caseworker-ref-api-aat.service.core-compute-aat.internal}
-
-testing:
-  support:
-    enabled: ${TESTING_SUPPORT_ENABLED:false}

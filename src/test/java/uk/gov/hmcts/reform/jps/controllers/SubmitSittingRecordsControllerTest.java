@@ -14,7 +14,6 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
-import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
@@ -55,10 +54,7 @@ class SubmitSittingRecordsControllerTest {
             .thenReturn(true);
         when(sittingRecordService.submitSittingRecords(isA(SubmitSittingRecordRequest.class),
                                                        anyString()))
-            .thenReturn(SubmitSittingRecordResponse.builder()
-                            .recordsSubmitted(3)
-                            .recordsClosed(2)
-                            .build());
+            .thenReturn(3);
 
         String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
         mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -67,11 +63,41 @@ class SubmitSittingRecordsControllerTest {
             .andDo(print())
             .andExpectAll(
                 status().isOk(),
-                jsonPath("$.recordsSubmitted").value(3),
-                jsonPath("$.recordsClosed").value(2)
+                jsonPath("$.recordsSubmitted").value(3)
             );
     }
 
+    @Test
+    void shouldReturn400WhenHmctsServiceNotOnboarded() throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(false);
+
+        String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
+            .andReturn();
+    }
+
+    @Test
+    void shouldReturn400ResponseWhenPathVariableHmctsServiceCodeNotSet() throws Exception {
+        String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/submitSittingRecords/")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestJson))
+            .andDo(print())
+            .andExpectAll(
+                status().isBadRequest(),
+                jsonPath("$.errors[0].fieldName").value("PathVariable"),
+                jsonPath("$.errors[0].message").value("hmctsServiceCode is mandatory")
+            );
+    }
 
     @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {

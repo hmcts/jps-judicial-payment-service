@@ -146,8 +146,10 @@ class RecordSittingRecordsControllerTest {
 
     @Test
     void shouldRespondWithBadRequestWhenDuplicateRecordFound() throws Exception {
-        LocalDateTime creationDateTime = LocalDateTime.now().minusDays(2).plusSeconds(1)
-            .truncatedTo(ChronoUnit.SECONDS);
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(true);
+        LocalDateTime creationDateTime = LocalDateTime.now().minusDays(2)
+            .truncatedTo(ChronoUnit.MICROS);
         doAnswer(invocation -> {
             List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(0);
             sittingRecordWrappers.forEach(

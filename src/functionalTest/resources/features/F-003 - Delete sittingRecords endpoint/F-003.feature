@@ -79,7 +79,8 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
-    Then a "negative" response is received with a "403 Forbidden" status code
+    Then a "negative" response is received with a "409 Conflict" status code
+    And the response contains "errors[0]" as "Sitting Record Status ID is in wrong state"
 
   @S-003.8 #AC07
   Scenario: Negative response - Return 409 Conflict for jps-submitter when trying to delete a record that is not in 'Recorded' status
@@ -91,7 +92,8 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
-    Then a "negative" response is received with a "403 Forbidden" status code
+    Then a "negative" response is received with a "409 Conflict" status code
+    And the response contains "errors[0]" as "Sitting Record Status ID is in wrong state"
 
   @S-003.9 #AC08
   Scenario: Negative response - Return 409 Conflict for jps-admin when trying to delete a record that is not in 'Submitted' status
@@ -102,7 +104,8 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains a valid service token
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
-    Then a "negative" response is received with a "403 Forbidden" status code
+    Then a "negative" response is received with a "409 Conflict" status code
+    And the response contains "errors[0]" as "Sitting Record Status ID is in wrong state"
 
   @S-003.10 #AC09
   Scenario: Negative response - Return 400 Bad Request when sittingRecordId is not passed

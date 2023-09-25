@@ -66,11 +66,12 @@ public class SubmitSittingRecordsController {
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
         @Valid @RequestBody SubmitSittingRecordRequest submitSittingRecordRequest) {
 
-        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
-        SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
-            submitSittingRecordRequest,
-            hmctsServiceCode
-        );
-        return ResponseEntity.ok(submitSittingRecordResponse);
+        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode, serviceService);
+
+        int recordsSubmitted = sittingRecordService.submitSittingRecords(submitSittingRecordRequest,
+                                                                         hmctsServiceCode);
+        return ResponseEntity.ok(SubmitSittingRecordResponse.builder()
+                                     .recordsSubmitted(recordsSubmitted)
+                                     .build());
     }
 }

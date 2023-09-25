@@ -33,8 +33,9 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
     Optional<SittingRecord> findRecorderSittingRecord(Long id, StatusId statusId);
 
     Streamable<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields>
-        findBySittingDateAndPersonalCodeAndStatusIdNotIn(
+        findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
             LocalDate sittingDate,
+            String epimmsId,
             String personalCode,
             Collection<StatusId> statusId
         );
@@ -42,8 +43,8 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update SittingRecord s"
-        + " set s.statusId = :statusId"
+        + " set s.statusId = 'SUBMITTED'"
         + " where s.id = :sittingRecordId and s.statusId = 'RECORDED'"
     )
-    void updateRecordedStatus(Long sittingRecordId, StatusId statusId);
+    void updateToSubmitted(Long sittingRecordId);
 }

@@ -564,7 +564,7 @@ class SittingRecordControllerITest {
         return StatusHistory.builder()
             .changedByName(changedByName)
             .changedByUserId(changedByUserId)
-            .changedDateTime(changedDateTime.truncatedTo(ChronoUnit.SECONDS).plusSeconds(1))
+            .changedDateTime(changedDateTime.truncatedTo(ChronoUnit.MICROS))
             .statusId(statusId)
             .build();
     }

@@ -10,5 +10,4 @@ import org.springframework.beans.factory.annotation.Autowired;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SubmitSittingRecordResponse {
     private final int recordsSubmitted;
-    private final int recordsClosed;
 }

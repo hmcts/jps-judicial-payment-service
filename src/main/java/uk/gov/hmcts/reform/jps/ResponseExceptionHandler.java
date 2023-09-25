@@ -150,9 +150,4 @@ public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {
     protected ResponseEntity<Object> handleForbiddenException(ForbiddenException exception) {
         return ResponseEntity.status(FORBIDDEN).body(exception.getMessage());
     }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    protected ResponseEntity<Object> handleIllegalArgumentException(IllegalArgumentException exception) {
-        return ResponseEntity.badRequest().body(exception.getMessage());
-    }
 }

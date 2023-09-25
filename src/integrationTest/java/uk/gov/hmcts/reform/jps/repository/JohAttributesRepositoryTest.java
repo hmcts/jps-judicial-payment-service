@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.domain.JohAttributes;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -44,7 +42,6 @@ class JohAttributesRepositoryTest {
 
 
     @Test
-    @Sql(scripts = RESET_DATABASE)
     void shouldSaveJohAttributes() {
         List<JohAttributes> johAttributesList = johAttributesRepository.findAll();
         JohAttributes johAttributes = johAttributesList.get(0);
@@ -58,7 +55,6 @@ class JohAttributesRepositoryTest {
 
 
     @Test
-    @Sql(scripts = RESET_DATABASE)
     void shouldUpdateJohAttributesWhenRecordIsPresent() {
         List<JohAttributes> johAttributesList = johAttributesRepository.findAll();
         JohAttributes johAttributes = johAttributesList.get(0);
@@ -81,14 +77,12 @@ class JohAttributesRepositoryTest {
     }
 
     @Test
-    @Sql(scripts = RESET_DATABASE)
     void shouldReturnEmptyWhenRecordNotFound() {
         Optional<JohAttributes> optionalJohAttributes = johAttributesRepository.findById(100L);
         assertThat(optionalJohAttributes).isEmpty();
     }
 
     @Test
-    @Sql(scripts = RESET_DATABASE)
     void shouldDeleteSelectedRecord() {
         List<JohAttributes> johAttributesList = johAttributesRepository.findAll();
         JohAttributes johAttributes = johAttributesList.get(0);

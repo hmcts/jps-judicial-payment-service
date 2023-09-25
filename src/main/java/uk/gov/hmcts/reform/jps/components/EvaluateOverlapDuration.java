@@ -7,6 +7,7 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 
 import static java.lang.Boolean.TRUE;
 import static uk.gov.hmcts.reform.jps.model.ErrorCode.INVALID_DUPLICATE_RECORD;
+import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 
 @Component
 public class EvaluateOverlapDuration implements DuplicateChecker {
@@ -21,7 +22,8 @@ public class EvaluateOverlapDuration implements DuplicateChecker {
                              sittingRecordDuplicateCheckFields) {
         SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
 
-        if ((((TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
+        if (sittingRecordDuplicateCheckFields.getStatusId() != DELETED
+            && (((TRUE.equals(sittingRecordDuplicateCheckFields.getPm())
             && TRUE.equals(sittingRecordDuplicateCheckFields.getAm()))
             && (sittingRecordRequest.getDurationBoolean().getPm()
             || sittingRecordRequest.getDurationBoolean().getAm()))

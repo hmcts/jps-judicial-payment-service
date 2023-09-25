@@ -27,9 +27,27 @@ class UtilityTest {
 
     @Test
     void shouldMissingPathVariableExceptionWhenCodeIsEmpty() {
-        Optional<String> empty = Optional.empty();
-        assertThatThrownBy(() -> Utility.validateServiceCode(empty))
+        assertThatThrownBy(() -> Utility.validateServiceCode(Optional.empty()))
             .isInstanceOf(MissingPathVariableException.class)
             .hasMessage("hmctsServiceCode is mandatory");
+    }
+
+    @Test
+    void shouldReturnServiceCodeWhenServiceIsOnboarded() {
+        String serviceCode = "22";
+        when(serviceService.isServiceOnboarded(serviceCode))
+            .thenReturn(Boolean.TRUE);
+        assertThat(Utility.validateServiceCode(Optional.of(serviceCode), serviceService))
+            .isEqualTo("22");
+    }
+
+    @Test
+    void shouldUnknownValueExceptionWhenServiceIsNotOnboarded() {
+        String serviceCode = "33";
+        when(serviceService.isServiceOnboarded(serviceCode))
+            .thenReturn(Boolean.FALSE);
+        assertThatThrownBy(() -> Utility.validateServiceCode(Optional.of(serviceCode), serviceService))
+            .isInstanceOf(UnknownValueException.class)
+            .hasMessage("004 unknown hmctsServiceCode");
     }
 }
