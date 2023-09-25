@@ -1,9 +1,12 @@
 #!groovy
+
 properties([
   // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
   pipelineTriggers([cron('H 08 * * 1-5')])
 ])
+
 @Library("Infrastructure")
+
 def type = "java"
 def product = "jps"
 def component = "judicial-payment-service"
