@@ -1,14 +1,24 @@
 #!groovy
-
 properties([
   // H allow predefined but random minute see https://en.wikipedia.org/wiki/Cron#Non-standard_characters
   pipelineTriggers([cron('H 08 * * 1-5')])
 ])
-
 @Library("Infrastructure")
-
 def type = "java"
 def product = "jps"
 def component = "judicial-payment-service"
 
-withNightlyPipeline(type, product, component) {}
+def secrets = [
+  'jps-${env}': [
+    secret('fortify-on-demand-username', 'FORTIFY_USER_NAME'),
+    secret('fortify-on-demand-password', 'FORTIFY_PASSWORD')
+  ]
+]
+
+withNightlyPipeline(type, product, component) {
+  loadVaultSecrets(secrets)
+  enableFortifyScan('jps-aat')
+  afterAlways('fortify-scan') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+  }
+}
