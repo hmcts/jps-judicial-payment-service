@@ -30,6 +30,7 @@ public class ServiceService {
             LocalDate.now())
             .isPresent();
     }
+
     @Transactional
     public uk.gov.hmcts.reform.jps.domain.Service save(uk.gov.hmcts.reform.jps.domain.Service service) {
         return serviceRepository.save(service);

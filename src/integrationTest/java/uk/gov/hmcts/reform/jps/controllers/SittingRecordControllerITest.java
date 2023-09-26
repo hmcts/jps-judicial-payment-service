@@ -474,7 +474,7 @@ class SittingRecordControllerITest {
     void shouldReturn400ResponseWhenServiceNotOnboarded() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
-        mockMvc.perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "ABA5")
+        mockMvc.perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "CBA5")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(updatedRecord))
             .andDo(print())

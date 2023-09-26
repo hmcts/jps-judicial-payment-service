@@ -14,6 +14,7 @@ import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
+import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
@@ -54,7 +55,10 @@ class SubmitSittingRecordsControllerTest {
             .thenReturn(true);
         when(sittingRecordService.submitSittingRecords(isA(SubmitSittingRecordRequest.class),
                                                        anyString()))
-            .thenReturn(3);
+            .thenReturn(SubmitSittingRecordResponse.builder()
+                            .recordsSubmitted(3)
+                            .recordsClosed(2)
+                            .build());
 
         String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
         mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
@@ -63,7 +67,8 @@ class SubmitSittingRecordsControllerTest {
             .andDo(print())
             .andExpectAll(
                 status().isOk(),
-                jsonPath("$.recordsSubmitted").value(3)
+                jsonPath("$.recordsSubmitted").value(3),
+                jsonPath("$.recordsClosed").value(2)
             );
     }
 
