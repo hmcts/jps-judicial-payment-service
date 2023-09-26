@@ -64,6 +64,9 @@ public class BaseTest {
         = "classpath:sql/insert_joh.sql";
 
 
+    public static final String INSERT_SERVICE_TEST_DATA
+        = "classpath:sql/insert_service_test_data.sql";
+
     @BeforeEach
     void init() {
         final String hostUrl = "http://localhost:" + wiremockPort;

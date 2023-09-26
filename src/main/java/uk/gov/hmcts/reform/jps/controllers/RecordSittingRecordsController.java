@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.RecordSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordResponse;
+import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
@@ -63,6 +64,7 @@ public class RecordSittingRecordsController {
     private final SittingRecordService sittingRecordService;
     private final LocationService regionService;
     private final JudicialUserDetailsService judicialUserDetailsService;
+    private final ServiceService serviceService;
 
     @Operation(description = "Root not to be displayed", hidden = true)
     @PostMapping(
@@ -91,7 +93,7 @@ public class RecordSittingRecordsController {
             @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
             @Valid @RequestBody RecordSittingRecordRequest recordSittingRecordRequest) {
 
-        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
+        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode, serviceService);
 
         List<SittingRecordWrapper> sittingRecordWrappers =
                 recordSittingRecordRequest.getRecordedSittingRecords().stream()

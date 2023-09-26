@@ -7,6 +7,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.contract.wiremock.AutoConfigureWireMock;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -33,11 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_SERVICE_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 
 
 @Transactional
@@ -80,12 +85,12 @@ class SittingRecordControllerITest {
 
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
     void shouldHaveOkResponseWhenRequestIsValidAndNoMatchingRecord() throws Exception {
         String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
         String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
         mockMvc
-            .perform(post(SEARCH_URL, "2")
+            .perform(post(SEARCH_URL, "BBA3")
               .contentType(MediaType.APPLICATION_JSON)
               .content(updatedRecord))
             .andDo(print())
@@ -101,7 +106,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE, "classpath:sql/insert_service_test_data.sql"})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
     void shouldHaveOkResponseWhenRequestIsValidAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -173,7 +178,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(RESET_DATABASE)
+    @Sql({RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
     void shouldHaveOkResponseWhenRequestIsValidButNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -245,7 +250,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -317,7 +322,7 @@ class SittingRecordControllerITest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -390,7 +395,7 @@ class SittingRecordControllerITest {
 
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
     void shouldHaveOkResponseWhenRequestIsValidButNoEpimsNoRegionAndHasMultipleMatchingRecords() throws Exception {
 
         SittingRecord sittingRecord1 = createSittingRecord(2L, EPIMMS_ID, HMCTS_SERVICE_CODE,
@@ -460,6 +465,24 @@ class SittingRecordControllerITest {
                            .value("PathVariable"))
             .andExpect(jsonPath("$.errors[0].message")
                            .value("hmctsServiceCode is mandatory"))
+            .andReturn();
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
+    void shouldReturn400ResponseWhenServiceNotOnboarded() throws Exception {
+        String requestJson = Resources.toString(getResource(SEARCH_SITTING_RECORDS_JSON), UTF_8);
+        String updatedRecord = requestJson.replace(TO_DATE_CONST, LocalDate.now().toString());
+        mockMvc.perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", "CBA5")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(updatedRecord))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
             .andReturn();
     }
 

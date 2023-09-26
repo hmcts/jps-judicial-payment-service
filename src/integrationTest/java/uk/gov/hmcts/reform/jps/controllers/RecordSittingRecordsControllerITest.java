@@ -39,6 +39,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_SERVICE_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_PUBLISHER;
@@ -75,12 +76,13 @@ public class RecordSittingRecordsControllerITest {
     @ParameterizedTest
     @CsvSource({"recordSittingRecordsReplaceDuplicate.json,201,4918178,true",
         "recordSittingRecords.json,201,4918500,false"})
-    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY, INSERT_SERVICE_TEST_DATA})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldRecordSittingRecordsWhenAllDataIsPresent(String fileName,
                                                         int responseCode,
                                                         String personalCode,
                                                         boolean checkStatusHistory) throws Exception {
+
         when(securityUtils.getUserInfo()).thenReturn(userInfo);
         when(userInfo.getRoles()).thenReturn(List.of("jps-recorder"));
         when(userInfo.getUid()).thenReturn("d139a314-eb40-45f4-9e7a-9e13f143cc3a");
@@ -146,7 +148,7 @@ public class RecordSittingRecordsControllerITest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY, INSERT_SERVICE_TEST_DATA})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
         String requestJson =  Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);
@@ -235,6 +237,23 @@ public class RecordSittingRecordsControllerITest {
         assertThat(actualErrors.getErrors()).isNotEmpty();
         assertThat(actualErrors.getErrors())
             .hasSameElementsAs(expectedErrors.getErrors());
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
+    void shouldReturn400ResponseWhenServiceNotOnboarded() throws Exception {
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", "ABA5")
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
+            .andReturn();
     }
 
     @Test

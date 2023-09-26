@@ -23,6 +23,7 @@ import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
+import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
@@ -40,6 +41,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -77,6 +79,9 @@ class RecordSittingRecordsControllerTest {
     @MockBean
     private LocationService regionService;
 
+    @MockBean
+    private ServiceService serviceService;
+
     @Captor
     private ArgumentCaptor<List<SittingRecordWrapper>> listArgumentCaptor;
 
@@ -86,6 +91,8 @@ class RecordSittingRecordsControllerTest {
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
                                                       int responseCode,
                                                       String personalCode) throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(true);
         String requestJson = Resources.toString(getResource(fileName), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -139,6 +146,8 @@ class RecordSittingRecordsControllerTest {
 
     @Test
     void shouldRespondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(true);
         LocalDateTime creationDateTime = LocalDateTime.now().minusDays(2).plusSeconds(1)
             .truncatedTo(ChronoUnit.SECONDS);
         doAnswer(invocation -> {
@@ -229,6 +238,8 @@ class RecordSittingRecordsControllerTest {
 
     @Test
     void shouldRepondWithBadRequestWhenInvalidLocationRecordFound() throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(true);
         doAnswer(invocation -> {
             List<SittingRecordWrapper> sittingRecordWrappers = invocation.getArgument(0);
             sittingRecordWrappers.stream()
@@ -326,7 +337,7 @@ class RecordSittingRecordsControllerTest {
 
     @Test
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
-    void shouldReturn400WhenHmctsServiceCode() throws Exception {
+    void shouldReturn400WhenHmctsServiceCodeMissing() throws Exception {
         String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords")
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -340,6 +351,24 @@ class RecordSittingRecordsControllerTest {
             .andReturn();
 
         assertThat(mvcResult.getResponse().getContentAsByteArray()).isNotNull();
+    }
+
+    @Test
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
+    void shouldReturn400WhenHmctsServiceNotOnboarded() throws Exception {
+        when(serviceService.isServiceOnboarded(TEST_SERVICE))
+            .thenReturn(false);
+        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
+                                                  .contentType(MediaType.APPLICATION_JSON)
+                                                  .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
+            .andReturn();
     }
 
     @Test
