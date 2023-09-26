@@ -1,0 +1,36 @@
+{
+    "services": [
+        {
+            "hmctsServiceId": "BBA3",
+            "serviceName": "Social Security and Child Support",
+            "accountCenterCode": "843648726",
+            "onboardingStartDate": "2022-09-20",
+            "retentionTimeInMonths": 0,
+            "closeRecordedRecordAfterTimeInMonths": 0
+        },
+        {
+            "hmctsServiceId": "ABA5",
+            "serviceName": "Family Private Law",
+            "accountCenterCode": "843648798",
+            "onboardingStartDate": "2022-09-20",
+            "retentionTimeInMonths": 0,
+            "closeRecordedRecordAfterTimeInMonths": 0
+        },
+        {
+            "hmctsServiceId": "ABA3",
+            "serviceName": "Family Public Law",
+            "accountCenterCode": "843648808",
+            "onboardingStartDate": "2050-09-20",
+            "retentionTimeInMonths": 0,
+            "closeRecordedRecordAfterTimeInMonths": 0
+        },
+        {
+            "hmctsServiceId": "BFA1",
+            "serviceName": "Immigration and Asylum Appeals",
+            "accountCenterCode": "843648877",
+            "onboardingStartDate": "2022-09-20",
+            "retentionTimeInMonths": 0,
+            "closeRecordedRecordAfterTimeInMonths": 0
+        }
+    ]
+}
