@@ -40,6 +40,7 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification given;
     Response response;
     static String JOH_KEY = "JOH";
+    static String SERVICE_KEY = "SERVICE";
 
     static Map<String,String> responses = new HashMap<>();
 
@@ -64,6 +65,13 @@ public class StepDefinitions extends TestVariables {
             "/testing-support/save-judicial-office-holders",
             JOH_KEY
         );
+        
+        createRecords(
+            "./src/functionalTest/resources/payloads/setup/addServices.json",
+            "/testing-support/save-service",
+            SERVICE_KEY
+        );
+
     }
 
     @AfterAll
@@ -72,6 +80,11 @@ public class StepDefinitions extends TestVariables {
         getValidatableResponse(
             "/testing-support/delete-judicial-office-holders",
             responses.get(JOH_KEY),
+            200
+        );
+        getValidatableResponse(
+            "/testing-support/delete-service",
+            responses.get(SERVICE_KEY),
             200
         );
     }

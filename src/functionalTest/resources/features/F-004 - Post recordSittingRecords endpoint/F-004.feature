@@ -515,3 +515,25 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+
+@S-004.36 #AC01
+  Scenario: Negative response, when the request has a hmctsServiceId passed that is not found (not in the service table)
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA4"
+    And the request body contains the "payload with one sitting record" as in "F-004_allFields"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
+
+  @S-004.37 #AC02
+  Scenario: Negative response, when the request has a hmctsServiceId passed but it is not yet on-boarded
+    Given a user with the IDAM role of "jps-recorder"
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "ABA3"
+    And the request body contains the "payload with one sitting record" as in "F-004_allFields"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
