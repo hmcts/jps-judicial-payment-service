@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps;
 
-import io.cucumber.java.Before;
+import io.cucumber.java.AfterAll;
+import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -20,12 +21,13 @@ import uk.gov.hmcts.reform.jps.testutils.ServiceAuthenticationGenerator;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.FORBIDDEN;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
@@ -37,28 +39,66 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification request;
     RequestSpecification given;
     Response response;
+    static String JOH_KEY = "JOH";
 
-    private static boolean isSetupExecuted = false;
+    static Map<String,String> responses = new HashMap<>();
 
-    @Before
-    public void setup() throws InterruptedException {
-        if (!isSetupExecuted) {
+    @BeforeAll
+    public static void setUpDB() throws IOException, InterruptedException {
 
-            IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
-            recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
-            submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
-            publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
-            adminAccessToken = idamTokenGenerator.authenticateUser(adminUsername, adminPassword);
-            johAdminAccessToken = idamTokenGenerator.authenticateUser(johAdminUsername, johAdminPassword);
-            invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
+        IdamTokenGenerator idamTokenGenerator = new IdamTokenGenerator();
+        recorderAccessToken = idamTokenGenerator.authenticateUser(recorderUsername, recorderPassword);
+        submitterAccessToken = idamTokenGenerator.authenticateUser(submitterUsername, submitterPassword);
+        publisherAccessToken = idamTokenGenerator.authenticateUser(publisherUsername, publisherPassword);
+        adminAccessToken = idamTokenGenerator.authenticateUser(adminUsername, adminPassword);
+        johAdminAccessToken = idamTokenGenerator.authenticateUser(johAdminUsername, johAdminPassword);
+        invalidAccessToken = idamTokenGenerator.authenticateUser(invalidUsername, invalidPassword);
 
-            ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
-            validS2sToken = serviceAuthenticationGenerator.generate();
-            invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
+        ServiceAuthenticationGenerator serviceAuthenticationGenerator = new ServiceAuthenticationGenerator();
+        validS2sToken = serviceAuthenticationGenerator.generate();
+        invalidS2sToken = serviceAuthenticationGenerator.generate("xui_webapp");
 
-            isSetupExecuted = true;
-        }
+        RestAssured.baseURI = testUrl;
+        createRecords(
+            "./src/functionalTest/resources/payloads/setup/addJOHs.json",
+            "/testing-support/save-judicial-office-holders",
+            JOH_KEY
+        );
     }
+
+    @AfterAll
+    public static void tearDownDB() {
+        RestAssured.baseURI = testUrl;
+        getValidatableResponse(
+            "/testing-support/delete-judicial-office-holders",
+            responses.get(JOH_KEY),
+            200
+        );
+    }
+
+
+    private static void createRecords(String data, String url, String key) throws IOException {
+        String body = new
+            String(Files.readAllBytes(Paths.get(data)));
+        Response response = createRecords(url, body, 201);
+
+        responses.put(key,response.getBody().asString());
+    }
+
+    private static Response createRecords(String url, String body, int statusCode) {
+        return getValidatableResponse(url, body, statusCode)
+            .extract().response();
+    }
+
+    private static ValidatableResponse getValidatableResponse(String url, String body, int statusCode) {
+        return given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post(url)
+            .then().log().all().assertThat().statusCode(statusCode);
+    }
+
 
     @Given("a user with the IDAM role of {string}")
     public void userWithTheIdamRoleOf(String role) {
@@ -206,8 +246,6 @@ public class StepDefinitions extends TestVariables {
                 assertThat(response.getStatusCode()).isEqualTo(UNAUTHORIZED.value());
             } else if (responseCode.equalsIgnoreCase("403 Forbidden")) {
                 assertThat(response.getStatusCode()).isEqualTo(FORBIDDEN.value());
-            } else if (responseCode.equalsIgnoreCase("409 Conflict")) {
-                assertThat(response.getStatusCode()).isEqualTo(CONFLICT.value());
             } else if (responseCode.equalsIgnoreCase("404 Not Found")) {
                 assertThat(response.getStatusCode()).isEqualTo(NOT_FOUND.value());
             }

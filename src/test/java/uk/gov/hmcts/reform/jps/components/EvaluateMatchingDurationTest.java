@@ -108,6 +108,38 @@ class EvaluateMatchingDurationTest extends BaseEvaluateDuplicate {
     }
 
     @Test
+    void shouldSetPotentialDuplicateWhenEpimmsIdDontMatch() throws IOException {
+        String requestJson = Resources.toString(getResource("duplicateRecordSitting.json"), UTF_8);
+        RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
+            requestJson,
+            RecordSittingRecordRequest.class
+        );
+
+        List<SittingRecordWrapper> sittingRecordWrappers =
+            recordSittingRecordRequest.getRecordedSittingRecords().stream()
+                .map(SittingRecordWrapper::new)
+                .toList();
+
+
+        SittingRecordRequest sittingRecordRequest = recordSittingRecordRequest.getRecordedSittingRecords().get(0);
+        SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields sittingRecordDuplicateCheckFields
+            = getDbRecord(
+            sittingRecordRequest.getSittingDate(),
+            "999999",
+            sittingRecordRequest.getPersonalCode(),
+            sittingRecordRequest.getDurationBoolean().getAm(),
+            sittingRecordRequest.getDurationBoolean().getPm(),
+            sittingRecordRequest.getJudgeRoleTypeId(),
+            RECORDED
+        );
+        SittingRecordWrapper sittingRecordWrapper = sittingRecordWrappers.get(0);
+        evaluateMatchingDuration.evaluate(sittingRecordWrapper, sittingRecordDuplicateCheckFields);
+
+        assertThat(sittingRecordWrapper.getErrorCode())
+            .isEqualTo(POTENTIAL_DUPLICATE_RECORD);
+    }
+
+    @Test
     void shouldSetValidWhenJudgeRoleTypeDontMatchAndReplaceDuplicateIsTrue() throws IOException {
         String requestJson = Resources.toString(getResource("duplicateRecordSittingReplaceDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(

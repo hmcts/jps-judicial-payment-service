@@ -230,7 +230,8 @@ def coverageExclusionList = [
   "**uk/gov/hmcts/reform/jps/model/**/*",
   "**uk/gov/hmcts/reform/jps/refdata/**/*",
   "**uk/gov/hmcts/reform/jps/validator/*.*",
-  "**uk/gov/hmcts/reform/jps/ResponseExceptionHandler.java"
+  "**uk/gov/hmcts/reform/jps/ResponseExceptionHandler.java",
+  "**uk/gov/hmcts/reform/jps/controllers/TestingSupportController.java"
 ]
 
 sonar {

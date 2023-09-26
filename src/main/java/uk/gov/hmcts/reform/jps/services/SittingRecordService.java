@@ -11,16 +11,17 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
-import uk.gov.hmcts.reform.jps.exceptions.ConflictException;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
+import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
@@ -28,10 +29,11 @@ import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 import static java.lang.Boolean.TRUE;
+import static java.util.function.Predicate.not;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_ADMIN;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
@@ -48,6 +50,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SittingRecordService {
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordService.class);
+    private static final List<Long> CONTRACT_TYPE_ID_NOT_TO_CLOSE = List.of(2L, 6L);
 
     private final SittingRecordRepository sittingRecordRepository;
     private final DuplicateCheckerService duplicateCheckerService;
@@ -55,6 +58,7 @@ public class SittingRecordService {
     private final LocationService locationService;
     private final ServiceService serviceService;
     private final StatusHistoryService statusHistoryService;
+    private final JudicialOfficeHolderService judicialOfficeHolderService;
 
 
     public List<SittingRecord> getSittingRecords(
@@ -172,16 +176,20 @@ public class SittingRecordService {
         SittingRecordRequest sittingRecordRequest = sittingRecordWrapper.getSittingRecordRequest();
 
         try (Stream<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> stream
-                     = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
+                     = sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
                 sittingRecordRequest.getSittingDate(),
-                sittingRecordRequest.getEpimmsId(),
                 sittingRecordRequest.getPersonalCode(),
                 List.of(DELETED, CLOSED)
         ).stream()) {
-            stream.forEach(sittingRecordDuplicateCheckFields ->
-                    duplicateCheckerService
+            stream
+                .forEach(sittingRecordDuplicateCheckFields -> {
+                    if (VALID == sittingRecordWrapper.getErrorCode()) {
+                        duplicateCheckerService
                             .evaluate(sittingRecordWrapper,
-                                    sittingRecordDuplicateCheckFields));
+                                      sittingRecordDuplicateCheckFields);
+                    }
+                }
+            );
         }
     }
 
@@ -220,7 +228,7 @@ public class SittingRecordService {
         if (sittingRecord.getStatusId() == recorded) {
             deleteSittingRecord(sittingRecord);
         } else {
-            throw new ConflictException("Sitting Record Status ID is in wrong state");
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
         }
     }
 
@@ -236,38 +244,96 @@ public class SittingRecordService {
 
             deleteSittingRecord(recordedStatusHistory.getSittingRecord());
         } else {
-            throw new ConflictException("Sitting Record Status ID is in wrong state");
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
         }
     }
 
     @Transactional
-    public int submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
-                                    String hmctsServiceCode) {
-        AtomicInteger counter = new AtomicInteger();
-        try (Stream<Long> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
+    @PreAuthorize("hasAuthority('jps-submitter')")
+    public SubmitSittingRecordResponse submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                                            String hmctsServiceCode) {
+        BiPredicate<RecordSubmitFields, Boolean> filter = this::filterRecordsToClose;
+
+        int submittedCount = 0;
+        int closedCount = 0;
+
+        List<RecordSubmitFields> recordsToSubmit = sittingRecordRepository.findRecordsToSubmit(
             submitSittingRecordRequest,
             hmctsServiceCode
-        )) {
+        );
 
-            recordsToSubmit.forEach(sittingRecordId -> {
-                statusHistoryService.insertRecord(
-                    sittingRecordId,
-                    SUBMITTED,
-                    submitSittingRecordRequest.getSubmittedByIdamId(),
-                    submitSittingRecordRequest.getSubmittedByName()
-                );
+        if (!recordsToSubmit.isEmpty()) {
+            List<Long> updatedRecords = getUpdatedRecords(
+                submitSittingRecordRequest,
+                recordsToSubmit,
+                SUBMITTED,
+                filter.negate(),
+                true
+            );
 
-                sittingRecordRepository.updateToSubmitted(sittingRecordId);
-                counter.incrementAndGet();
-            });
+            submittedCount = updatedRecords.size();
+
+            List<RecordSubmitFields> recordsToClose = recordsToSubmit.stream()
+                    .filter(not(recordSubmitFields -> updatedRecords.contains(recordSubmitFields.getId())))
+                    .toList();
+
+            closedCount = getUpdatedRecords(
+                submitSittingRecordRequest,
+                recordsToClose,
+                CLOSED,
+                filter,
+                false
+            ).size();
         }
-        return counter.intValue();
+
+        return SubmitSittingRecordResponse.builder()
+            .recordsSubmitted(submittedCount)
+            .recordsClosed(closedCount)
+            .build();
+    }
+
+    private List<Long> getUpdatedRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
+                                         List<RecordSubmitFields> recordsToSubmit,
+                                         StatusId statusId,
+                                         BiPredicate<RecordSubmitFields, Boolean> filter,
+                                         Boolean crownFlagEmpty
+    ) {
+        List<Long> records = recordsToSubmit.stream()
+            .filter(recordSubmitFields -> filter.test(recordSubmitFields, crownFlagEmpty))
+            .map(RecordSubmitFields::getId)
+            .toList();
+
+        records.forEach(submitRecordId -> {
+            statusHistoryService.insertRecord(submitRecordId,
+                                              statusId,
+                                              submitSittingRecordRequest.getSubmittedByIdamId(),
+                                              submitSittingRecordRequest.getSubmittedByName());
+
+            sittingRecordRepository.updateRecordedStatus(submitRecordId, statusId);
+        });
+        return records;
+    }
+
+    private boolean filterRecordsToClose(RecordSubmitFields recordSubmitFields, Boolean crownFlagEmpty) {
+        Optional<Boolean> crownServiceFlag = Optional.empty();
+        if (recordSubmitFields.getContractTypeId() == 6L) {
+            crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(
+                recordSubmitFields.getPersonalCode(),
+                recordSubmitFields.getSittingDate()
+            );
+
+            if (crownServiceFlag.isEmpty()) {
+                return crownFlagEmpty;
+            }
+        }
+
+        return !CONTRACT_TYPE_ID_NOT_TO_CLOSE.contains(recordSubmitFields.getContractTypeId())
+            || crownServiceFlag.map(Boolean.FALSE::equals).orElse(false);
     }
 
     private String getAccountCode(String hmctsServiceCode) {
         return serviceService.findService(hmctsServiceCode)
             .map(uk.gov.hmcts.reform.jps.domain.Service::getAccountCenterCode)
             .orElse(null);
-
     }
 }

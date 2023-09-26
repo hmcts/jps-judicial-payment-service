@@ -141,7 +141,7 @@ public class RecordSittingRecordsControllerITest {
         if (checkStatusHistory) {
             List<StatusHistory> statusHistories = statusHistoryRepository.findAll();
             assertThat(statusHistories)
-                .filteredOn(statusHistory -> statusHistory.getSittingRecord().getId() == 9)
+                .filteredOn(statusHistory -> statusHistory.getSittingRecord().getId() == 10)
                 .extracting("statusId")
                 .containsExactlyInAnyOrder(RECORDED, DELETED);
         }

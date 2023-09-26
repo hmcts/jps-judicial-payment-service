@@ -1,14 +1,16 @@
 package uk.gov.hmcts.reform.jps.repository;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import uk.gov.hmcts.reform.jps.domain.JohAttributes;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -16,38 +18,32 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
-@Disabled
 class JudicialOfficeHolderRepositoryTest {
-
     @Autowired
     private JudicialOfficeHolderRepository judicialOfficeHolderRepository;
     @Autowired
     private SittingRecordRepository recordRepository;
     private static final String PERSONAL_CODE = "001";
-    private JudicialOfficeHolder persistedJudicialOfficeHolder;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JudicialOfficeHolderRepositoryTest.class);
 
     @BeforeEach
     public void setUp() {
-
-        judicialOfficeHolderRepository.deleteAll();
-        recordRepository.deleteAll();
-
         JudicialOfficeHolder judicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(PERSONAL_CODE)
             .build();
-        LOGGER.debug("judicialOfficeHolder:{}", judicialOfficeHolder);
-        persistedJudicialOfficeHolder = judicialOfficeHolderRepository.save(judicialOfficeHolder);
+        judicialOfficeHolderRepository.save(judicialOfficeHolder);
 
         SittingRecord sittingRecord = SittingRecord.builder()
             .am(true)
@@ -69,28 +65,55 @@ class JudicialOfficeHolderRepositoryTest {
             .build();
         sittingRecord.addStatusHistory(statusHistory);
 
-        SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
-        LOGGER.info("persistedSittingRecord:{}", persistedSittingRecord);
+        recordRepository.save(sittingRecord);
 
         List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
-        LOGGER.info("list.size:{}", list);
-        assertFalse(list.isEmpty());
+        assertThat(list).isNotEmpty();
     }
 
-    @Test
-    void shouldSaveJudicialOfficeHolder() {
-        List<JudicialOfficeHolder> list = judicialOfficeHolderRepository.findAll();
+    @ParameterizedTest
+    @MethodSource("crownFlagForSittingDate")
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnCrownFlagWhenJohAttributesIsEffective(
+        String personalCode,
+        LocalDate sittingDate,
+        boolean crownFlag) {
 
-        assertNotNull(list);
-        assertFalse(list.isEmpty());
-        JudicialOfficeHolder judicialOfficeHolder = list.get(0);
-        assertEquals(judicialOfficeHolder.getId(), persistedJudicialOfficeHolder.getId());
-        assertEquals(judicialOfficeHolder.getPersonalCode(), PERSONAL_CODE);
+        Optional<JudicialOfficeHolder> judicialOfficeHolder
+            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+            personalCode,
+                sittingDate);
 
-        SittingRecord persistedSittingRecord = recordRepository.findAll().get(0);
 
-        assertEquals(PERSONAL_CODE, persistedSittingRecord.getPersonalCode());
+        assertThat(judicialOfficeHolder.stream())
+            .flatMap(JudicialOfficeHolder::getJohAttributes)
+            .extracting(JohAttributes::isCrownServantFlag)
+            .containsOnly(crownFlag);
     }
 
+    private static Stream<Arguments> crownFlagForSittingDate() {
+        return Stream.of(
+            Arguments.of("7918178", LocalDate.of(2023, Month.APRIL, 27), true),
+            Arguments.of("9928178", LocalDate.now(), false)
+        );
+    }
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # PERSONAL_CODE
+      '8918178'
+      '9918178'
+        """)
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnEmptyCrownFlagWhenJohAttributesIsMissingOrNotEffective(String personalCode) {
+        Optional<JudicialOfficeHolder> judicialOfficeHolder
+            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+            personalCode,
+            LocalDate.now());
+
+        assertThat(judicialOfficeHolder.stream())
+            .map(JudicialOfficeHolder::getJohAttributes)
+            .isEmpty();
+    }
 }
 

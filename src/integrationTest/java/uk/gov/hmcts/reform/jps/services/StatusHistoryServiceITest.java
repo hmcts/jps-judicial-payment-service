@@ -31,9 +31,8 @@ public class StatusHistoryServiceITest extends BaseTest {
     @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
     void shouldUpdateWithStatusHistoryWhenDbRecordPresent() {
         List<SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields> dbRecord
-            = sittingRecordRepository.findBySittingDateAndEpimmsIdAndPersonalCodeAndStatusIdNotIn(
+            = sittingRecordRepository.findBySittingDateAndPersonalCodeAndStatusIdNotIn(
             LocalDate.of(2023, Month.MAY, 11),
-            "852649",
             "4918178",
             List.of(DELETED, CLOSED)
         ).stream().toList();
