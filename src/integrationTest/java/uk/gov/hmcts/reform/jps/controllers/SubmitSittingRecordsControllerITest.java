@@ -19,7 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
-import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
 import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_SERVICE_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
@@ -36,8 +36,24 @@ class SubmitSittingRecordsControllerITest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Test
-    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY, INSERT_SERVICE_TEST_DATA})
+    @Autowired
+    private SittingRecordRepository sittingRecordRepository;
+
+    @Autowired
+    private StatusHistoryRepository statusHistoryRepository;
+
+
+    @ParameterizedTest
+    @CsvSource(textBlock = """
+      # RegionId,    Submitted,   Closed, StatusId, PreviousStatusId, Count
+      6,             1,           0,      SUBMITTED, RECORDED,          2
+      7,             0,           1,      CLOSED,    RECORDED,          2
+      8,             0,           1,      CLOSED,    RECORDED,          2
+      9,             1,           0,      SUBMITTED, RECORDED,          2
+      10,            0,           0,      RECORDED,  RECORDED,          1
+      11,            0,           0,      RECORDED , RECORDED,          1
+        """)
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY, INSERT_SERVICE_TEST_DATA})
     @WithMockUser(authorities = {"jps-submitter"})
     void shouldReturnRecordCountOfSubmittedRecordsWhenRecordsAreSubmitted() throws Exception {
         String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
@@ -86,7 +102,7 @@ class SubmitSittingRecordsControllerITest {
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
     void shouldReturn400ResponseWhenServiceNotOnboarded() throws Exception {
         String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
-        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", "ABA5")
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", "CBA5")
                             .contentType(MediaType.APPLICATION_JSON)
                             .content(requestJson))
             .andDo(print())

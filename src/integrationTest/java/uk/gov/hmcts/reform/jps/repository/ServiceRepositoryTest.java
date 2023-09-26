@@ -102,6 +102,18 @@ class ServiceRepositoryTest {
     }
 
     @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
+    void shouldDeleteRecordsWhenIdsPassed() {
+        List<Long> courtVenueIds = serviceRepository.findAll().stream()
+            .map(Service::getId)
+            .toList();
+        assertThat(courtVenueIds).isNotEmpty();
+        serviceRepository.deleteByIds(courtVenueIds);
+        List<Service> courtVenues = serviceRepository.findAll();
+        assertThat(courtVenues).isEmpty();
+    }
+
+    @Test
     void shouldFindServiceWhenServiceIsOnboarded() {
         assertThat(serviceRepository.findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(
             HMCTS_SERVICE_ID,
