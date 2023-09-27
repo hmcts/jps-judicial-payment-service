@@ -52,7 +52,8 @@ public class ExportedFileDataHeaderRepositoryTest {
         exportedFileDataHeaderRepository.save(exportedFileDataHeader);
         exportedFileDataHeaderRepository.deleteById(exportedFileDataHeader.getId());
 
-        Optional<ExportedFileDataHeader> optionalCourtVenue = exportedFileDataHeaderRepository.findById(exportedFileDataHeader.getId());
+        Optional<ExportedFileDataHeader> optionalCourtVenue = exportedFileDataHeaderRepository
+            .findById(exportedFileDataHeader.getId());
 
         assertThat(optionalCourtVenue).isEmpty();
     }
