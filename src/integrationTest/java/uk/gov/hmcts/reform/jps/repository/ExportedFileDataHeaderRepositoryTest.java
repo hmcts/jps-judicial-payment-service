@@ -42,7 +42,8 @@ public class ExportedFileDataHeaderRepositoryTest {
 
     @Test
     void shouldReturnEmptyWhenRecordNotFound() {
-        Optional<ExportedFileDataHeader> optionalExportedFileDataHeader = exportedFileDataHeaderRepository.findById(100L);
+        Optional<ExportedFileDataHeader> optionalExportedFileDataHeader = exportedFileDataHeaderRepository
+            .findById(100L);
         assertThat(optionalExportedFileDataHeader).isEmpty();
     }
 

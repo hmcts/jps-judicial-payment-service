@@ -42,6 +42,4 @@ public class ExportedFileDataHeader {
 
     @Column(name = "hmcts_service_id")
     private String hmctsServiceId;
-
-
 }
