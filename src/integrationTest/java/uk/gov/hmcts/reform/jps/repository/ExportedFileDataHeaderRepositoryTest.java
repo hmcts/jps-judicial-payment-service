@@ -42,8 +42,8 @@ public class ExportedFileDataHeaderRepositoryTest {
 
     @Test
     void shouldReturnEmptyWhenRecordNotFound() {
-        Optional<ExportedFileDataHeader> optionalCourtVenue = exportedFileDataHeaderRepository.findById(100L);
-        assertThat(optionalCourtVenue).isEmpty();
+        Optional<ExportedFileDataHeader> optionalExportedFileDataHeader = exportedFileDataHeaderRepository.findById(100L);
+        assertThat(optionalExportedFileDataHeader).isEmpty();
     }
 
     @Test
@@ -52,10 +52,10 @@ public class ExportedFileDataHeaderRepositoryTest {
         exportedFileDataHeaderRepository.save(exportedFileDataHeader);
         exportedFileDataHeaderRepository.deleteById(exportedFileDataHeader.getId());
 
-        Optional<ExportedFileDataHeader> optionalCourtVenue = exportedFileDataHeaderRepository
+        Optional<ExportedFileDataHeader> optionalExportedFileDataHeader = exportedFileDataHeaderRepository
             .findById(exportedFileDataHeader.getId());
 
-        assertThat(optionalCourtVenue).isEmpty();
+        assertThat(optionalExportedFileDataHeader).isEmpty();
     }
 
 }
