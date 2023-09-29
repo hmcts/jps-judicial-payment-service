@@ -13,14 +13,16 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = NONE)
 @DataJpaTest
 @ActiveProfiles("itest")
-public class ExportedFileDataHeaderRepositoryTest {
+public class ExportedFilesRepositoryTest {
+    @Autowired
+    private ExportedFilesRepository exportedFilesRepository;
+
     @Autowired
     private ExportedFileDataHeaderRepository exportedFileDataHeaderRepository;
 
@@ -28,50 +30,32 @@ public class ExportedFileDataHeaderRepositoryTest {
     @Sql(scripts = RESET_DATABASE)
     void shouldSaveExportedFileDataHeader() {
         ExportedFileDataHeader exportedFileDataHeader = createExportedFileDataHeader();
-        ExportedFileDataHeader persisted = exportedFileDataHeaderRepository.save(exportedFileDataHeader);
-        assertThat(persisted.getId()).isNotNull();
+        ExportedFileDataHeader persistedHeader = exportedFileDataHeaderRepository.save(exportedFileDataHeader);
+        ExportedFile exportedFile = createExportedFile(persistedHeader);
+        ExportedFile persistedFile = exportedFilesRepository.save(exportedFile);
+        assertThat(persistedFile.getId()).isNotNull();
     }
+
 
     @Test
     void shouldReturnEmptyWhenRecordNotFound() {
-        Optional<ExportedFileDataHeader> optionalExportedFileDataHeader = exportedFileDataHeaderRepository
-            .findById(100L);
-        assertThat(optionalExportedFileDataHeader).isEmpty();
+        Optional<ExportedFile> optionalExportedFile = exportedFilesRepository.findById(100L);
+        assertThat(optionalExportedFile).isEmpty();
     }
 
     @Test
+    @Sql(scripts = RESET_DATABASE)
     void shouldDeleteSelectedRecord() {
         ExportedFileDataHeader exportedFileDataHeader = createExportedFileDataHeader();
-        exportedFileDataHeaderRepository.save(exportedFileDataHeader);
-        exportedFileDataHeaderRepository.deleteById(exportedFileDataHeader.getId());
+        ExportedFileDataHeader persistedHeader = exportedFileDataHeaderRepository.save(exportedFileDataHeader);
+        ExportedFile exportedFile = createExportedFile(persistedHeader);
+        ExportedFile persistedFile = exportedFilesRepository.save(exportedFile);
 
-        Optional<ExportedFileDataHeader> optionalExportedFileDataHeader = exportedFileDataHeaderRepository
-            .findById(exportedFileDataHeader.getId());
+        exportedFilesRepository.deleteById(persistedFile.getId());
+        Optional<ExportedFile> optionalExportedFile = exportedFilesRepository
+            .findById(persistedFile.getId());
 
-        assertThat(optionalExportedFileDataHeader).isEmpty();
-    }
-
-    @Test
-    @Sql(RESET_DATABASE)
-    void shouldAddExportedFile() {
-        ExportedFileDataHeader exportedFileDataHeader = createExportedFileDataHeader();
-        ExportedFile exportedFile = createExportedFile();
-        exportedFileDataHeader.addExportedFile(exportedFile);
-
-        ExportedFileDataHeader persistedExportedFileDataHeader = exportedFileDataHeaderRepository
-            .save(exportedFileDataHeader);
-
-        Optional<ExportedFileDataHeader> fetchedExportedFileDataHeader = exportedFileDataHeaderRepository.findById(
-            persistedExportedFileDataHeader.getId());
-
-        assertThat(fetchedExportedFileDataHeader.stream())
-            .flatMap(ExportedFileDataHeader::getExportedFiles)
-            .map(
-                ExportedFile::getId,
-                ExportedFile::getFileName,
-                ExportedFile::getFileRecordCount
-            )
-            .contains(tuple(1L, "payments", 10));
+        assertThat(optionalExportedFile).isEmpty();
     }
 
     private ExportedFileDataHeader createExportedFileDataHeader() {
@@ -84,11 +68,11 @@ public class ExportedFileDataHeaderRepositoryTest {
             .build();
     }
 
-    private ExportedFile createExportedFile() {
+    private ExportedFile createExportedFile(ExportedFileDataHeader exportedFileDataHeader) {
         return ExportedFile.builder()
+            .exportedFileDataHeader(exportedFileDataHeader)
             .fileName("payments")
             .fileRecordCount(10)
             .build();
     }
-
 }
