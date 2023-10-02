@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -32,6 +33,9 @@ public class ExportedFile {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "exported_group_id", nullable = false, updatable = false)
     private ExportedFileDataHeader exportedFileDataHeader;
+
+    @Column(name = "exported_date_time")
+    private LocalDateTime exportedDateTime;
 
     @Column(name = "file_name")
     private String fileName;
