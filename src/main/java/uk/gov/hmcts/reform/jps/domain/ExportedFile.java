@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import javax.persistence.CascadeType;
@@ -42,6 +43,9 @@ public class ExportedFile {
         cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}
     )
     private final Set<ExportedFileData> exportedFileRecords = new HashSet<>();
+
+    @Column(name = "exported_date_time")
+    private LocalDateTime exportedDateTime;
 
     @Column(name = "file_name")
     private String fileName;

@@ -71,6 +71,7 @@ public class ExportedFilesRepositoryTest {
     private ExportedFile createExportedFile(ExportedFileDataHeader exportedFileDataHeader) {
         return ExportedFile.builder()
             .exportedFileDataHeader(exportedFileDataHeader)
+            .exportedDateTime(LocalDateTime.now())
             .fileName("payments")
             .fileRecordCount(10)
             .build();

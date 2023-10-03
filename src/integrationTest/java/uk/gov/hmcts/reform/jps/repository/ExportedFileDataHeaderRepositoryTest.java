@@ -164,6 +164,7 @@ public class ExportedFileDataHeaderRepositoryTest {
 
     private ExportedFile createExportedFile() {
         return ExportedFile.builder()
+            .exportedDateTime(LocalDateTime.now())
             .fileName("payments")
             .fileRecordCount(10)
             .build();
