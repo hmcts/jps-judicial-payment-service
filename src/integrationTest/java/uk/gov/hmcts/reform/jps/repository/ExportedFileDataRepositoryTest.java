@@ -12,10 +12,10 @@ import uk.gov.hmcts.reform.jps.domain.ExportedFileDataHeader;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
+import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
@@ -79,7 +79,7 @@ public class ExportedFileDataRepositoryTest {
 
     private ExportedFileDataHeader createExportedFileDataHeader() {
         return ExportedFileDataHeader.builder()
-            .exportedDateTime(LocalDateTime.now())
+            .exportedDateTime(now())
             .groupName("Test")
             .exportedBy("Publisher")
             .status("exported")
@@ -90,6 +90,7 @@ public class ExportedFileDataRepositoryTest {
     private ExportedFile createExportedFile(ExportedFileDataHeader exportedFileDataHeader) {
         return ExportedFile.builder()
             .exportedFileDataHeader(exportedFileDataHeader)
+            .exportedDateTime(now())
             .fileName("payments")
             .fileRecordCount(10)
             .build();

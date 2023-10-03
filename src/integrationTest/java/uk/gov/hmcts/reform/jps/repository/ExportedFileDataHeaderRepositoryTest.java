@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
+import static java.time.LocalTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
@@ -26,7 +27,7 @@ import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 @DataJpaTest
 @ActiveProfiles("itest")
 public class ExportedFileDataHeaderRepositoryTest {
-    public static final LocalTime NOW = LocalTime.now();
+    public static final LocalTime NOW = now();
     @Autowired
     private ExportedFileDataHeaderRepository exportedFileDataHeaderRepository;
 
