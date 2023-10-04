@@ -7,6 +7,9 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,6 +18,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
+import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 @Builder
@@ -34,6 +38,12 @@ public class ExportedFile {
     @JoinColumn(name = "exported_group_id", nullable = false, updatable = false)
     private ExportedFileDataHeader exportedFileDataHeader;
 
+    @OneToMany(
+        mappedBy = "exportedFile",
+        cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE}
+    )
+    private final Set<ExportedFileData> exportedFileRecords = new HashSet<>();
+
     @Column(name = "exported_date_time")
     private LocalDateTime exportedDateTime;
 
@@ -42,4 +52,9 @@ public class ExportedFile {
 
     @Column(name = "file_record_count")
     private Integer fileRecordCount;
+
+    public void addExportedFileData(ExportedFileData exportedFileData) {
+        exportedFileRecords.add(exportedFileData);
+        exportedFileData.setExportedFile(this);
+    }
 }
