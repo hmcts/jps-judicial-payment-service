@@ -130,11 +130,13 @@ public class StepDefinitions extends TestVariables {
         }
     }
 
-    @Given("a record for the hmctsServiceCode {string} exists in the database with the payload {string}")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws
+    @Given("{string} record for the hmctsServiceCode {string} exists in the database with the payload {string}")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String recordCount, String serviceCode, String payload) throws
         IOException {
-        randomDate = RandomDateGenerator.generateRandomDate().toString();
-
+        if (recordCount.equalsIgnoreCase("one")) {
+            randomDate = RandomDateGenerator.generateRandomDate().toString();
+        }
+        
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
         body = body.replace("dateToBeReplaced", randomDate);

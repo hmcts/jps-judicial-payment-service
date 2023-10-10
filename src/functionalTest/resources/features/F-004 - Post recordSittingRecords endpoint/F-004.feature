@@ -220,7 +220,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.20 @PossibleDuplicates #AC02
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "potentialDuplicateRecord" in response when judgeRoleTypeId doesn't match existing record
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -239,7 +239,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.21 @PossibleDuplicates #AC03
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when judgeRoleTypeId doesn't match and existing record is Submitted
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
@@ -259,7 +259,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.22 @PossibleDuplicates #AC04
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when existing record is Submitted
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
@@ -279,7 +279,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.23 @PossibleDuplicates #AC05
   Scenario: Positive response, Return 201 - Success when period doesn't match with existing record
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -293,7 +293,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.24 @PossibleDuplicates #AC06
   Scenario: Negative response, Return 400 - Invalid Location when one of the records has an invalid location for the given serviceCode
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-004.2"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-004.2"
     And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
@@ -321,7 +321,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.25 @PossibleDuplicates #AC07
   Scenario: Negative response, Return 400 - 008 could not insert with multiple errors
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -346,7 +346,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.26 @PossibleDuplicates #AC09
   Scenario: Positive response - Return 201 for multiple records
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -366,7 +366,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.27 @PossibleDuplicates #AC10
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when AM/PM values intersect with existing record
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -395,7 +395,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.29 @PossibleDuplicates
   Scenario: When epimmsId is different from existing record - Return 400 - 008 could not insert with errorCode set to "potentialDuplicateRecord" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -414,7 +414,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.30 @PossibleDuplicates
   Scenario: When epimmsId is different and existing sitting record status is Submitted- Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     And a call to submit the existing record with the payload "F-004_submitRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
@@ -434,7 +434,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.31 @PossibleDuplicates
   Scenario: When epimmsId and judgeRoleTypeId are different from existing record - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -453,7 +453,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.32 @PossibleDuplicates
   Scenario: When epimmsId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -467,7 +467,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.33 @PossibleDuplicates
   Scenario: When epimmsId, judgeRoleTypeId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -481,7 +481,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.34 @PossibleDuplicates
   Scenario: When epimmsId is different from existing record and period intersects - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -500,7 +500,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.35 @PossibleDuplicates
   Scenario: When epimmsId and judgeRoleTypeId are different from existing record and period intersects - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
     Given a user with the IDAM role of "jps-recorder"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -537,3 +537,23 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
+
+  @S-004.38 @PossibleDuplicates #IJPS-124
+  Scenario: Negative response, check whether correct record is returned - potential duplicate
+    Given a user with the IDAM role of "jps-recorder"
+    And "one" record for the hmctsServiceCode "BBA3" exists in the database with the payload "S-004.38_Existing_1" 
+    And "a second" record for the hmctsServiceCode "BBA3" exists in the database with the payload "S-004.38_Existing_2" 
+    When a request is prepared with appropriate values
+    And the request contains a valid service token
+    And the request contains the "hmctsServiceCode" as "BBA3"
+    And the request body contains the "sittingDate, epimmsId, personalCode matching the existing record, but AM/PM does not match" as in "S-004.38"
+    And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
+    Then a "negative" response is received with a "400 Bad Request" status code
+    And the response contains "message" as "008 could not insert"
+    And the response contains "errorRecords[0].errorCode" as "POTENTIAL_DUPLICATE_RECORD"
+    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And the response contains "errorRecords[0].am" as "false"
+    And the response contains "errorRecords[0].pm" as "true"
+    And the response contains "errorRecords[0].judgeRoleTypeId" as "14"
+    And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Ambrose"
