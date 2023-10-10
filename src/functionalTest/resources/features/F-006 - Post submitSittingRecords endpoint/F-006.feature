@@ -4,7 +4,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.1 #AC02
   Scenario: Success response - Return 200 success with content of record submitted
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-003_createRecord"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-003_createRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -122,7 +122,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.12 #AC01 IJPS-77
   Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 when Contract_type_id=1
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.12_createRecord"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.12_createRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -135,7 +135,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.13 #AC02 IJPS-77
   Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 and recordsSubmitted value incremented by 1 when 1 record has Contract_type_id=2 and other has Contract_type_id=1
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.13_createRecords"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.13_createRecords"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -148,7 +148,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.14 #AC03 IJPS-77
   Scenario: Success response - Return 200 success with recordsClosed value incremented by 1 when record has Contract_type_id=6 and crown_servant_flag set to false
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.14_createRecord"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.14_createRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -161,7 +161,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.15 #AC04 IJPS-77
   Scenario: Success response - Return 200 success with recordsSubmitted value incremented by 1 when record has Contract_type_id=6 and crown_servant_flag set to true
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.15_createRecord"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.15_createRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -174,7 +174,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.16 #AC05 IJPS-77
   Scenario: Success response - Return 200 success with no record updated when effective_start_date is before than sitting_date
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.16_createRecord"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.16_createRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
@@ -187,7 +187,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
   @S-006.17 #AC06 IJPS-77
   Scenario: Success response - Return 200 success with record is not updated when record has Contract_type_id=6 and there is no local_joh_record_id
     Given a user with the IDAM role of "jps-submitter"
-    And a record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.17_createRecord"
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.17_createRecord"
     When a request is prepared with appropriate values
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"

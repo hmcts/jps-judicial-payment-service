@@ -131,8 +131,8 @@ public class StepDefinitions extends TestVariables {
     }
 
     @Given("{string} record for the hmctsServiceCode {string} exists in the database with the payload {string}")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String recordCount, String serviceCode, String payload) throws
-        IOException {
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String recordCount, String serviceCode, 
+        String payload) throws IOException {
         if (recordCount.equalsIgnoreCase("one")) {
             randomDate = RandomDateGenerator.generateRandomDate().toString();
         }
