@@ -65,13 +65,12 @@ public class StepDefinitions extends TestVariables {
             "/testing-support/save-judicial-office-holders",
             JOH_KEY
         );
-        
+
         createRecords(
             "./src/functionalTest/resources/payloads/setup/addServices.json",
             "/testing-support/save-service",
             SERVICE_KEY
         );
-
     }
 
     @AfterAll
@@ -131,12 +130,12 @@ public class StepDefinitions extends TestVariables {
     }
 
     @Given("{string} record for the hmctsServiceCode {string} exists in the database with the payload {string}")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String recordCount, String serviceCode, 
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String recordCount, String serviceCode,
         String payload) throws IOException {
         if (recordCount.equalsIgnoreCase("one")) {
             randomDate = RandomDateGenerator.generateRandomDate().toString();
         }
-        
+
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
         body = body.replace("dateToBeReplaced", randomDate);

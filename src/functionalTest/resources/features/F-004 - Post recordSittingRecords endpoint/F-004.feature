@@ -39,7 +39,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
     And the request contains a valid service token
-    And the request contains the "hmctsServiceCode" as "BBA3"
+    And the request contains the "hmctsServiceCode" as "BFA1"
     And the request body contains the "payload with an invalid epimmsId for BBA3" as in "S-004.3"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
@@ -541,12 +541,12 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
   @S-004.38 @PossibleDuplicates #IJPS-124
   Scenario: Negative response, check whether correct record is returned - potential duplicate
     Given a user with the IDAM role of "jps-recorder"
-    And "one" record for the hmctsServiceCode "BBA3" exists in the database with the payload "S-004.38_existingRecord_1" 
-    And "a second" record for the hmctsServiceCode "BBA3" exists in the database with the payload "S-004.38_existingRecord_2" 
+    And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-004.38_existingRecord_1"
+    And "a second" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-004.38_existingRecord_2"
     When a request is prepared with appropriate values
     And the request contains a valid service token
-    And the request contains the "hmctsServiceCode" as "BBA3"
-    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM matching existing record 2, but judgeRoleTypeId" as in "S-004.38"
+    And the request contains the "hmctsServiceCode" as "ABA5"
+    And the request body contains the "sittingDate, epimmsId, personalCode, AM/PM matching existing record 1, but judgeRoleTypeId doesn't match" as in "S-004.38"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "negative" response is received with a "400 Bad Request" status code
     And the response contains "message" as "008 could not insert"
