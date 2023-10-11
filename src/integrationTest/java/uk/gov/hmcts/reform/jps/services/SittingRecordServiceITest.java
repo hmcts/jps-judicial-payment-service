@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +16,14 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory_;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.FinancialYearRecords;
+import uk.gov.hmcts.reform.jps.model.PublishSittingRecordCount;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.repository.SittingDaysRepository;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
@@ -70,6 +75,8 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistoryService statusHistoryService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private SittingDaysRepository sittingDaysRepository;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
@@ -793,6 +800,44 @@ class SittingRecordServiceITest extends BaseTest {
                       tuple(INVALID_DUPLICATE_RECORD, "Recorder", PUBLISHED),
                       tuple(VALID, null, null)
             );
+    }
+
+    @Test
+    @Sql(RESET_DATABASE)
+    void shouldReturnZeroPublishRecordCountWhenNoRecordPresent() {
+        PublishSittingRecordCount publishSittingRecordCount = sittingRecordService.retrievePublishedRecords("4918178");
+        assertThat(publishSittingRecordCount).isEqualTo(
+            PublishSittingRecordCount.builder()
+                .currentFinancialYear(FinancialYearRecords.builder().build())
+                .previousFinancialYear(FinancialYearRecords.builder().build())
+                .build());
+    }
+
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_PUBLISHED_TEST_DATA})
+    void shouldReturnPublishRecordCountWhenRecordPresent() {
+        LocalDate localDate = of(2023, 10, 10);
+        String personalCode = "4918178";
+        try (MockedStatic<LocalDate> mock = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
+            mock.when(LocalDate::now).thenReturn(localDate);
+
+            PublishSittingRecordCount publishSittingRecordCount = sittingRecordService
+                .retrievePublishedRecords(personalCode);
+
+            assertThat(publishSittingRecordCount).isEqualTo(
+                PublishSittingRecordCount.builder()
+                    .currentFinancialYear(FinancialYearRecords.builder()
+                                              .submittedCount(1)
+                                              .publishedCount(300)
+                                              .build())
+                    .previousFinancialYear(FinancialYearRecords.builder()
+                                               .submittedCount(2)
+                                               .publishedCount(3)
+                                               .build())
+                    .build());
+        }
+
     }
 
     private List<SittingRecordWrapper> recordSittingRecords(String jsonRequest) throws IOException {

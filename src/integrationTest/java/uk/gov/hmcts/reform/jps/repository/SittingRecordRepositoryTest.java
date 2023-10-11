@@ -1,6 +1,8 @@
 package uk.gov.hmcts.reform.jps.repository;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -16,6 +18,7 @@ import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,7 +26,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_PUBLISHED_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
+import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
 @DataJpaTest
@@ -72,7 +77,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         settingRecordToUpdate.setSittingDate(LocalDate.now().minusDays(30));
 
         StatusHistory statusHistory = StatusHistory.builder()
-            .statusId(StatusId.SUBMITTED)
+            .statusId(SUBMITTED)
             .changedDateTime(LocalDateTime.now())
             .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
             .changedByName("John Doe")
@@ -133,10 +138,11 @@ class SittingRecordRepositoryTest extends AbstractTest {
                                                     "John Doe",
                                                     sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded);
-        StatusHistory statusHistorySubmitted1 = createStatusHistory(StatusId.SUBMITTED,
-                                                   JpsRole.ROLE_RECORDER.getValue(),
-                                                   "Matthew Doe",
-                                                   sittingRecord);
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(
+            SUBMITTED,
+            JpsRole.ROLE_RECORDER.getValue(),
+            "Matthew Doe",
+            sittingRecord);
         sittingRecord.addStatusHistory(statusHistorySubmitted1);
 
         StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED,
@@ -208,5 +214,25 @@ class SittingRecordRepositoryTest extends AbstractTest {
             .hasSize(4)
             .extracting(RecordSubmitFields::getId)
             .contains(2L, 3L, 5L, 6L);
+    }
+
+    @ParameterizedTest
+    @CsvSource(quoteCharacter = '"', textBlock = """
+      # PERSONALCODE, COUNT
+        4918178,      2
+        555555,       0
+        """)
+    @Sql(scripts = {RESET_DATABASE, INSERT_PUBLISHED_TEST_DATA})
+    void shouldReturnSubmittedRecordForPersonalCodeWhenSittingDateWithinFinancialYear(String personalCode, Long count) {
+        Long submittedCount = recordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
+            personalCode,
+            SUBMITTED,
+            LocalDate.of(2022, Month.APRIL, 6),
+            LocalDate.of(2023, Month.APRIL, 5)
+
+        );
+
+        assertThat(submittedCount)
+            .isEqualTo(count);
     }
 }
