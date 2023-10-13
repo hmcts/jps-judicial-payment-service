@@ -31,4 +31,5 @@ public class SittingRecordResponse implements Serializable {
     private final Boolean pm;
     private final String judgeRoleTypeId;
     private final String judgeRoleTypeName;
+    private final String venue;
 }

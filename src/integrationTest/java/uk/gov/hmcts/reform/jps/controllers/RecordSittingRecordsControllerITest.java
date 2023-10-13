@@ -103,6 +103,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[0].venue").value("Special Court Venue"),
                 jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
@@ -114,6 +115,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[1].venue").value("Special Court Venue"),
                 jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
@@ -125,6 +127,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
+                jsonPath("$.errorRecords[2].venue").value("Special Court Venue"),
                 jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
             ).andReturn();
 
@@ -150,7 +153,7 @@ public class RecordSittingRecordsControllerITest {
     @Test
     @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY, INSERT_SERVICE_TEST_DATA})
     @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
-    void shouldRepondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+    void shouldRespondWithBadRequestWhenDuplicateRecordFound() throws Exception {
         String requestJson =  Resources.toString(getResource("recordSittingRecordsDuplicateRecords.json"), UTF_8);
 
         mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
