@@ -169,6 +169,7 @@ public class RecordSittingRecordsController {
             Function<SittingRecordWrapper, String> getName,
             UnaryOperator<StatusId> statusIdOperation
     ) {
+
         return sittingRecordWrappers.stream()
                 .map(sittingRecordWrapper ->
                         SittingRecordResponse.builder()
@@ -181,7 +182,7 @@ public class RecordSittingRecordsController {
                                 .pm(sittingRecordWrapper.getPm())
                                 .judgeRoleTypeId(sittingRecordWrapper.getJudgeRoleTypeId())
                                 .judgeRoleTypeName(sittingRecordWrapper.getJudgeRoleTypeName())
-                                .venue(regionService.getVenueName(hmctsServiceCode,
+                                .venue(regionService.getCourtName(hmctsServiceCode,
                                     sittingRecordWrapper.getSittingRecordRequest().getEpimmsId()))
                                 .build()
                 ).toList();
