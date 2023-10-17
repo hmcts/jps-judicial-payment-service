@@ -46,4 +46,18 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
         + " where s.id = :sittingRecordId and s.statusId = 'RECORDED'"
     )
     void updateRecordedStatus(Long sittingRecordId, StatusId statusId);
+
+    @Query("""
+        select count(sr.id)
+        from SittingRecord sr
+        where sr.personalCode = :personalCode
+        and sr.statusId = :statusId
+        and sr.sittingDate between :startDateTime and :endDateTime
+        """)
+    Long findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
+        String personalCode,
+        StatusId statusId,
+        LocalDate startDateTime,
+        LocalDate endDateTime
+    );
 }

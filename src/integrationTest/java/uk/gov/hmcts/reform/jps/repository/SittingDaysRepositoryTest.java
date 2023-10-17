@@ -2,6 +2,8 @@ package uk.gov.hmcts.reform.jps.repository;
 
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,6 +15,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_PUBLISHED_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 
@@ -61,5 +64,22 @@ public class SittingDaysRepositoryTest {
             .findById(persistedSittingDays.getId());
 
         assertThat(optionalSittingDays).isEmpty();
+    }
+
+    @ParameterizedTest
+    @CsvSource(quoteCharacter = '"', textBlock = """
+      # PERSONALCODE, COUNT
+        4918178,      300
+        555555,       0
+        """)
+    @Sql(scripts = {RESET_DATABASE, INSERT_PUBLISHED_TEST_DATA})
+    void shouldSittingCountWhenPersonalCodeIsPresentForFinalYear(String personalCode, Long count) {
+        Long sittingCountByPersonalCodeAndFinancialYear = sittingDaysRepository
+            .findSittingCountByPersonalCodeAndFinancialYear(
+                personalCode,
+                "2023-24"
+            ).orElse(0L);
+        assertThat(sittingCountByPersonalCodeAndFinancialYear)
+            .isEqualTo(count);
     }
 }
