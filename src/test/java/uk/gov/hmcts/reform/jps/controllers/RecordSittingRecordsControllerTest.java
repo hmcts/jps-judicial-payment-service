@@ -91,9 +91,9 @@ class RecordSittingRecordsControllerTest {
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
                                                       int responseCode,
                                                       String personalCode) throws Exception {
-        final String TestVenueName = "Magic Venue 99";
+        final String TestCourtName = "Test Court Name 200";
         when(serviceService.isServiceOnboarded(TEST_SERVICE)).thenReturn(true);
-        when(regionService.getVenueName(anyString(), anyString())).thenReturn(TestVenueName);
+        when(regionService.getCourtName(anyString(), anyString())).thenReturn(TestCourtName);
         String requestJson = Resources.toString(getResource(fileName), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -110,7 +110,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[0].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[0].statusId").value(RECORDED.name()),
-                jsonPath("$.errorRecords[0].venue").value(TestVenueName),
+                jsonPath("$.errorRecords[0].venue").value(TestCourtName),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -122,7 +122,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[1].statusId").value(RECORDED.name()),
-                jsonPath("$.errorRecords[1].venue").value(TestVenueName),
+                jsonPath("$.errorRecords[1].venue").value(TestCourtName),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -134,7 +134,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[2].statusId").value(RECORDED.name()),
-                jsonPath("$.errorRecords[0].venue").value(TestVenueName)
+                jsonPath("$.errorRecords[0].venue").value(TestCourtName)
             ).andReturn();
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
 
@@ -216,8 +216,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].createdDateTime")
-                    .value(creationDateTime.toString()),
+                jsonPath("$.errorRecords[2].createdDateTime").value(creationDateTime.toString()),
                 jsonPath("$.errorRecords[2].am").value("true"),
                 jsonPath("$.errorRecords[2].pm").value("false"),
                 jsonPath("$.errorRecords[2].judgeRoleTypeId").value("Judge"),
@@ -239,7 +238,7 @@ class RecordSittingRecordsControllerTest {
     }
 
     @Test
-    void shouldRepondWithBadRequestWhenInvalidLocationRecordFound() throws Exception {
+    void shouldRespondWithBadRequestWhenInvalidLocationRecordFound() throws Exception {
         when(serviceService.isServiceOnboarded(TEST_SERVICE))
             .thenReturn(true);
         doAnswer(invocation -> {

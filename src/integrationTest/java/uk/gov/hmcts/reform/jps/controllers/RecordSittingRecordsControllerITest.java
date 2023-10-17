@@ -56,7 +56,7 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 @ActiveProfiles("itest")
 public class RecordSittingRecordsControllerITest {
     private static final String TEST_SERVICE = "BBA3";
-    private static final String SPECIAL_COURT_NAME = "Special Court Name & Address";
+    private static final String SPECIAL_COURT_VENUE = "Special Court Name & Address";
     private static final String URL_RECORDSITTINGRECORDS_HMCTSSERVICECODE = "/recordSittingRecords/{hmctsServiceCode}";
     private static final String EPIMSSID_852649 = "852649";
     private static final String EPIMSSID_852650 = "852650";
@@ -112,7 +112,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value(FALSE),
                 jsonPath("$.errorRecords[0].errorCode").value(VALID),
                 jsonPath("$.errorRecords[0].createdByName").value(RECORDER),
-                jsonPath("$.errorRecords[0].venue").value(SPECIAL_COURT_NAME),
+                jsonPath("$.errorRecords[0].venue").value(SPECIAL_COURT_VENUE),
                 jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
@@ -124,7 +124,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value(VALID),
                 jsonPath("$.errorRecords[1].createdByName").value(RECORDER),
-                jsonPath("$.errorRecords[1].venue").value(SPECIAL_COURT_NAME),
+                jsonPath("$.errorRecords[1].venue").value(SPECIAL_COURT_VENUE),
                 jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
@@ -136,7 +136,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value(VALID),
                 jsonPath("$.errorRecords[2].createdByName").value(RECORDER),
-                jsonPath("$.errorRecords[2].venue").value(SPECIAL_COURT_NAME),
+                jsonPath("$.errorRecords[2].venue").value(SPECIAL_COURT_VENUE),
                 jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
             ).andReturn();
 
@@ -182,7 +182,7 @@ public class RecordSittingRecordsControllerITest {
                     jsonPath("$.errorRecords[0].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                     jsonPath("$.errorRecords[0].createdByName").value(RECORDER),
                     jsonPath("$.errorRecords[0].statusId").value(RECORDED.name()),
-                    jsonPath("$.errorRecords[0].venue").value(SPECIAL_COURT_NAME),
+                    jsonPath("$.errorRecords[0].venue").value(SPECIAL_COURT_VENUE),
                     jsonPath("$.errorRecords[0].createdDateTime").exists(),
 
                     jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
@@ -195,7 +195,7 @@ public class RecordSittingRecordsControllerITest {
                     jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                     jsonPath("$.errorRecords[1].createdByName").value(RECORDER),
                     jsonPath("$.errorRecords[1].statusId").value(RECORDED.name()),
-                    jsonPath("$.errorRecords[1].venue").value(SPECIAL_COURT_NAME),
+                    jsonPath("$.errorRecords[1].venue").value(SPECIAL_COURT_VENUE),
                     jsonPath("$.errorRecords[1].createdDateTime").exists(),
 
                     jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
@@ -208,7 +208,7 @@ public class RecordSittingRecordsControllerITest {
                     jsonPath("$.errorRecords[2].errorCode").value(INVALID_DUPLICATE_RECORD.name()),
                     jsonPath("$.errorRecords[2].createdByName").value(RECORDER),
                     jsonPath("$.errorRecords[2].statusId").value(RECORDED.name()),
-                    jsonPath("$.errorRecords[2].venue").value(SPECIAL_COURT_NAME),
+                    jsonPath("$.errorRecords[2].venue").value(SPECIAL_COURT_VENUE),
                     jsonPath("$.errorRecords[2].createdDateTime").exists()
             );
     }
