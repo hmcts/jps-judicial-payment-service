@@ -84,7 +84,7 @@ class SittingRecordControllerITest {
     private static final String USERID_11255 = "11255";
     private static final String USERID_11266 = "11266";
 
-    private static final String SPECIAL_COURT_VENUE = "Special Court Venue";
+    private static final String SPECIAL_COURT_VENUE = "Special Court Name & Address";
 
     public static final String SEARCH_URL = "/sitting-records/searchSittingRecords/{hmctsServiceCode}";
 
