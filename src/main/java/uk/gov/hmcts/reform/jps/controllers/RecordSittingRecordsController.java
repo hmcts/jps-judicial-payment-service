@@ -182,10 +182,14 @@ public class RecordSittingRecordsController {
                                 .pm(sittingRecordWrapper.getPm())
                                 .judgeRoleTypeId(sittingRecordWrapper.getJudgeRoleTypeId())
                                 .judgeRoleTypeName(sittingRecordWrapper.getJudgeRoleTypeName())
-                                .venue(regionService.getCourtName(hmctsServiceCode,
-                                    sittingRecordWrapper.getSittingRecordRequest().getEpimmsId()))
+                                .venue(getVenueName(hmctsServiceCode,
+                                    sittingRecordWrapper.getEpimmsId()))
                                 .build()
                 ).toList();
+    }
+
+    private String getVenueName(String hmctsServiceCode, String epimmsId) {
+        return regionService.getCourtName(hmctsServiceCode, epimmsId);
     }
 
 }

@@ -88,7 +88,7 @@ public class SittingRecordService {
                      .sittingRecordId(sittingRecord.getId())
                      .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                      .statusId(sittingRecord.getStatusId())
-                     .venueName(locationService.getVenueName(
+                     .venueName(getVenueName(
                          sittingRecord.getHmctsServiceId(), sittingRecord.getEpimmsId()))
                      .build()
                  )
@@ -325,4 +325,9 @@ public class SittingRecordService {
             .map(uk.gov.hmcts.reform.jps.domain.Service::getAccountCenterCode)
             .orElse(null);
     }
+
+    private String getVenueName(String hmctsServiceCode, String epimmsId) {
+        return locationService.getCourtName(hmctsServiceCode, epimmsId);
+    }
+
 }

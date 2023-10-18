@@ -45,6 +45,7 @@ public class DuplicateCheckerService {
             sittingRecordWrapper.setJudgeRoleTypeId(fields.getJudgeRoleTypeId());
             sittingRecordWrapper.setAm(fields.getAm());
             sittingRecordWrapper.setPm(fields.getPm());
+            sittingRecordWrapper.setEpimmsId(fields.getEpimmsId());
         }
     }
 
