@@ -191,9 +191,9 @@ class LocationServiceTest {
             .courtVenues(courtVenues)
             .serviceCode("Service Code")
             .build();
-        when(locationServiceClient.getCourtVenue(Mockito.<String>any())).thenReturn(buildResult);
+        when(locationServiceClient.getCourtVenue(Mockito.anyString())).thenReturn(buildResult);
         assertEquals("Venue Name", locationService.getVenueName("Hmcts Service Code", "EP42"));
-        verify(locationServiceClient).getCourtVenue(Mockito.<String>any());
+        verify(locationServiceClient).getCourtVenue(Mockito.anyString());
     }
 
     @Test
@@ -205,9 +205,9 @@ class LocationServiceTest {
             .courtVenues(courtVenues)
             .serviceCode("Service Code")
             .build();
-        when(locationServiceClient.getCourtVenue(Mockito.<String>any())).thenReturn(buildResult);
+        when(locationServiceClient.getCourtVenue(Mockito.anyString())).thenReturn(buildResult);
         assertEquals("Court Name", locationService.getCourtName("Hmcts Service Code", "EP42"));
-        verify(locationServiceClient).getCourtVenue(Mockito.<String>any());
+        verify(locationServiceClient).getCourtVenue(Mockito.anyString());
     }
 
     private CourtVenue createCourtVenue() {
