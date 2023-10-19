@@ -183,7 +183,7 @@ public class RecordSittingRecordsController {
                                 .judgeRoleTypeId(sittingRecordWrapper.getJudgeRoleTypeId())
                                 .judgeRoleTypeName(sittingRecordWrapper.getJudgeRoleTypeName())
                                 .venue(getVenueName(hmctsServiceCode,
-                                    sittingRecordWrapper.getSittingRecordRequest().getEpimmsId()))
+                                    sittingRecordWrapper.getEpimmsId()))
                                 .build()
                 ).toList();
     }
