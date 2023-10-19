@@ -112,7 +112,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value(FALSE),
                 jsonPath("$.errorRecords[0].errorCode").value(VALID),
                 jsonPath("$.errorRecords[0].createdByName").value(RECORDER),
-                jsonPath("$.errorRecords[0].venue").value(""),
+                jsonPath("$.errorRecords[0].venue").value(SPECIAL_COURT_VENUE),
                 jsonPath("$.errorRecords[0].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
@@ -124,7 +124,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value(VALID),
                 jsonPath("$.errorRecords[1].createdByName").value(RECORDER),
-                jsonPath("$.errorRecords[1].venue").value(""),
+                jsonPath("$.errorRecords[1].venue").value(SPECIAL_COURT_VENUE),
                 jsonPath("$.errorRecords[1].statusId").value(StatusId.RECORDED.name()),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
@@ -136,7 +136,7 @@ public class RecordSittingRecordsControllerITest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value(VALID),
                 jsonPath("$.errorRecords[2].createdByName").value(RECORDER),
-                jsonPath("$.errorRecords[2].venue").value(""),
+                jsonPath("$.errorRecords[2].venue").value(SPECIAL_COURT_VENUE),
                 jsonPath("$.errorRecords[2].statusId").value(StatusId.RECORDED.name())
             ).andReturn();
 
