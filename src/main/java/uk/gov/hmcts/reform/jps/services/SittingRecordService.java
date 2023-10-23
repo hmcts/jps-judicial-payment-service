@@ -14,6 +14,8 @@ import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
 import uk.gov.hmcts.reform.jps.exceptions.ResourceNotFoundException;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
+import uk.gov.hmcts.reform.jps.model.FinancialYearRecords;
+import uk.gov.hmcts.reform.jps.model.PublishSittingRecordCount;
 import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -25,7 +27,9 @@ import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiPredicate;
@@ -57,6 +61,7 @@ public class SittingRecordService {
     private final ServiceService serviceService;
     private final StatusHistoryService statusHistoryService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
+    private final SittingDaysService sittingDaysService;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -330,4 +335,57 @@ public class SittingRecordService {
         return locationService.getCourtName(hmctsServiceCode, epimmsId);
     }
 
+    public PublishSittingRecordCount retrievePublishedRecords(String personalCode) {
+        LocalDate currentDate = LocalDate.now();
+        String currentFinancialYear = getFinancialYear(currentDate);
+
+        FinancialYearRecords currentFinancialYearRecords = FinancialYearRecords.builder()
+            .publishedCount(sittingDaysService.getSittingCount(personalCode, currentFinancialYear))
+            .submittedCount(
+                sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
+                        personalCode,
+                        SUBMITTED,
+                        startOfFinancialYear(currentDate),
+                        endOfFinancialYear(currentDate))
+            )
+            .build();
+
+        LocalDate previousYear = currentDate.minusYears(1L);
+        String previousFinancialYear = getFinancialYear(previousYear);
+        FinancialYearRecords previousFinancialYearRecords = FinancialYearRecords.builder()
+            .publishedCount(sittingDaysService.getSittingCount(personalCode, previousFinancialYear))
+            .submittedCount(
+                sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
+                        personalCode,
+                        SUBMITTED,
+                        startOfFinancialYear(previousYear),
+                        endOfFinancialYear(previousYear))
+            )
+            .build();
+
+        return PublishSittingRecordCount.builder()
+            .currentFinancialYear(currentFinancialYearRecords)
+            .previousFinancialYear(previousFinancialYearRecords)
+            .build();
+    }
+
+    private String getFinancialYear(LocalDate date) {
+        int year = date.getYear();
+        int nextYear = (year + 1) % 100;
+        return String.join("-",
+                           String.valueOf(year), String.valueOf(nextYear));
+
+    }
+
+    private LocalDate startOfFinancialYear(LocalDate date) {
+        return LocalDate.of(date.getYear(),
+                                             Month.APRIL,
+                                             6);
+    }
+
+    private LocalDate endOfFinancialYear(LocalDate date) {
+        return LocalDate.of(date.getYear() + 1,
+                                             Month.APRIL,
+                                             5);
+    }
 }
