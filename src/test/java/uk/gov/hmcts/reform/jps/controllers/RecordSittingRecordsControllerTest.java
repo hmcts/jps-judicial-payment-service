@@ -91,9 +91,7 @@ class RecordSittingRecordsControllerTest {
     void shouldCreateSittingRecordsWhenRequestIsValid(String fileName,
                                                       int responseCode,
                                                       String personalCode) throws Exception {
-        final String TestCourtName = "Test Court Name 200";
         when(serviceService.isServiceOnboarded(TEST_SERVICE)).thenReturn(true);
-        when(regionService.getCourtName(anyString(), anyString())).thenReturn(TestCourtName);
         String requestJson = Resources.toString(getResource(fileName), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post("/recordSittingRecords/{hmctsServiceCode}", TEST_SERVICE)
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -147,6 +145,8 @@ class RecordSittingRecordsControllerTest {
 
     @Test
     void shouldRespondWithBadRequestWhenDuplicateRecordFound() throws Exception {
+        final String TestCourtName = "Test Court Name 200";
+        when(regionService.getCourtName(anyString(), anyString())).thenReturn(TestCourtName);
         when(serviceService.isServiceOnboarded(TEST_SERVICE))
             .thenReturn(true);
         LocalDateTime creationDateTime = LocalDateTime.now().minusDays(2).plusSeconds(1)
@@ -162,6 +162,7 @@ class RecordSittingRecordsControllerTest {
                     sittingRecordWrapper.setJudgeRoleTypeName("Tester");
                     sittingRecordWrapper.setAm(Boolean.TRUE);
                     sittingRecordWrapper.setPm(Boolean.FALSE);
+                    sittingRecordWrapper.setEpimmsId("852649");
                 });
             return null;
         }).when(sittingRecordService).checkDuplicateRecords(anyList());
@@ -188,6 +189,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[0].pm").value("false"),
                 jsonPath("$.errorRecords[0].judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[0].judgeRoleTypeName").value("Tester"),
+                jsonPath("$.errorRecords[0].venue").value(TestCourtName),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -203,6 +205,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].pm").value("false"),
                 jsonPath("$.errorRecords[1].judgeRoleTypeId").value("Judge"),
                 jsonPath("$.errorRecords[1].judgeRoleTypeName").value("Tester"),
+                jsonPath("$.errorRecords[1].venue").value(TestCourtName),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -217,7 +220,8 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].am").value("true"),
                 jsonPath("$.errorRecords[2].pm").value("false"),
                 jsonPath("$.errorRecords[2].judgeRoleTypeId").value("Judge"),
-                jsonPath("$.errorRecords[2].judgeRoleTypeName").value("Tester")
+                jsonPath("$.errorRecords[2].judgeRoleTypeName").value("Tester"),
+                jsonPath("$.errorRecords[2].venue").value(TestCourtName)
             ).andReturn();
 
         verify(sittingRecordService).checkDuplicateRecords(anyList());
