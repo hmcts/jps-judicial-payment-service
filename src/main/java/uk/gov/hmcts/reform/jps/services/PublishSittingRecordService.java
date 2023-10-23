@@ -133,13 +133,15 @@ public class PublishSittingRecordService {
     private long getPublishedSittingCount(
         PublishSittingRecordCount publishSittingRecordCount,
         String sittingDateFinancialYear) {
-        long publishedSittingCount = 0L;
+        long publishedSittingCount;
 
         if (publishSittingRecordCount.getCurrentFinancialYear().getFinancialYear().equals(sittingDateFinancialYear)) {
             publishedSittingCount = publishSittingRecordCount.getCurrentFinancialYear().getPublishedCount() + 1;
         } else if (publishSittingRecordCount.getPreviousFinancialYear().getFinancialYear().equals(
             sittingDateFinancialYear)) {
             publishedSittingCount = publishSittingRecordCount.getPreviousFinancialYear().getPublishedCount() + 1;
+        } else {
+            throw new IllegalArgumentException("Financial year is invalid : " + sittingDateFinancialYear);
         }
         return publishedSittingCount;
     }

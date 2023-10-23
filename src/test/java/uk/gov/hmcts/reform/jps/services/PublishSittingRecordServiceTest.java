@@ -20,6 +20,7 @@ import java.util.Optional;
 
 import static java.time.LocalDate.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -211,5 +212,102 @@ class PublishSittingRecordServiceTest {
         assertThat(fee)
             .as(feeType)
             .isEqualTo(new BigDecimal(expectedFee));
+    }
+
+    @Test
+    void shouldReturnStandardFeeWhenNonMedicalMemberWithLondonWeightedFeeNotPresent() {
+        when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+            HMCTS_SERVICE_CODE,
+            MEDICAL_STAFF,
+            LocalDate.now()))
+            .thenReturn(Fee.builder()
+                            .standardFee(STANDARD_FEE)
+                            .higherThresholdFee(HIGHER_THRESHOLD_FEE)
+                            .build());
+
+        BigDecimal fee = publishSittingRecordService.calculateJohFee(
+            HMCTS_SERVICE_CODE,
+            PERSONAL_CODE,
+            MEDICAL_STAFF,
+            LocalDate.now(),
+            false
+        );
+
+        assertThat(fee).isEqualTo(STANDARD_FEE);
+    }
+
+    @Test
+    void shouldReturnHigherFeeWhenSittingDateIsInPreviousFinancialYear() {
+        LocalDate localDate = of(2023, 10, 19);
+        try (MockedStatic<LocalDate> localDateMockedStatic = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+            localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+            LocalDate sittingDate = LocalDate.now().minusYears(1);
+            when(sittingDaysService.getSittingCount(eq(PERSONAL_CODE), anyString()))
+                .thenReturn(2L);
+            when(sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
+                eq(PERSONAL_CODE),
+                eq(SUBMITTED),
+                any(LocalDate.class),
+                any(LocalDate.class)
+            )).thenReturn(300L);
+            when(applicationProperties.isMedicalMember(MEDICAL_STAFF))
+                .thenReturn(true);
+
+            when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+                HMCTS_SERVICE_CODE,
+                MEDICAL_STAFF,
+                sittingDate))
+                .thenReturn(Fee.builder()
+                                .standardFee(STANDARD_FEE)
+                                .higherThresholdFee(HIGHER_THRESHOLD_FEE)
+                                .build());
+
+            BigDecimal fee = publishSittingRecordService.calculateJohFee(
+                HMCTS_SERVICE_CODE,
+                PERSONAL_CODE,
+                MEDICAL_STAFF,
+                sittingDate,
+                false
+            );
+            assertThat(fee).isEqualTo(HIGHER_THRESHOLD_FEE);
+        }
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenSittingDateIsOutOfRange() {
+        LocalDate localDate = of(2023, 10, 19);
+        try (MockedStatic<LocalDate> localDateMockedStatic = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+            localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+            LocalDate sittingDate = LocalDate.now().minusYears(2);
+            when(sittingDaysService.getSittingCount(eq(PERSONAL_CODE), anyString()))
+                .thenReturn(2L);
+            when(sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
+                eq(PERSONAL_CODE),
+                eq(SUBMITTED),
+                any(LocalDate.class),
+                any(LocalDate.class)
+            )).thenReturn(300L);
+            when(applicationProperties.isMedicalMember(MEDICAL_STAFF))
+                .thenReturn(true);
+
+            when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+                HMCTS_SERVICE_CODE,
+                MEDICAL_STAFF,
+                sittingDate
+                ))
+                .thenReturn(Fee.builder()
+                                .standardFee(STANDARD_FEE)
+                                .higherThresholdFee(HIGHER_THRESHOLD_FEE)
+                                .build());
+
+            assertThatThrownBy(() -> publishSittingRecordService.calculateJohFee(
+                HMCTS_SERVICE_CODE,
+                PERSONAL_CODE,
+                MEDICAL_STAFF,
+                sittingDate,
+                false
+            )).isInstanceOf(IllegalArgumentException.class)
+              .hasMessage("Financial year is invalid : 2021-22");
+        }
     }
 }

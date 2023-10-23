@@ -100,10 +100,11 @@ class FeeServiceTest {
 
     @Test
     void shouldThrowIllegalArgumentExceptionWhenFeeMissing() {
+        LocalDate now = LocalDate.now();
         assertThatThrownBy(() -> feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
             "BBA3",
             "Judge",
-            LocalDate.now()
+            now
         )).isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Fee not set/active for hmctsServiceCode and judgeRoleTypeId Judge");
     }
