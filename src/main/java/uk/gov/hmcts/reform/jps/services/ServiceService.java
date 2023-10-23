@@ -31,6 +31,12 @@ public class ServiceService {
             .isPresent();
     }
 
+    public LocalDate getServiceDateOnboarded(String hmctsServiceId) {
+        Optional<uk.gov.hmcts.reform.jps.domain.Service> service =
+            serviceRepository.findByHmctsServiceId(hmctsServiceId);
+        return service.map(uk.gov.hmcts.reform.jps.domain.Service::getOnboardingStartDate).orElse(null);
+    }
+
     @Transactional
     public uk.gov.hmcts.reform.jps.domain.Service save(uk.gov.hmcts.reform.jps.domain.Service service) {
         return serviceRepository.save(service);

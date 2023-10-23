@@ -18,6 +18,7 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -104,6 +105,23 @@ class ServiceServiceTest {
             .containsExactlyInAnyOrder(1L, 2L);
 
         verify(serviceRepository).saveAll(anyList());
+    }
+
+    @Test
+    void testGetServiceDateOnboarded() {
+        final LocalDate onboardedDate = LocalDate.now().minusDays(3);
+        Service service = createService(1L);
+        service.setOnboardingStartDate(onboardedDate);
+        when(serviceRepository.findByHmctsServiceId(anyString()))
+            .thenReturn(Optional.of(service));
+
+        Optional<Service> result = serviceService.findService("42");
+        assertThat(result)
+            .isPresent()
+            .hasValue(service);
+        assertEquals(result.get().getOnboardingStartDate(), onboardedDate);
+
+        verify(serviceRepository).findByHmctsServiceId(anyString());
     }
 
     private uk.gov.hmcts.reform.jps.model.in.Service getService() {
