@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,10 +14,11 @@ import uk.gov.hmcts.reform.jps.repository.JudicialOfficeHolderRepository;
 
 import java.time.LocalDate;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
+import static java.util.Comparator.comparing;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -54,8 +56,18 @@ public class JudicialOfficeHolderService {
     }
 
 
-
     public Optional<Boolean> getCrownServiceFlag(String personalCode, LocalDate sittingDate) {
+        return getFlagValue(personalCode, sittingDate, JohAttributes::isCrownServantFlag);
+    }
+
+    public Optional<Boolean> getLondonFlag(String personalCode, LocalDate sittingDate) {
+        return getFlagValue(personalCode, sittingDate, JohAttributes::isLondonFlag);
+    }
+
+    @NotNull
+    private Optional<Boolean> getFlagValue(String personalCode,
+                                           LocalDate sittingDate,
+                                           Function<JohAttributes, Boolean> flag) {
         Optional<JudicialOfficeHolder> judicialOfficeHolder =
             judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
                 personalCode,
@@ -65,14 +77,12 @@ public class JudicialOfficeHolderService {
         return judicialOfficeHolder.stream()
             .map(JudicialOfficeHolder::getJohAttributes)
             .flatMap(Collection::stream)
-            .max(Comparator.comparing(JohAttributes::getEffectiveStartDate))
-            .map(JohAttributes::isCrownServantFlag);
+            .max(comparing(JohAttributes::getEffectiveStartDate))
+            .map(flag);
     }
 
-
     private JudicialOfficeHolder getJudicialOfficeHolder(
-        uk.gov.hmcts.reform.jps.model.JudicialOfficeHolder judicialOfficeHolder
-    ) {
+        uk.gov.hmcts.reform.jps.model.JudicialOfficeHolder judicialOfficeHolder) {
         JudicialOfficeHolder domainJudicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(judicialOfficeHolder.getPersonalCode())
             .build();

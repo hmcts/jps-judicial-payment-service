@@ -10,11 +10,15 @@ import uk.gov.hmcts.reform.jps.model.in.FeeDeleteRequest;
 import uk.gov.hmcts.reform.jps.model.in.FeeRequest;
 import uk.gov.hmcts.reform.jps.repository.FeeRepository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -73,6 +77,35 @@ class FeeServiceTest {
         assertThatThrownBy(() -> feeService.delete(feeDeleteRequest))
             .isInstanceOf(IllegalArgumentException.class)
             .hasMessageContaining("Fee ids missing");
+    }
+
+    @Test
+    void shouldReturnFeeWhenRecordPresent() {
+        long id = 100L;
+        when(feeRepository.findByHmctsServiceIdAndJudgeRoleIdAndEffectiveFromIsLessThanEqual(
+            anyString(),
+            anyString(),
+            any(LocalDate.class)
+        )).thenReturn(Optional.of(uk.gov.hmcts.reform.jps.domain.Fee.builder()
+                                              .id(id)
+                                              .build()));
+        uk.gov.hmcts.reform.jps.domain.Fee fees = feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+            "BBA3",
+            "Judge",
+            LocalDate.now()
+        );
+
+        assertThat(fees.getId()).isEqualTo(id);
+    }
+
+    @Test
+    void shouldThrowIllegalArgumentExceptionWhenFeeMissing() {
+        assertThatThrownBy(() -> feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+            "BBA3",
+            "Judge",
+            LocalDate.now()
+        )).isInstanceOf(IllegalArgumentException.class)
+            .hasMessageContaining("Fee not set/active for hmctsServiceCode and judgeRoleTypeId Judge");
     }
 
     private uk.gov.hmcts.reform.jps.domain.Fee getDomainFee(long id) {
