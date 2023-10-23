@@ -1,8 +1,6 @@
 package uk.gov.hmcts.reform.jps.services;
 
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
@@ -19,8 +17,6 @@ import java.util.Objects;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @Service
-@Getter
-@Setter
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PublishSittingRecordService {
     private final SittingRecordRepository sittingRecordRepository;

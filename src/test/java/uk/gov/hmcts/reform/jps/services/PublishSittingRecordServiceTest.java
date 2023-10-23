@@ -214,8 +214,15 @@ class PublishSittingRecordServiceTest {
             .isEqualTo(new BigDecimal(expectedFee));
     }
 
-    @Test
-    void shouldReturnStandardFeeWhenNonMedicalMemberWithLondonWeightedFeeNotPresent() {
+    @ParameterizedTest
+    @CsvSource(quoteCharacter = '"', textBlock = """
+      # LondonFlag
+        true
+        false
+        """)
+    void shouldReturnStandardFeeWhenNonMedicalMemberWithLondonWeightedFeeNotPresent(boolean londonFlag) {
+        when(judicialOfficeHolderService.getLondonFlag(PERSONAL_CODE, LocalDate.now()))
+            .thenReturn(Optional.of(londonFlag));
         when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
             HMCTS_SERVICE_CODE,
             MEDICAL_STAFF,
