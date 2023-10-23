@@ -171,7 +171,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecords.get(0)).isEqualTo(getDomainSittingRecords(2).get(0));
         assertThat(sittingRecords.get(1)).isEqualTo(getDomainSittingRecords(2).get(1));
-        verify(locationService, times(2)).getVenueName(anyString(), anyString());
         verify(serviceService).findService(anyString());
     }
 

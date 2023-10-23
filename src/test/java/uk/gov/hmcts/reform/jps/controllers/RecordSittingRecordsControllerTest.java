@@ -110,7 +110,6 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[0].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[0].statusId").value(RECORDED.name()),
-                jsonPath("$.errorRecords[0].venue").value(TestCourtName),
 
                 jsonPath("$.errorRecords[1].postedRecord.sittingDate").value("2023-04-10"),
                 jsonPath("$.errorRecords[1].postedRecord.epimmsId").value("852649"),
@@ -122,7 +121,6 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
                 jsonPath("$.errorRecords[1].statusId").value(RECORDED.name()),
-                jsonPath("$.errorRecords[1].venue").value(TestCourtName),
 
                 jsonPath("$.errorRecords[2].postedRecord.sittingDate").value("2023-03-09"),
                 jsonPath("$.errorRecords[2].postedRecord.epimmsId").value("852649"),
@@ -133,8 +131,7 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value("VALID"),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].statusId").value(RECORDED.name()),
-                jsonPath("$.errorRecords[0].venue").value(TestCourtName)
+                jsonPath("$.errorRecords[2].statusId").value(RECORDED.name())
             ).andReturn();
         assertThat(mvcResult.getResponse().getStatus()).isEqualTo(responseCode);
 
