@@ -37,7 +37,7 @@ public class LocationService {
     public String getVenueName(String hmctsServiceCode, String epimmsId) {
         return getCourtVenue(hmctsServiceCode, epimmsId)
             .map(CourtVenue::getVenueName)
-            .orElse("");
+            .orElse(null);
     }
 
     public String getCourtName(String hmctsServiceCode, String epimmsId) {
