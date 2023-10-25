@@ -207,7 +207,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateRangeTo(LocalDate.now())
                                                .personalCode(PERSONAL_CODE)
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
-                                               .statusId(RECORDED)
+                                               .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
                                                .build(), SSCS);
 
