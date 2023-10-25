@@ -67,9 +67,11 @@ public class SittingRecordService {
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
+        LocalDate serviceOnboardedDate = serviceService.getServiceDateOnboarded(hmctsServiceCode);
         try (Stream<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = sittingRecordRepository.find(
             recordSearchRequest,
-            hmctsServiceCode
+            hmctsServiceCode,
+            serviceOnboardedDate
         )) {
             List<CourtVenue> courtVenues = locationService.getCourtVenues(hmctsServiceCode);
             String accountCode = getAccountCode(hmctsServiceCode);

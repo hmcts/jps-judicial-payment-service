@@ -52,7 +52,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     @Override
     public Stream<SittingRecord> find(
         SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode) {
+        String hmctsServiceCode,
+        LocalDate serviceOnboardedDate) {
         try {
             // create the outer query
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();

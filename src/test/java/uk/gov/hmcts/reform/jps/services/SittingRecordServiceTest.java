@@ -158,7 +158,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Test
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
         when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
-                                                  isA(String.class)))
+                                                  isA(String.class),
+                                          any(LocalDate.class)))
             .thenReturn(getDbSittingRecords(2).stream());
 
         when(locationService.getCourtVenues(anyString()))

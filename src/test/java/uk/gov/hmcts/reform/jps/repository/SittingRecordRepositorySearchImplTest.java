@@ -151,7 +151,9 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
-                                               .build(), SSCS);
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
@@ -209,7 +211,9 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
-                                               .build(), SSCS);
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
@@ -265,7 +269,9 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
-                                               .build(), SSCS);
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
@@ -318,7 +324,9 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
-                                               .build(), SSCS);
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
@@ -365,7 +373,9 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
                                                .duration(Duration.AM)
-                                               .build(), SSCS);
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
@@ -413,8 +423,9 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateRangeTo(LocalDate.now())
                                                .duration(Duration.PM)
                                                .build(),
-                                           SSCS
-        );
+                                           SSCS,
+                                           LocalDate.now());
+
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
