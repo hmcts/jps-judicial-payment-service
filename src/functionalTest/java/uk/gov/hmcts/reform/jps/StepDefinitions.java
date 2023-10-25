@@ -1,6 +1,5 @@
 package uk.gov.hmcts.reform.jps;
 
-import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
@@ -278,7 +277,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
             .body("sittingRecords[0].epimmsId",equalTo("229786"))
-            .body("sittingRecords[0].venueName",equalTo("Barnet"))
+            .body("sittingRecords[0].venueName",equalTo("Barnet Civil And Family Courts Centre"))
             .body("sittingRecords[0].hmctsServiceId",equalTo("ABA5"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
             .body("sittingRecords[0].personalName",equalTo("Joe Bloggs"))
