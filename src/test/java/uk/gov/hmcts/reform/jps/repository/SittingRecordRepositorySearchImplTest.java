@@ -9,8 +9,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
@@ -36,7 +39,6 @@ import javax.persistence.criteria.Root;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
@@ -60,6 +62,8 @@ import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.STATUS_ID;
 
 @ExtendWith(MockitoExtension.class)
 class SittingRecordRepositorySearchImplTest {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordRepositorySearchImplTest.class);
 
     private static final int OFF_SET = 5;
     private static final int PAGE_SIZE = 10;
@@ -91,15 +95,15 @@ class SittingRecordRepositorySearchImplTest {
     @Mock
     SingularAttributePath<String> attributePath;
     @Mock
-    SingularAttributePath<String> SITTINGDATE;
+    static SingularAttributePath<String> SITTINGDATE;
     @Mock
-    SingularAttributePath<String> SUBMITTED;
+    static SingularAttributePath<String> SUBMITTED;
     @Mock
-    SingularAttributePath<String> PUBLISHED;
+    static SingularAttributePath<String> PUBLISHED;
     @Mock
-    SingularAttributePath<String> CLOSED;
+    static SingularAttributePath<String> CLOSED;
     @Mock
-    SingularAttributePath<String> RECORDED;
+    static SingularAttributePath<String> RECORDED;
     @Mock
     OrderImpl orderImpl;
     @Mock
@@ -107,12 +111,11 @@ class SittingRecordRepositorySearchImplTest {
     @Captor
     ArgumentCaptor<Order> order;
 
+    @InjectMocks
     private SittingRecordRepositorySearchImpl sittingRecordRepositorySearch;
 
     @Test
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
@@ -173,8 +176,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasNoRegionIdSelected() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
@@ -232,8 +233,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasNoEpimmsIdSelected() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
@@ -290,8 +289,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasNoEpimmsAndNoRegionIdSelected() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
@@ -344,7 +341,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void testFindCriteriaQueryIsInitialisedCorrectlyWhenRequestMandatoryValuesSetWithAmDurationAndDescendingOrdering() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
@@ -392,7 +388,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void testFindCriteriaQueryIsInitCorrectlyWhenRequestMandatoryValuesSetWithPmDurationAndDescendingOrdering() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
         setUpMock();
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
@@ -442,7 +437,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyTotalCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(Long.class))
@@ -515,7 +509,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void checkTotalCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
         when(entityManager.getCriteriaBuilder()).thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(Long.class)).thenReturn(countCriteriaQuery);
         when(countCriteriaQuery.from(SittingRecord.class)).thenReturn(sittingRecord);
@@ -587,8 +580,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyFindRecordsToSubmitCriteriaQueryIsInitCorrectlyWhenRequestHasAllValuesSetWithoutChangedByUserId() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(RecordSubmitFields.class))
@@ -640,8 +631,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Test
     void verifyFindRecordsToSubmitCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         when(entityManager.getCriteriaBuilder())
             .thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(RecordSubmitFields.class))
@@ -692,7 +681,6 @@ class SittingRecordRepositorySearchImplTest {
         verify(entityManager)
             .getCriteriaBuilder();
 
-
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(REGION_ID));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(EPIMMS_ID));
@@ -711,8 +699,6 @@ class SittingRecordRepositorySearchImplTest {
         "'SUBMITTED',true"
     })
     void testGetDateRangePredicate(String status, boolean assertionResult) {
-        sittingRecordRepositorySearch = new SittingRecordRepositorySearchImpl(serviceService);
-
         final String hmctsServiceCode = "testHmctsCode";
         if (status.equals(StatusId.CLOSED.name())) {
             when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(CLOSED);
@@ -720,12 +706,8 @@ class SittingRecordRepositorySearchImplTest {
             when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(PUBLISHED);
         } else if (status.equals(StatusId.RECORDED.name())) {
             when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(RECORDED);
-            when(serviceService.getServiceDateOnboarded(anyString()))
-                .thenReturn(LocalDate.now().minusDays(4));
         } else if (status.equals(StatusId.SUBMITTED.name())) {
             when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(SUBMITTED);
-            when(serviceService.getServiceDateOnboarded(anyString()))
-                .thenReturn(LocalDate.now().minusDays(4));
         }
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(SITTINGDATE);
         when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class))).thenReturn(predicate);
@@ -733,17 +715,10 @@ class SittingRecordRepositorySearchImplTest {
                                             sittingRecord,
                                             criteriaBuilder,
                                             hmctsServiceCode,
-                                            SittingRecordSearchRequest.builder()
-                                                .regionId(REGION_ID)
-                                                .epimmsId(EPIMMS_ID)
-                                                .dateRangeFrom(LocalDate.now().minusDays(2))
-                                                .dateRangeTo(LocalDate.now())
-                                                .personalCode(PERSONAL_CODE)
-                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
-                                                .duration(Duration.FULL_DAY)
-                                                .createdByUserId(CHANGED_BY_USER_ID)
-                                                .build()
+                                            LocalDate.now().minusDays(2),
+                                            LocalDate.now()
         );
+        LOGGER.info("predicateDateRange: {}", predicateDateRange.get().getExpressions());
         assertEquals(predicateDateRange.isPresent(), assertionResult);
     }
 

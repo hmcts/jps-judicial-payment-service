@@ -11,7 +11,6 @@ import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
-import uk.gov.hmcts.reform.jps.services.ServiceService;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -29,7 +28,15 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
-import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.*;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.CONTRACT_TYPE_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.EPIMMS_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.HMCTS_SERVICE_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.JUDGE_ROLE_TYPE_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.PERSONAL_CODE;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.REGION_ID;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.SITTING_DATE;
+import static uk.gov.hmcts.reform.jps.domain.SittingRecord_.STATUS_HISTORIES;
 import static uk.gov.hmcts.reform.jps.domain.StatusHistory_.CHANGED_BY_USER_ID;
 import static uk.gov.hmcts.reform.jps.model.Duration.AM;
 import static uk.gov.hmcts.reform.jps.model.Duration.FULL_DAY;
@@ -39,14 +46,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordRepositorySearchImpl.class);
 
-    private final ServiceService serviceService;
-
     @PersistenceContext
     private EntityManager entityManager;
-
-    SittingRecordRepositorySearchImpl(ServiceService serviceService) {
-        this.serviceService = serviceService;
-    }
 
     @Override
     public Stream<SittingRecord> find(
@@ -131,36 +132,53 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     public void addDateRangePredicate(Root<SittingRecord> sittingRecord,
                                       CriteriaBuilder criteriaBuilder,
                                       String hmctsServiceCode,
-                                      SittingRecordSearchRequest recordSearchRequest,
+                                      LocalDate dateFrom,
+                                      LocalDate dateTo,
                                       List<Predicate> predicates) {
 
         Optional<Predicate> predicateDateFilter = getDateRangePredicate(sittingRecord,
                                                                         criteriaBuilder,
                                                                         hmctsServiceCode,
-                                                                        recordSearchRequest);
-
+                                                                        dateFrom,
+                                                                        dateTo);
+        LOGGER.info("predicateDateFilter: {}", predicateDateFilter.toString());
         predicateDateFilter.ifPresent(predicates::add);
     }
 
     public Optional<Predicate> getDateRangePredicate(Root<SittingRecord> sittingRecord,
                                                      CriteriaBuilder criteriaBuilder,
                                                      String hmctsServiceCode,
-                                                     SittingRecordSearchRequest recordSearchRequest) {
+                                                     LocalDate dateFrom,
+                                                     LocalDate dateTo) {
 
         if (isClosedOrPublished(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
+            LOGGER.info("isClosedOrPublished: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
-                recordSearchRequest.getDateRangeFrom(),
+                dateFrom,
                 LocalDate.now()
             ));
         } else if (isRecordedOrSubmitted(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
+            LOGGER.info("isRecordedOrSubmitted: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
-                serviceService.getServiceDateOnboarded(hmctsServiceCode),
-                recordSearchRequest.getDateRangeTo()
+                getServiceDateOnboarded(hmctsServiceCode),
+                dateTo
             ));
         }
+        LOGGER.info("not Recorded/Submitted/Closed/Published: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
         return Optional.empty();
+    }
+
+    /**
+     * get ServiceDateOnboarded.
+     * @param hmctsServiceCode hmcts Service Code
+     * @return LocalDate serviceDateOnboarded for hmctsServiceCode
+     */
+    public LocalDate getServiceDateOnboarded(String hmctsServiceCode) {
+        // TODO: Find a solution to get ServiceDateOnboarded.
+        // serviceService.getServiceDateOnboarded(hmctsServiceCode),
+        return LocalDate.parse("2023-05-11");
     }
 
     @Override
@@ -180,9 +198,10 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         predicates.add(criteriaBuilder.equal(sittingRecord.get(HMCTS_SERVICE_ID),
                                              hmctsServiceCode));
         predicates.add(criteriaBuilder.equal(sittingRecord.get(REGION_ID), recordSearchRequest.getRegionId()));
-        predicates.add(criteriaBuilder.between(sittingRecord.get(SITTING_DATE),
-                                               recordSearchRequest.getDateRangeFrom(),
-                                               recordSearchRequest.getDateRangeTo()));
+
+
+        addDateRangePredicate(sittingRecord, criteriaBuilder, hmctsServiceCode, recordSearchRequest.getDateRangeFrom(),
+                              recordSearchRequest.getDateRangeTo(), predicates);
 
         if (Objects.nonNull(recordSearchRequest.getCreatedByUserId())) {
             Join<Object, Object> statusHistories = sittingRecord.join(STATUS_HISTORIES, JoinType.INNER);
@@ -234,6 +253,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     public boolean isClosedOrPublished(String status) {
         return (isStatusClosed(status) || isStatusPublished(status));
     }
+
     private <T> void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
@@ -245,7 +265,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         final List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
 
-        addDateRangePredicate(sittingRecord, criteriaBuilder, hmctsServiceCode, recordSearchRequest, predicates);
+        addDateRangePredicate(sittingRecord, criteriaBuilder, hmctsServiceCode, recordSearchRequest.getDateRangeFrom(),
+            recordSearchRequest.getDateRangeTo(), predicates);
 
         Optional.ofNullable(recordSearchRequest.getRegionId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(
