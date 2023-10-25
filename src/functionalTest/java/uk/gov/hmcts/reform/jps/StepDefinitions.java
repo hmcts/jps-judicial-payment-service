@@ -1,5 +1,6 @@
 package uk.gov.hmcts.reform.jps;
 
+import io.cucumber.java.AfterAll;
 import io.cucumber.java.BeforeAll;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
