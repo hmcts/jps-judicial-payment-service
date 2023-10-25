@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
-import uk.gov.hmcts.reform.jps.services.ServiceService;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -71,8 +70,6 @@ class SittingRecordRepositorySearchImplTest {
 
     @Mock
     private EntityManager entityManager;
-    @Mock
-    private ServiceService serviceService;
     @Mock
     private CriteriaBuilder criteriaBuilder;
     @Mock
@@ -210,7 +207,7 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateRangeTo(LocalDate.now())
                                                .personalCode(PERSONAL_CODE)
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
-                                               .statusId(StatusId.RECORDED)
+                                               .statusId(RECORDED)
                                                .duration(Duration.FULL_DAY)
                                                .build(), SSCS);
 

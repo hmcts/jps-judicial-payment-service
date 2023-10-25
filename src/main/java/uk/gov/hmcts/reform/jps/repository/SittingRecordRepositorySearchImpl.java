@@ -86,7 +86,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
     @Override
     public long totalRecords(SittingRecordSearchRequest recordSearchRequest,
-                             String hmctsServiceCode) {
+                            String hmctsServiceCode) {
         try {
             CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
             CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -198,7 +198,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         predicates.add(criteriaBuilder.equal(sittingRecord.get(HMCTS_SERVICE_ID),
                                              hmctsServiceCode));
         predicates.add(criteriaBuilder.equal(sittingRecord.get(REGION_ID), recordSearchRequest.getRegionId()));
-
 
         addDateRangePredicate(sittingRecord, criteriaBuilder, hmctsServiceCode, recordSearchRequest.getDateRangeFrom(),
                               recordSearchRequest.getDateRangeTo(), predicates);
