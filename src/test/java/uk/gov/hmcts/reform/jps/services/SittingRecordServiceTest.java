@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
-import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -157,18 +156,11 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
     @Test
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
-        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
-                                                  isA(String.class)))
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class), isA(String.class)))
             .thenReturn(getDbSittingRecords(2).stream());
 
-        when(locationService.getCourtVenues(anyString()))
-            .thenReturn(List.of(
-                CourtVenue.builder()
-                    .epimmsId("1")
-                    .regionId("1")
-                    .siteName("one")
-                    .build())
-            );
+        when(locationService.getVenueName(anyString(), anyString()))
+            .thenReturn("Court Venue 1");
         when(serviceService.findService(anyString()))
             .thenReturn(Optional.of(Service.builder()
                     .accountCenterCode("123")
@@ -184,7 +176,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecords.get(0)).isEqualTo(getDomainSittingRecords(2).get(0));
         assertThat(sittingRecords.get(1)).isEqualTo(getDomainSittingRecords(2).get(1));
-        verify(locationService).getCourtVenues(anyString());
         verify(serviceService).findService(anyString());
     }
 

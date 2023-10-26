@@ -34,11 +34,16 @@ public class LocationService {
             .findAny();
     }
 
-
     public String getVenueName(String hmctsServiceCode, String epimmsId) {
         return getCourtVenue(hmctsServiceCode, epimmsId)
             .map(CourtVenue::getVenueName)
-            .orElse("");
+            .orElse(null);
+    }
+
+    public String getCourtName(String hmctsServiceCode, String epimmsId) {
+        return getCourtVenue(hmctsServiceCode, epimmsId)
+            .map(CourtVenue::getCourtName)
+            .orElse(null);
     }
 
     public void setRegionName(String hmctsServiceCode,

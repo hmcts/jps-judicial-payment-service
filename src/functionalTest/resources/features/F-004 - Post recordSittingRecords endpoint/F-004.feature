@@ -235,6 +235,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.21 @PossibleDuplicates #AC03
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when judgeRoleTypeId doesn't match and existing record is Submitted
@@ -255,6 +256,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.22 @PossibleDuplicates #AC04
   Scenario: Negative response, Return 400 - 008 could not insert with errorCode set to "invalidDuplicateRecord" in response when existing record is Submitted
@@ -275,6 +277,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.23 @PossibleDuplicates #AC05
   Scenario: Positive response, Return 201 - Success when period doesn't match with existing record
@@ -309,6 +312,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "true"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Ramon Herrera"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
     And the response contains "errorRecords[1].errorCode" as "INVALID_LOCATION"
     And the response contains "errorRecords[2].errorCode" as "INVALID_DUPLICATE_RECORD"
     And the response contains "errorRecords[2].createdByName" as "Submitter"
@@ -317,6 +321,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[2].pm" as "false"
     And the response contains "errorRecords[2].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[2].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[2].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.25 @PossibleDuplicates #AC07
   Scenario: Negative response, Return 400 - 008 could not insert with multiple errors
@@ -335,12 +340,14 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
     And the response contains "errorRecords[1].errorCode" as "INVALID_DUPLICATE_RECORD"
-    And the response contains "errorRecords[0].createdByName" as "Recorder"
+    And the response contains "errorRecords[1].createdByName" as "Recorder"
     And the response contains "errorRecords[1].am" as "true"
     And the response contains "errorRecords[1].pm" as "false"
     And the response contains "errorRecords[1].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[1].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[1].venue" as "Barnet Civil And Family Courts Centre"
     And the response contains "errorRecords[2].errorCode" as "VALID"
 
   @S-004.26 @PossibleDuplicates #AC09
@@ -380,6 +387,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.28 @PossibleDuplicates #AC08
   Scenario: Negative response - Return 400 - 008 could not insert generic error
@@ -410,6 +418,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.30 @PossibleDuplicates
   Scenario: When epimmsId is different and existing sitting record status is Submitted- Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
@@ -430,6 +439,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.31 @PossibleDuplicates
   Scenario: When epimmsId and judgeRoleTypeId are different from existing record - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
@@ -449,6 +459,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.32 @PossibleDuplicates
   Scenario: When epimmsId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
@@ -496,6 +507,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.35 @PossibleDuplicates
   Scenario: When epimmsId and judgeRoleTypeId are different from existing record and period intersects - Return 400 - 008 could not insert with errorCode set to "invalidDuplicate" in response
@@ -515,6 +527,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "false"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "Judge"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Bloggs"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
 @S-004.36 #AC01
   Scenario: Negative response, when the request has a hmctsServiceId passed that is not found (not in the service table)
@@ -557,3 +570,4 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].pm" as "true"
     And the response contains "errorRecords[0].judgeRoleTypeId" as "14"
     And the response contains "errorRecords[0].judgeRoleTypeName" as "Joe Ambrose"
+    And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
