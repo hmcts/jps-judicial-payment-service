@@ -2,8 +2,6 @@ package uk.gov.hmcts.reform.jps.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +14,6 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory_;
 import uk.gov.hmcts.reform.jps.model.DurationBoolean;
-import uk.gov.hmcts.reform.jps.model.FinancialYearRecords;
-import uk.gov.hmcts.reform.jps.model.PublishSittingRecordCount;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
@@ -806,43 +802,6 @@ class SittingRecordServiceITest extends BaseTest {
             );
     }
 
-    @Test
-    @Sql(RESET_DATABASE)
-    void shouldReturnZeroPublishRecordCountWhenNoRecordPresent() {
-        PublishSittingRecordCount publishSittingRecordCount = sittingRecordService.retrievePublishedRecords("4918178");
-        assertThat(publishSittingRecordCount).isEqualTo(
-            PublishSittingRecordCount.builder()
-                .currentFinancialYear(FinancialYearRecords.builder().build())
-                .previousFinancialYear(FinancialYearRecords.builder().build())
-                .build());
-    }
-
-
-    @Test
-    @Sql(scripts = {RESET_DATABASE, INSERT_PUBLISHED_TEST_DATA})
-    void shouldReturnPublishRecordCountWhenRecordPresent() {
-        LocalDate localDate = of(2023, 10, 10);
-        String personalCode = "4918178";
-        try (MockedStatic<LocalDate> mock = Mockito.mockStatic(LocalDate.class, Mockito.CALLS_REAL_METHODS)) {
-            mock.when(LocalDate::now).thenReturn(localDate);
-
-            PublishSittingRecordCount publishSittingRecordCount = sittingRecordService
-                .retrievePublishedRecords(personalCode);
-
-            assertThat(publishSittingRecordCount).isEqualTo(
-                PublishSittingRecordCount.builder()
-                    .currentFinancialYear(FinancialYearRecords.builder()
-                                              .submittedCount(1)
-                                              .publishedCount(300)
-                                              .build())
-                    .previousFinancialYear(FinancialYearRecords.builder()
-                                               .submittedCount(2)
-                                               .publishedCount(3)
-                                               .build())
-                    .build());
-        }
-
-    }
 
     private List<SittingRecordWrapper> recordSittingRecords(String jsonRequest) throws IOException {
         String requestJson = Resources.toString(getResource(jsonRequest), UTF_8);

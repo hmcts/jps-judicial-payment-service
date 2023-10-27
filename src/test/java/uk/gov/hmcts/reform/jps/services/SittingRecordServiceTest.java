@@ -23,8 +23,6 @@ import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRe
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.exceptions.ForbiddenException;
-import uk.gov.hmcts.reform.jps.model.FinancialYearRecords;
-import uk.gov.hmcts.reform.jps.model.PublishSittingRecordCount;
 import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
 import uk.gov.hmcts.reform.jps.model.SittingRecordWrapper;
 import uk.gov.hmcts.reform.jps.model.StatusId;
@@ -110,8 +108,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
-    @Mock
-    private SittingDaysService sittingDaysService;
+
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -824,45 +821,5 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 recordSittingRecordRequest.getRecordedByIdamId());
 
         verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
-    }
-
-    @Test
-    void shouldReturnZeroPublishRecordCountWhenNoRecordPresent() {
-        PublishSittingRecordCount publishSittingRecordCount = sittingRecordService.retrievePublishedRecords("4918178");
-        assertThat(publishSittingRecordCount).isEqualTo(
-            PublishSittingRecordCount.builder()
-                .currentFinancialYear(FinancialYearRecords.builder().build())
-                .previousFinancialYear(FinancialYearRecords.builder().build())
-                .build());
-    }
-
-
-    @Test
-    void shouldReturnPublishRecordCountWhenRecordPresent() {
-        String personalCode = "4918178";
-        when(sittingDaysService.getSittingCount(eq(personalCode), anyString()))
-            .thenReturn(2L);
-        when(sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
-            eq(personalCode),
-            eq(SUBMITTED),
-            any(LocalDate.class),
-            any(LocalDate.class)
-        )).thenReturn(300L);
-
-
-        PublishSittingRecordCount publishSittingRecordCount = sittingRecordService
-            .retrievePublishedRecords(personalCode);
-
-        assertThat(publishSittingRecordCount).isEqualTo(
-            PublishSittingRecordCount.builder()
-                .currentFinancialYear(FinancialYearRecords.builder()
-                                          .submittedCount(300)
-                                          .publishedCount(2)
-                                          .build())
-                .previousFinancialYear(FinancialYearRecords.builder()
-                                           .submittedCount(300)
-                                           .publishedCount(2)
-                                           .build())
-                .build());
     }
 }

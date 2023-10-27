@@ -11,7 +11,9 @@ import uk.gov.hmcts.reform.jps.domain.Fee;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.Month;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -87,6 +89,20 @@ class FeeRepositoryTest {
         List<Fee> courtVenues = feeRepository.findAll();
         assertThat(courtVenues).isEmpty();
     }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_FEE})
+    void shouldReturnFeeWhenRecordPresent() {
+        Optional<Fee> fee = feeRepository.findByHmctsServiceIdAndJudgeRoleIdAndEffectiveFromIsLessThanEqual(
+            "BBA3",
+            "58",
+            LocalDate.of(2023, Month.OCTOBER, 19)
+        );
+        assertThat(fee)
+            .isPresent()
+            .matches(foundFee -> Objects.nonNull(foundFee.get().getId()));
+    }
+
 
     private Fee createFee() {
         return Fee.builder()

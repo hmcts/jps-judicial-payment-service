@@ -6,6 +6,7 @@ import lombok.Data;
 @Builder
 @Data
 public class FinancialYearRecords {
+    private String financialYear;
     private long publishedCount;
     private long submittedCount;
 }
