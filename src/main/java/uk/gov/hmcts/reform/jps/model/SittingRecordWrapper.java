@@ -29,4 +29,5 @@ public class SittingRecordWrapper {
     private Boolean pm;
     private String judgeRoleTypeId;
     private String judgeRoleTypeName;
+    private String epimmsId;
 }

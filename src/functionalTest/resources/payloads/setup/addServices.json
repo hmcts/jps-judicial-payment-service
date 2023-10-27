@@ -1,14 +1,6 @@
 {
     "services": [
         {
-            "hmctsServiceId": "BBA3",
-            "serviceName": "Social Security and Child Support",
-            "accountCenterCode": "843648726",
-            "onboardingStartDate": "2022-09-20",
-            "retentionTimeInMonths": 0,
-            "closeRecordedRecordAfterTimeInMonths": 0
-        },
-        {
             "hmctsServiceId": "ABA5",
             "serviceName": "Family Private Law",
             "accountCenterCode": "843648798",

@@ -34,7 +34,6 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
-import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -186,7 +185,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(sittingRecords.get(0)).isEqualTo(getDomainSittingRecords(2).get(0));
         assertThat(sittingRecords.get(1)).isEqualTo(getDomainSittingRecords(2).get(1));
-        verify(locationService).getCourtVenues(anyString());
         verify(serviceService).findService(anyString());
     }
 
