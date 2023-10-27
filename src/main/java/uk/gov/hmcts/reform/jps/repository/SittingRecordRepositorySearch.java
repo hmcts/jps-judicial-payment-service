@@ -15,7 +15,7 @@ public interface SittingRecordRepositorySearch {
                                LocalDate serviceOnboardedDate);
 
     long totalRecords(SittingRecordSearchRequest recordSearchRequest,
-                          String hmctsServiceCode);
+                          String hmctsServiceCode, LocalDate serviceOnboardedDate);
 
     List<RecordSubmitFields> findRecordsToSubmit(SubmitSittingRecordRequest recordSearchRequest,
                                                  String hmctsServiceCode);

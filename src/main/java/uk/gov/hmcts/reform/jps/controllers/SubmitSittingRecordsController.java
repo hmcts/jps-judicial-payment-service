@@ -70,7 +70,8 @@ public class SubmitSittingRecordsController {
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
-            hmctsServiceCode
+            hmctsServiceCode,
+            serviceService.getServiceDateOnboarded(hmctsServiceCode)
         );
         return ResponseEntity.ok(submitSittingRecordResponse);
     }

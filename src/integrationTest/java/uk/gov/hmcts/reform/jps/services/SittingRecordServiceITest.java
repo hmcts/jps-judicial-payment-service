@@ -70,6 +70,8 @@ class SittingRecordServiceITest extends BaseTest {
     @Autowired
     private StatusHistoryRepository statusHistoryRepository;
     @Autowired
+    private ServiceService serviceService;
+    @Autowired
     private SittingRecordService sittingRecordService;
     @Autowired
     private StatusHistoryService statusHistoryService;
@@ -87,6 +89,7 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String REGION_ID_FIXED = "1";
     private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
+    private static final String JSON_RECORD_SITTING_RECORDS = "recordSittingRecords.json";
 
 
     @Test
@@ -246,7 +249,8 @@ class SittingRecordServiceITest extends BaseTest {
 
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
-            HMCTS_SERVICE_CODE
+            HMCTS_SERVICE_CODE,
+            LocalDate.now().minusDays(2)
         );
 
         assertThat(totalRecordCount).isEqualTo(25);
@@ -255,7 +259,7 @@ class SittingRecordServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {RESET_DATABASE})
     void shouldRecordSittingRecordsWhenAllDataIsPresent() throws IOException {
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(JSON_RECORD_SITTING_RECORDS), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
             RecordSittingRecordRequest.class
@@ -414,7 +418,7 @@ class SittingRecordServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {RESET_DATABASE})
     void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatch() throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -432,9 +436,9 @@ class SittingRecordServiceITest extends BaseTest {
         assertThat(sittingRecordWrappers)
             .extracting("errorCode", "createdByName", "statusId")
             .contains(
-                tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
-                tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED)
+                tuple(POTENTIAL_DUPLICATE_RECORD, USER_NAME_FIXED, RECORDED),
+                tuple(POTENTIAL_DUPLICATE_RECORD, USER_NAME_FIXED, RECORDED),
+                tuple(POTENTIAL_DUPLICATE_RECORD, USER_NAME_FIXED, RECORDED)
             );
 
         assertThat(sittingRecordWrappers).describedAs("Created date assertion")
@@ -446,7 +450,7 @@ class SittingRecordServiceITest extends BaseTest {
     @Sql(scripts = {RESET_DATABASE})
     void shouldSetPotentialDuplicateRecordAndInvalidLocationWhenJudgeRoleTypeIdDoesntMatchAndLocationIsInvalid()
         throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -483,7 +487,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetInvalidDuplicateRecordWhenJudgeRoleTypeIdDoesntMatchAndStatusSubmitted() throws IOException {
-        repoRecordSittingRecords("recordSittingRecords.json", PUBLISHED);
+        repoRecordSittingRecords(JSON_RECORD_SITTING_RECORDS, PUBLISHED);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -513,7 +517,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetValidRecordWhenEpimmsIdDoesntMatch() throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -550,7 +554,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetValidRecordWhenPersonalCodeDontMatch() throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -587,7 +591,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetValidRecordWhenDurationDontMatch() throws IOException {
-        List<SittingRecordWrapper> savedSittingRecordsWrapper = recordSittingRecords("recordSittingRecords.json");
+        List<SittingRecordWrapper> savedSittingRecordsWrapper = recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         List<SittingRecordRequest> sittingRecordRequestList
             = savedSittingRecordsWrapper.stream()
@@ -626,7 +630,7 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetValidRecordWhenSittingDateDontMatch() throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
@@ -664,7 +668,7 @@ class SittingRecordServiceITest extends BaseTest {
     @Test
     void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatchWithReplaceDuplicateSetToTrue()
         throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
         String requestJson = Resources.toString(
             getResource("recordSittingRecordsPotentialDuplicateReplaceDuplicate.json"), UTF_8);
@@ -690,9 +694,9 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetInvalidDuplicateRecordWhenJudgeRoleTypeIdMatch() throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(JSON_RECORD_SITTING_RECORDS), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
             RecordSittingRecordRequest.class
@@ -721,9 +725,9 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Test
     void shouldSetInvalidDuplicateRecordWhenStatusRecordedDurationIntersect() throws IOException {
-        recordSittingRecords("recordSittingRecords.json");
+        recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(JSON_RECORD_SITTING_RECORDS), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
             RecordSittingRecordRequest.class
@@ -763,9 +767,9 @@ class SittingRecordServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {RESET_DATABASE})
     void shouldSetInvalidDuplicateRecordWhenStatusNotRecordedAndDurationIntersect() throws IOException {
-        repoRecordSittingRecords("recordSittingRecords.json", PUBLISHED);
+        repoRecordSittingRecords(JSON_RECORD_SITTING_RECORDS, PUBLISHED);
 
-        String requestJson = Resources.toString(getResource("recordSittingRecords.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(JSON_RECORD_SITTING_RECORDS), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
             RecordSittingRecordRequest.class

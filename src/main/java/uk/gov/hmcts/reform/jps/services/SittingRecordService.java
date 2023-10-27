@@ -114,11 +114,12 @@ public class SittingRecordService {
 
     public long getTotalRecordCount(
         SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode) {
+        String hmctsServiceCode,
+        LocalDate serviceOnboardedDate) {
         LOGGER.debug("getTotalRecordCount");
 
         return sittingRecordRepository.totalRecords(recordSearchRequest,
-            hmctsServiceCode);
+            hmctsServiceCode, serviceOnboardedDate);
     }
 
     @Transactional
@@ -256,7 +257,7 @@ public class SittingRecordService {
     @Transactional
     @PreAuthorize("hasAuthority('jps-submitter')")
     public SubmitSittingRecordResponse submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
-                                                            String hmctsServiceCode) {
+                                                            String hmctsServiceCode, LocalDate serviceOnboardedDate) {
         BiPredicate<RecordSubmitFields, Boolean> filter = this::filterRecordsToClose;
 
         int submittedCount = 0;

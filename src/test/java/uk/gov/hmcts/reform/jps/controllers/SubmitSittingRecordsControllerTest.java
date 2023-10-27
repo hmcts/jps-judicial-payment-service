@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
 import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.when;
@@ -54,7 +55,7 @@ class SubmitSittingRecordsControllerTest {
         when(serviceService.isServiceOnboarded(TEST_SERVICE))
             .thenReturn(true);
         when(sittingRecordService.submitSittingRecords(isA(SubmitSittingRecordRequest.class),
-                                                       anyString()))
+                                                       anyString(), any()))
             .thenReturn(SubmitSittingRecordResponse.builder()
                             .recordsSubmitted(3)
                             .recordsClosed(2)

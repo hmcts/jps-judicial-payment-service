@@ -163,7 +163,7 @@ class SittingRecordControllerTest {
         List<SittingRecord> sittingRecords = generateSittingRecords();
         List<RecordingUser> recordingUsers = generateRecordingUsers();
 
-        when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
+        when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS), any()))
             .thenReturn(Long.valueOf(sittingRecords.size()));
         when(sittingRecordService.getSittingRecords(isA(SittingRecordSearchRequest.class), eq(SSCS)))
             .thenReturn(sittingRecords);
@@ -209,7 +209,8 @@ class SittingRecordControllerTest {
             .thenReturn(true);
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
-            eq(SSCS)
+            eq(SSCS),
+            any()
         )).thenReturn(2L);
 
         List<SittingRecord> sittingRecords = Collections.emptyList();

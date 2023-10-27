@@ -63,6 +63,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             updateCriteriaQuery(
                 recordSearchRequest,
                 hmctsServiceCode,
+                serviceOnboardedDate,
                 cb,
                 cq,
                 root,
@@ -87,7 +88,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
     @Override
     public long totalRecords(SittingRecordSearchRequest recordSearchRequest,
-                            String hmctsServiceCode) {
+                            String hmctsServiceCode, LocalDate serviceOnboardedDate) {
         try {
             CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
             CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -98,6 +99,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             updateCriteriaQuery(
                 recordSearchRequest,
                 hmctsServiceCode,
+                serviceOnboardedDate,
                 criteriaBuilder,
                 criteriaQuery,
                 sittingRecord,
@@ -133,6 +135,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     public void addDateRangePredicate(Root<SittingRecord> sittingRecord,
                                       CriteriaBuilder criteriaBuilder,
                                       String hmctsServiceCode,
+                                      LocalDate serviceOnboardedDate,
                                       LocalDate dateFrom,
                                       LocalDate dateTo,
                                       List<Predicate> predicates) {
@@ -140,46 +143,38 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         Optional<Predicate> predicateDateFilter = getDateRangePredicate(sittingRecord,
                                                                         criteriaBuilder,
                                                                         hmctsServiceCode,
+                                                                        serviceOnboardedDate,
                                                                         dateFrom,
                                                                         dateTo);
-        LOGGER.info("predicateDateFilter: {}", predicateDateFilter.toString());
+        LOGGER.debug("predicateDateFilter: {}", predicateDateFilter);
         predicateDateFilter.ifPresent(predicates::add);
     }
 
     public Optional<Predicate> getDateRangePredicate(Root<SittingRecord> sittingRecord,
                                                      CriteriaBuilder criteriaBuilder,
                                                      String hmctsServiceCode,
+                                                     LocalDate serviceOnboardedDate,
                                                      LocalDate dateFrom,
                                                      LocalDate dateTo) {
 
+        LOGGER.info("sittingRecord.get(SittingRecord_.STATUS_ID): {}", sittingRecord.get(SittingRecord_.STATUS_ID));
         if (isClosedOrPublished(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
-            LOGGER.info("isClosedOrPublished: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
+            LOGGER.debug("isClosedOrPublished: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
                 dateFrom,
                 LocalDate.now()
             ));
         } else if (isRecordedOrSubmitted(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
-            LOGGER.info("isRecordedOrSubmitted: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
+            LOGGER.debug("isRecordedOrSubmitted: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
-                getServiceDateOnboarded(hmctsServiceCode),
+                serviceOnboardedDate,
                 dateTo
             ));
         }
-        LOGGER.info("not Recorded/Submitted/Closed/Published: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
+        LOGGER.debug("not Recorded/Submitted/Closed/Published: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
         return Optional.empty();
-    }
-
-    /**
-     * get ServiceDateOnboarded.
-     * @param hmctsServiceCode hmcts Service Code
-     * @return LocalDate serviceDateOnboarded for hmctsServiceCode
-     */
-    public LocalDate getServiceDateOnboarded(String hmctsServiceCode) {
-        // TODO: Find a solution to get ServiceDateOnboarded.
-        // serviceService.getServiceDateOnboarded(hmctsServiceCode),
-        return LocalDate.parse("2023-05-11");
     }
 
     @Override
@@ -199,9 +194,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         predicates.add(criteriaBuilder.equal(sittingRecord.get(HMCTS_SERVICE_ID),
                                              hmctsServiceCode));
         predicates.add(criteriaBuilder.equal(sittingRecord.get(REGION_ID), recordSearchRequest.getRegionId()));
-
-        addDateRangePredicate(sittingRecord, criteriaBuilder, hmctsServiceCode, recordSearchRequest.getDateRangeFrom(),
-                              recordSearchRequest.getDateRangeTo(), predicates);
+        predicates.add(criteriaBuilder.between(sittingRecord.get(SITTING_DATE),
+                                               recordSearchRequest.getDateRangeFrom(),
+                                               recordSearchRequest.getDateRangeTo()));
 
         if (Objects.nonNull(recordSearchRequest.getCreatedByUserId())) {
             Join<Object, Object> statusHistories = sittingRecord.join(STATUS_HISTORIES, JoinType.INNER);
@@ -257,6 +252,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     private <T> void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
+        LocalDate serviceOnboardedDate,
         CriteriaBuilder criteriaBuilder,
         CriteriaQuery<T> criteriaQuery,
         Root<SittingRecord> sittingRecord,
@@ -264,9 +260,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         final List<Predicate> predicates = new ArrayList<>();
         predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
-
-        addDateRangePredicate(sittingRecord, criteriaBuilder, hmctsServiceCode, recordSearchRequest.getDateRangeFrom(),
-            recordSearchRequest.getDateRangeTo(), predicates);
 
         Optional.ofNullable(recordSearchRequest.getRegionId())
             .ifPresent(value -> predicates.add(criteriaBuilder.equal(

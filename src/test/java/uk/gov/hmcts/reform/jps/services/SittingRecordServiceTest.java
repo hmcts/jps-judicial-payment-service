@@ -136,18 +136,21 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         when(serviceService.findService(HMCTS_SERVICE_CODE))
             .thenReturn(Optional.of(Service.builder()
                                         .accountCenterCode("123")
+                                        .onboardingStartDate(LocalDate.now().minusYears(4))
                                         .build()));
     }
 
     @Test
     void shouldReturnTotalRecordCount() {
         when(sittingRecordRepository.totalRecords(isA(SittingRecordSearchRequest.class),
-                                                  isA(String.class)))
+                                                  isA(String.class),
+                                                  any()))
             .thenReturn(10L);
 
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             SittingRecordSearchRequest.builder().build(),
-            HMCTS_SERVICE_CODE
+            HMCTS_SERVICE_CODE,
+            LocalDate.now().minusDays(2)
         );
 
         assertThat(totalRecordCount)
@@ -162,6 +165,9 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                                           any(LocalDate.class)))
             .thenReturn(getDbSittingRecords(2).stream());
 
+        when(serviceService.getServiceDateOnboarded(anyString()))
+            .thenReturn(LocalDate.now().minusDays(5));
+
         when(locationService.getCourtVenues(anyString()))
             .thenReturn(List.of(
                 CourtVenue.builder()
@@ -169,11 +175,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                     .regionId("1")
                     .siteName("one")
                     .build())
-            );
-        when(serviceService.findService(anyString()))
-            .thenReturn(Optional.of(Service.builder()
-                    .accountCenterCode("123")
-                        .build())
             );
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(
@@ -635,7 +636,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
-            hmctsServiceCode
+            hmctsServiceCode,
+            serviceService.getServiceDateOnboarded(hmctsServiceCode)
         );
 
         verify(statusHistoryService, times(2))
@@ -720,7 +722,8 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
-            hmctsServiceCode
+            hmctsServiceCode,
+            serviceService.getServiceDateOnboarded(hmctsServiceCode)
         );
         verify(statusHistoryService, never())
             .insertRecord(anyLong(),
