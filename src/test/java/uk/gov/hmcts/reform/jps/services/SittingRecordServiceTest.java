@@ -34,6 +34,7 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
