@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
@@ -37,6 +38,12 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
             LocalDate sittingDate,
             String personalCode,
             Collection<StatusId> statusId
+        );
+
+    Streamable<SittingRecordPublishProjection.SittingRecordPublishFields>
+        findByStatusIdAndSittingDateLessThanEqual(
+            StatusId statusId,
+            LocalDate sittingDate
         );
 
     @Modifying(clearAutomatically = true)

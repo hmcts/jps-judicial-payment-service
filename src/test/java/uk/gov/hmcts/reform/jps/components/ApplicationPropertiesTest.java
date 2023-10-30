@@ -23,6 +23,7 @@ class ApplicationPropertiesTest {
             ? "is a medical member" : "is not a medical member";
         ApplicationProperties properties = new ApplicationProperties(
             40,
+                 3,
             List.of("20-Higher Fee", "100-Standard Fee")
         );
 

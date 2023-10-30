@@ -90,4 +90,10 @@ class CourtVenueRepositoryTest {
             .build();
     }
 
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_COURT_VENUE})
+    void shouldReturnCourtVenueWhenRecordPresent() {
+        assertThat(courtVenueRepository.findByHmctsServiceIdAndEpimmsId("BBA3", "852649"))
+            .isPresent();
+    }
 }

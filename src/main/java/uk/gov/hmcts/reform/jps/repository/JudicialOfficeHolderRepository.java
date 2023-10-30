@@ -23,4 +23,16 @@ public interface JudicialOfficeHolderRepository extends JpaRepository<JudicialOf
     Optional<JudicialOfficeHolder> findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
         @Param("personalCode") String personalCode,
         @Param("dateEqualOrBefore") LocalDate dateEqualOrBefore);
+
+
+    @Query("""
+        select jfh from JudicialOfficeHolder jfh
+        inner join fetch jfh.johPayrolls p
+        where jfh.personalCode = :personalCode
+        and p.effectiveStartDate <= :dateEqualOrBefore
+        """)
+    Optional<JudicialOfficeHolder> findJudicialOfficeHolderWithJohPayrollFilteredByEffectiveStartDate(
+        @Param("personalCode") String personalCode,
+        @Param("dateEqualOrBefore") LocalDate dateEqualOrBefore);
+
 }

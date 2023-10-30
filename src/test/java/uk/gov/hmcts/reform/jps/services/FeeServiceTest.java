@@ -89,25 +89,18 @@ class FeeServiceTest {
         )).thenReturn(Optional.of(uk.gov.hmcts.reform.jps.domain.Fee.builder()
                                               .id(id)
                                               .build()));
-        uk.gov.hmcts.reform.jps.domain.Fee fees = feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
-            "BBA3",
-            "Judge",
-            LocalDate.now()
+        Optional<uk.gov.hmcts.reform.jps.domain.Fee> fees =
+            feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+                "BBA3",
+                "Judge",
+                LocalDate.now()
         );
 
-        assertThat(fees.getId()).isEqualTo(id);
+        assertThat(fees)
+            .map(uk.gov.hmcts.reform.jps.domain.Fee::getId)
+            .hasValue(id);
     }
 
-    @Test
-    void shouldThrowIllegalArgumentExceptionWhenFeeMissing() {
-        LocalDate now = LocalDate.now();
-        assertThatThrownBy(() -> feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
-            "BBA3",
-            "Judge",
-            now
-        )).isInstanceOf(IllegalArgumentException.class)
-            .hasMessageContaining("Fee not set/active for hmctsServiceCode and judgeRoleTypeId Judge");
-    }
 
     private uk.gov.hmcts.reform.jps.domain.Fee getDomainFee(long id) {
         uk.gov.hmcts.reform.jps.domain.Fee fee = new uk.gov.hmcts.reform.jps.domain.Fee();

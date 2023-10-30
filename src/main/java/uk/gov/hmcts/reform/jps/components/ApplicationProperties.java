@@ -17,12 +17,15 @@ import java.util.List;
 public class ApplicationProperties {
 
     private final int medicalThreshold;
+    private final int maximumNumberOfRecordsPerFile;
     private final List<String> medicalJohRoleIds;
 
     public ApplicationProperties(
         @Value("${joh.medicalThreshold}") int medicalThreshold,
+        @Value("${joh.maximumNumberOfRecordsPerFile}") int maximumNumberOfRecordsPerFile,
         @Value("${joh.medicalJohRoles}") List<String> medicalJohRoles) {
         this.medicalThreshold = medicalThreshold;
+        this.maximumNumberOfRecordsPerFile = maximumNumberOfRecordsPerFile;
         this.medicalJohRoleIds = extractJohRolesIds(medicalJohRoles);
     }
 

@@ -89,4 +89,26 @@ public class JudicialUserDetailsService {
     }
 
 
+    public String getJudicialUserName(String personalCode) {
+
+        List<JudicialUserDetailsApiResponse> judicialUserDetails = getJudicialUserDetailsApiResponses(personalCode);
+
+        return getJudgeName(personalCode, judicialUserDetails);
+    }
+
+    private List<JudicialUserDetailsApiResponse> getJudicialUserDetailsApiResponses(String personalCode) {
+        JudicialUserDetailsApiRequest judicialUsersApiRequest = JudicialUserDetailsApiRequest.builder()
+            .personalCode(List.of(personalCode))
+            .build();
+
+        return judicialUserServiceClient.getJudicialUserDetails(
+            judicialUsersApiRequest);
+    }
+
+    public Optional<JudicialUserDetailsApiResponse> getJudicialUserDetails(String personalCode) {
+        List<JudicialUserDetailsApiResponse> judicialUserDetailsApiResponses = getJudicialUserDetailsApiResponses(
+            personalCode);
+        return getJudicialUserResponse(personalCode, judicialUserDetailsApiResponses);
+    }
+
 }

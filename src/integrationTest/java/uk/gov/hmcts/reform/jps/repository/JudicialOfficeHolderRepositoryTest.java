@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.jps.repository;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -25,6 +26,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_JOH;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 
 @AutoConfigureTestDatabase(replace = AutoConfigureTestDatabase.Replace.NONE)
@@ -115,5 +117,19 @@ class JudicialOfficeHolderRepositoryTest {
             .map(JudicialOfficeHolder::getJohAttributes)
             .isEmpty();
     }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_JOH})
+    void shouldReturnJudicialOfficeHolderWithJohPayrollWhenJudicialOfficeHolderPresent() {
+        Optional<JudicialOfficeHolder> judicialOfficeHolder
+            = judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohPayrollFilteredByEffectiveStartDate(
+            "4923421",
+            LocalDate.now());
+
+        assertThat(judicialOfficeHolder.stream())
+            .map(JudicialOfficeHolder::getJohPayrolls)
+            .isNotEmpty();
+    }
+
 }
 

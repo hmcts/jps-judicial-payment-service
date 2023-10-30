@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.jps.domain.CourtVenue;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface CourtVenueRepository extends JpaRepository<CourtVenue, Long> {
@@ -15,4 +16,6 @@ public interface CourtVenueRepository extends JpaRepository<CourtVenue, Long> {
         delete from CourtVenue where id in :ids
         """)
     void deleteByIds(List<Long> ids);
+
+    Optional<CourtVenue> findByHmctsServiceIdAndEpimmsId(String hmctsServiceId, String epimmsId);
 }

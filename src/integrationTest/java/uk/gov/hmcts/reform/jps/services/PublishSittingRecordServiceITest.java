@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.BaseTest;
 import uk.gov.hmcts.reform.jps.model.FinancialYearRecords;
 import uk.gov.hmcts.reform.jps.model.PublishSittingRecordCount;
+import uk.gov.hmcts.reform.jps.model.out.PublishResponse;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -134,7 +135,7 @@ class PublishSittingRecordServiceITest extends BaseTest {
         4918178,       100,           20,  Standard Fee
         """)
     @Sql(scripts = {RESET_DATABASE, INSERT_PUBLISHED_TEST_DATA, INSERT_FEE, INSERT_JOH})
-    void shouldFeeWhenNonMedicalMember(
+    void shouldReturnFeeWhenNonMedicalMember(
         String personalCode,
         String judgeRoleTypeId,
         int expectedFee,
@@ -157,6 +158,29 @@ class PublishSittingRecordServiceITest extends BaseTest {
             assertThat(fee)
                 .as(feeType)
                 .isEqualTo(new BigDecimal(expectedFee));
+        }
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_PUBLISHED_TEST_DATA, INSERT_FEE, INSERT_JOH})
+    void shouldFeeWhenNonMedicalMember() {
+        LocalDate localDate = of(2023, 10, 10);
+        try (MockedStatic<LocalDate> localDateMockedStatic = Mockito.mockStatic(
+            LocalDate.class,
+            Mockito.CALLS_REAL_METHODS
+        )) {
+            localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+
+            PublishResponse publishResponse = publishSittingRecordService
+                .publishRecords(
+                    "ABA5",
+                    now(),
+                    "publishedByIdAMId",
+                    "publishedByName",
+                    false
+                );
+
+            System.out.println(publishResponse);
         }
     }
 }

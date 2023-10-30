@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
 import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
@@ -22,7 +23,9 @@ import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDate.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
@@ -227,12 +230,38 @@ class SittingRecordRepositoryTest extends AbstractTest {
         Long submittedCount = recordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
             personalCode,
             SUBMITTED,
-            LocalDate.of(2022, Month.APRIL, 6),
-            LocalDate.of(2023, Month.APRIL, 5)
+            of(2022, Month.APRIL, 6),
+            of(2023, Month.APRIL, 5)
 
         );
 
         assertThat(submittedCount)
             .isEqualTo(count);
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnSubmittedRecordWhenRecordsPresentForSittingDates() {
+        List<SittingRecordPublishProjection.SittingRecordPublishFields> sittingRecordPublishFields =
+            recordRepository.findByStatusIdAndSittingDateLessThanEqual(
+                SUBMITTED,
+                LocalDate.now()
+            ).stream().toList();
+        assertThat(sittingRecordPublishFields)
+            .map(SittingRecordPublishProjection.SittingRecordPublishFields::getId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getPersonalCode,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getContractTypeId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getJudgeRoleTypeId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getEpimmsId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getSittingDate,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getStatusId)
+            .contains(tuple(4L,
+                            "4918178",
+                            1L,
+                            "HealthWorker",
+                            "852649",
+                            of(2023, Month.MAY,11),
+                            SUBMITTED)
+            );
     }
 }

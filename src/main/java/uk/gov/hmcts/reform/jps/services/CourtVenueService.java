@@ -44,4 +44,8 @@ public class CourtVenueService {
             .orElseThrow(() -> new IllegalArgumentException("Court venue ids missing"));
         courtVenueRepository.deleteByIds(ids);
     }
+
+    public Optional<CourtVenue> getCourtVenue(String hmctsServiceId, String epimmsId) {
+        return courtVenueRepository.findByHmctsServiceIdAndEpimmsId(hmctsServiceId, epimmsId);
+    }
 }
