@@ -52,8 +52,28 @@ class CourtVenueErrorCheckerTest extends BasePublishSittingRecord {
         );
     }
 
+
     @Test
     void shouldAddCourtVenueErrorWhenCourtVenueIsNotPresent() {
+        when(courtVenueService.getCourtVenue(anyString(), anyString()))
+            .thenReturn(Optional.empty());
+        courtVenueErrorChecker.evaluate(
+            publishErrors,
+            HMCTS_SERVICE_CODE,
+            getDefaultDbSittingRecord()
+        );
+        assertThat(publishErrors.getErrorCount()).isEqualTo(1);
+        assertThat(publishErrors.getCourtVenueInErrors()).hasSize(1);
+        verify(publishErrorChecker, never()).evaluate(
+            same(publishErrors),
+            eq(HMCTS_SERVICE_CODE),
+            any(SittingRecordPublishFields.class)
+        );
+    }
+
+    @Test
+    void shouldAddCourtVenueErrorWhenCourtVenueIsNotPresentAndNextInChainIsNull() {
+        courtVenueErrorChecker.next(null);
         when(courtVenueService.getCourtVenue(anyString(), anyString()))
             .thenReturn(Optional.empty());
         courtVenueErrorChecker.evaluate(
