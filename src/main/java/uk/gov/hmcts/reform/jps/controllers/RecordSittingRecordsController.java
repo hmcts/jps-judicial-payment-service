@@ -122,10 +122,11 @@ public class RecordSittingRecordsController {
             return status(HttpStatus.BAD_REQUEST)
                     .body(RecordSittingRecordResponse.builder()
                             .message("008 could not insert")
-                            .errorRecords(generateResponse(sittingRecordWrappers,
-                                    errorCode -> errorCode,
-                                    SittingRecordWrapper::getCreatedByName,
-                                    statusId -> statusId
+                            .errorRecords(generateResponse(hmctsServiceCode,
+                                                            sittingRecordWrappers,
+                                                            errorCode -> errorCode,
+                                                            SittingRecordWrapper::getCreatedByName,
+                                                            statusId -> statusId
                             ))
                             .build()
                     );
@@ -137,7 +138,9 @@ public class RecordSittingRecordsController {
             );
             return status(CREATED)
                     .body(RecordSittingRecordResponse.builder()
-                            .errorRecords(generateResponse(sittingRecordWrappers,
+                            .errorRecords(generateResponse(
+                                hmctsServiceCode,
+                                sittingRecordWrappers,
                                     errorCode -> VALID,
                                     sittingRecordWrapper ->
                                             recordSittingRecordRequest.getRecordedByName(),
@@ -160,11 +163,13 @@ public class RecordSittingRecordsController {
 
 
     private List<SittingRecordResponse> generateResponse(
+            String hmctsServiceCode,
             List<SittingRecordWrapper> sittingRecordWrappers,
             UnaryOperator<ErrorCode> errorCodeOperator,
             Function<SittingRecordWrapper, String> getName,
             UnaryOperator<StatusId> statusIdOperation
     ) {
+
         return sittingRecordWrappers.stream()
                 .map(sittingRecordWrapper ->
                         SittingRecordResponse.builder()
@@ -177,7 +182,14 @@ public class RecordSittingRecordsController {
                                 .pm(sittingRecordWrapper.getPm())
                                 .judgeRoleTypeId(sittingRecordWrapper.getJudgeRoleTypeId())
                                 .judgeRoleTypeName(sittingRecordWrapper.getJudgeRoleTypeName())
+                                .venue(getVenueName(hmctsServiceCode,
+                                    sittingRecordWrapper.getEpimmsId()))
                                 .build()
                 ).toList();
     }
+
+    private String getVenueName(String hmctsServiceCode, String epimmsId) {
+        return regionService.getCourtName(hmctsServiceCode, epimmsId);
+    }
+
 }

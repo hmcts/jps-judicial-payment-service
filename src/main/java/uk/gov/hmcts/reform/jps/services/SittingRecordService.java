@@ -22,7 +22,6 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
-import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -43,7 +42,6 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.CLOSED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.DELETED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
-
 
 @Service
 @Slf4j
@@ -67,7 +65,6 @@ public class SittingRecordService {
             recordSearchRequest,
             hmctsServiceCode
         )) {
-            List<CourtVenue> courtVenues = locationService.getCourtVenues(hmctsServiceCode);
             String accountCode = getAccountCode(hmctsServiceCode);
 
             return dbSittingRecords
@@ -91,19 +88,12 @@ public class SittingRecordService {
                      .sittingRecordId(sittingRecord.getId())
                      .statusHistories(List.copyOf(sittingRecord.getStatusHistories()))
                      .statusId(sittingRecord.getStatusId())
-                     .venueName(getVenueName(courtVenues, sittingRecord.getEpimmsId()))
+                     .venueName(getVenueName(
+                         sittingRecord.getHmctsServiceId(), sittingRecord.getEpimmsId()))
                      .build()
                  )
                 .toList();
         }
-    }
-
-    private String getVenueName(List<CourtVenue> courtVenues, String empimmsId) {
-        return courtVenues.stream()
-                .filter(courtVenue ->  courtVenue.getEpimmsId().equals(empimmsId))
-                .map(CourtVenue::getVenueName)
-                .findAny()
-                .orElse("");
     }
 
     public long getTotalRecordCount(
@@ -336,4 +326,7 @@ public class SittingRecordService {
             .orElse(null);
     }
 
+    private String getVenueName(String hmctsServiceCode, String epimmsId) {
+        return locationService.getCourtName(hmctsServiceCode, epimmsId);
+    }
 }
