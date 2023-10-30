@@ -354,6 +354,31 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
     }
 
     @Test
+    void shouldThrowIllegalArgumentExceptionWhenFeeNotFound() {
+        LocalDate localDate = of(2023, 10, 19);
+        try (MockedStatic<LocalDate> localDateMockedStatic = mockStatic(LocalDate.class, CALLS_REAL_METHODS)) {
+            localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+            LocalDate sittingDate = LocalDate.now().minusYears(2);
+
+            when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+                HMCTS_SERVICE_CODE,
+                MEDICAL_STAFF,
+                sittingDate
+            ))
+                .thenReturn(Optional.empty());
+
+            assertThatThrownBy(() -> publishSittingRecordService.calculateJohFee(
+                HMCTS_SERVICE_CODE,
+                PERSONAL_CODE,
+                MEDICAL_STAFF,
+                sittingDate,
+                false
+            )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Fee not set/active for hmctsServiceCode BBA3 and judgeRoleTypeId 44");
+        }
+    }
+
+    @Test
     void shouldReturnPublishRecordWhenPopulatedWithErrorsAndFileInfos() {
         when(serviceService.findService(HMCTS_SERVICE_CODE))
             .thenReturn(Optional.of(

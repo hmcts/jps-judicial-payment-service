@@ -38,7 +38,7 @@ class ServiceErrorCheckerTest extends BasePublishSittingRecord {
         serviceErrorChecker.evaluate(publishErrors,
                                    HMCTS_SERVICE_CODE,
                                    getDefaultDbSittingRecord());
-        assertThat(publishErrors.getErrorCount()).isEqualTo(0);
+        assertThat(publishErrors.getErrorCount()).isZero();
         verify(publishErrorChecker).evaluate(
             same(publishErrors),
             eq(HMCTS_SERVICE_CODE),

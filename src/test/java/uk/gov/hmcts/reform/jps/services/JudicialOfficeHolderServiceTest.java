@@ -20,6 +20,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -166,6 +168,32 @@ class JudicialOfficeHolderServiceTest {
         );
         judicialOfficeHolderService.delete(judicialOfficeHolderDeleteRequest);
         verify(judicialOfficeHolderRepository).deleteAllById(anyList());
+    }
+
+    @Test
+    void shouldReturnJudicialOfficeHolderWhenPresentWithPayroll() {
+        when(judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohPayrollFilteredByEffectiveStartDate(
+            anyString(),
+            isA(LocalDate.class)
+        )).thenReturn(Optional.of(JudicialOfficeHolder.builder().build()));
+
+        assertThat(judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
+            "personal",
+            LocalDate.now()
+        )).isNotEmpty();
+    }
+
+    @Test
+    void shouldReturnJudicialOfficeHolderWhenPresentWithJohAttributes() {
+        when(judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+            anyString(),
+            isA(LocalDate.class)
+        )).thenReturn(Optional.of(JudicialOfficeHolder.builder().build()));
+
+        assertThat(judicialOfficeHolderService.getJudicialOfficeHolderWithJohAttributes(
+            "personal",
+            LocalDate.now()
+        )).isNotEmpty();
     }
 
     private void setJohAttributes(uk.gov.hmcts.reform.jps.model.JudicialOfficeHolder judicialOfficeHolder) {

@@ -19,11 +19,6 @@ public abstract class ErrorChecker implements PublishErrorChecker {
                                          String hmctsServiceCode,
                                          SittingRecordPublishFields sittingRecord);
 
-    @Override
-    public abstract void evaluate(PublishErrors publishErrors,
-                                  String hmctsServiceCode,
-                                  SittingRecordPublishFields sittingRecord);
-
     public void evaluate(PublishErrors publishErrors,
                          String hmctsServiceCode,
                          SittingRecordPublishFields sittingRecord,

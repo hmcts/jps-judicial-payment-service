@@ -111,10 +111,10 @@ public class PublishSittingRecordService {
             sittingDate
         ).orElseThrow(() -> new IllegalArgumentException(
             String.join(
-                "",
-                "Fee not set/active for hmctsServiceCode ",
+                " ",
+                "Fee not set/active for hmctsServiceCode",
                 hmctsServiceCode,
-                "and judgeRoleTypeId ",
+                "and judgeRoleTypeId",
                 judgeRoleTypeId
             )));
 

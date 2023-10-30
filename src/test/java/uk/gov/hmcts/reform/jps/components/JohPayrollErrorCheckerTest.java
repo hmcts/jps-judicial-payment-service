@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
-import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection.SittingRecordPublishFields;
 import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiResponse;
 import uk.gov.hmcts.reform.jps.services.JudicialOfficeHolderService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
@@ -46,11 +46,11 @@ class JohPayrollErrorCheckerTest extends BasePublishSittingRecord {
         johPayrollErrorChecker.evaluate(publishErrors,
                                            HMCTS_SERVICE_CODE,
                                            getDefaultDbSittingRecord());
-        assertThat(publishErrors.getErrorCount()).isEqualTo(0);
+        assertThat(publishErrors.getErrorCount()).isZero();
         verify(publishErrorChecker).evaluate(
             same(publishErrors),
             eq(HMCTS_SERVICE_CODE),
-            any(SittingRecordPublishProjection.SittingRecordPublishFields.class)
+            any(SittingRecordPublishFields.class)
         );
     }
 
@@ -72,7 +72,7 @@ class JohPayrollErrorCheckerTest extends BasePublishSittingRecord {
         verify(publishErrorChecker, never()).evaluate(
             same(publishErrors),
             eq(HMCTS_SERVICE_CODE),
-            any(SittingRecordPublishProjection.SittingRecordPublishFields.class)
+            any(SittingRecordPublishFields.class)
         );
         verify(judicialUserDetailsService).getJudicialUserDetails(PERSONAL_CODE);
     }
@@ -83,20 +83,21 @@ class JohPayrollErrorCheckerTest extends BasePublishSittingRecord {
         when(judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(PERSONAL_CODE,
                                                                                   SITTING_DATE))
             .thenReturn(Optional.empty());
+        SittingRecordPublishFields defaultDbSittingRecord = getDefaultDbSittingRecord();
 
         assertThatThrownBy(() -> johPayrollErrorChecker.evaluate(
             publishErrors,
             HMCTS_SERVICE_CODE,
-            getDefaultDbSittingRecord()
+            defaultDbSittingRecord
         )).isInstanceOf(IllegalArgumentException.class)
             .hasMessage("JudicialUserDetails not found for personal code: " + PERSONAL_CODE);
 
-        assertThat(publishErrors.getErrorCount()).isEqualTo(0);
+        assertThat(publishErrors.getErrorCount()).isZero();
         assertThat(publishErrors.getJohPayrollInErrors()).isEmpty();
         verify(publishErrorChecker, never()).evaluate(
             same(publishErrors),
             eq(HMCTS_SERVICE_CODE),
-            any(SittingRecordPublishProjection.SittingRecordPublishFields.class)
+            any(SittingRecordPublishFields.class)
         );
         verify(judicialUserDetailsService).getJudicialUserDetails(PERSONAL_CODE);
     }
