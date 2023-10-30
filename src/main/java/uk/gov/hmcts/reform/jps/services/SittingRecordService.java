@@ -57,7 +57,6 @@ public class SittingRecordService {
     private final ServiceService serviceService;
     private final StatusHistoryService statusHistoryService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
-    private final SittingDaysService sittingDaysService;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
@@ -329,59 +328,5 @@ public class SittingRecordService {
 
     private String getVenueName(String hmctsServiceCode, String epimmsId) {
         return locationService.getCourtName(hmctsServiceCode, epimmsId);
-    }
-
-    public PublishSittingRecordCount retrievePublishedRecords(String personalCode) {
-        LocalDate currentDate = LocalDate.now();
-        String currentFinancialYear = getFinancialYear(currentDate);
-
-        FinancialYearRecords currentFinancialYearRecords = FinancialYearRecords.builder()
-            .publishedCount(sittingDaysService.getSittingCount(personalCode, currentFinancialYear))
-            .submittedCount(
-                sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
-                        personalCode,
-                        SUBMITTED,
-                        startOfFinancialYear(currentDate),
-                        endOfFinancialYear(currentDate))
-            )
-            .build();
-
-        LocalDate previousYear = currentDate.minusYears(1L);
-        String previousFinancialYear = getFinancialYear(previousYear);
-        FinancialYearRecords previousFinancialYearRecords = FinancialYearRecords.builder()
-            .publishedCount(sittingDaysService.getSittingCount(personalCode, previousFinancialYear))
-            .submittedCount(
-                sittingRecordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
-                        personalCode,
-                        SUBMITTED,
-                        startOfFinancialYear(previousYear),
-                        endOfFinancialYear(previousYear))
-            )
-            .build();
-
-        return PublishSittingRecordCount.builder()
-            .currentFinancialYear(currentFinancialYearRecords)
-            .previousFinancialYear(previousFinancialYearRecords)
-            .build();
-    }
-
-    private String getFinancialYear(LocalDate date) {
-        int year = date.getYear();
-        int nextYear = (year + 1) % 100;
-        return String.join("-",
-                           String.valueOf(year), String.valueOf(nextYear));
-
-    }
-
-    private LocalDate startOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear(),
-                                             Month.APRIL,
-                                             6);
-    }
-
-    private LocalDate endOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear() + 1,
-                                             Month.APRIL,
-                                             5);
     }
 }
