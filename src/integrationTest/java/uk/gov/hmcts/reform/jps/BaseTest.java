@@ -70,6 +70,9 @@ public class BaseTest {
     public static final String INSERT_PUBLISHED_TEST_DATA
         = "classpath:sql/insert_published_test_data.sql";
 
+    public static final String INSERT_EVALUATE_PUBLISHED_TEST_DATA
+        = "classpath:sql/insert_evaluate_published_test_data.sql";
+
     @BeforeEach
     void init() {
         final String hostUrl = "http://localhost:" + wiremockPort;
