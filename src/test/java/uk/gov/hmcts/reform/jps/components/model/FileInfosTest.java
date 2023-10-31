@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
 import uk.gov.hmcts.reform.jps.model.FileInfo;
 import uk.gov.hmcts.reform.jps.model.FileInfos;
 
@@ -14,6 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 
 class FileInfosTest {
 
@@ -43,13 +43,13 @@ class FileInfosTest {
 
     @Test
     void shouldUpdateWithFullFileNameWhenUpdateRequested() {
-        IntStream.range(0, 3).forEach(counter -> getFileInfo());
         LocalDate localDate = LocalDate.of(2023, Month.OCTOBER, 30);
         try (MockedStatic<LocalDate> localDateMockedStatic = Mockito.mockStatic(
             LocalDate.class,
-            InvocationOnMock::callRealMethod
+            CALLS_REAL_METHODS
         )) {
             localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+            IntStream.range(0, 3).forEach(counter -> getFileInfo());
             fileInfos.setFileNames();
             assertThat(fileInfos.getFileInfos())
                 .map(FileInfo::getFileCreationDate,

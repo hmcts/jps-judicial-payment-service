@@ -43,6 +43,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -384,16 +385,6 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
             .thenReturn(Optional.of(
                 Service.builder().serviceName(SERVICE_NAME).build()));
 
-
-        when(sittingRecordRepository.findByStatusIdAndSittingDateLessThanEqual(
-            SUBMITTED,
-            LocalDate.now()
-        ))
-            .thenReturn(Streamable.of(
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord()
-            ));
-
         doAnswer(invocation -> {
             PublishErrors publishErrors = getPublishErrors(invocation);
             publishErrors.addCourtVenueError(CourtVenueInError.builder()
@@ -418,6 +409,15 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
             InvocationOnMock::callRealMethod
         )) {
             localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+
+            doReturn(Streamable.of(
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord()
+            )).when(sittingRecordRepository).findByStatusIdAndSittingDateLessThanEqual(
+                eq(SUBMITTED),
+                isA(LocalDate.class)
+            );
+
             PublishResponse publishResponse = publishSittingRecordService.publishRecords(
                 HMCTS_SERVICE_CODE,
                 LocalDate.now(),
@@ -458,29 +458,26 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
 
     @Test
     void shouldReturnPublishRecordWhenPopulatedWithOnlyFileInfosWithMultiFileInfoRecords() {
-        when(applicationProperties.getMaximumNumberOfRecordsPerFile()).thenReturn(2);
-        when(serviceService.findService(HMCTS_SERVICE_CODE))
-            .thenReturn(Optional.of(
-                Service.builder().serviceName(SERVICE_NAME).build()));
-
-
-        when(sittingRecordRepository.findByStatusIdAndSittingDateLessThanEqual(
-            SUBMITTED,
-            LocalDate.now()
-        ))
-            .thenReturn(Streamable.of(
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord()
-            ));
-
-
         LocalDate localDate = LocalDate.of(2023, Month.OCTOBER, 30);
         try (MockedStatic<LocalDate> localDateMockedStatic = Mockito.mockStatic(
             LocalDate.class,
             InvocationOnMock::callRealMethod
         )) {
             localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+            when(applicationProperties.getMaximumNumberOfRecordsPerFile()).thenReturn(2);
+            when(serviceService.findService(HMCTS_SERVICE_CODE))
+                .thenReturn(Optional.of(
+                    Service.builder().serviceName(SERVICE_NAME).build()));
+
+            doReturn(Streamable.of(
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord()
+            )).when(sittingRecordRepository).findByStatusIdAndSittingDateLessThanEqual(
+                eq(SUBMITTED),
+                isA(LocalDate.class)
+            );
+
             PublishResponse publishResponse = publishSittingRecordService.publishRecords(
                 HMCTS_SERVICE_CODE,
                 LocalDate.now(),
@@ -518,19 +515,6 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
             .thenReturn(Optional.of(
                 Service.builder().serviceName(SERVICE_NAME).build()));
 
-
-        when(sittingRecordRepository.findByStatusIdAndSittingDateLessThanEqual(
-            SUBMITTED,
-            LocalDate.now()
-        ))
-            .thenReturn(Streamable.of(
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord()
-            ));
-
         doAnswer(invocation -> {
             PublishErrors publishErrors = getPublishErrors(invocation);
             publishErrors.addCourtVenueError(CourtVenueInError.builder().build());
@@ -563,6 +547,18 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
             InvocationOnMock::callRealMethod
         )) {
             localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
+
+            doReturn(Streamable.of(
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord(),
+                getDefaultDbSittingRecord()
+            )).when(sittingRecordRepository).findByStatusIdAndSittingDateLessThanEqual(
+                eq(SUBMITTED),
+                isA(LocalDate.class)
+            );
+
             PublishResponse publishResponse = publishSittingRecordService.publishRecords(
                 HMCTS_SERVICE_CODE,
                 LocalDate.now(),
