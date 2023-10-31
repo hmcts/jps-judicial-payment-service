@@ -35,6 +35,17 @@ public class BasePublishSittingRecord {
         );
     }
 
+    protected SittingRecordPublishProjection.SittingRecordPublishFields getDefaultDbSittingRecord(LocalDate now) {
+        return  getDbSittingRecord(
+            PERSONAL_CODE,
+            CONTRACT_TYPE,
+            JUDGE_ROLE_TYPE_ID,
+            EMPIMMS_ID,
+            now,
+            StatusId.SUBMITTED
+        );
+    }
+
     protected SittingRecordPublishProjection.SittingRecordPublishFields getDbSittingRecord(String personalCode,
                                                                                            Long contractType,
                                                                                            String judgeRoleTypeId,

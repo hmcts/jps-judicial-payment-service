@@ -43,7 +43,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.when;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -81,6 +80,13 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
     @InjectMocks
     private PublishSittingRecordService publishSittingRecordService;
 
+    @NotNull
+    private static PublishErrors getPublishErrors(InvocationOnMock invocation) {
+        PublishErrors publishErrors = invocation.getArgument(2, PublishErrors.class);
+        publishErrors.setError(true);
+        return publishErrors;
+    }
+
     @Test
     void shouldReturnZeroPublishRecordCountWhenNoRecordPresent() {
         LocalDate localDate = of(2023, 10, 19);
@@ -100,7 +106,6 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
                     .build());
         }
     }
-
 
     @Test
     void shouldReturnPublishRecordCountWhenRecordPresent() {
@@ -204,7 +209,6 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
         assertThat(fee).isEqualTo(STANDARD_FEE);
 
     }
-
 
     @ParameterizedTest
     @CsvSource(quoteCharacter = '"', textBlock = """
@@ -409,14 +413,14 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
             InvocationOnMock::callRealMethod
         )) {
             localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
-
-            doReturn(Streamable.of(
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord()
-            )).when(sittingRecordRepository).findByStatusIdAndSittingDateLessThanEqual(
-                eq(SUBMITTED),
-                isA(LocalDate.class)
-            );
+            LocalDate now = LocalDate.now();
+            when(sittingRecordRepository.findByStatusIdAndSittingDateLessThanEqual(
+                SUBMITTED,
+                now
+            )).thenReturn(Streamable.of(
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now)
+            ));
 
             PublishResponse publishResponse = publishSittingRecordService.publishRecords(
                 HMCTS_SERVICE_CODE,
@@ -438,19 +442,25 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
                     FileInfo::getFileName
                 )
                 .containsExactly(
-                    tuple(localDate,
-                          USER_ID,
-                          USER_NAME,
-                          1,
-                          "SSCS_1_of_1_October_2023")
+                    tuple(
+                        localDate,
+                        USER_ID,
+                        USER_NAME,
+                        1,
+                        "SSCS_1_of_1_October_2023"
+                    )
                 );
 
             assertThat(publishResponse.getErrors().getCourtVenueInErrors())
-                .map(CourtVenueInError::getHmctsServiceId,
-                     CourtVenueInError::getEpimmsId)
+                .map(
+                    CourtVenueInError::getHmctsServiceId,
+                    CourtVenueInError::getEpimmsId
+                )
                 .containsExactly(
-                    tuple(HMCTS_SERVICE_CODE,
-                          EMPIMMS_ID)
+                    tuple(
+                        HMCTS_SERVICE_CODE,
+                        EMPIMMS_ID
+                    )
                 );
         }
 
@@ -469,14 +479,15 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
                 .thenReturn(Optional.of(
                     Service.builder().serviceName(SERVICE_NAME).build()));
 
-            doReturn(Streamable.of(
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord()
-            )).when(sittingRecordRepository).findByStatusIdAndSittingDateLessThanEqual(
-                eq(SUBMITTED),
-                isA(LocalDate.class)
-            );
+            LocalDate now = LocalDate.now();
+            when(sittingRecordRepository.findByStatusIdAndSittingDateLessThanEqual(
+                SUBMITTED,
+                now
+            )).thenReturn(Streamable.of(
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now)
+            ));
 
             PublishResponse publishResponse = publishSittingRecordService.publishRecords(
                 HMCTS_SERVICE_CODE,
@@ -495,16 +506,20 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
                     FileInfo::getFileName
                 )
                 .containsExactly(
-                    tuple(localDate,
-                          USER_ID,
-                          USER_NAME,
-                          2,
-                          "SSCS_1_of_2_October_2023"),
-                    tuple(localDate,
-                          USER_ID,
-                          USER_NAME,
-                          1,
-                          "SSCS_2_of_2_October_2023")
+                    tuple(
+                        localDate,
+                        USER_ID,
+                        USER_NAME,
+                        2,
+                        "SSCS_1_of_2_October_2023"
+                    ),
+                    tuple(
+                        localDate,
+                        USER_ID,
+                        USER_NAME,
+                        1,
+                        "SSCS_2_of_2_October_2023"
+                    )
                 );
         }
     }
@@ -547,17 +562,17 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
             InvocationOnMock::callRealMethod
         )) {
             localDateMockedStatic.when(LocalDate::now).thenReturn(localDate);
-
-            doReturn(Streamable.of(
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord(),
-                getDefaultDbSittingRecord()
-            )).when(sittingRecordRepository).findByStatusIdAndSittingDateLessThanEqual(
-                eq(SUBMITTED),
-                isA(LocalDate.class)
-            );
+            LocalDate now = LocalDate.now();
+            when(sittingRecordRepository.findByStatusIdAndSittingDateLessThanEqual(
+                SUBMITTED,
+                now
+            )).thenReturn(Streamable.of(
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now),
+                getDefaultDbSittingRecord(now)
+            ));
 
             PublishResponse publishResponse = publishSittingRecordService.publishRecords(
                 HMCTS_SERVICE_CODE,
@@ -586,12 +601,5 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
                 .hasSize(1);
         }
 
-    }
-
-    @NotNull
-    private static PublishErrors getPublishErrors(InvocationOnMock invocation) {
-        PublishErrors publishErrors = invocation.getArgument(2, PublishErrors.class);
-        publishErrors.setError(true);
-        return publishErrors;
     }
 }
