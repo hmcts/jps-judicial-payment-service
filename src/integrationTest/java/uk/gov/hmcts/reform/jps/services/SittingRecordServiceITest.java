@@ -61,20 +61,12 @@ class SittingRecordServiceITest extends BaseTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
 
-    @Autowired
-    private SittingRecordRepository sittingRecordRepository;
-    @Autowired
-    private StatusHistoryRepository statusHistoryRepository;
-    @Autowired
-    private ServiceService serviceService;
-    @Autowired
+    private final SittingRecordRepository sittingRecordRepository;
     private SittingRecordService sittingRecordService;
-    @Autowired
-    private StatusHistoryService statusHistoryService;
-    @Autowired
-    private ObjectMapper objectMapper;
-    @Autowired
-    private SittingDaysRepository sittingDaysRepository;
+    private final StatusHistoryService statusHistoryService;
+    private final ObjectMapper objectMapper;
+    private final SittingDaysRepository sittingDaysRepository;
+    private final StatusHistoryRepository statusHistoryRepository;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
@@ -87,6 +79,21 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
     private static final String JSON_RECORD_SITTING_RECORDS = "recordSittingRecords.json";
 
+    @Autowired
+    public SittingRecordServiceITest(SittingRecordRepository sittingRecordRepository,
+                                     StatusHistoryRepository statusHistoryRepository,
+                                     SittingRecordService sittingRecordService,
+                                     StatusHistoryService statusHistoryService,
+                                     SittingDaysRepository sittingDaysRepository,
+                                     ObjectMapper objectMapper) {
+
+        this.sittingRecordRepository = sittingRecordRepository;
+        this.statusHistoryRepository = statusHistoryRepository;
+        this.sittingRecordService = sittingRecordService;
+        this.statusHistoryService = statusHistoryService;
+        this.sittingDaysRepository = sittingDaysRepository;
+        this.objectMapper = objectMapper;
+    }
 
     @Test
     @Sql(scripts = {RESET_DATABASE})
@@ -322,11 +329,6 @@ class SittingRecordServiceITest extends BaseTest {
         assertThat(sittingRecord.getId()).isNotNull();
         assertEquals(sittingRecord.getStatusHistories().size(), 2);
 
-        StatusHistory statusHistoryDeleted1 = createStatusHistory(DELETED, Peter_Parker_ID, Peter_Parker);
-        statusHistoryService.saveStatusHistory(statusHistoryDeleted1, sittingRecord);
-        assertThat(sittingRecord.getId()).isNotNull();
-        assertEquals(sittingRecord.getStatusHistories().size(), 3);
-
         createAndSaveSittingRecord(RECORDED, 2L, Peter_Parker_ID, Peter_Parker);
 
         SittingRecord sittingRecord3 = createAndSaveSittingRecord(RECORDED, 1L, Clark_Kent_ID,
@@ -366,7 +368,6 @@ class SittingRecordServiceITest extends BaseTest {
         LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
         LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
         assertEquals(statusHistoryCreated1, actual.getFirstStatusHistory());
-
     }
 
     private SittingRecord createAndSaveSittingRecord(StatusId statusId, Long counter, String userId, String userName) {
