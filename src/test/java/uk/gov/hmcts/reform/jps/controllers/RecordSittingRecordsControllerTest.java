@@ -184,7 +184,8 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[0].postedRecord.am").value("false"),
                 jsonPath("$.errorRecords[0].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[0].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[0].createdDateTime").value(creationDateTime.toString()),
+                jsonPath("$.errorRecords[0].createdDateTime").value(creationDateTime
+                                                                        .truncatedTo(ChronoUnit.SECONDS).toString()),
                 jsonPath("$.errorRecords[0].am").value("true"),
                 jsonPath("$.errorRecords[0].pm").value("false"),
                 jsonPath("$.errorRecords[0].judgeRoleTypeId").value("Judge"),
@@ -200,7 +201,8 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[1].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[1].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[1].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[1].createdDateTime").value(creationDateTime.toString()),
+                jsonPath("$.errorRecords[1].createdDateTime").value(creationDateTime
+                                                                        .truncatedTo(ChronoUnit.SECONDS).toString()),
                 jsonPath("$.errorRecords[1].am").value("true"),
                 jsonPath("$.errorRecords[1].pm").value("false"),
                 jsonPath("$.errorRecords[1].judgeRoleTypeId").value("Judge"),
@@ -216,7 +218,8 @@ class RecordSittingRecordsControllerTest {
                 jsonPath("$.errorRecords[2].postedRecord.am").value("true"),
                 jsonPath("$.errorRecords[2].errorCode").value(POTENTIAL_DUPLICATE_RECORD.name()),
                 jsonPath("$.errorRecords[2].createdByName").value("Recorder"),
-                jsonPath("$.errorRecords[2].createdDateTime").value(creationDateTime.toString()),
+                jsonPath("$.errorRecords[2].createdDateTime").value(creationDateTime
+                                                                        .truncatedTo(ChronoUnit.SECONDS).toString()),
                 jsonPath("$.errorRecords[2].am").value("true"),
                 jsonPath("$.errorRecords[2].pm").value("false"),
                 jsonPath("$.errorRecords[2].judgeRoleTypeId").value("Judge"),
