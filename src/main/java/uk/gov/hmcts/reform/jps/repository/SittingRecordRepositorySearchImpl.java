@@ -54,6 +54,12 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
         LocalDate serviceOnboardedDate) {
+
+        LOGGER.info("find method");
+        LOGGER.info("recordSearchRequest: {}", recordSearchRequest);
+        LOGGER.info("hmctsServiceCode: {}", hmctsServiceCode);
+        LOGGER.info("serviceOnboardedDate: {}", serviceOnboardedDate);
+
         try {
             // create the outer query
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -157,16 +163,18 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                      LocalDate dateFrom,
                                                      LocalDate dateTo) {
 
+        LOGGER.info("getDateRangePredicate:");
+        LOGGER.info("dateFrom: {}, dateTo: {}", dateFrom, dateTo);
         LOGGER.info("sittingRecord.get(SittingRecord_.STATUS_ID): {}", sittingRecord.get(SittingRecord_.STATUS_ID));
+        LOGGER.info("isClosedOrPublished: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
+        LOGGER.info("isRecordedOrSubmitted: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
         if (isClosedOrPublished(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
-            LOGGER.debug("isClosedOrPublished: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
                 dateFrom,
                 LocalDate.now()
             ));
         } else if (isRecordedOrSubmitted(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
-            LOGGER.debug("isRecordedOrSubmitted: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
                 serviceOnboardedDate,
@@ -259,6 +267,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         Consumer<List<Predicate>> predicateConsumer) {
 
         final List<Predicate> predicates = new ArrayList<>();
+
+        predicates.add(criteriaBuilder.notEqual(sittingRecord.get(SittingRecord_.STATUS_ID), StatusId.DELETED));
+
         predicates.add(criteriaBuilder.equal(sittingRecord.get(SittingRecord_.HMCTS_SERVICE_ID), hmctsServiceCode));
 
         Optional.ofNullable(recordSearchRequest.getRegionId())
