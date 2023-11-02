@@ -54,12 +54,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
         LocalDate serviceOnboardedDate) {
-
-        LOGGER.info("find method");
-        LOGGER.info("recordSearchRequest: {}", recordSearchRequest);
-        LOGGER.info("hmctsServiceCode: {}", hmctsServiceCode);
-        LOGGER.info("serviceOnboardedDate: {}", serviceOnboardedDate);
-
         try {
             // create the outer query
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -163,11 +157,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                      LocalDate dateFrom,
                                                      LocalDate dateTo) {
 
-        LOGGER.info("getDateRangePredicate:");
-        LOGGER.info("dateFrom: {}, dateTo: {}", dateFrom, dateTo);
-        LOGGER.info("sittingRecord.get(SittingRecord_.STATUS_ID): {}", sittingRecord.get(SittingRecord_.STATUS_ID));
-        LOGGER.info("isClosedOrPublished: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
-        LOGGER.info("isRecordedOrSubmitted: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
         if (isClosedOrPublished(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
             return Optional.ofNullable(criteriaBuilder.between(
                 sittingRecord.get(SittingRecord_.SITTING_DATE),
