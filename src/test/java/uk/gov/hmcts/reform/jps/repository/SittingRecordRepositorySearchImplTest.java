@@ -114,9 +114,7 @@ class SittingRecordRepositorySearchImplTest {
     @Test
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
         setUpMock();
-
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
-
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
@@ -176,7 +174,6 @@ class SittingRecordRepositorySearchImplTest {
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
-
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
@@ -233,7 +230,6 @@ class SittingRecordRepositorySearchImplTest {
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
-
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
@@ -287,7 +283,6 @@ class SittingRecordRepositorySearchImplTest {
         setUpMock();
 
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
-
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
@@ -337,6 +332,7 @@ class SittingRecordRepositorySearchImplTest {
     void testFindCriteriaQueryIsInitialisedCorrectlyWhenRequestMandatoryValuesSetWithAmDurationAndDescendingOrdering() {
         setUpMock();
 
+        when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
@@ -381,6 +377,7 @@ class SittingRecordRepositorySearchImplTest {
     @Test
     void testFindCriteriaQueryIsInitCorrectlyWhenRequestMandatoryValuesSetWithPmDurationAndDescendingOrdering() {
         setUpMock();
+        when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.HMCTS_SERVICE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.REGION_ID)).thenReturn(attributePath);
@@ -567,7 +564,7 @@ class SittingRecordRepositorySearchImplTest {
             .thenReturn(recordSubmitFieldsTypedQuery);
 
         when(sittingRecord.<String>get(SITTING_DATE)).thenReturn(attributePath);
-
+        when(sittingRecord.<String>get(STATUS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(CONTRACT_TYPE_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(PERSONAL_CODE)).thenReturn(attributePath);
