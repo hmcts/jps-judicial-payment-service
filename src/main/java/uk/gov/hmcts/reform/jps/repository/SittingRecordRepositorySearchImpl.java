@@ -50,10 +50,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     private EntityManager entityManager;
 
     @Override
-    public Stream<SittingRecord> find(
-        SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode,
-        LocalDate serviceOnboardedDate) {
+    public Stream<SittingRecord> find(SittingRecordSearchRequest recordSearchRequest, String hmctsServiceCode,
+                                      LocalDate serviceOnboardedDate) {
         try {
             // create the outer query
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -117,61 +115,54 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
     public void addJoinCriteria(SittingRecordSearchRequest recordSearchRequest,
                                 CriteriaBuilder criteriaBuilder,
-                                final List<Predicate> predicate,
+                                List<Predicate> predicates,
                                 Root<SittingRecord> sittingRecord) {
 
         if (Objects.nonNull(recordSearchRequest.getCreatedByUserId())
             && !recordSearchRequest.getCreatedByUserId().isEmpty()) {
             Join<Object, Object> joinStatusHistory =
                 sittingRecord.join(SittingRecord_.STATUS_HISTORIES, JoinType.INNER);
-            predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.CHANGED_BY_USER_ID),
-                                                recordSearchRequest.getCreatedByUserId()));
-            predicate.add(criteriaBuilder.equal(joinStatusHistory.get(StatusHistory_.STATUS_ID),
-                                                StatusId.RECORDED));
+            Predicate predicateUserId = criteriaBuilder.equal(joinStatusHistory.get(
+                StatusHistory_.CHANGED_BY_USER_ID), recordSearchRequest.getCreatedByUserId());
+            Predicate predicateStatusRecorded = criteriaBuilder.equal(joinStatusHistory.get(
+                StatusHistory_.STATUS_ID), StatusId.RECORDED);
+            predicates.add(criteriaBuilder.and(predicateUserId, predicateStatusRecorded));
         }
-
     }
 
-    public void addDateRangePredicate(Root<SittingRecord> sittingRecord,
-                                      CriteriaBuilder criteriaBuilder,
-                                      String hmctsServiceCode,
-                                      LocalDate serviceOnboardedDate,
-                                      LocalDate dateFrom,
-                                      LocalDate dateTo,
-                                      List<Predicate> predicates) {
-
-        Optional<Predicate> predicateDateFilter = getDateRangePredicate(sittingRecord,
-                                                                        criteriaBuilder,
-                                                                        hmctsServiceCode,
-                                                                        serviceOnboardedDate,
-                                                                        dateFrom,
-                                                                        dateTo);
-        LOGGER.debug("predicateDateFilter: {}", predicateDateFilter);
-        predicateDateFilter.ifPresent(predicates::add);
+    public Predicate getStatusPredicate(Root<SittingRecord> sittingRecord,
+                                        CriteriaBuilder criteriaBuilder,
+                                        StatusId statusId) {
+        return criteriaBuilder.equal(sittingRecord.get(SittingRecord_.STATUS_ID),
+                                                          statusId);
     }
 
-    public Optional<Predicate> getDateRangePredicate(Root<SittingRecord> sittingRecord,
-                                                     CriteriaBuilder criteriaBuilder,
-                                                     String hmctsServiceCode,
-                                                     LocalDate serviceOnboardedDate,
-                                                     LocalDate dateFrom,
-                                                     LocalDate dateTo) {
+    public Predicate getSittingDateRangePredicate(Root<SittingRecord> sittingRecord,
+                                        CriteriaBuilder criteriaBuilder,
+                                        LocalDate dateFrom, LocalDate dateTo) {
+        LOGGER.debug("predicateDateRange: sittingDate between {} and {}", dateFrom, dateTo);
+        return criteriaBuilder.between(
+            sittingRecord.get(SittingRecord_.SITTING_DATE),
+            dateFrom,
+            dateTo);
+    }
 
-        if (isClosedOrPublished(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
-            return Optional.ofNullable(criteriaBuilder.between(
-                sittingRecord.get(SittingRecord_.SITTING_DATE),
-                dateFrom,
-                LocalDate.now()
-            ));
-        } else if (isRecordedOrSubmitted(sittingRecord.get(SittingRecord_.STATUS_ID).toString())) {
-            return Optional.ofNullable(criteriaBuilder.between(
-                sittingRecord.get(SittingRecord_.SITTING_DATE),
-                serviceOnboardedDate,
-                dateTo
-            ));
-        }
-        LOGGER.debug("not Recorded/Submitted/Closed/Published: {}", sittingRecord.get(SittingRecord_.STATUS_ID));
-        return Optional.empty();
+    public List<Predicate> getRecordedDateRangePredicates(Root<SittingRecord> sittingRecord,
+                                                           CriteriaBuilder criteriaBuilder,
+                                                           LocalDate serviceOnboardedDate,
+                                                           LocalDate dateTo) {
+
+        List<Predicate> predicatesRecordedDateRange = new ArrayList<>();
+        predicatesRecordedDateRange.add(getStatusPredicate(sittingRecord,
+                                                          criteriaBuilder,
+                                                          StatusId.RECORDED));
+
+        LOGGER.debug("predicatePublishedDateRange: sittingDate between serviceOnboardedDate, dateTo");
+        predicatesRecordedDateRange.add(getSittingDateRangePredicate(sittingRecord, criteriaBuilder,
+                                                                    serviceOnboardedDate,
+                                           (dateTo.isBefore(serviceOnboardedDate) ? serviceOnboardedDate : dateTo)));
+
+        return predicatesRecordedDateRange;
     }
 
     @Override
@@ -222,29 +213,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         return entityManager.createQuery(criteriaQuery).getResultList();
     }
 
-    public boolean isStatusPublished(String status) {
-        return (status.equals(StatusId.CLOSED.name()));
-    }
-
-    public boolean isStatusClosed(String status) {
-        return (status.equals(StatusId.PUBLISHED.name()));
-    }
-
-    public boolean isStatusRecorded(String status) {
-        return (status.equals(StatusId.RECORDED.name()));
-    }
-
-    public boolean isStatusSubmitted(String status) {
-        return (status.equals(StatusId.SUBMITTED.name()));
-    }
-
-    public boolean isRecordedOrSubmitted(String status) {
-        return (isStatusRecorded(status) || isStatusSubmitted(status));
-    }
-
-    public boolean isClosedOrPublished(String status) {
-        return (isStatusClosed(status) || isStatusPublished(status));
-    }
 
     private <T> void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
@@ -296,12 +264,104 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             }
         }
 
-        addJoinCriteria(recordSearchRequest, criteriaBuilder, predicates,sittingRecord);
+        addJoinCriteria(recordSearchRequest, criteriaBuilder, predicates, sittingRecord);
 
-        predicateConsumer.accept(predicates);
 
-        Predicate[] predicatesArray = new Predicate[predicates.size()];
-        criteriaQuery.where(criteriaBuilder.and(predicates.toArray(predicatesArray)));
+        List<Predicate> predicatesClosed = getClosedDateRangePredicates(sittingRecord, criteriaBuilder,
+                                                                        recordSearchRequest.getDateRangeFrom());
+
+        List<Predicate> predicatesPublished = getPublishedDateRangePredicates(sittingRecord, criteriaBuilder,
+                                                                              recordSearchRequest.getDateRangeFrom());
+
+        List<Predicate> predicatesSubmitted = getSubmittedDateRangePredicates(sittingRecord, criteriaBuilder,
+                                                                              serviceOnboardedDate,
+                                                                              recordSearchRequest.getDateRangeTo());
+
+        List<Predicate> predicatesRecorded = getRecordedDateRangePredicates(sittingRecord, criteriaBuilder,
+                                                                            serviceOnboardedDate,
+                                                                            recordSearchRequest.getDateRangeTo());
+
+        // Combine the OR conditions using criteriaBuilder.or
+        Predicate finalPredicate = buildFinalPredicate(predicatesClosed, predicatesPublished, predicatesSubmitted,
+                                                     predicatesRecorded, criteriaBuilder, predicates);
+
+        if (null != finalPredicate) {
+            predicateConsumer.accept(List.of(finalPredicate));
+        }
+
+        criteriaQuery.where(finalPredicate);
+    }
+
+    protected List<Predicate> getClosedDateRangePredicates(Root<SittingRecord> sittingRecord,
+                                                        CriteriaBuilder criteriaBuilder,
+                                                        LocalDate dateFrom) {
+
+        List<Predicate> predicatesClosedDateRange = new ArrayList<>();
+        predicatesClosedDateRange.add(getStatusPredicate(sittingRecord,
+                                                         criteriaBuilder,
+                                                         StatusId.CLOSED));
+
+        LOGGER.debug("predicateClosedDateRange: sittingDate between dateFrom, now");
+        predicatesClosedDateRange.add(getSittingDateRangePredicate(sittingRecord, criteriaBuilder,
+                                                                   dateFrom, LocalDate.now()));
+
+        return predicatesClosedDateRange;
+    }
+
+    protected List<Predicate> getPublishedDateRangePredicates(Root<SittingRecord> sittingRecord,
+                                                           CriteriaBuilder criteriaBuilder,
+                                                           LocalDate dateFrom) {
+
+        List<Predicate> predicatesPublishedDateRange = new ArrayList<>();
+        predicatesPublishedDateRange.add(getStatusPredicate(sittingRecord,
+                                                            criteriaBuilder,
+                                                            StatusId.PUBLISHED));
+        LOGGER.debug("predicatePublishedDateRange: sittingDate between dateFrom, now");
+        predicatesPublishedDateRange.add(getSittingDateRangePredicate(sittingRecord,
+                                                                      criteriaBuilder,
+                                                                      dateFrom, LocalDate.now()));
+
+        return predicatesPublishedDateRange;
+    }
+
+    protected List<Predicate> getSubmittedDateRangePredicates(Root<SittingRecord> sittingRecord,
+                                                           CriteriaBuilder criteriaBuilder,
+                                                           LocalDate serviceOnboardedDate,
+                                                           LocalDate dateTo) {
+
+        List<Predicate> predicatesSubmittedDateRange = new ArrayList<>();
+        predicatesSubmittedDateRange.add(getStatusPredicate(sittingRecord,
+                                                            criteriaBuilder,
+                                                            StatusId.SUBMITTED));
+
+        LOGGER.debug("predicatePublishedDateRange: sittingDate between serviceOnboardedDate, dateTo");
+        LocalDate paramDateTo = dateTo.isBefore(serviceOnboardedDate) ? serviceOnboardedDate : dateTo;
+        predicatesSubmittedDateRange.add(getSittingDateRangePredicate(sittingRecord, criteriaBuilder,
+                                                                      serviceOnboardedDate, paramDateTo));
+
+        return predicatesSubmittedDateRange;
+    }
+
+    protected Predicate buildFinalPredicate(List<Predicate> predicatesClosed, List<Predicate> predicatesPublished,
+                                              List<Predicate> predicatesSubmitted, List<Predicate> predicatesRecorded,
+                                              CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+
+        Predicate[] predicatesArray = predicates.toArray(new Predicate[predicates.size()]);
+        Predicate[] predicatesClosedArray = predicatesClosed.toArray(new Predicate[predicatesClosed.size()]);
+        Predicate[] predicatesPublishedArray = predicatesPublished.toArray(new Predicate[predicatesPublished.size()]);
+        Predicate[] predicatesRecordedArray = predicatesRecorded.toArray(new Predicate[predicatesRecorded.size()]);
+        Predicate[] predicatesSubmittedArray = predicatesSubmitted.toArray(new Predicate[predicatesSubmitted.size()]);
+
+        Predicate andPredicate = criteriaBuilder.and(predicatesArray);
+        Predicate orPredicateClosed = criteriaBuilder.and(predicatesClosedArray);
+        Predicate orPredicatePublished = criteriaBuilder.and(predicatesPublishedArray);
+        Predicate orPredicateRecorded = criteriaBuilder.and(predicatesRecordedArray);
+        Predicate orPredicateSubmitted = criteriaBuilder.and(predicatesSubmittedArray);
+        Predicate orPredicate = criteriaBuilder.or(orPredicateClosed, orPredicatePublished, orPredicateRecorded,
+                                                   orPredicateSubmitted);
+
+        // Combine the OR conditions using criteriaBuilder.or
+        return criteriaBuilder.and(orPredicate, andPredicate);
     }
 
     private <V> void setDurationPredicates(CriteriaBuilder criteriaBuilder,

@@ -19,9 +19,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
-import uk.gov.hmcts.reform.jps.repository.SittingDaysRepository;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
-import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
 import java.io.IOException;
 import java.time.LocalDate;
@@ -62,11 +60,9 @@ class SittingRecordServiceITest extends BaseTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(SittingRecordServiceITest.class);
 
     private final SittingRecordRepository sittingRecordRepository;
-    private SittingRecordService sittingRecordService;
+    private final SittingRecordService sittingRecordService;
     private final StatusHistoryService statusHistoryService;
     private final ObjectMapper objectMapper;
-    private final SittingDaysRepository sittingDaysRepository;
-    private final StatusHistoryRepository statusHistoryRepository;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
@@ -81,22 +77,18 @@ class SittingRecordServiceITest extends BaseTest {
 
     @Autowired
     public SittingRecordServiceITest(SittingRecordRepository sittingRecordRepository,
-                                     StatusHistoryRepository statusHistoryRepository,
                                      SittingRecordService sittingRecordService,
                                      StatusHistoryService statusHistoryService,
-                                     SittingDaysRepository sittingDaysRepository,
                                      ObjectMapper objectMapper) {
 
         this.sittingRecordRepository = sittingRecordRepository;
-        this.statusHistoryRepository = statusHistoryRepository;
         this.sittingRecordService = sittingRecordService;
         this.statusHistoryService = statusHistoryService;
-        this.sittingDaysRepository = sittingDaysRepository;
         this.objectMapper = objectMapper;
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
     void shouldReturnQueriedRecordsWithMandatoryFieldsSet() {
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED,2L, USER_ID, USER_NAME);
 
@@ -124,7 +116,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
     void shouldReturnQueriedRecordsWithAllSearchFieldsSet() {
 
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED, 2L, USER_ID, USER_NAME);
@@ -153,7 +145,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
     void shouldReturnOffset10RecordsOnwardsInAscendingOrder() {
         int recordCount = 25;
         String reasonId = "1";
@@ -191,7 +183,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
     void shouldReturnLast2RecordsWhenSortOrderIsDescending() {
         int recordCount = 22;
         String reasonId = "1";
@@ -233,7 +225,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
     void shouldReturnTotalRecordCounts() {
         int recordCount = 25;
         String reasonId = "1";
@@ -253,7 +245,7 @@ class SittingRecordServiceITest extends BaseTest {
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
             HMCTS_SERVICE_CODE,
-            LocalDate.now().minusDays(2)
+            LocalDate.now().minusDays(recordCount)
         );
 
         assertThat(totalRecordCount).isEqualTo(25);
@@ -312,7 +304,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE})
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
         final String Bruce_Wayne = "Bruce Wayne";
         final String Clark_Kent = "Clark Kent";
