@@ -10,8 +10,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
@@ -22,6 +20,7 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 import javax.persistence.EntityManager;
@@ -128,8 +127,8 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-//        when(orderImpl.isAscending()).thenReturn(true);
-//        when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+        when(orderImpl.isAscending()).thenReturn(true);
+        when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
 
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
@@ -143,17 +142,19 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
+                                               .medicalMembersOnly(false)
                                                .build(),
                                            SSCS,
-                                           LocalDate.now());
+                                           LocalDate.now(),
+                                           new ArrayList<>());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
         verify(typedQuery).setFirstResult(OFF_SET);
-    //    verify(criteriaQuery).orderBy(order.capture());
+        verify(criteriaQuery).orderBy(order.capture());
 
-    //    Order value1 = order.getValue();
-    //    assertThat(value1.isAscending()).isTrue();
+        Order value1 = order.getValue();
+        assertThat(value1.isAscending()).isTrue();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
@@ -185,8 +186,8 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-    //    when(orderImpl.isAscending()).thenReturn(true);
-    //    when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+        when(orderImpl.isAscending()).thenReturn(true);
+        when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
 
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
@@ -199,17 +200,19 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
+                                               .medicalMembersOnly(false)
                                                .build(),
                                            SSCS,
-                                           LocalDate.now());
+                                           LocalDate.now(),
+                                           new ArrayList<>());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
         verify(typedQuery).setFirstResult(OFF_SET);
-    //    verify(criteriaQuery).orderBy(order.capture());
+        verify(criteriaQuery).orderBy(order.capture());
 
-    //    Order value1 = order.getValue();
-    //    assertThat(value1.isAscending()).isTrue();
+        Order value1 = order.getValue();
+        assertThat(value1.isAscending()).isTrue();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
@@ -239,8 +242,8 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-    //    when(orderImpl.isAscending()).thenReturn(true);
-    //    when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+        // when(orderImpl.isAscending()).thenReturn(true);
+        // when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
 
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
@@ -253,17 +256,19 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
+                                               .medicalMembersOnly(false)
                                                .build(),
                                            SSCS,
-                                           LocalDate.now());
+                                           LocalDate.now(),
+                                           new ArrayList<>());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
         verify(typedQuery).setFirstResult(OFF_SET);
-    //    verify(criteriaQuery).orderBy(order.capture());
+        // verify(criteriaQuery).orderBy(order.capture());
 
-    //    Order value1 = order.getValue();
-    //    assertThat(value1.isAscending()).isTrue();
+        // Order value1 = order.getValue();
+        // assertThat(value1.isAscending()).isTrue();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
@@ -291,8 +296,8 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-    //    when(orderImpl.isAscending()).thenReturn(true);
-    //    when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+        // when(orderImpl.isAscending()).thenReturn(true);
+        // when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
 
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
@@ -304,17 +309,19 @@ class SittingRecordRepositorySearchImplTest {
                                                .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                                                .statusId(StatusId.RECORDED)
                                                .duration(Duration.FULL_DAY)
+                                               .medicalMembersOnly(false)
                                                .build(),
                                            SSCS,
-                                           LocalDate.now());
+                                           LocalDate.now(),
+                                           new ArrayList<>());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
         verify(typedQuery).setFirstResult(OFF_SET);
-    //    verify(criteriaQuery).orderBy(order.capture());
+        // verify(criteriaQuery).orderBy(order.capture());
 
-    //    Order value1 = order.getValue();
-    //    assertThat(value1.isAscending()).isTrue();
+        // Order value1 = order.getValue();
+        // assertThat(value1.isAscending()).isTrue();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(PERSONAL_CODE));
@@ -339,8 +346,8 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-    //    when(orderImpl.isAscending()).thenReturn(false);
-    //    when(criteriaBuilder.desc(any())).thenReturn(orderImpl);
+        // when(orderImpl.isAscending()).thenReturn(false);
+        // when(criteriaBuilder.desc(any())).thenReturn(orderImpl);
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
                                                .pageSize(10)
@@ -350,17 +357,19 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
                                                .duration(Duration.AM)
+                                               .medicalMembersOnly(false)
                                                .build(),
                                            SSCS,
-                                           LocalDate.now().minusDays(2));
+                                           LocalDate.now().minusDays(2),
+                                           new ArrayList<>());
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
         verify(typedQuery).setFirstResult(OFF_SET);
-    //    verify(criteriaQuery).orderBy(order.capture());
+        // verify(criteriaQuery).orderBy(order.capture());
 
-    //    Order value1 = order.getValue();
-    //    assertThat(value1.isAscending()).isFalse();
+        // Order value1 = order.getValue();
+        // assertThat(value1.isAscending()).isFalse();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
@@ -385,8 +394,8 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
 
-    //    when(orderImpl.isAscending()).thenReturn(false);
-    //    when(criteriaBuilder.desc(any())).thenReturn(orderImpl);
+        // when(orderImpl.isAscending()).thenReturn(false);
+        // when(criteriaBuilder.desc(any())).thenReturn(orderImpl);
 
         sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
                                                .offset(5)
@@ -397,18 +406,20 @@ class SittingRecordRepositorySearchImplTest {
                                                .dateRangeFrom(LocalDate.now().minusDays(2))
                                                .dateRangeTo(LocalDate.now())
                                                .duration(Duration.PM)
+                                               .medicalMembersOnly(false)
                                                .build(),
                                            SSCS,
-                                           LocalDate.now());
+                                           LocalDate.now(),
+                                           new ArrayList<>());
 
 
         verify(entityManager).getCriteriaBuilder();
         verify(typedQuery).setMaxResults(PAGE_SIZE);
         verify(typedQuery).setFirstResult(OFF_SET);
-    //    verify(criteriaQuery).orderBy(order.capture());
+        // verify(criteriaQuery).orderBy(order.capture());
 
-    //    Order value1 = order.getValue();
-    //    assertThat(value1.isAscending()).isFalse();
+        // Order value1 = order.getValue();
+        // assertThat(value1.isAscending()).isFalse();
 
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
@@ -436,7 +447,7 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.EPIMMS_ID)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PERSONAL_CODE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(attributePath);
-        //when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
+        // when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
@@ -471,9 +482,11 @@ class SittingRecordRepositorySearchImplTest {
                 .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
                 .statusId(StatusId.RECORDED)
                 .duration(Duration.FULL_DAY)
+                .medicalMembersOnly(false)
                 .build(),
             SSCS,
-            LocalDate.now().minusDays(2)
+            LocalDate.now().minusDays(2),
+            new ArrayList<>()
         );
 
         assertThat(totalRecords).isEqualTo(10);
@@ -531,10 +544,12 @@ class SittingRecordRepositorySearchImplTest {
             .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
             .statusId(StatusId.RECORDED)
             .duration(Duration.FULL_DAY)
+            .medicalMembersOnly(false)
             .build();
 
         long totalRecords = sittingRecordRepositorySearch.totalRecords(recordSearchRequest, SSCS,
-                                                                       LocalDate.now().minusDays(2));
+                                                                       LocalDate.now().minusDays(2),
+                                                                        new ArrayList<>());
 
         assertThat(totalRecords).isEqualTo(10);
 
@@ -667,8 +682,8 @@ class SittingRecordRepositorySearchImplTest {
     void testGetClosedDateRangePredicate() {
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(CLOSED);
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(SITTINGDATE);
-        //when(criteriaBuilder.equal(any(), any())).thenReturn(predicate);
-        //when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class))).thenReturn(predicate);
+        // when(criteriaBuilder.equal(any(), any())).thenReturn(predicate);
+        // when(criteriaBuilder.between(any(), isA(LocalDate.class), isA(LocalDate.class))).thenReturn(predicate);
         List<Predicate> predicatesClosedDateRange = sittingRecordRepositorySearch.getClosedDateRangePredicates(
             sittingRecord,
             criteriaBuilder,

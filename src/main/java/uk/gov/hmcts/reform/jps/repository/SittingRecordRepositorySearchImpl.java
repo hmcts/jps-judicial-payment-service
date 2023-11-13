@@ -23,6 +23,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
@@ -49,9 +50,13 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     @PersistenceContext
     private EntityManager entityManager;
 
+    public SittingRecordRepositorySearchImpl() {
+
+    }
+
     @Override
     public Stream<SittingRecord> find(SittingRecordSearchRequest recordSearchRequest, String hmctsServiceCode,
-                                      LocalDate serviceOnboardedDate) {
+                                      LocalDate serviceOnboardedDate, List<String> medicalJohIds) {
         try {
             // create the outer query
             CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -62,6 +67,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                 recordSearchRequest,
                 hmctsServiceCode,
                 serviceOnboardedDate,
+                medicalJohIds,
                 cb,
                 cq,
                 root,
@@ -86,7 +92,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
     @Override
     public long totalRecords(SittingRecordSearchRequest recordSearchRequest,
-                            String hmctsServiceCode, LocalDate serviceOnboardedDate) {
+                            String hmctsServiceCode, LocalDate serviceOnboardedDate, List<String> medicalJohIds) {
         try {
             CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
             CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
@@ -98,6 +104,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                 recordSearchRequest,
                 hmctsServiceCode,
                 serviceOnboardedDate,
+                medicalJohIds,
                 criteriaBuilder,
                 criteriaQuery,
                 sittingRecord,
@@ -218,6 +225,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
         LocalDate serviceOnboardedDate,
+        List<String> medicalJohIds,
         CriteriaBuilder criteriaBuilder,
         CriteriaQuery<T> criteriaQuery,
         Root<SittingRecord> sittingRecord,
@@ -266,6 +274,9 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         addJoinCriteria(recordSearchRequest, criteriaBuilder, predicates, sittingRecord);
 
+        if (Boolean.TRUE.equals(recordSearchRequest.getMedicalMembersOnly())) {
+            selectMedicalMembers(sittingRecord, criteriaBuilder, medicalJohIds, predicates);
+        }
 
         List<Predicate> predicatesClosed = getClosedDateRangePredicates(sittingRecord, criteriaBuilder,
                                                                         recordSearchRequest.getDateRangeFrom());
@@ -282,14 +293,28 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                                             recordSearchRequest.getDateRangeTo());
 
         // Combine the OR conditions using criteriaBuilder.or
-        Predicate finalPredicate = buildFinalPredicate(predicatesClosed, predicatesPublished, predicatesSubmitted,
-                                                     predicatesRecorded, criteriaBuilder, predicates);
+        List<Predicate> finalPredicates = predicates;
+        finalPredicates.addAll(predicatesClosed);
+        finalPredicates.addAll(predicatesPublished);
+        finalPredicates.addAll(predicatesRecorded);
+        finalPredicates.addAll(predicatesSubmitted);
 
-        if (null != finalPredicate) {
-            predicateConsumer.accept(List.of(finalPredicate));
-        }
+        Predicate finalPredicate = buildFinalPredicate(predicatesClosed, predicatesPublished, predicatesRecorded,
+                                                     predicatesSubmitted, criteriaBuilder, predicates);
+
+        predicateConsumer.accept(finalPredicates);
 
         criteriaQuery.where(finalPredicate);
+    }
+
+    protected void selectMedicalMembers(Root<SittingRecord> sittingRecord,
+                                             CriteriaBuilder criteriaBuilder,
+                                             List<String> medicalJohIds,
+                                             List<Predicate> predicates) {
+        Expression<String> attributeToCheck = sittingRecord.get(JUDGE_ROLE_TYPE_ID);
+        Predicate inPredicate = attributeToCheck.in(medicalJohIds);
+
+        predicates.add(inPredicate);
     }
 
     protected List<Predicate> getClosedDateRangePredicates(Root<SittingRecord> sittingRecord,
@@ -343,7 +368,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     }
 
     protected Predicate buildFinalPredicate(List<Predicate> predicatesClosed, List<Predicate> predicatesPublished,
-                                              List<Predicate> predicatesSubmitted, List<Predicate> predicatesRecorded,
+                                              List<Predicate> predicatesRecorded, List<Predicate> predicatesSubmitted,
                                               CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
 
         Predicate[] predicatesArray = predicates.toArray(new Predicate[predicates.size()]);

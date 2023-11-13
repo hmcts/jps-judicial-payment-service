@@ -10,12 +10,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public interface SittingRecordRepositorySearch {
-    Stream<SittingRecord> find(SittingRecordSearchRequest recordSearchRequest,
-                               String hmctsServiceCode,
-                               LocalDate serviceOnboardedDate);
+    Stream<SittingRecord> find(SittingRecordSearchRequest recordSearchRequest, String hmctsServiceCode,
+                               LocalDate serviceOnboardedDate, List<String> medicalJohIds);
 
-    long totalRecords(SittingRecordSearchRequest recordSearchRequest,
-                          String hmctsServiceCode, LocalDate serviceOnboardedDate);
+    long totalRecords(SittingRecordSearchRequest recordSearchRequest, String hmctsServiceCode,
+                      LocalDate serviceOnboardedDate, List<String> medicalJohIds);
 
     List<RecordSubmitFields> findRecordsToSubmit(SubmitSittingRecordRequest recordSearchRequest,
                                                  String hmctsServiceCode);
