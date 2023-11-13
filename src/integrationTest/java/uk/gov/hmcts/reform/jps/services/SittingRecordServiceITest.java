@@ -9,6 +9,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.BaseTest;
+import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -62,6 +63,7 @@ class SittingRecordServiceITest extends BaseTest {
     private final SittingRecordRepository sittingRecordRepository;
     private final SittingRecordService sittingRecordService;
     private final StatusHistoryService statusHistoryService;
+    private final ServiceService serviceService;
     private final ObjectMapper objectMapper;
 
     public static final String EPIMMS_ID = "852649";
@@ -79,11 +81,13 @@ class SittingRecordServiceITest extends BaseTest {
     public SittingRecordServiceITest(SittingRecordRepository sittingRecordRepository,
                                      SittingRecordService sittingRecordService,
                                      StatusHistoryService statusHistoryService,
+                                     ServiceService serviceService,
                                      ObjectMapper objectMapper) {
 
         this.sittingRecordRepository = sittingRecordRepository;
         this.sittingRecordService = sittingRecordService;
         this.statusHistoryService = statusHistoryService;
+        this.serviceService = serviceService;
         this.objectMapper = objectMapper;
     }
 
@@ -244,8 +248,7 @@ class SittingRecordServiceITest extends BaseTest {
 
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             recordSearchRequest,
-            HMCTS_SERVICE_CODE,
-            LocalDate.now().minusDays(recordCount)
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(totalRecordCount).isEqualTo(25);
@@ -304,7 +307,7 @@ class SittingRecordServiceITest extends BaseTest {
     }
 
     @Test
-    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE})
+    @Sql(scripts = {RESET_DATABASE})
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
         final String Bruce_Wayne = "Bruce Wayne";
         final String Clark_Kent = "Clark Kent";
@@ -313,12 +316,17 @@ class SittingRecordServiceITest extends BaseTest {
         final String Clark_Kent_ID = "clark-100022";
         final String Peter_Parker_ID = "peter-10033";
 
+        int recordCount = 22;
+        LocalDate serviceOnboardedDate = LocalDate.now().minusDays(recordCount);
+        createAndSaveService(HMCTS_SERVICE_CODE, serviceOnboardedDate);
+
         SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED,2L, Bruce_Wayne_ID,
                                                                  Bruce_Wayne);
 
         StatusHistory statusHistorySubmitted1 = createStatusHistory(SUBMITTED, Clark_Kent_ID, Clark_Kent);
         statusHistoryService.saveStatusHistory(statusHistorySubmitted1, sittingRecord);
         assertThat(sittingRecord.getId()).isNotNull();
+        assertEquals(sittingRecord.getStatusId(), statusHistorySubmitted1.getStatusId());
         assertEquals(sittingRecord.getStatusHistories().size(), 2);
 
         createAndSaveSittingRecord(RECORDED, 2L, Peter_Parker_ID, Peter_Parker);
@@ -328,8 +336,8 @@ class SittingRecordServiceITest extends BaseTest {
         StatusHistory statusHistorySubmitted3 = createStatusHistory(SUBMITTED,
                                                                     Bruce_Wayne_ID, Bruce_Wayne);
         statusHistoryService.saveStatusHistory(statusHistorySubmitted3, sittingRecord3);
+        assertEquals(sittingRecord3.getStatusId(), statusHistorySubmitted3.getStatusId());
 
-        int recordCount = 22;
         SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
             .pageSize(10)
             .offset(0)
@@ -360,48 +368,6 @@ class SittingRecordServiceITest extends BaseTest {
         LOGGER.debug("statusHistoryCreated1:{}", statusHistoryCreated1);
         LOGGER.debug("actual               :{}", actual.getFirstStatusHistory());
         assertEquals(statusHistoryCreated1, actual.getFirstStatusHistory());
-    }
-
-    private SittingRecord createAndSaveSittingRecord(StatusId statusId, Long counter, String userId, String userName) {
-        SittingRecord sittingRecord = createSittingRecord(statusId,  counter, userId, userName);
-        SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
-        assertThat(persistedSittingRecord).isNotNull();
-        assertThat(sittingRecord.getStatusHistories()).isNotNull();
-        assertFalse(sittingRecord.getStatusHistories().isEmpty());
-        return persistedSittingRecord;
-    }
-
-    private SittingRecord createSittingRecord(StatusId statusId, long counter, String userId, String userName) {
-        SittingRecord.SittingRecordBuilder builder = SittingRecord.builder();
-        SittingRecord sittingRecord = builder
-            .sittingDate(LocalDate.now().minusDays(counter))
-            .statusId(statusId)
-            .regionId("1")
-            .epimmsId(EPIMMS_ID)
-            .hmctsServiceId(HMCTS_SERVICE_CODE)
-            .personalCode("001")
-            .contractTypeId(counter)
-            .am(true)
-            .judgeRoleTypeId("HighCourt")
-            .build();
-        StatusHistory statusHistory = createStatusHistory(sittingRecord.getStatusId(), userId, userName);
-        sittingRecord.addStatusHistory(statusHistory);
-        return sittingRecord;
-    }
-
-    private StatusHistory createStatusHistory(StatusId statusId, String userId, String userName) {
-        return StatusHistory.builder()
-            .statusId(statusId)
-            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusSeconds(1))
-            .changedByUserId(userId)
-            .changedByName(userName)
-            .build();
-    }
-
-    private void createMultipleRecords(int count) {
-        for (long i = count; i > 0; i--) {
-            createAndSaveSittingRecord(RECORDED, i, USER_ID, USER_NAME);
-        }
     }
 
     @Test
@@ -795,6 +761,117 @@ class SittingRecordServiceITest extends BaseTest {
             );
     }
 
+    @Test
+    @Sql(scripts = {RESET_DATABASE})
+    void shouldReturnMedicalMembersOnlyQueriedRecordsWithMandatoryFieldsSet() {
+
+        long counter = 7;
+        LocalDate serviceOnboardedDate = LocalDate.now().minusDays(counter);
+        createAndSaveService(HMCTS_SERVICE_CODE, serviceOnboardedDate);
+
+        final String medicalJoh1 = "44";
+        final String medicalJoh2 = "50";
+        final List<String> medicalJohIds = List.of(medicalJoh1, medicalJoh2);
+        final SittingRecord sittingRecord2 = createAndSaveSittingRecord(RECORDED,2L, USER_ID, USER_NAME, medicalJoh1);
+        final SittingRecord sittingRecord4 = createAndSaveSittingRecord(RECORDED,4L, USER_ID, USER_NAME, medicalJoh2);
+        createAndSaveSittingRecord(RECORDED,1L, USER_ID, USER_NAME, "nonMed1");
+        createAndSaveSittingRecord(RECORDED,3L, USER_ID, USER_NAME, "nonMed2");
+        createAndSaveSittingRecord(RECORDED,5L, USER_ID, USER_NAME, "nonMed3");
+        createAndSaveSittingRecord(RECORDED,6L, USER_ID, USER_NAME, "nonMed4");
+        createAndSaveSittingRecord(RECORDED,7L, USER_ID, USER_NAME, "nonMed5");
+
+        SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
+            .pageSize(10)
+            .offset(0)
+            .regionId(sittingRecord2.getRegionId())
+            .epimmsId(sittingRecord2.getEpimmsId())
+            .dateOrder(ASCENDING)
+            .dateRangeFrom(serviceOnboardedDate)
+            .dateRangeTo(LocalDate.now())
+            .medicalMembersOnly(true)
+            .build();
+
+        List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
+            recordSearchRequest,
+            sittingRecord2.getHmctsServiceId()
+        );
+
+        uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
+        assertThat(response).hasSize(2);
+        assertTrue(medicalJohIds.contains(response.get(0).getJudgeRoleTypeId()));
+        assertTrue(medicalJohIds.contains(response.get(1).getJudgeRoleTypeId()));
+    }
+
+    private Service createAndSaveService(String hmctsServiceCode, LocalDate serviceOnboardedDate) {
+        Service service = Service.builder()
+            .serviceName("servName1")
+            .accountCenterCode("accCentr1")
+            .hmctsServiceId(hmctsServiceCode)
+            .onboardingStartDate(serviceOnboardedDate)
+            .build();
+        serviceService.save(service);
+
+
+        Optional<Service> serviceRetrieved = serviceService.findService(hmctsServiceCode);
+        LOGGER.debug("service: {}", serviceRetrieved.get());
+
+        return serviceRetrieved.orElse(null);
+    }
+
+    private SittingRecord createAndSaveSittingRecord(StatusId statusId, Long counter, String userId, String userName) {
+        return createAndSaveSittingRecord(statusId, counter, userId, userName, "HighCourt");
+    }
+
+    private SittingRecord createAndSaveSittingRecord(StatusId statusId, Long counter, String userId, String userName,
+                                                     String judgeRoleTypeId) {
+        SittingRecord sittingRecord = createSittingRecord(statusId,  counter, userId, userName, judgeRoleTypeId);
+        SittingRecord persistedSittingRecord = sittingRecordRepository.save(sittingRecord);
+        LOGGER.debug("sittingRecord: {}", sittingRecord);
+        assertThat(persistedSittingRecord).isNotNull();
+        assertThat(sittingRecord.getStatusHistories()).isNotNull();
+        assertFalse(sittingRecord.getStatusHistories().isEmpty());
+        return persistedSittingRecord;
+    }
+
+    private SittingRecord createSittingRecord(StatusId statusId, long counter, String userId, String userName,
+                                              String judgeRoleTypeId) {
+        SittingRecord.SittingRecordBuilder builder = SittingRecord.builder();
+        SittingRecord sittingRecord = builder
+            .sittingDate(LocalDate.now().minusDays(counter))
+            .statusId(statusId)
+            .regionId("1")
+            .epimmsId(EPIMMS_ID)
+            .hmctsServiceId(HMCTS_SERVICE_CODE)
+            .personalCode("001")
+            .contractTypeId(counter)
+            .am(true)
+            .judgeRoleTypeId(judgeRoleTypeId)
+            .build();
+        StatusHistory statusHistory = createStatusHistory(sittingRecord.getStatusId(), userId, userName);
+        sittingRecord.addStatusHistory(statusHistory);
+        LOGGER.debug("sittingRecord: {}", sittingRecord);
+        return sittingRecord;
+    }
+
+
+    private StatusHistory createStatusHistory(StatusId statusId, String userId, String userName) {
+        StatusHistory statusHistory =  StatusHistory.builder()
+            .statusId(statusId)
+            .changedDateTime(LocalDateTime.now().truncatedTo(ChronoUnit.SECONDS).plusSeconds(1))
+            .changedByUserId(userId)
+            .changedByName(userName)
+            .build();
+
+        LOGGER.debug("statusHistory: {}", statusHistory);
+
+        return statusHistory;
+    }
+
+    private void createMultipleRecords(int count) {
+        for (long i = count; i > 0; i--) {
+            createAndSaveSittingRecord(RECORDED, i, USER_ID, USER_NAME);
+        }
+    }
 
     private List<SittingRecordWrapper> recordSittingRecords(String jsonRequest) throws IOException {
         String requestJson = Resources.toString(getResource(jsonRequest), UTF_8);

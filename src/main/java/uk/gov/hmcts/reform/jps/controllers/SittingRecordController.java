@@ -70,8 +70,7 @@ public class SittingRecordController {
 
         final long totalRecordCount = sittingRecordService.getTotalRecordCount(
             sittingRecordSearchRequest,
-            hmctsServiceCode,
-            serviceService.getServiceDateOnboarded(hmctsServiceCode)
+            hmctsServiceCode
         );
 
         List<SittingRecord> sittingRecords = emptyList();

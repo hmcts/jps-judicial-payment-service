@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -62,15 +63,20 @@ public class SittingRecordService {
     private final StatusHistoryService statusHistoryService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
     private final SittingDaysService sittingDaysService;
+    private final ApplicationProperties properties;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
+
         LocalDate serviceOnboardedDate = serviceService.getServiceDateOnboarded(hmctsServiceCode);
+        List<String> medicalJohRoleIds = properties.getMedicalJohRoleIds();
+
         try (Stream<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = sittingRecordRepository.find(
             recordSearchRequest,
             hmctsServiceCode,
-            serviceOnboardedDate
+            serviceOnboardedDate,
+            medicalJohRoleIds
         )) {
             String accountCode = getAccountCode(hmctsServiceCode);
 
@@ -103,14 +109,16 @@ public class SittingRecordService {
         }
     }
 
-    public long getTotalRecordCount(
+    public Long getTotalRecordCount(
         SittingRecordSearchRequest recordSearchRequest,
-        String hmctsServiceCode,
-        LocalDate serviceOnboardedDate) {
+        String hmctsServiceCode) {
         LOGGER.debug("getTotalRecordCount");
 
-        return sittingRecordRepository.totalRecords(recordSearchRequest,
-            hmctsServiceCode, serviceOnboardedDate);
+        LocalDate serviceOnboardedDate = serviceService.getServiceDateOnboarded(hmctsServiceCode);
+        List<String> medicalJohRoleIds = properties.getMedicalJohRoleIds();
+
+        return sittingRecordRepository.totalRecords(recordSearchRequest, hmctsServiceCode,
+                                                    serviceOnboardedDate, medicalJohRoleIds);
     }
 
     @Transactional
@@ -279,8 +287,7 @@ public class SittingRecordService {
                 recordsToClose,
                 CLOSED,
                 filter,
-                false
-            ).size();
+                false).size();
         }
 
         return SubmitSittingRecordResponse.builder()
@@ -316,8 +323,7 @@ public class SittingRecordService {
         if (recordSubmitFields.getContractTypeId() == 6L) {
             crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(
                 recordSubmitFields.getPersonalCode(),
-                recordSubmitFields.getSittingDate()
-            );
+                recordSubmitFields.getSittingDate());
 
             if (crownServiceFlag.isEmpty()) {
                 return crownFlagEmpty;
@@ -349,8 +355,7 @@ public class SittingRecordService {
                         personalCode,
                         SUBMITTED,
                         startOfFinancialYear(currentDate),
-                        endOfFinancialYear(currentDate))
-            )
+                        endOfFinancialYear(currentDate)))
             .build();
 
         LocalDate previousYear = currentDate.minusYears(1L);
@@ -362,8 +367,7 @@ public class SittingRecordService {
                         personalCode,
                         SUBMITTED,
                         startOfFinancialYear(previousYear),
-                        endOfFinancialYear(previousYear))
-            )
+                        endOfFinancialYear(previousYear)))
             .build();
 
         return PublishSittingRecordCount.builder()
@@ -375,20 +379,15 @@ public class SittingRecordService {
     private String getFinancialYear(LocalDate date) {
         int year = date.getYear();
         int nextYear = (year + 1) % 100;
-        return String.join("-",
-                           String.valueOf(year), String.valueOf(nextYear));
+        return String.join("-", String.valueOf(year), String.valueOf(nextYear));
 
     }
 
     private LocalDate startOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear(),
-                                             Month.APRIL,
-                                             6);
+        return LocalDate.of(date.getYear(), Month.APRIL, 6);
     }
 
     private LocalDate endOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear() + 1,
-                                             Month.APRIL,
-                                             5);
+        return LocalDate.of(date.getYear() + 1, Month.APRIL, 5);
     }
 }

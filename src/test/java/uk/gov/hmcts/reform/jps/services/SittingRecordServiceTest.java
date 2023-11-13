@@ -141,13 +141,12 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     void shouldReturnTotalRecordCount() {
         when(sittingRecordRepository.totalRecords(isA(SittingRecordSearchRequest.class),
                                                   isA(String.class),
-                                                  any()))
+                                                  any(), any()))
             .thenReturn(10L);
 
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             SittingRecordSearchRequest.builder().build(),
-            HMCTS_SERVICE_CODE,
-            LocalDate.now().minusDays(2)
+            HMCTS_SERVICE_CODE
         );
 
         assertThat(totalRecordCount)
@@ -159,7 +158,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
         when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
                                                   isA(String.class),
-                                          any(LocalDate.class)))
+                                          any(LocalDate.class), anyList()))
             .thenReturn(getDbSittingRecords(2).stream());
 
         when(serviceService.getServiceDateOnboarded(anyString()))

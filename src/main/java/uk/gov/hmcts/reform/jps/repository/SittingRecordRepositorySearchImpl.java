@@ -50,10 +50,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
     @PersistenceContext
     private EntityManager entityManager;
 
-    public SittingRecordRepositorySearchImpl() {
-
-    }
-
     @Override
     public Stream<SittingRecord> find(SittingRecordSearchRequest recordSearchRequest, String hmctsServiceCode,
                                       LocalDate serviceOnboardedDate, List<String> medicalJohIds) {
@@ -152,24 +148,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
             sittingRecord.get(SittingRecord_.SITTING_DATE),
             dateFrom,
             dateTo);
-    }
-
-    public List<Predicate> getRecordedDateRangePredicates(Root<SittingRecord> sittingRecord,
-                                                           CriteriaBuilder criteriaBuilder,
-                                                           LocalDate serviceOnboardedDate,
-                                                           LocalDate dateTo) {
-
-        List<Predicate> predicatesRecordedDateRange = new ArrayList<>();
-        predicatesRecordedDateRange.add(getStatusPredicate(sittingRecord,
-                                                          criteriaBuilder,
-                                                          StatusId.RECORDED));
-
-        LOGGER.debug("predicatePublishedDateRange: sittingDate between serviceOnboardedDate, dateTo");
-        predicatesRecordedDateRange.add(getSittingDateRangePredicate(sittingRecord, criteriaBuilder,
-                                                                    serviceOnboardedDate,
-                                           (dateTo.isBefore(serviceOnboardedDate) ? serviceOnboardedDate : dateTo)));
-
-        return predicatesRecordedDateRange;
     }
 
     @Override
@@ -275,7 +253,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         addJoinCriteria(recordSearchRequest, criteriaBuilder, predicates, sittingRecord);
 
         if (Boolean.TRUE.equals(recordSearchRequest.getMedicalMembersOnly())) {
-            selectMedicalMembers(sittingRecord, criteriaBuilder, medicalJohIds, predicates);
+            selectMedicalMembers(sittingRecord, medicalJohIds, predicates);
         }
 
         List<Predicate> predicatesClosed = getClosedDateRangePredicates(sittingRecord, criteriaBuilder,
@@ -298,20 +276,18 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         finalPredicates.addAll(predicatesPublished);
         finalPredicates.addAll(predicatesRecorded);
         finalPredicates.addAll(predicatesSubmitted);
+        predicateConsumer.accept(finalPredicates);
 
         Predicate finalPredicate = buildFinalPredicate(predicatesClosed, predicatesPublished, predicatesRecorded,
                                                      predicatesSubmitted, criteriaBuilder, predicates);
-
-        predicateConsumer.accept(finalPredicates);
 
         criteriaQuery.where(finalPredicate);
     }
 
     protected void selectMedicalMembers(Root<SittingRecord> sittingRecord,
-                                             CriteriaBuilder criteriaBuilder,
                                              List<String> medicalJohIds,
                                              List<Predicate> predicates) {
-        Expression<String> attributeToCheck = sittingRecord.get(JUDGE_ROLE_TYPE_ID);
+        Expression<String> attributeToCheck = sittingRecord.get(SittingRecord_.JUDGE_ROLE_TYPE_ID);
         Predicate inPredicate = attributeToCheck.in(medicalJohIds);
 
         predicates.add(inPredicate);
@@ -347,6 +323,25 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                                       dateFrom, LocalDate.now()));
 
         return predicatesPublishedDateRange;
+    }
+
+    public List<Predicate> getRecordedDateRangePredicates(Root<SittingRecord> sittingRecord,
+                                                          CriteriaBuilder criteriaBuilder,
+                                                          LocalDate serviceOnboardedDate,
+                                                          LocalDate dateTo) {
+
+        List<Predicate> predicatesRecordedDateRange = new ArrayList<>();
+        predicatesRecordedDateRange.add(getStatusPredicate(sittingRecord,
+                                                           criteriaBuilder,
+                                                           StatusId.RECORDED));
+
+        LOGGER.debug("predicatePublishedDateRange: sittingDate between serviceOnboardedDate, dateTo");
+        LocalDate paramDateTo = dateTo.isBefore(serviceOnboardedDate) ? serviceOnboardedDate : dateTo;
+        predicatesRecordedDateRange.add(getSittingDateRangePredicate(sittingRecord, criteriaBuilder,
+                                                                     serviceOnboardedDate,
+                                                                     paramDateTo));
+
+        return predicatesRecordedDateRange;
     }
 
     protected List<Predicate> getSubmittedDateRangePredicates(Root<SittingRecord> sittingRecord,
