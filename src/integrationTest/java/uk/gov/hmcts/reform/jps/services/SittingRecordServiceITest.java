@@ -345,7 +345,7 @@ class SittingRecordServiceITest extends BaseTest {
             .epimmsId(sittingRecord.getEpimmsId())
             .dateOrder(ASCENDING)
             .dateRangeFrom(LocalDate.now().minusDays(recordCount))
-            .dateRangeTo(LocalDate.now())
+            .dateRangeTo(LocalDate.now().plusDays(2))
             .createdByUserId(Bruce_Wayne_ID)
             .build();
 
