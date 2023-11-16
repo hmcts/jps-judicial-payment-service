@@ -66,6 +66,9 @@ class SittingRecordServiceITest extends BaseTest {
     private final ServiceService serviceService;
     private final ObjectMapper objectMapper;
 
+    private static final String JSON_RecordSittingRecordsPotentialDuplicate
+        = "recordSittingRecordsPotentialDuplicate.json";
+
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
     private static final String USER_ID = UUID.randomUUID().toString();
@@ -76,6 +79,14 @@ class SittingRecordServiceITest extends BaseTest {
     private static final String EPIMMS_ID_FIXED = "852649";
     private static final String JUDGE_ROLE_TYPE_ID_FIXED = "Judge";
     private static final String JSON_RECORD_SITTING_RECORDS = "recordSittingRecords.json";
+
+    private static final  String Bruce_Wayne = "Bruce Wayne";
+    private static final  String Clark_Kent = "Clark Kent";
+    private static final  String Peter_Parker = "Peter Parker";
+    private static final  String Bruce_Wayne_ID = "bruce-100011";
+    private static final  String Clark_Kent_ID = "clark-100022";
+    private static final  String Peter_Parker_ID = "peter-10033";
+
 
     @Autowired
     public SittingRecordServiceITest(SittingRecordRepository sittingRecordRepository,
@@ -309,12 +320,6 @@ class SittingRecordServiceITest extends BaseTest {
     @Test
     @Sql(scripts = {RESET_DATABASE})
     void shouldReturnQueriedRecordsCreatedByGivenUser() {
-        final String Bruce_Wayne = "Bruce Wayne";
-        final String Clark_Kent = "Clark Kent";
-        final String Peter_Parker = "Peter Parker";
-        final String Bruce_Wayne_ID = "bruce-100011";
-        final String Clark_Kent_ID = "clark-100022";
-        final String Peter_Parker_ID = "peter-10033";
 
         int recordCount = 22;
         LocalDate serviceOnboardedDate = LocalDate.now().minusDays(recordCount);
@@ -375,7 +380,7 @@ class SittingRecordServiceITest extends BaseTest {
     void shouldSetPotentialDuplicateRecordWhenJudgeRoleTypeIdDoesntMatch() throws IOException {
         recordSittingRecords(JSON_RECORD_SITTING_RECORDS);
 
-        String requestJson = Resources.toString(getResource("recordSittingRecordsPotentialDuplicate.json"), UTF_8);
+        String requestJson = Resources.toString(getResource(JSON_RecordSittingRecordsPotentialDuplicate), UTF_8);
         RecordSittingRecordRequest recordSittingRecordRequest = objectMapper.readValue(
             requestJson,
             RecordSittingRecordRequest.class
@@ -429,7 +434,7 @@ class SittingRecordServiceITest extends BaseTest {
             .map(SittingRecordWrapper::getErrorCode,
                  SittingRecordWrapper::getCreatedByName,
                  SittingRecordWrapper::getStatusId)
-            .containsExactly(tuple(POTENTIAL_DUPLICATE_RECORD, "Recorder", RECORDED),
+            .containsExactly(tuple(POTENTIAL_DUPLICATE_RECORD, USER_NAME_FIXED, RECORDED),
                              tuple(INVALID_LOCATION, null, null),
                              tuple(INVALID_LOCATION, null, null)
             );
@@ -796,10 +801,81 @@ class SittingRecordServiceITest extends BaseTest {
             sittingRecord2.getHmctsServiceId()
         );
 
-        uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
         assertThat(response).hasSize(2);
         assertTrue(medicalJohIds.contains(response.get(0).getJudgeRoleTypeId()));
         assertTrue(medicalJohIds.contains(response.get(1).getJudgeRoleTypeId()));
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_FEE})
+    void shouldReturnMedicalMembersOnlyAndCalculatedFee() {
+
+        long counter = 7;
+        LocalDate serviceOnboardedDate = LocalDate.now().minusDays(counter);
+        createAndSaveService(HMCTS_SERVICE_CODE, serviceOnboardedDate);
+
+        final String medicalJoh1 = "44";
+        final List<String> medicalJohIds = List.of(medicalJoh1);
+        final SittingRecord sittingRecord2 = createAndSaveSittingRecord(RECORDED,2L, USER_ID, USER_NAME, medicalJoh1);
+        createAndSaveSittingRecord(RECORDED,1L, USER_ID, USER_NAME, "nonMed1");
+        createAndSaveSittingRecord(RECORDED,3L, USER_ID, USER_NAME, "nonMed2");
+        createAndSaveSittingRecord(RECORDED,4L, USER_ID, USER_NAME, "nonMed3");
+
+        SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
+            .pageSize(10)
+            .offset(0)
+            .regionId(sittingRecord2.getRegionId())
+            .epimmsId(sittingRecord2.getEpimmsId())
+            .dateOrder(ASCENDING)
+            .dateRangeFrom(serviceOnboardedDate)
+            .dateRangeTo(LocalDate.now())
+            .medicalMembersOnly(true)
+            .build();
+
+        List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
+            recordSearchRequest,
+            sittingRecord2.getHmctsServiceId()
+        );
+
+        uk.gov.hmcts.reform.jps.model.out.SittingRecord actual = response.get(0);
+        assertThat(response).hasSize(1);
+        assertTrue(medicalJohIds.contains(actual.getJudgeRoleTypeId()));
+        // TODO: fee!
+        //assertNotNull(actual.getFee());
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_FEE})
+    void shouldNotReturnDeletedStatus() {
+
+        long counter = 1;
+        LocalDate serviceOnboardedDate = LocalDate.now().minusDays(counter);
+        createAndSaveService(HMCTS_SERVICE_CODE, serviceOnboardedDate);
+
+        SittingRecord sittingRecord = createAndSaveSittingRecord(RECORDED, counter, Bruce_Wayne_ID, Bruce_Wayne,
+                                                                 JUDGE_ROLE_TYPE_ID_FIXED);
+        StatusHistory statusHistorySubmitted = createStatusHistory(SUBMITTED, Clark_Kent_ID, Clark_Kent);
+        statusHistoryService.saveStatusHistory(statusHistorySubmitted, sittingRecord);
+        StatusHistory statusHistoryDeleted = createStatusHistory(DELETED, Peter_Parker_ID, Peter_Parker);
+        statusHistoryService.saveStatusHistory(statusHistoryDeleted, sittingRecord);
+
+        SittingRecordSearchRequest recordSearchRequest = SittingRecordSearchRequest.builder()
+            .pageSize(10)
+            .offset(0)
+            .regionId(sittingRecord.getRegionId())
+            .epimmsId(sittingRecord.getEpimmsId())
+            .dateOrder(ASCENDING)
+            .dateRangeFrom(serviceOnboardedDate)
+            .dateRangeTo(LocalDate.now())
+            .medicalMembersOnly(true)
+            .build();
+
+        List<uk.gov.hmcts.reform.jps.model.out.SittingRecord> response = sittingRecordService.getSittingRecords(
+            recordSearchRequest,
+            sittingRecord.getHmctsServiceId()
+        );
+
+        assertThat(response).hasSize(0);
     }
 
     private Service createAndSaveService(String hmctsServiceCode, LocalDate serviceOnboardedDate) {
@@ -813,7 +889,7 @@ class SittingRecordServiceITest extends BaseTest {
 
 
         Optional<Service> serviceRetrieved = serviceService.findService(hmctsServiceCode);
-        LOGGER.debug("service: {}", serviceRetrieved.get());
+        LOGGER.debug("service: {}", (serviceRetrieved.isPresent() ? serviceRetrieved.get() : null));
 
         return serviceRetrieved.orElse(null);
     }

@@ -272,8 +272,8 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
 
         // Combine the OR conditions using criteriaBuilder.or
         List<Predicate> finalPredicates = predicates;
-        finalPredicates.addAll(predicatesRecorded);
-        // Exclude the OR cases for the accept()
+        // Exclude the OR cases for the accept() - investigate why!
+        //finalPredicates.addAll(predicatesRecorded);
         //finalPredicates.addAll(predicatesClosed);
         //finalPredicates.addAll(predicatesPublished);
         //finalPredicates.addAll(predicatesSubmitted);

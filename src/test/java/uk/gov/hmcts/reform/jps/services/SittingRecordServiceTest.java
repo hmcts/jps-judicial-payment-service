@@ -15,6 +15,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.util.Streamable;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.Service;
@@ -108,12 +109,13 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
-
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private ApplicationProperties properties;
 
     @InjectMocks
     private SittingRecordService sittingRecordService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
@@ -143,6 +145,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                                                   isA(String.class),
                                                   any(), any()))
             .thenReturn(10L);
+        when(properties.getMedicalJohRoleIds()).thenReturn(List.of("Test1","Test2"));
 
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             SittingRecordSearchRequest.builder().build(),
@@ -151,7 +154,6 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(totalRecordCount)
             .isEqualTo(10);
-
     }
 
     @Test
