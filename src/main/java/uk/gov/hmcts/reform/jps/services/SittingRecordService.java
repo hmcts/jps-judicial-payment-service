@@ -69,7 +69,7 @@ public class SittingRecordService {
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
 
-        LocalDate serviceOnboardedDate = serviceService.getServiceDateOnboarded(hmctsServiceCode);
+        LocalDate serviceOnboardedDate = getServiceOnboardedDate(hmctsServiceCode);
         List<String> medicalJohRoleIds = properties.getMedicalJohRoleIds();
 
         try (Stream<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = sittingRecordRepository.find(
@@ -227,32 +227,6 @@ public class SittingRecordService {
         sittingRecordRepository.save(sittingRecord);
     }
 
-    private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
-                            StatusId recorded) {
-
-        if (sittingRecord.getStatusId() == recorded) {
-            deleteSittingRecord(sittingRecord);
-        } else {
-            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
-        }
-    }
-
-    private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
-        if (sittingRecord.getStatusId() == RECORDED) {
-            StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
-                .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
-                .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
-                    securityUtils.getUserInfo().getUid()))
-                .findAny()
-                .orElseThrow(() -> new ForbiddenException(
-                    "User IDAM ID does not match the oldest Changed by IDAM ID "));
-
-            deleteSittingRecord(recordedStatusHistory.getSittingRecord());
-        } else {
-            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
-        }
-    }
-
     @Transactional
     @PreAuthorize("hasAuthority('jps-submitter')")
     public SubmitSittingRecordResponse submitSittingRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
@@ -294,6 +268,44 @@ public class SittingRecordService {
             .recordsSubmitted(submittedCount)
             .recordsClosed(closedCount)
             .build();
+    }
+
+    public List<String> getJohRoleIds(String hmctsServiceCode,
+                                      SittingRecordSearchRequest recordSearchRequest) {
+        LocalDate serviceOnboardedDate = getServiceOnboardedDate(hmctsServiceCode);
+        return sittingRecordRepository.findJohRoles(hmctsServiceCode,
+                                                    recordSearchRequest.getRegionId(),
+                                                    null != recordSearchRequest.getStatusId()
+                                                        ? recordSearchRequest.getStatusId().name() : null,
+                                                    recordSearchRequest.getDateRangeFrom(),
+                                                    recordSearchRequest.getDateRangeTo(),
+                                                    serviceOnboardedDate);
+    }
+
+    private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
+                            StatusId recorded) {
+
+        if (sittingRecord.getStatusId() == recorded) {
+            deleteSittingRecord(sittingRecord);
+        } else {
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
+    private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        if (sittingRecord.getStatusId() == RECORDED) {
+            StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
+                .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
+                .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
+                    securityUtils.getUserInfo().getUid()))
+                .findAny()
+                .orElseThrow(() -> new ForbiddenException(
+                    "User IDAM ID does not match the oldest Changed by IDAM ID "));
+
+            deleteSittingRecord(recordedStatusHistory.getSittingRecord());
+        } else {
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
+        }
     }
 
     private List<Long> getUpdatedRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
@@ -389,5 +401,9 @@ public class SittingRecordService {
 
     private LocalDate endOfFinancialYear(LocalDate date) {
         return LocalDate.of(date.getYear() + 1, Month.APRIL, 5);
+    }
+
+    private LocalDate getServiceOnboardedDate(String hmctsServiceCode) {
+        return serviceService.getServiceDateOnboarded(hmctsServiceCode);
     }
 }

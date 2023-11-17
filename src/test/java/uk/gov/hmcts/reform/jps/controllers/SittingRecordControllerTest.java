@@ -157,11 +157,12 @@ class SittingRecordControllerTest {
     }
 
     @Test
-    void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
+    void shouldReturnResponseWithSittingRecordsWhenRecordsExistForGivenCriteria() throws Exception {
         when(serviceService.isServiceOnboarded(SSCS))
             .thenReturn(true);
         List<SittingRecord> sittingRecords = generateSittingRecords();
         List<RecordingUser> recordingUsers = generateRecordingUsers();
+        List<String> johRoles = List.of("johRole1", "johRole2");
 
         when(sittingRecordService.getTotalRecordCount(isA(SittingRecordSearchRequest.class),eq(SSCS)))
             .thenReturn(Long.valueOf(sittingRecords.size()));
@@ -169,7 +170,8 @@ class SittingRecordControllerTest {
             .thenReturn(sittingRecords);
         when(statusHistoryService.findRecordingUsers(anyString(), anyString(), anyList(), any(), any()))
             .thenReturn(recordingUsers);
-
+        when(sittingRecordService.getJohRoleIds(anyString(), any()))
+            .thenReturn(johRoles);
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
         MvcResult mvcResult = mockMvc.perform(post(
                                                  "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
@@ -183,6 +185,10 @@ class SittingRecordControllerTest {
                 status().isOk(),
                 jsonPath("$.recordingUsers").exists(),
                 jsonPath("$.recordingUsers").isArray(),
+                jsonPath("$.recordingUsers").isNotEmpty(),
+                jsonPath("$.johRoles").exists(),
+                jsonPath("$.johRoles").isArray(),
+                jsonPath("$.johRoles").isNotEmpty(),
                 content().contentType(MediaType.APPLICATION_JSON))
             .andReturn();
 
