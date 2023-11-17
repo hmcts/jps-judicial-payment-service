@@ -28,6 +28,7 @@ import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -63,6 +64,7 @@ public class SittingRecordService {
     private final StatusHistoryService statusHistoryService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
     private final SittingDaysService sittingDaysService;
+    private final SubmitSittingRecordService submitSittingRecordService;
     private final ApplicationProperties properties;
 
     public List<SittingRecord> getSittingRecords(
@@ -91,6 +93,9 @@ public class SittingRecordService {
                      .createdByUserId(sittingRecord.getCreatedByUserId())
                      .createdByUserName(sittingRecord.getCreatedByUserName())
                      .createdDateTime(sittingRecord.getCreatedDateTime())
+                     .fee(getFee(recordSearchRequest.getIncludeFees(), sittingRecord.getStatusId(), hmctsServiceCode,
+                                 sittingRecord.getPersonalCode(), sittingRecord.getJudgeRoleTypeId(),
+                                 sittingRecord.getSittingDate()))
                      .epimmsId(sittingRecord.getEpimmsId())
                      .hmctsServiceId(sittingRecord.getHmctsServiceId())
                      .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
@@ -406,4 +411,26 @@ public class SittingRecordService {
     private LocalDate getServiceOnboardedDate(String hmctsServiceCode) {
         return serviceService.getServiceDateOnboarded(hmctsServiceCode);
     }
+
+    private Long getFee(Boolean includeFees, StatusId statusId, String hmctsServiceCode, String personalCode,
+                              String judgeRoleTypeId, LocalDate sittingDate) {
+        if (null == includeFees || Boolean.FALSE.equals(includeFees)) {
+            return null;
+        }
+
+        if (statusId.equals(StatusId.PUBLISHED)) {
+            // TODO: refdata
+            return null;
+        }
+
+        if (statusId.equals(StatusId.SUBMITTED)) {
+            BigDecimal fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
+                                                              sittingDate);
+            return (null != fee ? fee.longValue() : null);
+        }
+
+        return null;
+    }
+
+
 }
