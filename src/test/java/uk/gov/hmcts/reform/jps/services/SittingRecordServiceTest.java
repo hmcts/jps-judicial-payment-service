@@ -633,8 +633,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
-            hmctsServiceCode,
-            serviceService.getServiceDateOnboarded(hmctsServiceCode)
+            hmctsServiceCode
         );
 
         verify(statusHistoryService, times(2))
@@ -719,8 +718,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
-            hmctsServiceCode,
-            serviceService.getServiceDateOnboarded(hmctsServiceCode)
+            hmctsServiceCode
         );
         verify(statusHistoryService, never())
             .insertRecord(anyLong(),
