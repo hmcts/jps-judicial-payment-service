@@ -62,26 +62,6 @@ public class PublishSittingRecordService {
             .build();
     }
 
-    private String getFinancialYear(LocalDate date) {
-        int year = date.getYear();
-        int nextYear = (year + 1) % 100;
-        return String.join("-",
-                           String.valueOf(year), String.valueOf(nextYear));
-
-    }
-
-    private LocalDate startOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear(),
-                            Month.APRIL,
-                            6);
-    }
-
-    private LocalDate endOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear() + 1,
-                            Month.APRIL,
-                            5);
-    }
-
     public BigDecimal calculateJohFee(
         String hmctsServiceCode,
         String personalCode,
@@ -140,5 +120,25 @@ public class PublishSittingRecordService {
             throw new IllegalArgumentException("Financial year is invalid : " + sittingDateFinancialYear);
         }
         return publishedSittingCount;
+    }
+
+    private String getFinancialYear(LocalDate date) {
+        int year = date.getYear();
+        int nextYear = (year + 1) % 100;
+        return String.join("-",
+                           String.valueOf(year), String.valueOf(nextYear));
+
+    }
+
+    private LocalDate startOfFinancialYear(LocalDate date) {
+        return LocalDate.of(date.getYear(),
+                            Month.APRIL,
+                            6);
+    }
+
+    private LocalDate endOfFinancialYear(LocalDate date) {
+        return LocalDate.of(date.getYear() + 1,
+                            Month.APRIL,
+                            5);
     }
 }
