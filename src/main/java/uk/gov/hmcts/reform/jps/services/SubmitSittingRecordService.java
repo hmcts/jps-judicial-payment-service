@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.domain.Fee;
-import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -14,8 +13,6 @@ import java.util.Objects;
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SubmitSittingRecordService {
-    private final SittingRecordRepository sittingRecordRepository;
-    private final SittingDaysService sittingDaysService;
     private final FeeService feeService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
     private final ApplicationProperties properties;
