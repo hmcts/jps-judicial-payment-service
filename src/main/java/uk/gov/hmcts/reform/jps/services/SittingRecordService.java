@@ -283,6 +283,26 @@ public class SittingRecordService {
                                                     serviceOnboardedDate);
     }
 
+    protected Long getFee(Boolean includeFees, StatusId statusId, String hmctsServiceCode, String personalCode,
+                          String judgeRoleTypeId, LocalDate sittingDate) {
+        if (null == includeFees || Boolean.FALSE.equals(includeFees)) {
+            return null;
+        }
+
+        if (statusId.equals(StatusId.PUBLISHED)) {
+            // TODO: refdata
+            return null;
+        }
+
+        if (statusId.equals(StatusId.SUBMITTED)) {
+            BigDecimal fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
+                                                                        sittingDate);
+            return (null != fee ? fee.longValue() : null);
+        }
+
+        return null;
+    }
+
     private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
                             StatusId recorded) {
 
@@ -361,24 +381,5 @@ public class SittingRecordService {
         return serviceService.getServiceDateOnboarded(hmctsServiceCode);
     }
 
-    private Long getFee(Boolean includeFees, StatusId statusId, String hmctsServiceCode, String personalCode,
-                              String judgeRoleTypeId, LocalDate sittingDate) {
-        if (null == includeFees || Boolean.FALSE.equals(includeFees)) {
-            return null;
-        }
-
-        if (statusId.equals(StatusId.PUBLISHED)) {
-            // TODO: refdata
-            return null;
-        }
-
-        if (statusId.equals(StatusId.SUBMITTED)) {
-            BigDecimal fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
-                                                              sittingDate);
-            return (null != fee ? fee.longValue() : null);
-        }
-
-        return null;
-    }
 
 }
