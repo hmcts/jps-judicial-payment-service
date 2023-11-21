@@ -89,7 +89,7 @@ public class PublishSittingRecordService {
             .orElse(fee.getStandardFee());
     }
 
-    private BigDecimal getMedicalMemberFee(
+    protected BigDecimal getMedicalMemberFee(
         String personalCode,
         LocalDate sittingDate,
         boolean higherMedicalRateSession,
@@ -127,7 +127,6 @@ public class PublishSittingRecordService {
         int nextYear = (year + 1) % 100;
         return String.join("-",
                            String.valueOf(year), String.valueOf(nextYear));
-
     }
 
     private LocalDate startOfFinancialYear(LocalDate date) {

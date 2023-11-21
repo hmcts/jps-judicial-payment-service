@@ -39,6 +39,7 @@ public class BaseTest {
 
     @Value("${wiremock.server.port}")
     protected Integer wiremockPort;
+
     @Mock
     protected Authentication authentication;
 
@@ -63,12 +64,14 @@ public class BaseTest {
     public static final String INSERT_JOH
         = "classpath:sql/insert_joh.sql";
 
-
     public static final String INSERT_SERVICE_TEST_DATA
         = "classpath:sql/insert_service_test_data.sql";
 
     public static final String INSERT_PUBLISHED_TEST_DATA
         = "classpath:sql/insert_published_test_data.sql";
+
+    public static final String INSERT_SUBMITTED_TEST_DATA
+        = "classpath:sql/insert_submitted_test_data.sql";
 
     @BeforeEach
     void init() {
@@ -78,19 +81,24 @@ public class BaseTest {
         when(authentication.getPrincipal()).thenReturn(jwt);
         SecurityContextHolder.setContext(new SecurityContextImpl(authentication));
 
+        final String jsonText = """
+        {
+            "jurisdiction": "Jurisdiction1",
+            "case_type": "CaseType1"
+        }
+            """;
         stubFor(WireMock.get(urlMatching("/cases/.*"))
-            .willReturn(okJson("{\n"
-                               + "\t\"jurisdiction\": \"Jurisdiction1\",\n"
-                               + "\t\"case_type\": \"CaseType1\"\n"
-                               + "}")));
+                    .willReturn(okJson(jsonText)));
     }
 
     @Configuration
     static class WireMockTestConfiguration {
         @Bean
         public WireMockConfigurationCustomizer wireMockConfigurationCustomizer() {
-            return config -> config.extensions(new WiremockFixtures.ConnectionClosedTransformer(),
-                new DynamicOAuthJwkSetResponseTransformer());
+            return config -> config.extensions(
+                new WiremockFixtures.ConnectionClosedTransformer(),
+                new DynamicOAuthJwkSetResponseTransformer()
+            );
         }
     }
 

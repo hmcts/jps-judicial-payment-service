@@ -72,14 +72,14 @@ class SubmitSittingRecordServiceTest {
     @ParameterizedTest
     @MockitoSettings(strictness = Strictness.LENIENT)
     @CsvSource(quoteCharacter = '"', textBlock = """
-      # isMedicalMember, isLondonFlag, londonFee, isHigherMedicalRateSession, medicalThreshold, expectedFee
-        true,    false, 2.5, false,  0, 2.1
-        true,    false, 2.5, true,   0, 2.1
-        true,    false, 2.5, false, 20, 1.5
-        false,    true, 2.5, false,  0, 2.5
-        false,    true,    , false,  0, 1.5
-        false,   false, 2.5, false,  0, 2.5
-        """)
+        # isMedicalMember, isLondonFlag, londonFee, isHigherMedicalRateSession, medicalThreshold, expectedFee
+          true,    false, 2.5, false,  0, 1.5
+          true,    false, 2.5, true,   0, 2.1
+          true,    false, 2.5, false, 20, 1.5
+          false,    true, 2.5, false,  0, 2.5
+          false,    true,    , false,  0, 1.5
+          false,   false, 2.5, false,  0, 2.5
+          """)
     void calculateJohFeeForParams(boolean isMedicalMember, boolean isLondonFlag, BigDecimal londonFee,
                                   boolean isHigherMedicalSessionRate, int medicalThreshold, BigDecimal expectedFee) {
 
