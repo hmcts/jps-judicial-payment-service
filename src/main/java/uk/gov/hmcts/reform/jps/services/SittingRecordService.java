@@ -296,7 +296,7 @@ public class SittingRecordService {
 
         if (statusId.equals(StatusId.SUBMITTED)) {
             BigDecimal fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
-                                                                        sittingDate);
+                                                                        sittingDate, false);
             return (null != fee ? fee.longValue() : null);
         }
 
