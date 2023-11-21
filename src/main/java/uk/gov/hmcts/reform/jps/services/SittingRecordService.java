@@ -295,8 +295,10 @@ public class SittingRecordService {
         }
 
         if (statusId.equals(StatusId.SUBMITTED)) {
+            // TODO: when does higher medicate rate session kick in?
+            boolean higherMedicalRateSession = false;
             BigDecimal fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
-                                                                        sittingDate, false);
+                                                                        sittingDate, higherMedicalRateSession);
             return (null != fee ? fee.longValue() : null);
         }
 

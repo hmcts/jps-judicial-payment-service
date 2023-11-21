@@ -1,7 +1,6 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -73,7 +72,7 @@ class SubmitSittingRecordServiceTest {
     @ParameterizedTest
     @MockitoSettings(strictness = Strictness.LENIENT)
     @CsvSource(quoteCharacter = '"', textBlock = """
-      # isMedicalMember, isLondonFlag, londonFee, isHigherMedicalRateSession, medicalThreshold, expectedFeeType
+      # isMedicalMember, isLondonFlag, londonFee, isHigherMedicalRateSession, medicalThreshold, expectedFee
         true,    false, 2.5, false,  0, 2.1
         true,    false, 2.5, true,   0, 2.1
         true,    false, 2.5, false, 20, 1.5
