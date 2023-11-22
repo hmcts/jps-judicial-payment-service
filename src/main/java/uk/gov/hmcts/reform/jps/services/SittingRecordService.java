@@ -60,6 +60,7 @@ public class SittingRecordService {
     private final ServiceService serviceService;
     private final StatusHistoryService statusHistoryService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
+    private final PublishSittingRecordService publishSittingRecordService;
     private final SubmitSittingRecordService submitSittingRecordService;
     private final ApplicationProperties properties;
 
@@ -289,20 +290,21 @@ public class SittingRecordService {
             return null;
         }
 
+        // TODO: when does higher medical rate session kick in?
+        boolean higherMedicalRateSession = false;
+
+        BigDecimal fee = null;
+
         if (statusId.equals(StatusId.PUBLISHED)) {
-            // TODO: refdata
-            return null;
+            // TODO: get from refdata - meantime on-the-fly calc
+            fee = publishSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
+                                                              sittingDate, higherMedicalRateSession);
+        } else if (statusId.equals(StatusId.SUBMITTED)) {
+            fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
+                                                             sittingDate, higherMedicalRateSession);
         }
 
-        if (statusId.equals(StatusId.SUBMITTED)) {
-            // TODO: when does higher medicate rate session kick in?
-            boolean higherMedicalRateSession = false;
-            BigDecimal fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
-                                                                        sittingDate, higherMedicalRateSession);
-            return (null != fee ? fee.longValue() : null);
-        }
-
-        return null;
+        return (null != fee ? fee.longValue() : null);
     }
 
     private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
