@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
@@ -25,6 +26,8 @@ import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -57,13 +60,24 @@ public class SittingRecordService {
     private final ServiceService serviceService;
     private final StatusHistoryService statusHistoryService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
+    private final PublishSittingRecordService publishSittingRecordService;
+    private final SubmitSittingRecordService submitSittingRecordService;
+    private final ApplicationProperties properties;
+
+    private final SittingDaysService sittingDaysService;
 
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
+
+        LocalDate serviceOnboardedDate = getServiceOnboardedDate(hmctsServiceCode);
+        List<String> medicalJohRoleIds = properties.getMedicalJohRoleIds();
+
         try (Stream<uk.gov.hmcts.reform.jps.domain.SittingRecord> dbSittingRecords = sittingRecordRepository.find(
             recordSearchRequest,
-            hmctsServiceCode
+            hmctsServiceCode,
+            serviceOnboardedDate,
+            medicalJohRoleIds
         )) {
             String accountCode = getAccountCode(hmctsServiceCode);
 
@@ -78,6 +92,9 @@ public class SittingRecordService {
                      .createdByUserId(sittingRecord.getCreatedByUserId())
                      .createdByUserName(sittingRecord.getCreatedByUserName())
                      .createdDateTime(sittingRecord.getCreatedDateTime())
+                     .fee(getFee(recordSearchRequest.getIncludeFees(), sittingRecord.getStatusId(), hmctsServiceCode,
+                                 sittingRecord.getPersonalCode(), sittingRecord.getJudgeRoleTypeId(),
+                                 sittingRecord.getSittingDate()))
                      .epimmsId(sittingRecord.getEpimmsId())
                      .hmctsServiceId(sittingRecord.getHmctsServiceId())
                      .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
@@ -96,13 +113,16 @@ public class SittingRecordService {
         }
     }
 
-    public long getTotalRecordCount(
+    public Long getTotalRecordCount(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
         LOGGER.debug("getTotalRecordCount");
 
-        return sittingRecordRepository.totalRecords(recordSearchRequest,
-            hmctsServiceCode);
+        LocalDate serviceOnboardedDate = serviceService.getServiceDateOnboarded(hmctsServiceCode);
+        List<String> medicalJohRoleIds = properties.getMedicalJohRoleIds();
+
+        return sittingRecordRepository.totalRecords(recordSearchRequest, hmctsServiceCode,
+                                                    serviceOnboardedDate, medicalJohRoleIds);
     }
 
     @Transactional
@@ -281,6 +301,67 @@ public class SittingRecordService {
             .build();
     }
 
+    public List<String> getJohRoleIds(String hmctsServiceCode,
+                                      SittingRecordSearchRequest recordSearchRequest) {
+        LocalDate serviceOnboardedDate = getServiceOnboardedDate(hmctsServiceCode);
+        return sittingRecordRepository.findJohRoles(hmctsServiceCode,
+                                                    recordSearchRequest.getRegionId(),
+                                                    null != recordSearchRequest.getStatusId()
+                                                        ? recordSearchRequest.getStatusId().name() : null,
+                                                    recordSearchRequest.getDateRangeFrom(),
+                                                    recordSearchRequest.getDateRangeTo(),
+                                                    serviceOnboardedDate);
+    }
+
+    protected Long getFee(Boolean includeFees, StatusId statusId, String hmctsServiceCode, String personalCode,
+                          String judgeRoleTypeId, LocalDate sittingDate) {
+        if (null == includeFees || Boolean.FALSE.equals(includeFees)) {
+            return null;
+        }
+
+        // TODO: when does higher medical rate session kick in?
+        boolean higherMedicalRateSession = false;
+
+        BigDecimal fee = null;
+
+        if (statusId.equals(StatusId.PUBLISHED)) {
+            // TODO: get from refdata - meantime on-the-fly calc
+            fee = publishSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
+                                                              sittingDate, higherMedicalRateSession);
+        } else if (statusId.equals(StatusId.SUBMITTED)) {
+            fee = submitSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
+                                                             sittingDate, higherMedicalRateSession);
+        }
+
+        return (null != fee ? fee.longValue() : null);
+    }
+
+    private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
+                            StatusId recorded) {
+
+        if (sittingRecord.getStatusId() == recorded) {
+            deleteSittingRecord(sittingRecord);
+        } else {
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
+    private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
+        if (sittingRecord.getStatusId() == RECORDED) {
+            StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
+                .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
+                .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
+                    securityUtils.getUserInfo().getUid()))
+                .findAny()
+                .orElseThrow(() -> new ForbiddenException(
+                    "User IDAM ID does not match the oldest Changed by IDAM ID "));
+
+            deleteSittingRecord(recordedStatusHistory.getSittingRecord());
+        } else {
+            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
+        }
+    }
+
     private List<Long> getUpdatedRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
                                          List<RecordSubmitFields> recordsToSubmit,
                                          StatusId statusId,
@@ -308,8 +389,7 @@ public class SittingRecordService {
         if (recordSubmitFields.getContractTypeId() == 6L) {
             crownServiceFlag = judicialOfficeHolderService.getCrownServiceFlag(
                 recordSubmitFields.getPersonalCode(),
-                recordSubmitFields.getSittingDate()
-            );
+                recordSubmitFields.getSittingDate());
 
             if (crownServiceFlag.isEmpty()) {
                 return crownFlagEmpty;
@@ -329,4 +409,10 @@ public class SittingRecordService {
     private String getVenueName(String hmctsServiceCode, String epimmsId) {
         return locationService.getCourtName(hmctsServiceCode, epimmsId);
     }
+
+    private LocalDate getServiceOnboardedDate(String hmctsServiceCode) {
+        return serviceService.getServiceDateOnboarded(hmctsServiceCode);
+    }
+
+
 }

@@ -15,6 +15,7 @@ import org.mockito.quality.Strictness;
 import org.springframework.data.util.Streamable;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.idam.client.models.UserInfo;
+import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.Service;
@@ -32,6 +33,7 @@ import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -52,7 +54,7 @@ import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.Assert.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -107,12 +109,13 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     @Mock
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
-
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    @Mock
+    private ApplicationProperties properties;
 
     @InjectMocks
     private SittingRecordService sittingRecordService;
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
@@ -132,14 +135,17 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         when(serviceService.findService(HMCTS_SERVICE_CODE))
             .thenReturn(Optional.of(Service.builder()
                                         .accountCenterCode("123")
+                                        .onboardingStartDate(LocalDate.now().minusYears(4))
                                         .build()));
     }
 
     @Test
     void shouldReturnTotalRecordCount() {
         when(sittingRecordRepository.totalRecords(isA(SittingRecordSearchRequest.class),
-                                                  isA(String.class)))
+                                                  isA(String.class),
+                                                  any(), any()))
             .thenReturn(10L);
+        when(properties.getMedicalJohRoleIds()).thenReturn(List.of("Test1","Test2"));
 
         long totalRecordCount = sittingRecordService.getTotalRecordCount(
             SittingRecordSearchRequest.builder().build(),
@@ -148,20 +154,25 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         assertThat(totalRecordCount)
             .isEqualTo(10);
-
     }
 
     @Test
     void shouldReturnSittingRecordsWhenRecordPresentInDb() {
-        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class), isA(String.class)))
+        when(sittingRecordRepository.find(isA(SittingRecordSearchRequest.class),
+                                                  isA(String.class),
+                                          any(LocalDate.class), anyList()))
             .thenReturn(getDbSittingRecords(2).stream());
 
-        when(locationService.getVenueName(anyString(), anyString()))
-            .thenReturn("Court Venue 1");
-        when(serviceService.findService(anyString()))
-            .thenReturn(Optional.of(Service.builder()
-                    .accountCenterCode("123")
-                        .build())
+        when(serviceService.getServiceDateOnboarded(anyString()))
+            .thenReturn(LocalDate.now().minusDays(5));
+
+        when(locationService.getCourtVenues(anyString()))
+            .thenReturn(List.of(
+                CourtVenue.builder()
+                    .epimmsId("1")
+                    .regionId("1")
+                    .siteName("one")
+                    .build())
             );
 
         List<SittingRecord> sittingRecords = sittingRecordService.getSittingRecords(

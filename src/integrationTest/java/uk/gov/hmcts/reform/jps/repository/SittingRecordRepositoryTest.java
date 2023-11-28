@@ -38,14 +38,12 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @ActiveProfiles("itest")
 class SittingRecordRepositoryTest extends AbstractTest {
 
-
     @Autowired
     private SittingRecordRepository recordRepository;
 
     private StatusHistory statusHistoryRecorded;
 
     private static final String PERSONAL_CODE = "001";
-
 
     @Test
     void shouldSaveSittingRecord() {
@@ -230,8 +228,8 @@ class SittingRecordRepositoryTest extends AbstractTest {
         Long submittedCount = recordRepository.findCountByPersonalCodeAndStatusIdAndFinancialYearBetween(
             personalCode,
             SUBMITTED,
-            of(2022, Month.APRIL, 6),
-            of(2023, Month.APRIL, 5)
+            LocalDate.of(2022, Month.APRIL, 6),
+            LocalDate.of(2023, Month.APRIL, 5)
 
         );
 
@@ -264,4 +262,29 @@ class SittingRecordRepositoryTest extends AbstractTest {
                             SUBMITTED)
             );
     }
+
+    private SittingRecord createSittingRecordWithSeveralStatus() {
+        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
+        statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
+                                                    JpsRole.ROLE_RECORDER.getValue(),
+                                                    "John Doe",
+                                                    sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryRecorded);
+        StatusHistory statusHistorySubmitted1 = createStatusHistory(
+            SUBMITTED,
+            JpsRole.ROLE_RECORDER.getValue(),
+            "Matthew Doe",
+            sittingRecord);
+        sittingRecord.addStatusHistory(statusHistorySubmitted1);
+
+        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED,
+                                                                   JpsRole.ROLE_RECORDER.getValue(),
+                                                                   "Mark Doe",
+                                                                   sittingRecord);
+        sittingRecord.addStatusHistory(statusHistoryPublished);
+
+        return sittingRecord;
+    }
+
+
 }

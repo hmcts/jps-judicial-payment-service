@@ -1,11 +1,14 @@
 package uk.gov.hmcts.reform.jps.config;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import uk.gov.hmcts.reform.jps.testutils.PropertiesReader;
 import uk.gov.hmcts.reform.jps.testutils.RandomDateGenerator;
 
 @SuppressWarnings("HideUtilityClassConstructor")
 public class TestVariables {
+    protected static final Logger LOGGER = LoggerFactory.getLogger(TestVariables.class);
     protected static final String testUrl;
     protected static final String recorderUsername;
     protected static final String recorderPassword;
