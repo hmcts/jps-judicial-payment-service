@@ -20,6 +20,7 @@ public class JohAttributesErrorChecker extends ErrorChecker {
     public void evaluate(PublishErrors publishErrors,
                          String hmctsServiceCode,
                          SittingRecordPublishFields sittingRecord) {
+        LOGGER.debug("evaluate");
         evaluate(publishErrors, hmctsServiceCode, sittingRecord,
                  () ->
                      judicialOfficeHolderService.getJudicialOfficeHolderWithJohAttributes(
@@ -38,7 +39,6 @@ public class JohAttributesErrorChecker extends ErrorChecker {
                     sittingRecord.getPersonalCode())
                 .orElseThrow(() -> new IllegalArgumentException("JudicialUserDetails not found for personal code: "
                                                                     + sittingRecord.getPersonalCode()));
-
         publishErrors.addJohAttributesError(JohAttributesInError.builder()
                                                 .personalCode(sittingRecord.getPersonalCode())
                                                 .sittingDate(sittingRecord.getSittingDate())
@@ -46,6 +46,5 @@ public class JohAttributesErrorChecker extends ErrorChecker {
                                                 .postNominals(judicialUserDetailsApiResponse.getPostNominals())
                                                 .fullName(judicialUserDetailsApiResponse.getFullName())
                                                 .build());
-
     }
 }

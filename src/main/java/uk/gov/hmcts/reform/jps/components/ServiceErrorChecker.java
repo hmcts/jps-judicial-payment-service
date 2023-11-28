@@ -18,6 +18,7 @@ public class ServiceErrorChecker extends ErrorChecker {
     public void evaluate(PublishErrors publishErrors,
                          String hmctsServiceCode,
                          SittingRecordPublishProjection.SittingRecordPublishFields sittingRecord) {
+        LOGGER.debug("evaluate");
         evaluate(publishErrors, hmctsServiceCode, sittingRecord,
                  () -> serviceService.isServiceOnboarded(hmctsServiceCode)
                  ? Optional.of(Boolean.TRUE) : Optional.empty()
