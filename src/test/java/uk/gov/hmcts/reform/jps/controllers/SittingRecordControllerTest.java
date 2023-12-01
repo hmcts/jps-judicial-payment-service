@@ -14,7 +14,6 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.shaded.com.google.common.io.Resources;
 import uk.gov.hmcts.reform.jps.TestIdamConfiguration;
 import uk.gov.hmcts.reform.jps.config.SecurityConfiguration;
@@ -26,6 +25,7 @@ import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecordSearchResponse;
 import uk.gov.hmcts.reform.jps.model.out.errors.ModelValidationError;
 import uk.gov.hmcts.reform.jps.security.JwtGrantedAuthoritiesConverter;
+import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 import uk.gov.hmcts.reform.jps.services.StatusHistoryService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
@@ -46,6 +46,8 @@ import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -75,13 +77,15 @@ class SittingRecordControllerTest {
     private LocationService regionService;
     @MockBean
     private JudicialUserDetailsService judicialUserDetailsService;
+    @MockBean
+    private ServiceService serviceService;
 
     private static final String SSCS = "sscs";
 
     @Test
     void shouldReturn400WhenHmctsServiceCode() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+        MvcResult mvcResult = mockMvc.perform(post(
                                                       "/sitting-records/searchSittingRecords"
                                                   )
                                                   .contentType(MediaType.APPLICATION_JSON)
@@ -100,7 +104,7 @@ class SittingRecordControllerTest {
     @Test
     void shouldReturn400ResponseWhenMandatoryFieldsMissing() throws Exception {
         String requestJson = Resources.toString(getResource("searchSittingRecordsWithoutMandatoryFields.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+        MvcResult mvcResult = mockMvc.perform(post(
                                                       "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
                                                       SSCS
                                                   )
@@ -129,8 +133,10 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldReturnResponseWithSittingRecordsWhenNoRecordsForGivenCriteria() throws Exception {
+        when(serviceService.isServiceOnboarded(SSCS))
+            .thenReturn(true);
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+        MvcResult mvcResult = mockMvc.perform(post(
                                                       "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
                                                       SSCS
                                                   )
@@ -152,7 +158,8 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldReturnResponseWithSittingRecordsWhenRecordsExitsForGivenCriteria() throws Exception {
-
+        when(serviceService.isServiceOnboarded(SSCS))
+            .thenReturn(true);
         List<SittingRecord> sittingRecords = generateSittingRecords();
         List<RecordingUser> recordingUsers = generateRecordingUsers();
 
@@ -164,7 +171,7 @@ class SittingRecordControllerTest {
             .thenReturn(recordingUsers);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+        MvcResult mvcResult = mockMvc.perform(post(
                                                  "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
                                                       SSCS
                                                   )
@@ -198,6 +205,8 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldReturnResponseWithSittingRecordsCountButNoSittingRecordsForRequestedOffset() throws Exception {
+        when(serviceService.isServiceOnboarded(SSCS))
+            .thenReturn(true);
         when(sittingRecordService.getTotalRecordCount(
             isA(SittingRecordSearchRequest.class),
             eq(SSCS)
@@ -208,7 +217,7 @@ class SittingRecordControllerTest {
             .thenReturn(sittingRecords);
 
         String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
-        MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(
+        MvcResult mvcResult = mockMvc.perform(post(
                                                       "/sitting-records/searchSittingRecords/{hmctsServiceCode}",
                                                       SSCS
                                                   )
@@ -243,7 +252,7 @@ class SittingRecordControllerTest {
 
     @Test
     void shouldThrowSittingRecordMandatoryWhenSittingRecordMissing() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.delete("/sittingRecord"))
+        mockMvc.perform(delete("/sittingRecord"))
             .andDo(print())
             .andExpectAll(
                 status().isBadRequest(),
@@ -349,4 +358,20 @@ class SittingRecordControllerTest {
         return List.of(sittingRecord1, sittingRecord2);
     }
 
+    @Test
+    void shouldReturn400ResponseWhenServiceNotOnboarded() throws Exception {
+        when(serviceService.isServiceOnboarded(SSCS))
+            .thenReturn(false);
+        String requestJson = Resources.toString(getResource("searchSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/sitting-records/searchSittingRecords/{hmctsServiceCode}", SSCS)
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
+            .andReturn();
+    }
 }

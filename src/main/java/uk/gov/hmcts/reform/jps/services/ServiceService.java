@@ -8,6 +8,7 @@ import uk.gov.hmcts.reform.jps.model.in.ServiceDeleteRequest;
 import uk.gov.hmcts.reform.jps.model.in.ServiceRequest;
 import uk.gov.hmcts.reform.jps.repository.ServiceRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +22,13 @@ public class ServiceService {
 
     public Optional<uk.gov.hmcts.reform.jps.domain.Service> findService(String hmctsServiceId) {
         return serviceRepository.findByHmctsServiceId(hmctsServiceId);
+    }
+
+    public boolean isServiceOnboarded(String hmctsServiceId) {
+        return serviceRepository.findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(
+            hmctsServiceId,
+            LocalDate.now())
+            .isPresent();
     }
 
     @Transactional

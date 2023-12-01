@@ -19,6 +19,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.in.RecordSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.in.SittingRecordSearchRequest;
+import uk.gov.hmcts.reform.jps.repository.SittingDaysRepository;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.repository.StatusHistoryRepository;
 
@@ -70,6 +71,8 @@ class SittingRecordServiceITest extends BaseTest {
     private StatusHistoryService statusHistoryService;
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private SittingDaysRepository sittingDaysRepository;
 
     public static final String EPIMMS_ID = "852649";
     public static final String HMCTS_SERVICE_CODE = "BBA3";
@@ -794,6 +797,7 @@ class SittingRecordServiceITest extends BaseTest {
                       tuple(VALID, null, null)
             );
     }
+
 
     private List<SittingRecordWrapper> recordSittingRecords(String jsonRequest) throws IOException {
         String requestJson = Resources.toString(getResource(jsonRequest), UTF_8);

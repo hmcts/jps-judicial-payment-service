@@ -9,6 +9,7 @@ import uk.gov.hmcts.reform.jps.model.in.FeeDeleteRequest;
 import uk.gov.hmcts.reform.jps.model.in.FeeRequest;
 import uk.gov.hmcts.reform.jps.repository.FeeRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,5 +44,20 @@ public class FeeService {
         List<Long> ids = Optional.ofNullable(feeDeleteRequest.getFees())
             .orElseThrow(() -> new IllegalArgumentException("Fee ids missing"));
         feeRepository.deleteByIds(ids);
+    }
+
+    public Fee findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+        String hmctsServiceCode,
+        String judgeRoleId,
+        LocalDate sittingDate
+    ) {
+
+        return feeRepository.findByHmctsServiceIdAndJudgeRoleIdAndEffectiveFromIsLessThanEqual(
+            hmctsServiceCode,
+            judgeRoleId,
+            sittingDate
+        ).orElseThrow(() -> new IllegalArgumentException(
+            "Fee not set/active for hmctsServiceCode and judgeRoleTypeId " + judgeRoleId)
+        );
     }
 }

@@ -6,11 +6,18 @@
   ],
 
   "labels": ["dependencies"],
-  "helm-requirements":
+  "helm-requirements":  {
+    "fileMatch": ["\\Chart.yaml$"],
+    "aliases": {
+      "hmctspublic": "https://hmctspublic.azurecr.io/helm/v1/repo/"
+    }
+  },
+  "regexManagers": [
     {
-      "fileMatch": ["\\Chart.yaml$"],
-              "aliases": {
-                "hmctspublic": "https://hmctspublic.azurecr.io/helm/v1/repo/"
-              }
-  }
+      "fileMatch": ["^Dockerfile$"],
+      "matchStrings": [
+        "datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?\\sARG .*?_VERSION=(?<currentValue>.*)\\s"
+      ]
+    }
+  ]
 }

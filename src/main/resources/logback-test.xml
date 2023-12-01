@@ -1,43 +1,11 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-  <shutdownHook class="ch.qos.logback.core.hook.DelayingShutdownHook"/>
-
-  <property name="LOGS" value="./logs" />
-
-  <appender name="Console"
-            class="ch.qos.logback.core.ConsoleAppender">
-    <layout class="ch.qos.logback.classic.PatternLayout">
+  <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
       <Pattern>
-        %black(%d{ISO8601}) %highlight(%-5level) [%blue(%t)] %yellow(%C{1.}): %msg%n%throwable
+        %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n
       </Pattern>
-    </layout>
-  </appender>
-
-  <appender name="RollingFile"
-            class="ch.qos.logback.core.rolling.RollingFileAppender">
-    <file>${LOGS}/judicial-payment-service.log</file>
-    <encoder
-      class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-      <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
     </encoder>
-
-    <rollingPolicy
-      class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-      <!-- rollover daily and when the file reaches 10 MegaBytes -->
-      <fileNamePattern>${LOGS}/archived/judicial-payment-service-log-%d{yyyy-MM-dd}.%i.log
-      </fileNamePattern>
-      <timeBasedFileNamingAndTriggeringPolicy
-        class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-        <maxFileSize>10MB</maxFileSize>
-      </timeBasedFileNamingAndTriggeringPolicy>
-    </rollingPolicy>
   </appender>
-
-  <!-- LOG everything at INFO level -->
-  <root level="info">
-    <appender-ref ref="RollingFile" />
-    <appender-ref ref="Console" />
-  </root>
 
   <!-- LOG "uk.gov.hmcts.reform.jps" at INFO level -->
   <logger name="uk.gov.hmcts.reform.jps" level="info" additivity="false">
@@ -45,19 +13,58 @@
     <appender-ref ref="Console" />
   </logger>
 
-  <!-- LOG "javax.persistence.criteria" at INFO level -->
-  <logger name="javax.persistence.criteria" level="info" additivity="false">
-    <appender-ref ref="RollingFile" />
-    <appender-ref ref="Console" />
+  <!-- Hibernate before 5.4.5 -->
+  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.type.descriptor.sql" level="trace" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.stat" level="trace" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.cache" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
   </logger>
 
-  <!-- LOG "org.hibernate" at INFO level -->
-  <logger name="org.hibernate" level="info" additivity="false">
-    <appender-ref ref="RollingFile" />
-    <appender-ref ref="Console" />
+  <!-- Hibernate after 5.4.5 -->
+  <logger name="org.hibernate.SQL" level="trace" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.type.descriptor.sql" level="trace" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.stat" level="trace" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.SQL_SLOW" level="info" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.cache" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+
+  <!-- Hibernate after 6 -->
+  <logger name="org.hibernate.SQL" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.orm.jdbc.bind" level="trace" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.stat" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.SQL_SLOW" level="info" additivity="false">
+    <appender-ref ref="STDOUT"/>
+  </logger>
+  <logger name="org.hibernate.cache" level="debug" additivity="false">
+    <appender-ref ref="STDOUT"/>
   </logger>
 
   <!-- LOG "uk.gov.hmcts.fortifyclient" at INFO level -->
   <logger name="uk.gov.hmcts.fortifyclient" level="INFO" />
 
+  <root level="info">
+    <appender-ref ref="STDOUT"/>
+  </root>
 </configuration>

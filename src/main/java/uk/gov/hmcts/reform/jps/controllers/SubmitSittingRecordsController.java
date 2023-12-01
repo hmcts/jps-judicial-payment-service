@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import uk.gov.hmcts.reform.jps.controllers.util.Utility;
 import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
+import uk.gov.hmcts.reform.jps.services.ServiceService;
 import uk.gov.hmcts.reform.jps.services.SittingRecordService;
 
 import java.util.Optional;
@@ -37,6 +38,7 @@ import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESP
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class SubmitSittingRecordsController {
     private final SittingRecordService sittingRecordService;
+    private final ServiceService serviceService;
 
     @Operation(description = "Root not to be displayed", hidden = true)
     @PostMapping(
@@ -64,7 +66,8 @@ public class SubmitSittingRecordsController {
         @PathVariable("hmctsServiceCode") Optional<String> requestHmctsServiceCode,
         @Valid @RequestBody SubmitSittingRecordRequest submitSittingRecordRequest) {
 
-        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode);
+        String hmctsServiceCode = Utility.validateServiceCode(requestHmctsServiceCode, serviceService);
+
         SubmitSittingRecordResponse submitSittingRecordResponse = sittingRecordService.submitSittingRecords(
             submitSittingRecordRequest,
             hmctsServiceCode

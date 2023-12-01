@@ -40,6 +40,7 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification given;
     Response response;
     static String JOH_KEY = "JOH";
+    static String SERVICE_KEY = "SERVICE";
 
     static Map<String,String> responses = new HashMap<>();
 
@@ -64,6 +65,12 @@ public class StepDefinitions extends TestVariables {
             "/testing-support/save-judicial-office-holders",
             JOH_KEY
         );
+
+        createRecords(
+            "./src/functionalTest/resources/payloads/setup/addServices.json",
+            "/testing-support/save-service",
+            SERVICE_KEY
+        );
     }
 
     @AfterAll
@@ -72,6 +79,11 @@ public class StepDefinitions extends TestVariables {
         getValidatableResponse(
             "/testing-support/delete-judicial-office-holders",
             responses.get(JOH_KEY),
+            200
+        );
+        getValidatableResponse(
+            "/testing-support/delete-service",
+            responses.get(SERVICE_KEY),
             200
         );
     }
@@ -117,10 +129,12 @@ public class StepDefinitions extends TestVariables {
         }
     }
 
-    @Given("a record for the hmctsServiceCode {string} exists in the database with the payload {string}")
-    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String serviceCode, String payload) throws
-        IOException {
-        randomDate = RandomDateGenerator.generateRandomDate().toString();
+    @Given("{string} record for the hmctsServiceCode {string} exists in the database with the payload {string}")
+    public void recordForTheGivenHmctsServiceCodeExistsInTheDatabase(String recordCount, String serviceCode,
+        String payload) throws IOException {
+        if (recordCount.equalsIgnoreCase("one")) {
+            randomDate = RandomDateGenerator.generateRandomDate().toString();
+        }
 
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
@@ -264,7 +278,7 @@ public class StepDefinitions extends TestVariables {
             .body("sittingRecords[0].regionId",equalTo("1"))
             .body("sittingRecords[0].regionName",equalTo("London"))
             .body("sittingRecords[0].epimmsId",equalTo("229786"))
-            .body("sittingRecords[0].venueName",equalTo("Barnet"))
+            .body("sittingRecords[0].venueName",equalTo("Barnet Civil And Family Courts Centre"))
             .body("sittingRecords[0].hmctsServiceId",equalTo("ABA5"))
             .body("sittingRecords[0].personalCode",equalTo("4918178"))
             .body("sittingRecords[0].personalName",equalTo("Joe Bloggs"))

@@ -94,6 +94,8 @@ class DuplicateCheckerServiceTest extends BaseEvaluateDuplicate {
                 .isEqualTo(sittingRecordDuplicateCheckFields.getAm());
         assertThat(sittingRecordWrapper.getPm())
                 .isEqualTo(sittingRecordDuplicateCheckFields.getPm());
+        assertThat(sittingRecordWrapper.getEpimmsId())
+            .isEqualTo(sittingRecordDuplicateCheckFields.getEpimmsId());
     }
 
     @Test
@@ -214,6 +216,8 @@ class DuplicateCheckerServiceTest extends BaseEvaluateDuplicate {
                 .isEqualTo(sittingRecordDuplicateCheckFields.getAm());
         assertThat(sittingRecordWrapper.getPm())
                 .isEqualTo(sittingRecordDuplicateCheckFields.getPm());
+        assertThat(sittingRecordWrapper.getEpimmsId())
+            .isEqualTo(sittingRecordDuplicateCheckFields.getEpimmsId());
 
     }
 }

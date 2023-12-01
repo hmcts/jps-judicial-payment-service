@@ -26,12 +26,16 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testcontainers.shaded.com.google.common.base.Charsets.UTF_8;
 import static org.testcontainers.shaded.com.google.common.io.Resources.getResource;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_SERVICE_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_RECORDER;
+import static uk.gov.hmcts.reform.jps.constant.JpsRoles.JPS_SUBMITTER;
 
 @Transactional
 @SpringBootTest
@@ -61,7 +65,7 @@ class SubmitSittingRecordsControllerITest {
       10,            0,           0,      RECORDED,  RECORDED,          1
       11,            0,           0,      RECORDED , RECORDED,          1
         """)
-    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY})
+    @Sql(scripts = {RESET_DATABASE, ADD_SUBMIT_SITTING_RECORD_STATUS_HISTORY, INSERT_SERVICE_TEST_DATA})
     @WithMockUser(authorities = {"jps-submitter"})
     void shouldReturnRecordCountOfSubmittedRecordsWhenRecordsAreSubmitted(
         String regionId,
@@ -99,6 +103,23 @@ class SubmitSittingRecordsControllerITest {
             .map(StatusHistory::getStatusId)
             .hasSize(count)
             .containsExactlyInAnyOrderElementsOf(statusIds);
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_SERVICE_TEST_DATA})
+    @WithMockUser(authorities = {JPS_RECORDER, JPS_SUBMITTER})
+    void shouldReturn400ResponseWhenServiceNotOnboarded() throws Exception {
+        String requestJson = Resources.toString(getResource("submitSittingRecords.json"), UTF_8);
+        mockMvc.perform(post("/submitSittingRecords/{hmctsServiceCode}", "CBA5")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(requestJson))
+            .andDo(print())
+            .andExpectAll(status().isBadRequest(),
+                          content().contentType(MediaType.APPLICATION_JSON),
+                          jsonPath("$.errors[0].fieldName").value("hmctsServiceCode"),
+                          jsonPath("$.errors[0].message").value("004 unknown hmctsServiceCode")
+            )
+            .andReturn();
     }
 
     @Test

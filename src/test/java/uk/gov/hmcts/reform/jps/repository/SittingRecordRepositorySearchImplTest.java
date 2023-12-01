@@ -10,7 +10,6 @@ import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord_;
 import uk.gov.hmcts.reform.jps.model.DateOrder;
@@ -94,7 +93,6 @@ class SittingRecordRepositorySearchImplTest {
     private SittingRecordRepositorySearchImpl sittingRecordRepositorySearch;
 
     @Test
-    @Sql(scripts = {"classpath:sql/insert_service_test_data.sql"})
     void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
 
         setUpMock();

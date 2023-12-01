@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import uk.gov.hmcts.reform.jps.domain.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,8 @@ import java.util.Optional;
 public interface ServiceRepository extends JpaRepository<Service, Long> {
 
     Optional<Service> findByHmctsServiceId(String hmctsServiceId);
+
+    Optional<Service> findByHmctsServiceIdAndOnboardingStartDateLessThanEqual(String hmctsServiceId, LocalDate date);
 
     @Modifying
     @Query("""
