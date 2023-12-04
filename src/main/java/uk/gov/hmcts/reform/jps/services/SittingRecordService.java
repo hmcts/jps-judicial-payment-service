@@ -336,32 +336,6 @@ public class SittingRecordService {
         return (null != fee ? fee.longValue() : null);
     }
 
-    private void stateCheck(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord,
-                            StatusId recorded) {
-
-        if (sittingRecord.getStatusId() == recorded) {
-            deleteSittingRecord(sittingRecord);
-        } else {
-            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
-        }
-    }
-
-    private void recorderDelete(uk.gov.hmcts.reform.jps.domain.SittingRecord sittingRecord) {
-        if (sittingRecord.getStatusId() == RECORDED) {
-            StatusHistory recordedStatusHistory = sittingRecord.getStatusHistories().stream()
-                .filter(statusHistory -> statusHistory.getStatusId() == RECORDED)
-                .filter(statusHistory -> statusHistory.getChangedByUserId().equals(
-                    securityUtils.getUserInfo().getUid()))
-                .findAny()
-                .orElseThrow(() -> new ForbiddenException(
-                    "User IDAM ID does not match the oldest Changed by IDAM ID "));
-
-            deleteSittingRecord(recordedStatusHistory.getSittingRecord());
-        } else {
-            throw new ForbiddenException("Sitting Record Status ID is in wrong state");
-        }
-    }
-
     private List<Long> getUpdatedRecords(SubmitSittingRecordRequest submitSittingRecordRequest,
                                          List<RecordSubmitFields> recordsToSubmit,
                                          StatusId statusId,

@@ -46,6 +46,12 @@ class SubmitSittingRecordServiceTest {
     @Mock
     ApplicationProperties applicationProperties;
 
+    @Mock
+    PublishErrorCheckerService publishErrorCheckerService;
+
+    @Mock
+    ServiceService serviceService;
+
     @InjectMocks
     FeeService feeService;
 
@@ -65,7 +71,9 @@ class SubmitSittingRecordServiceTest {
             sittingDaysService,
             feeService,
             judicialOfficeHolderService,
-            applicationProperties
+            applicationProperties,
+            publishErrorCheckerService,
+            serviceService
         );
     }
 

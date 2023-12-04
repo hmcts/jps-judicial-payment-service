@@ -263,28 +263,4 @@ class SittingRecordRepositoryTest extends AbstractTest {
             );
     }
 
-    private SittingRecord createSittingRecordWithSeveralStatus() {
-        SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
-        statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
-                                                    JpsRole.ROLE_RECORDER.getValue(),
-                                                    "John Doe",
-                                                    sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryRecorded);
-        StatusHistory statusHistorySubmitted1 = createStatusHistory(
-            SUBMITTED,
-            JpsRole.ROLE_RECORDER.getValue(),
-            "Matthew Doe",
-            sittingRecord);
-        sittingRecord.addStatusHistory(statusHistorySubmitted1);
-
-        StatusHistory statusHistoryPublished = createStatusHistory(StatusId.PUBLISHED,
-                                                                   JpsRole.ROLE_RECORDER.getValue(),
-                                                                   "Mark Doe",
-                                                                   sittingRecord);
-        sittingRecord.addStatusHistory(statusHistoryPublished);
-
-        return sittingRecord;
-    }
-
-
 }

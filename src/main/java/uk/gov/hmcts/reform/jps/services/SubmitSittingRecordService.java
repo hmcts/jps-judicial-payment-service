@@ -14,8 +14,11 @@ public class SubmitSittingRecordService extends PublishSittingRecordService {
     public SubmitSittingRecordService(SittingRecordRepository sittingRecordRepository,
                                       SittingDaysService sittingDaysService, FeeService feeService,
                                       JudicialOfficeHolderService judicialOfficeHolderService,
-                                      ApplicationProperties properties) {
-        super(sittingRecordRepository, sittingDaysService, feeService, judicialOfficeHolderService, properties);
+                                      ApplicationProperties properties,
+                                      PublishErrorCheckerService publishErrorCheckerService,
+                                      ServiceService serviceService) {
+        super(sittingRecordRepository, sittingDaysService, feeService, judicialOfficeHolderService, properties,
+              publishErrorCheckerService, serviceService);
     }
 
     @Override
