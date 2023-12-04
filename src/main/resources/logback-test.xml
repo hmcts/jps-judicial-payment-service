@@ -6,6 +6,12 @@
       </Pattern>
     </encoder>
   </appender>
+
+  <!-- LOG "uk.gov.hmcts.reform.jps" at INFO level -->
+  <logger name="uk.gov.hmcts.reform.jps" level="info" additivity="false">
+    <appender-ref ref="STDOUT" />
+  </logger>
+
   <!-- Hibernate before 5.4.5 -->
   <logger name="org.hibernate.SQL" level="debug" additivity="false">
     <appender-ref ref="STDOUT"/>
@@ -53,6 +59,9 @@
   <logger name="org.hibernate.cache" level="debug" additivity="false">
     <appender-ref ref="STDOUT"/>
   </logger>
+
+  <!-- LOG "uk.gov.hmcts.fortifyclient" at INFO level -->
+  <logger name="uk.gov.hmcts.fortifyclient" level="INFO" />
 
   <root level="info">
     <appender-ref ref="STDOUT"/>

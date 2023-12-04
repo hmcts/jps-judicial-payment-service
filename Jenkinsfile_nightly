@@ -11,4 +11,18 @@ def type = "java"
 def product = "jps"
 def component = "judicial-payment-service"
 
-withNightlyPipeline(type, product, component) {}
+static LinkedHashMap<String, Object> secret(String secretName, String envVar) {
+    [$class     : 'AzureKeyVaultSecret',
+     secretType : 'Secret',
+     name       : secretName,
+     version    : '',
+     envVariable: envVar
+    ]
+}
+
+withNightlyPipeline(type, product, component) {
+  enableFortifyScan('jps-aat')
+  afterAlways('fortify-scan') {
+    steps.archiveArtifacts allowEmptyArchive: true, artifacts: '**/Fortify Scan/**/*'
+  }
+}
