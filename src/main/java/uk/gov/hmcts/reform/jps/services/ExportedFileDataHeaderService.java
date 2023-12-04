@@ -7,8 +7,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.domain.ExportedFileDataHeader;
 import uk.gov.hmcts.reform.jps.repository.ExportedFileDataHeaderRepository;
 
-import java.time.LocalDateTime;
-
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 @Service
 public class ExportedFileDataHeaderService {

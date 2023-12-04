@@ -42,16 +42,5 @@ public class PublishErrorCheckerService {
                                         hmctsServiceCode,
                                         sittingRecord);
 
-        // TODO: check the evaluate implementations
-        johAttributesErrorChecker.evaluate(publishErrors,
-                                            hmctsServiceCode,
-                                            sittingRecord);
-        johPayrollErrorChecker.evaluate(publishErrors,
-                                          hmctsServiceCode,
-                                          sittingRecord);
-        feeInErrorChecker.evaluate(publishErrors,
-                                     hmctsServiceCode,
-                                     sittingRecord);
-
     }
 }
