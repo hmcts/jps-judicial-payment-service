@@ -270,13 +270,7 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
                                                                             serviceOnboardedDate,
                                                                             recordSearchRequest.getDateRangeTo());
 
-        // Combine the OR conditions using criteriaBuilder.or
         List<Predicate> finalPredicates = predicates;
-        // Exclude the OR cases for the accept() - investigate why!
-        //finalPredicates.addAll(predicatesRecorded);
-        //finalPredicates.addAll(predicatesClosed);
-        //finalPredicates.addAll(predicatesPublished);
-        //finalPredicates.addAll(predicatesSubmitted);
         predicateConsumer.accept(finalPredicates);
 
         // Combine the OR conditions using criteriaBuilder.or
