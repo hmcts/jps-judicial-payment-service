@@ -290,13 +290,11 @@ public class SittingRecordService {
             return null;
         }
 
-        // TODO: when does higher medical rate session kick in?
         boolean higherMedicalRateSession = false;
 
         BigDecimal fee = null;
 
         if (statusId.equals(StatusId.PUBLISHED)) {
-            // TODO: get from refdata - meantime on-the-fly calc
             fee = publishSittingRecordService.calculateJohFee(hmctsServiceCode, personalCode, judgeRoleTypeId,
                                                               sittingDate, higherMedicalRateSession);
         } else if (statusId.equals(StatusId.SUBMITTED)) {
