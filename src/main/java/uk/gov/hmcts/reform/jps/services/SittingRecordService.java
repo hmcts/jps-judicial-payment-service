@@ -383,5 +383,4 @@ public class SittingRecordService {
         return serviceService.getServiceDateOnboarded(hmctsServiceCode);
     }
 
-
 }
