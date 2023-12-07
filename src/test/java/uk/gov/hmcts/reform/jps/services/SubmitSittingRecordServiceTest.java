@@ -10,10 +10,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.Fee;
 import uk.gov.hmcts.reform.jps.domain.JohAttributes;
 import uk.gov.hmcts.reform.jps.domain.JohPayroll;
 import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
+import uk.gov.hmcts.reform.jps.repository.ExportedFileDataHeaderRepository;
 import uk.gov.hmcts.reform.jps.repository.FeeRepository;
 import uk.gov.hmcts.reform.jps.repository.JudicialOfficeHolderRepository;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
@@ -36,6 +38,30 @@ class SubmitSittingRecordServiceTest {
 
     @Mock
     SittingDaysService sittingDaysService;
+
+    @Mock
+    StatusHistoryService statusHistoryService;
+
+    @Mock
+    SittingRecordService sittingRecordService;
+
+    @Mock
+    SecurityUtils securityUtils;
+
+    @Mock
+    CourtVenueService courtVenueService;
+
+    @Mock
+    ExportedFileDataHeaderRepository exportedFileDataHeaderRepository;
+
+    @Mock
+    ExportedFileDataHeaderService exportedFileDataHeaderService;
+
+    @Mock
+    ExportedFileDataService exportedFileDataService;
+
+    @Mock
+    ExportedFilesService exportedFilesService;
 
     @Mock
     FeeRepository feeRepository;
@@ -67,13 +93,10 @@ class SubmitSittingRecordServiceTest {
     @BeforeEach
     public void setUp() {
         submitSittingRecordService = new SubmitSittingRecordService(
-            sittingRecordRepository,
-            sittingDaysService,
-            feeService,
-            judicialOfficeHolderService,
-            applicationProperties,
-            publishErrorCheckerService,
-            serviceService
+            sittingRecordRepository, statusHistoryService, sittingRecordService, sittingDaysService, feeService,
+            judicialOfficeHolderService, applicationProperties, publishErrorCheckerService, securityUtils,
+            serviceService, courtVenueService, exportedFileDataHeaderRepository, exportedFileDataHeaderService,
+            exportedFileDataService, exportedFilesService
         );
     }
 

@@ -16,6 +16,9 @@ public class FileInfos {
 
     private final LinkedList<FileInfo> fileInfos = new LinkedList<>();
 
+    @Builder.Default
+    private Integer groupNameCount = 0;
+
     public void addFileInfo(FileInfo fileInfo) {
         fileInfos.add(fileInfo);
     }
@@ -63,6 +66,8 @@ public class FileInfos {
             .build();
 
         fileInfos.addFileInfo(fileInfo);
+        groupNameCount++;
         return fileInfo;
     }
+
 }

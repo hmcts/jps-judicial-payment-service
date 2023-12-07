@@ -72,10 +72,30 @@ public class StatusHistoryService {
                              StatusId statusId,
                              String changedByUserId,
                              String changedByUserName) {
+        addStatusHistory(SittingRecord.builder()
+                             .id(sittingRecordId)
+                             .build(),
+                         statusId,
+                         changedByUserId,
+                         changedByUserName);
+    }
+
+    @Transactional
+    public void publish(SittingRecord sittingRecord,
+                             String changedByUserId,
+                             String changedByUserName) {
+        addStatusHistory(sittingRecord,
+                         StatusId.PUBLISHED,
+                         changedByUserId,
+                         changedByUserName);
+    }
+
+    private void addStatusHistory(SittingRecord sittingRecord,
+                        StatusId statusId,
+                        String changedByUserId,
+                        String changedByUserName) {
         StatusHistory statusHistory = StatusHistory.builder()
-            .sittingRecord(SittingRecord.builder()
-                               .id(sittingRecordId)
-                               .build())
+            .sittingRecord(sittingRecord)
             .statusId(statusId)
             .changedByUserId(changedByUserId)
             .changedByName(changedByUserName)
