@@ -92,7 +92,7 @@ public class SittingRecordService {
                      .createdDateTime(sittingRecord.getCreatedDateTime())
                      .fee(getFee(recordSearchRequest.getIncludeFees(), sittingRecord.getStatusId(), hmctsServiceCode,
                                  sittingRecord.getPersonalCode(), sittingRecord.getJudgeRoleTypeId(),
-                                 sittingRecord.getSittingDate()))
+                                 sittingRecord.getSittingDate(), false))
                      .epimmsId(sittingRecord.getEpimmsId())
                      .hmctsServiceId(sittingRecord.getHmctsServiceId())
                      .judgeRoleTypeId(sittingRecord.getJudgeRoleTypeId())
@@ -285,12 +285,10 @@ public class SittingRecordService {
     }
 
     protected Long getFee(Boolean includeFees, StatusId statusId, String hmctsServiceCode, String personalCode,
-                          String judgeRoleTypeId, LocalDate sittingDate) {
+                          String judgeRoleTypeId, LocalDate sittingDate, Boolean higherMedicalRateSession) {
         if (null == includeFees || Boolean.FALSE.equals(includeFees)) {
             return null;
         }
-
-        boolean higherMedicalRateSession = false;
 
         BigDecimal fee = null;
 

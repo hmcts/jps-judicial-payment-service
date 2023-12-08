@@ -95,9 +95,7 @@ public class PublishSittingRecordService {
         boolean higherMedicalRateSession,
         Fee fee) {
         BigDecimal derivedFee;
-        String sittingDateFinancialYear = getFinancialYear(sittingDate);
-        PublishSittingRecordCount publishSittingRecordCount = retrievePublishedRecords(personalCode);
-        long publishedSittingCount = getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
+        long publishedSittingCount = evaluatePublishedSittingCount(personalCode, sittingDate);
         if (publishedSittingCount > properties.getMedicalThreshold() || higherMedicalRateSession) {
             derivedFee = fee.getHigherThresholdFee();
         } else {
@@ -106,9 +104,14 @@ public class PublishSittingRecordService {
         return derivedFee;
     }
 
-    private long getPublishedSittingCount(
-        PublishSittingRecordCount publishSittingRecordCount,
-        String sittingDateFinancialYear) {
+    protected Long evaluatePublishedSittingCount(String personalCode, LocalDate sittingDate) {
+        String sittingDateFinancialYear = getFinancialYear(sittingDate);
+        PublishSittingRecordCount publishSittingRecordCount = retrievePublishedRecords(personalCode);
+        return getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
+    }
+
+    protected Long getPublishedSittingCount(PublishSittingRecordCount publishSittingRecordCount,
+                                            String sittingDateFinancialYear) {
         long publishedSittingCount;
 
         if (publishSittingRecordCount.getCurrentFinancialYear().getFinancialYear().equals(sittingDateFinancialYear)) {
