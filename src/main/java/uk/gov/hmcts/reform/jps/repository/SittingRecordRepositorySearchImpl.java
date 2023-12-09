@@ -198,7 +198,6 @@ public class SittingRecordRepositorySearchImpl implements SittingRecordRepositor
         return entityManager.createQuery(criteriaQuery).getResultList();
     }
 
-
     private <T> void updateCriteriaQuery(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode,
