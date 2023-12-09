@@ -105,8 +105,7 @@ class SittingRecordRepositorySearchImplTest {
     @InjectMocks
     private SittingRecordRepositorySearchImpl sittingRecordRepositorySearch;
 
-    @Test
-    void verifyFindCriteriaQueryIsInitialisedCorrectlyWhenRequestHasAllValuesSet() {
+    void genericMock() {
         setUpMock();
         when(sittingRecord.<String>get(SittingRecord_.SITTING_DATE)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.STATUS_ID)).thenReturn(attributePath);
@@ -118,7 +117,6 @@ class SittingRecordRepositorySearchImplTest {
         when(sittingRecord.<String>get(SittingRecord_.AM)).thenReturn(attributePath);
         when(sittingRecord.<String>get(SittingRecord_.PM)).thenReturn(attributePath);
 
-        when(criteriaBuilder.equal(attributePath, StatusId.RECORDED)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SSCS)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.REGION_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.EPIMMS_ID))
@@ -126,6 +124,22 @@ class SittingRecordRepositorySearchImplTest {
         when(criteriaBuilder.equal(attributePath, SittingRecord_.PERSONAL_CODE)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, SittingRecord_.JUDGE_ROLE_TYPE_ID)).thenReturn(predicate);
         when(criteriaBuilder.equal(attributePath, true)).thenReturn(predicate);
+
+        when(orderImpl.isAscending()).thenReturn(true);
+        when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+    }
+
+    @Test
+    void verifyFullDayFindCriteriaQueryForAllValuesSet() {
+        genericMock();
+
+        when(criteriaBuilder.equal(attributePath, StatusId.RECORDED)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, StatusId.PUBLISHED)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, StatusId.CLOSED)).thenReturn(predicate);
+        when(criteriaBuilder.equal(attributePath, StatusId.SUBMITTED)).thenReturn(predicate);
+
+        //when(criteriaBuilder.equal(attributePath, AM)).thenReturn(predicate);
+        //when(criteriaBuilder.equal(attributePath, PM)).thenReturn(predicate);
 
         when(orderImpl.isAscending()).thenReturn(true);
         when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
@@ -163,6 +177,99 @@ class SittingRecordRepositorySearchImplTest {
         verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(StatusId.RECORDED));
         verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(true));
+    }
+
+    @Test
+    void verifyAfternoonSubmittedFindCriteriaQueryForAllValuesSet() {
+        genericMock();
+
+        when(criteriaBuilder.equal(attributePath, StatusId.SUBMITTED)).thenReturn(predicate);
+
+        when(orderImpl.isAscending()).thenReturn(true);
+        when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+
+        sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
+                                               .offset(5)
+                                               .pageSize(10)
+                                               .regionId(SittingRecord_.REGION_ID)
+                                               .epimmsId(SittingRecord_.EPIMMS_ID)
+                                               .dateOrder(DateOrder.ASCENDING)
+                                               .dateRangeFrom(LocalDate.now().minusDays(2))
+                                               .dateRangeTo(LocalDate.now())
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
+                                               .statusId(StatusId.SUBMITTED)
+                                               .duration(Duration.PM)
+                                               .medicalMembersOnly(false)
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now(),
+                                           new ArrayList<>());
+
+        verify(entityManager).getCriteriaBuilder();
+        verify(typedQuery).setMaxResults(PAGE_SIZE);
+        verify(typedQuery).setFirstResult(OFF_SET);
+        verify(criteriaQuery).orderBy(order.capture());
+
+        Order value1 = order.getValue();
+        assertThat(value1.isAscending()).isTrue();
+
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(StatusId.SUBMITTED));
+        // am-false, pm-true
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(true));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(false));
+    }
+
+    @Test
+    void verifyMorningPublishedFindCriteriaQueryForAllValuesSet() {
+        genericMock();
+
+        when(criteriaBuilder.equal(attributePath, StatusId.PUBLISHED)).thenReturn(predicate);
+        when(criteriaBuilder.notEqual(attributePath, StatusId.DELETED)).thenReturn(predicate);
+
+        when(orderImpl.isAscending()).thenReturn(true);
+        when(criteriaBuilder.asc(any())).thenReturn(orderImpl);
+
+        sittingRecordRepositorySearch.find(SittingRecordSearchRequest.builder()
+                                               .offset(5)
+                                               .pageSize(10)
+                                               .regionId(SittingRecord_.REGION_ID)
+                                               .epimmsId(SittingRecord_.EPIMMS_ID)
+                                               .dateOrder(DateOrder.ASCENDING)
+                                               .dateRangeFrom(LocalDate.now().minusDays(2))
+                                               .dateRangeTo(LocalDate.now())
+                                               .personalCode(PERSONAL_CODE)
+                                               .judgeRoleTypeId(JUDGE_ROLE_TYPE_ID)
+                                               .statusId(StatusId.PUBLISHED)
+                                               .duration(Duration.AM)
+                                               .medicalMembersOnly(false)
+                                               .build(),
+                                           SSCS,
+                                           LocalDate.now(),
+                                           new ArrayList<>());
+
+        verify(entityManager).getCriteriaBuilder();
+        verify(typedQuery).setMaxResults(PAGE_SIZE);
+        verify(typedQuery).setFirstResult(OFF_SET);
+        verify(criteriaQuery).orderBy(order.capture());
+
+        Order value1 = order.getValue();
+        assertThat(value1.isAscending()).isTrue();
+
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SSCS));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.REGION_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.EPIMMS_ID));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.PERSONAL_CODE));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(SittingRecord_.JUDGE_ROLE_TYPE_ID));
+        verify(criteriaBuilder, times(2)).equal(isA(SingularAttributePath.class), eq(StatusId.PUBLISHED));
+        // am-true, pm-false
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(true));
+        verify(criteriaBuilder).equal(isA(SingularAttributePath.class), eq(false));
     }
 
     @Test
