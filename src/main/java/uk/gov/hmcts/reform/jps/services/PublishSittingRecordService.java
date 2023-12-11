@@ -65,8 +65,7 @@ public class PublishSittingRecordService {
                     personalCode,
                     SUBMITTED,
                     startOfFinancialYear(currentDate),
-                    endOfFinancialYear(currentDate)
-                )
+                    endOfFinancialYear(currentDate))
             )
             .financialYear(getFinancialYear(currentDate))
             .build();
@@ -80,8 +79,7 @@ public class PublishSittingRecordService {
                     personalCode,
                     SUBMITTED,
                     startOfFinancialYear(previousYear),
-                    endOfFinancialYear(previousYear)
-                )
+                    endOfFinancialYear(previousYear))
             )
             .financialYear(getFinancialYear(previousYear))
             .build();
@@ -102,14 +100,7 @@ public class PublishSittingRecordService {
             hmctsServiceCode,
             judgeRoleTypeId,
             sittingDate
-        ).orElseThrow(() -> new IllegalArgumentException(
-            String.join(
-                " ",
-                "Fee not set/active for hmctsServiceCode",
-                hmctsServiceCode,
-                "and judgeRoleTypeId",
-                judgeRoleTypeId
-            )));
+        );
 
         if (properties.isMedicalMember(judgeRoleTypeId)) {
             return getMedicalMemberFee(personalCode, sittingDate, higherMedicalRateSession, fee);
@@ -147,14 +138,17 @@ public class PublishSittingRecordService {
                         publishErrors
                     );
                     if (!publishErrors.isError()) {
-                        FileInfo fileInfo = getFileInfo(fileInfos,
-                                                        serviceName,
-                                                        publishedByIdamId,
-                                                        publishedByName);
+                        FileInfo fileInfo = getFileInfo(
+                            fileInfos,
+                            serviceName,
+                            publishedByIdamId,
+                            publishedByName
+                        );
 
                         if (publish) {
                             doPublish(sittingRecordPublishFields, fileInfo, hmctsServiceCode,
-                                      fileInfos.getGroupNameCount());
+                                      fileInfos.getGroupNameCount()
+                            );
                         }
                     }
                 }
@@ -170,15 +164,19 @@ public class PublishSittingRecordService {
         boolean higherMedicalRateSession,
         Fee fee) {
         BigDecimal derivedFee;
-        String sittingDateFinancialYear = getFinancialYear(sittingDate);
-        PublishSittingRecordCount publishSittingRecordCount = retrievePublishedRecords(personalCode);
-        long publishedSittingCount = getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
+        long publishedSittingCount = evaluatePublishedSittingCount(personalCode, sittingDate);
         if (publishedSittingCount > properties.getMedicalThreshold() || higherMedicalRateSession) {
             derivedFee = fee.getHigherThresholdFee();
         } else {
             derivedFee = fee.getStandardFee();
         }
         return derivedFee;
+    }
+
+    protected Long evaluatePublishedSittingCount(String personalCode, LocalDate sittingDate) {
+        String sittingDateFinancialYear = getFinancialYear(sittingDate);
+        PublishSittingRecordCount publishSittingRecordCount = retrievePublishedRecords(personalCode);
+        return getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
     }
 
     public void doPublish(SittingRecordPublishFields sittingRecordPublishFields, FileInfo fileInfo,
@@ -218,9 +216,8 @@ public class PublishSittingRecordService {
         return "<Service>" + groupNameCount + "<payRollMonth>" + "<payRollYear>";
     }
 
-    private Long getPublishedSittingCount(
-        PublishSittingRecordCount publishSittingRecordCount,
-        String sittingDateFinancialYear) {
+    protected Long getPublishedSittingCount(PublishSittingRecordCount publishSittingRecordCount,
+                                            String sittingDateFinancialYear) {
         long publishedSittingCount;
 
         if (publishSittingRecordCount.getCurrentFinancialYear().getFinancialYear().equals(sittingDateFinancialYear)) {

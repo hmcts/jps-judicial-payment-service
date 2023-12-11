@@ -5,10 +5,13 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
@@ -18,6 +21,7 @@ import uk.gov.hmcts.reform.idam.client.models.UserInfo;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.components.BaseEvaluateDuplicate;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
+import uk.gov.hmcts.reform.jps.domain.Fee;
 import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection.SittingRecordDuplicateCheckFields;
@@ -38,6 +42,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Month;
@@ -54,6 +59,7 @@ import static java.time.LocalDate.of;
 import static java.time.LocalDateTime.now;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
@@ -89,33 +95,43 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     public static final String LOCATION = "Sutton Social Security";
 
     @Mock
-    private SittingRecordRepository sittingRecordRepository;
-
-    @Mock
-    private SecurityUtils securityUtils;
+    private ApplicationProperties properties;
 
     @Mock
     private DuplicateCheckerService duplicateCheckerService;
 
     @Mock
-    private LocationService locationService;
-
-    @Mock
-    private ServiceService serviceService;
-
-    @Mock
-    private StatusHistoryService statusHistoryService;
+    FeeService feeService;
 
     @Mock
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
     @Mock
-    private ApplicationProperties properties;
+    private LocationService locationService;
+
+    @Mock
+    private SecurityUtils securityUtils;
+
+    @Mock
+    private ServiceService serviceService;
+
+    @Mock
+    private SittingDaysService sittingDaysService;
+
+    @Mock
+    private SittingRecordRepository sittingRecordRepository;
+
+    @Mock
+    private StatusHistoryService statusHistoryService;
 
     @InjectMocks
     private SittingRecordService sittingRecordService;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private PublishSittingRecordService publishSittingRecordService;
+
+    private SubmitSittingRecordService submitSittingRecordService;
 
     @Captor
     private ArgumentCaptor<uk.gov.hmcts.reform.jps.domain.SittingRecord> sittingRecordArgumentCaptor;
@@ -137,6 +153,18 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                                         .accountCenterCode("123")
                                         .onboardingStartDate(LocalDate.now().minusYears(4))
                                         .build()));
+        MockitoAnnotations.openMocks(this);
+
+        publishSittingRecordService = new PublishSittingRecordService(
+            sittingRecordRepository, sittingDaysService, feeService, judicialOfficeHolderService, properties);
+
+        submitSittingRecordService = new SubmitSittingRecordService(
+            sittingRecordRepository, sittingDaysService, feeService, judicialOfficeHolderService, properties);
+
+        sittingRecordService = new SittingRecordService(sittingRecordRepository, duplicateCheckerService, securityUtils,
+                                                        locationService, serviceService, statusHistoryService,
+                                                        judicialOfficeHolderService, publishSittingRecordService,
+                                                        submitSittingRecordService, properties);
     }
 
     @Test
@@ -247,7 +275,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                 .statusId(RECORDED)
                 .regionId("1")
                 .epimmsId(EPIMMS_ID)
-                .hmctsServiceId("sscs")
+                .hmctsServiceId(HMCTS_SERVICE_CODE)
                 .personalCode("001")
                 .contractTypeId(count)
                 .judgeRoleTypeId("HighCourt")
@@ -265,7 +293,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
                     .statusId(RECORDED)
                     .regionId("1")
                     .epimmsId(EPIMMS_ID)
-                    .hmctsServiceId("sscs")
+                    .hmctsServiceId(HMCTS_SERVICE_CODE)
                     .personalCode("001")
                     .contractTypeId(count)
                     .judgeRoleTypeId("HighCourt")
@@ -291,7 +319,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .statusId(state)
             .regionId("1")
             .epimmsId(EPIMMS_ID)
-            .hmctsServiceId("sscs")
+            .hmctsServiceId(HMCTS_SERVICE_CODE)
             .personalCode("001")
             .contractTypeId(1L)
             .judgeRoleTypeId("HighCourt")
@@ -821,4 +849,51 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
 
         verify(sittingRecordRepository).save(isA(uk.gov.hmcts.reform.jps.domain.SittingRecord.class));
     }
+
+    @ParameterizedTest
+    @CsvSource(quoteCharacter = '"', textBlock = """
+      # includeFees,  statusId, expectedFeeValue, isMedicalMember, highMedicalRateSession, londonFlag
+            true,    PUBLISHED,              250,           false,                  false,      true
+            true,    PUBLISHED,              200,           false,                  false,      false
+            true,    PUBLISHED,              200,           false,                  true,       false
+            false,   PUBLISHED,                 ,           false,                  false,      false
+            true,    PUBLISHED,              200,           true,                   false,      false
+            true,    PUBLISHED,              300,           true,                   true,       false
+            true,    SUBMITTED,              250,           false,                  false,      true
+            true,    SUBMITTED,              200,           false,                  false,      false
+            true,    SUBMITTED,              200,           true,                   false,      false
+            false,   SUBMITTED,                ,           false,                  false,       false
+            true,    SUBMITTED,              300,           true,                   true,       false
+            true,     RECORDED,                 ,           false,                  false,      false
+            false,    RECORDED,                 ,           false,                  false,      false
+        """)
+    void getFeeReturnsExpectedValue(Boolean includeFees,
+                                            String status,
+                                            Long expectedValue,
+                                            Boolean isMedicalMember,
+                                            Boolean highMedicalRateSession,
+                                            Boolean londonFlag) {
+
+        final String hmctsServiceCode = "SSC_ID";
+        final String personalCode = "PERS_CODE";
+        final String judgeRoleTypeId = "judge";
+        final LocalDate sittingDate = LocalDate.parse("2023-11-01");
+
+        Fee fee = Fee.builder()
+            .standardFee(BigDecimal.valueOf(200))
+            .higherThresholdFee(BigDecimal.valueOf(300))
+            .londonWeightedFee(BigDecimal.valueOf(250))
+            .build();
+
+        when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(anyString(), anyString(), any()))
+                 .thenReturn(fee);
+        when(properties.isMedicalMember(anyString())).thenReturn(isMedicalMember);
+        when(judicialOfficeHolderService.getLondonFlag(anyString(), any())).thenReturn(Optional.ofNullable(londonFlag));
+        when(properties.getMedicalThreshold()).thenReturn(20);
+
+        Long feeValue = sittingRecordService.getFee(includeFees, StatusId.valueOf(status), hmctsServiceCode,
+                                                    personalCode, judgeRoleTypeId, sittingDate, highMedicalRateSession);
+        assertEquals(expectedValue, feeValue);
+    }
+
 }
