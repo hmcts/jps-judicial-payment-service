@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -59,5 +60,24 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
         StatusId statusId,
         LocalDate startDateTime,
         LocalDate endDateTime
+    );
+
+    @Query(
+        "select distinct sr.judgeRoleTypeId "
+        + "from SittingRecord sr inner join StatusHistory sh on sr.id=sh.sittingRecord.id "
+        + "where sr.hmctsServiceId = :hmctsServiceId "
+        + "and ( CAST(:regionId as org.hibernate.type.StringType) is null "
+        + "or sr.regionId = CAST(:regionId as org.hibernate.type.StringType) ) "
+        + "and ( CAST(:statusId as org.hibernate.type.StringType) is null "
+        + "or sr.statusId = CAST(:statusId as org.hibernate.type.StringType) ) "
+        + "or (sr.statusId='PUBLISHED' and (sr.sittingDate between :startDate and now()) "
+        + "or sr.statusId='SUBMITTED' and (sr.sittingDate between :serviceOnboardedDate and :endDate)) "
+        )
+    List<String> findJohRoles(@Param("hmctsServiceId") String hmctsServiceId,
+                              @Param("regionId") String regionId,
+                              @Param("statusId") String statusId,
+                              @Param("startDate") LocalDate startDate,
+                              @Param("endDate") LocalDate endDate,
+                              @Param("serviceOnboardedDate") LocalDate serviceOnboardedDate
     );
 }

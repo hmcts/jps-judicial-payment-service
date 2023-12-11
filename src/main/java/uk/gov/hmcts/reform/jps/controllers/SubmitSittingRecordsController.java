@@ -28,7 +28,6 @@ import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESP
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_401;
 import static uk.gov.hmcts.reform.jps.controllers.ControllerResponseMessage.RESPONSE_403;
 
-
 @RestController
 @Validated
 @RequestMapping(

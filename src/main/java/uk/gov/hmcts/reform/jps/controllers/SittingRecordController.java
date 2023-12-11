@@ -34,7 +34,6 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.PUBLISHED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.RECORDED;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
-
 @RestController
 @Validated
 @RequestMapping(
@@ -75,6 +74,7 @@ public class SittingRecordController {
 
         List<SittingRecord> sittingRecords = emptyList();
         List<RecordingUser> recordingUsers = emptyList();
+        List<String> johRoles = emptyList();
 
         if (totalRecordCount > 0) {
             sittingRecords = sittingRecordService.getSittingRecords(
@@ -85,6 +85,8 @@ public class SittingRecordController {
             if (!sittingRecords.isEmpty()) {
                 regionService.setRegionName(hmctsServiceCode, sittingRecords);
                 judicialUserDetailsService.setJudicialUserDetails(sittingRecords);
+
+                johRoles = sittingRecordService.getJohRoleIds(hmctsServiceCode, sittingRecordSearchRequest);
 
                 recordingUsers =
                     statusHistoryService.findRecordingUsers(
@@ -100,6 +102,7 @@ public class SittingRecordController {
         return ok(SittingRecordSearchResponse.builder()
                       .recordCount(totalRecordCount)
                       .recordingUsers(recordingUsers)
+                      .johRoles(johRoles)
                       .sittingRecords(sittingRecords)
                       .build());
     }

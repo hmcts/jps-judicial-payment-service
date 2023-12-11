@@ -62,26 +62,6 @@ public class PublishSittingRecordService {
             .build();
     }
 
-    private String getFinancialYear(LocalDate date) {
-        int year = date.getYear();
-        int nextYear = (year + 1) % 100;
-        return String.join("-",
-                           String.valueOf(year), String.valueOf(nextYear));
-
-    }
-
-    private LocalDate startOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear(),
-                            Month.APRIL,
-                            6);
-    }
-
-    private LocalDate endOfFinancialYear(LocalDate date) {
-        return LocalDate.of(date.getYear() + 1,
-                            Month.APRIL,
-                            5);
-    }
-
     public BigDecimal calculateJohFee(
         String hmctsServiceCode,
         String personalCode,
@@ -109,15 +89,13 @@ public class PublishSittingRecordService {
             .orElse(fee.getStandardFee());
     }
 
-    private BigDecimal getMedicalMemberFee(
+    protected BigDecimal getMedicalMemberFee(
         String personalCode,
         LocalDate sittingDate,
         boolean higherMedicalRateSession,
         Fee fee) {
         BigDecimal derivedFee;
-        String sittingDateFinancialYear = getFinancialYear(sittingDate);
-        PublishSittingRecordCount publishSittingRecordCount = retrievePublishedRecords(personalCode);
-        long publishedSittingCount = getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
+        long publishedSittingCount = evaluatePublishedSittingCount(personalCode, sittingDate);
         if (publishedSittingCount > properties.getMedicalThreshold() || higherMedicalRateSession) {
             derivedFee = fee.getHigherThresholdFee();
         } else {
@@ -126,9 +104,14 @@ public class PublishSittingRecordService {
         return derivedFee;
     }
 
-    private long getPublishedSittingCount(
-        PublishSittingRecordCount publishSittingRecordCount,
-        String sittingDateFinancialYear) {
+    protected Long evaluatePublishedSittingCount(String personalCode, LocalDate sittingDate) {
+        String sittingDateFinancialYear = getFinancialYear(sittingDate);
+        PublishSittingRecordCount publishSittingRecordCount = retrievePublishedRecords(personalCode);
+        return getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
+    }
+
+    protected Long getPublishedSittingCount(PublishSittingRecordCount publishSittingRecordCount,
+                                            String sittingDateFinancialYear) {
         long publishedSittingCount;
 
         if (publishSittingRecordCount.getCurrentFinancialYear().getFinancialYear().equals(sittingDateFinancialYear)) {
@@ -140,5 +123,24 @@ public class PublishSittingRecordService {
             throw new IllegalArgumentException("Financial year is invalid : " + sittingDateFinancialYear);
         }
         return publishedSittingCount;
+    }
+
+    private String getFinancialYear(LocalDate date) {
+        int year = date.getYear();
+        int nextYear = (year + 1) % 100;
+        return String.join("-",
+                           String.valueOf(year), String.valueOf(nextYear));
+    }
+
+    private LocalDate startOfFinancialYear(LocalDate date) {
+        return LocalDate.of(date.getYear(),
+                            Month.APRIL,
+                            6);
+    }
+
+    private LocalDate endOfFinancialYear(LocalDate date) {
+        return LocalDate.of(date.getYear() + 1,
+                            Month.APRIL,
+                            5);
     }
 }
