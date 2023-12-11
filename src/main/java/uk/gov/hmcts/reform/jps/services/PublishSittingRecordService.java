@@ -40,7 +40,6 @@ public class PublishSittingRecordService {
 
     private final SittingRecordRepository sittingRecordRepository;
     private final StatusHistoryService statusHistoryService;
-    private final SittingRecordService sittingRecordService;
     private final SittingDaysService sittingDaysService;
     private final FeeService feeService;
     private final JudicialOfficeHolderService judicialOfficeHolderService;
@@ -53,6 +52,10 @@ public class PublishSittingRecordService {
     private final ExportedFileDataHeaderService exportedFileDataHeaderService;
     private final ExportedFileDataService exportedFileDataService;
     private final ExportedFilesService exportedFilesService;
+
+    public uk.gov.hmcts.reform.jps.domain.SittingRecord getSittingRecord(Long id) {
+        return sittingRecordRepository.findById(id).get();
+    }
 
     public PublishSittingRecordCount retrievePublishedRecords(String personalCode) {
         LocalDate currentDate = LocalDate.now();
@@ -100,7 +103,15 @@ public class PublishSittingRecordService {
             hmctsServiceCode,
             judgeRoleTypeId,
             sittingDate
-        );
+        ).orElseThrow(() -> new IllegalArgumentException(
+            String.join(
+                " ",
+                "Fee not set/active for hmctsServiceCode",
+                hmctsServiceCode,
+                "and judgeRoleTypeId",
+                judgeRoleTypeId
+            )));
+
 
         if (properties.isMedicalMember(judgeRoleTypeId)) {
             return getMedicalMemberFee(personalCode, sittingDate, higherMedicalRateSession, fee);
@@ -182,7 +193,7 @@ public class PublishSittingRecordService {
     public void doPublish(SittingRecordPublishFields sittingRecordPublishFields, FileInfo fileInfo,
                           String hmctsServiceCode, Integer groupNameCount) {
 
-        SittingRecord sittingRecord = sittingRecordService.getSittingRecord(sittingRecordPublishFields.getId());
+        SittingRecord sittingRecord = getSittingRecord(sittingRecordPublishFields.getId());
 
         String groupName = getGroupName(groupNameCount);
         String publishedByUid = securityUtils.getUserInfo().getUid();
@@ -190,17 +201,13 @@ public class PublishSittingRecordService {
 
         CourtVenue courtVenue = courtVenueService.getCourtVenue(hmctsServiceCode, sittingRecord.getEpimmsId()).get();
 
-        JohPayroll johPayroll = null;
-        //        JohPayroll johPayroll = judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
-        //            sittingRecord.getPersonalCode(),
-        //            sittingRecord.getSittingDate()).get();
+        JohPayroll johPayroll = judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
+                    sittingRecord.getPersonalCode(),
+                    sittingRecord.getSittingDate()).get().getJohPayrolls().get(0);
 
         ExportedFileDataHeader exportedFileDataHeader = exportedFileDataHeaderService.createExportedFileDataHeader(
             groupName, publishedByName, hmctsServiceCode);
 
-        // ExportedFile exportedFile = exportedFilesService.createExportedFile(exportedFileDataHeader,
-        //                                                                     fileInfo.getFileName(),
-        //                                                                     fileInfo.getRecordCount());
         exportedFilesService.createExportedFile(exportedFileDataHeader,
                                                 fileInfo.getFileName(),
                                                 fileInfo.getRecordCount());

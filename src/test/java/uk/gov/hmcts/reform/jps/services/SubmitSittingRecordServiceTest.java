@@ -93,7 +93,7 @@ class SubmitSittingRecordServiceTest {
     @BeforeEach
     public void setUp() {
         submitSittingRecordService = new SubmitSittingRecordService(
-            sittingRecordRepository, statusHistoryService, sittingRecordService, sittingDaysService, feeService,
+            sittingRecordRepository, statusHistoryService, sittingDaysService, feeService,
             judicialOfficeHolderService, applicationProperties, publishErrorCheckerService, securityUtils,
             serviceService, courtVenueService, exportedFileDataHeaderRepository, exportedFileDataHeaderService,
             exportedFileDataService, exportedFilesService

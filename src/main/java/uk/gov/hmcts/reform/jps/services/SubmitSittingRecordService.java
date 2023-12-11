@@ -15,7 +15,6 @@ public class SubmitSittingRecordService extends PublishSittingRecordService {
 
     public SubmitSittingRecordService(SittingRecordRepository sittingRecordRepository,
                                       StatusHistoryService statusHistoryService,
-                                      SittingRecordService sittingRecordService,
                                       SittingDaysService sittingDaysService, FeeService feeService,
                                       JudicialOfficeHolderService judicialOfficeHolderService,
                                       ApplicationProperties properties,
@@ -28,7 +27,7 @@ public class SubmitSittingRecordService extends PublishSittingRecordService {
                                       ExportedFileDataService exportedFileDataService,
                                       ExportedFilesService exportedFilesService) {
 
-        super(sittingRecordRepository, statusHistoryService, sittingRecordService, sittingDaysService, feeService,
+        super(sittingRecordRepository, statusHistoryService, sittingDaysService, feeService,
               judicialOfficeHolderService, properties, publishErrorCheckerService, securityUtils, serviceService,
               courtVenueService, exportedFileDataHeaderRepository, exportedFileDataHeaderService,
               exportedFileDataService, exportedFilesService);

@@ -38,6 +38,7 @@ import uk.gov.hmcts.reform.jps.model.in.SubmitSittingRecordRequest;
 import uk.gov.hmcts.reform.jps.model.out.SittingRecord;
 import uk.gov.hmcts.reform.jps.model.out.SubmitSittingRecordResponse;
 import uk.gov.hmcts.reform.jps.refdata.location.model.CourtVenue;
+import uk.gov.hmcts.reform.jps.repository.ExportedFileDataHeaderRepository;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import uk.gov.hmcts.reform.jps.services.refdata.LocationService;
 
@@ -98,16 +99,34 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
     private ApplicationProperties properties;
 
     @Mock
+    private CourtVenueService courtVenueService;
+
+    @Mock
     private DuplicateCheckerService duplicateCheckerService;
 
     @Mock
-    FeeService feeService;
+    private ExportedFileDataHeaderRepository exportedFileDataHeaderRepository;
+
+    @Mock
+    private ExportedFileDataHeaderService exportedFileDataHeaderService;
+
+    @Mock
+    private ExportedFileDataService exportedFileDataService;
+
+    @Mock
+    private ExportedFilesService exportedFilesService;
+
+    @Mock
+    private FeeService feeService;
 
     @Mock
     private JudicialOfficeHolderService judicialOfficeHolderService;
 
     @Mock
     private LocationService locationService;
+
+    @Mock
+    private PublishErrorCheckerService publishErrorCheckerService;
 
     @Mock
     private SecurityUtils securityUtils;
@@ -156,10 +175,16 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
         MockitoAnnotations.openMocks(this);
 
         publishSittingRecordService = new PublishSittingRecordService(
-            sittingRecordRepository, sittingDaysService, feeService, judicialOfficeHolderService, properties);
+            sittingRecordRepository, statusHistoryService, sittingDaysService, feeService,
+            judicialOfficeHolderService, properties, publishErrorCheckerService, securityUtils,
+            serviceService, courtVenueService, exportedFileDataHeaderRepository, exportedFileDataHeaderService,
+            exportedFileDataService, exportedFilesService);
 
         submitSittingRecordService = new SubmitSittingRecordService(
-            sittingRecordRepository, sittingDaysService, feeService, judicialOfficeHolderService, properties);
+            sittingRecordRepository, statusHistoryService, sittingDaysService, feeService,
+            judicialOfficeHolderService, properties, publishErrorCheckerService, securityUtils,
+            serviceService, courtVenueService, exportedFileDataHeaderRepository, exportedFileDataHeaderService,
+            exportedFileDataService, exportedFilesService);
 
         sittingRecordService = new SittingRecordService(sittingRecordRepository, duplicateCheckerService, securityUtils,
                                                         locationService, serviceService, statusHistoryService,
@@ -886,7 +911,7 @@ class SittingRecordServiceTest extends BaseEvaluateDuplicate {
             .build();
 
         when(feeService.findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(anyString(), anyString(), any()))
-                 .thenReturn(fee);
+                 .thenReturn(Optional.ofNullable(fee));
         when(properties.isMedicalMember(anyString())).thenReturn(isMedicalMember);
         when(judicialOfficeHolderService.getLondonFlag(anyString(), any())).thenReturn(Optional.ofNullable(londonFlag));
         when(properties.getMedicalThreshold()).thenReturn(20);
