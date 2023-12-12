@@ -13,6 +13,7 @@ import uk.gov.hmcts.reform.jps.domain.ExportedFileData;
 import uk.gov.hmcts.reform.jps.domain.ExportedFileDataHeader;
 import uk.gov.hmcts.reform.jps.domain.Fee;
 import uk.gov.hmcts.reform.jps.domain.JohPayroll;
+import uk.gov.hmcts.reform.jps.domain.JudicialOfficeHolder;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection.SittingRecordPublishFields;
 import uk.gov.hmcts.reform.jps.model.FileInfo;
@@ -54,7 +55,8 @@ public class PublishSittingRecordService {
     private final ExportedFilesService exportedFilesService;
 
     public uk.gov.hmcts.reform.jps.domain.SittingRecord getSittingRecord(Long id) {
-        return sittingRecordRepository.findById(id).get();
+        return sittingRecordRepository.findById(id)
+            .orElse(null);
     }
 
     public PublishSittingRecordCount retrievePublishedRecords(String personalCode) {
@@ -195,15 +197,18 @@ public class PublishSittingRecordService {
 
         SittingRecord sittingRecord = getSittingRecord(sittingRecordPublishFields.getId());
 
-        String groupName = getGroupName(groupNameCount);
+        String groupName = getGroupName(hmctsServiceCode, groupNameCount);
         String publishedByUid = securityUtils.getUserInfo().getUid();
         String publishedByName = securityUtils.getUserInfo().getName();
 
-        CourtVenue courtVenue = courtVenueService.getCourtVenue(hmctsServiceCode, sittingRecord.getEpimmsId()).get();
+        CourtVenue courtVenue = courtVenueService.getCourtVenue(hmctsServiceCode, sittingRecord.getEpimmsId())
+            .orElseThrow(() -> new IllegalArgumentException("Court venue missing"));
 
-        JohPayroll johPayroll = judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
-                    sittingRecord.getPersonalCode(),
-                    sittingRecord.getSittingDate()).get().getJohPayrolls().get(0);
+        JudicialOfficeHolder judicialOfficeHolder = judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
+            sittingRecord.getPersonalCode(),
+            sittingRecord.getSittingDate())
+            .orElseThrow(() -> new IllegalArgumentException("JudicialOfficeHolder missing"));
+        JohPayroll johPayroll = judicialOfficeHolder.getJohPayrolls().get(0);
 
         ExportedFileDataHeader exportedFileDataHeader = exportedFileDataHeaderService.createExportedFileDataHeader(
             groupName, publishedByName, hmctsServiceCode);
@@ -216,11 +221,13 @@ public class PublishSittingRecordService {
                                                                                            johPayroll);
 
         statusHistoryService.publish(sittingRecord, publishedByUid, publishedByName);
-
     }
 
-    private String getGroupName(Integer groupNameCount) {
-        return "<Service>" + groupNameCount + "<payRollMonth>" + "<payRollYear>";
+    private String getGroupName(String hmctsServiceCode, Integer groupNameCount) {
+        return hmctsServiceCode
+            + "_" + groupNameCount
+            + "_" + LocalDate.now().getMonth()
+            + "_" + LocalDate.now().getYear();
     }
 
     protected Long getPublishedSittingCount(PublishSittingRecordCount publishSittingRecordCount,

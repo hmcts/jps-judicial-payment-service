@@ -64,10 +64,6 @@ public class SittingRecordService {
     private final SubmitSittingRecordService submitSittingRecordService;
     private final ApplicationProperties properties;
 
-    public uk.gov.hmcts.reform.jps.domain.SittingRecord getSittingRecord(Long id) {
-        return sittingRecordRepository.findById(id).get();
-    }
-
     public List<SittingRecord> getSittingRecords(
         SittingRecordSearchRequest recordSearchRequest,
         String hmctsServiceCode) {
