@@ -14,18 +14,27 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.util.Streamable;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.components.BasePublishSittingRecord;
+import uk.gov.hmcts.reform.jps.components.CourtVenueErrorChecker;
+import uk.gov.hmcts.reform.jps.components.FeeInErrorChecker;
+import uk.gov.hmcts.reform.jps.components.JohAttributesErrorChecker;
+import uk.gov.hmcts.reform.jps.components.JohPayrollErrorChecker;
+import uk.gov.hmcts.reform.jps.components.ServiceErrorChecker;
+import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.Fee;
 import uk.gov.hmcts.reform.jps.domain.Service;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection.SittingRecordPublishFields;
 import uk.gov.hmcts.reform.jps.model.CourtVenueInError;
 import uk.gov.hmcts.reform.jps.model.FeeInError;
 import uk.gov.hmcts.reform.jps.model.FileInfo;
+import uk.gov.hmcts.reform.jps.model.FileInfos;
 import uk.gov.hmcts.reform.jps.model.FinancialYearRecords;
 import uk.gov.hmcts.reform.jps.model.JohAttributesInError;
 import uk.gov.hmcts.reform.jps.model.JohPayrollInError;
 import uk.gov.hmcts.reform.jps.model.PublishErrors;
 import uk.gov.hmcts.reform.jps.model.PublishSittingRecordCount;
+import uk.gov.hmcts.reform.jps.model.StatusId;
 import uk.gov.hmcts.reform.jps.model.out.PublishResponse;
+import uk.gov.hmcts.reform.jps.repository.ExportedFileDataHeaderRepository;
 import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 
 import java.math.BigDecimal;
@@ -37,6 +46,8 @@ import static java.time.LocalDate.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -49,8 +60,71 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 
 @ExtendWith(MockitoExtension.class)
 class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
-    public static final String PERSONAL_CODE = "4918178";
 
+    @Mock
+    private ApplicationProperties applicationProperties;
+
+    @Mock
+    private CourtVenueErrorChecker courtVenueErrorChecker;
+
+    @Mock
+    private CourtVenueService courtVenueService;
+
+    @Mock
+    private FeeInErrorChecker feeInErrorChecker;
+
+    @Mock
+    private FeeService feeService;
+
+    @Mock
+    private FileInfos fileInfos;
+
+    @Mock
+    private JudicialOfficeHolderService judicialOfficeHolderService;
+
+    @Mock
+    private JohAttributesErrorChecker johAttributesErrorChecker;
+
+    @Mock
+    private JohPayrollErrorChecker johPayrollErrorChecker;
+
+    @Mock
+    private ServiceService serviceService;
+
+    @Mock
+    private ServiceErrorChecker serviceErrorChecker;
+
+    @Mock
+    private SittingDaysService sittingDaysService;
+
+    @Mock
+    private SittingRecordRepository sittingRecordRepository;
+
+    @Mock
+    private StatusHistoryService statusHistoryService;
+
+    @Mock
+    private SecurityUtils securityUtils;
+
+    @Mock
+    private ExportedFileDataHeaderRepository exportedFileDataHeaderRepository;
+
+    @Mock
+    private ExportedFileDataHeaderService exportedFileDataHeaderService;
+
+    @Mock
+    private ExportedFileDataService exportedFileDataService;
+
+    @Mock
+    private ExportedFilesService exportedFilesService;
+
+    @Mock
+    private PublishErrorCheckerService publishErrorCheckerService;
+
+    @InjectMocks
+    private PublishSittingRecordService publishSittingRecordService;
+
+    public static final String PERSONAL_CODE = "4918178";
     public static final String MEDICAL_STAFF = "44";
     public static final BigDecimal HIGHER_THRESHOLD_FEE = new BigDecimal(100L);
     public static final BigDecimal STANDARD_FEE = new BigDecimal(10);
@@ -58,27 +132,6 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
     public static final String USER_ID = "user_id";
     public static final String USER_NAME = "user_name";
     public static final String SERVICE_NAME = "SSCS";
-    @Mock
-    private SittingDaysService sittingDaysService;
-    @Mock
-    private SittingRecordRepository sittingRecordRepository;
-    @Mock
-    private FeeService feeService;
-
-    @Mock
-    private ApplicationProperties applicationProperties;
-
-    @Mock
-    private JudicialOfficeHolderService judicialOfficeHolderService;
-
-    @Mock
-    private ServiceService serviceService;
-
-    @Mock
-    private PublishErrorCheckerService publishErrorCheckerService;
-
-    @InjectMocks
-    private PublishSittingRecordService publishSittingRecordService;
 
     @NotNull
     private static PublishErrors getPublishErrors(InvocationOnMock invocation) {
@@ -601,5 +654,115 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
                 .hasSize(1);
         }
 
+    }
+
+    @Test
+    void publishNotTrueAndHasErrors() {
+        final String hmctsServiceCode = "hmcts1";
+        final LocalDate dateRangeTo = LocalDate.of(2023, 11, 21);
+        final String publishedByIdamId = "publishedById";
+        final String publishedByName = "publishedByName";
+        final boolean publish = false;
+
+        final String epimmsId = "EP001";
+        final String judgeRoleTypeId = "judge";
+        final String judgeRoleTypeName = "judgeJury";
+        SittingRecordPublishFields publishFields = generateSittingRecordPublishFields(1L,"pc001",
+                                                                                     1L,
+                                                                                      judgeRoleTypeId,
+                                                                                      epimmsId,
+                                                                      LocalDate.of(2023,11,25),
+                                                                                      StatusId.PUBLISHED);
+        String serviceName = "hmcts1";
+
+        PublishErrors publishErrors  = PublishErrors.builder().build();
+
+        CourtVenueInError courtVenueInError = CourtVenueInError.builder()
+            .hmctsServiceId(serviceName)
+            .epimmsId(epimmsId)
+            .build();
+        publishErrors.addCourtVenueError(courtVenueInError);
+
+        FeeInError feeInError = FeeInError.builder()
+            .hmctsServiceId(serviceName)
+            .judgeRoleTypeId(judgeRoleTypeId)
+            .judgeRoleTypeName(judgeRoleTypeName)
+            .build();
+        publishErrors.addFeeError(feeInError);
+
+        publishSittingRecordService.processSinglePublishFields(publishFields, publishErrors, hmctsServiceCode,
+                                                               fileInfos, serviceName, publishedByIdamId,
+                                                               publishedByName, publish);
+
+        assertTrue(publishErrors.getErrorCount() > 0);
+    }
+
+    @Test
+    void publishNotTrueAndNoErrors() {
+        final String hmctsServiceCode = "hmcts1";
+        final LocalDate dateRangeTo = LocalDate.of(2023, 11, 21);
+        final String publishedByIdamId = "publishedById";
+        final String publishedByName = "publishedByName";
+        final boolean publish = false;
+
+        final String epimmsId = "EP001";
+        SittingRecordPublishFields publishFields = generateSittingRecordPublishFields(1L,"pc001",
+                                                                                      1L,
+                                                                                      "judge",
+                                                                                      epimmsId,
+                                                                                      LocalDate.of(2023,11,25),
+                                                                                      StatusId.PUBLISHED);
+        String serviceName = "hmcts1";
+
+        PublishErrors publishErrors  = PublishErrors.builder().build();
+
+        publishSittingRecordService.processSinglePublishFields(publishFields, publishErrors, hmctsServiceCode,
+                                                               fileInfos, serviceName, publishedByIdamId,
+                                                               publishedByName, publish);
+
+        assertEquals(0, publishErrors.getErrorCount());
+    }
+
+    private SittingRecordPublishFields generateSittingRecordPublishFields(Long id, String personalCode,
+                                                                          Long contractTypeId, String judgeRoleTypeId,
+                                                                          String epimmsId, LocalDate sittingDate,
+                                                                          StatusId statusId) {
+        SittingRecordPublishFields sittingRecordPublishFields = new SittingRecordPublishFields() {
+            @Override
+            public Long getId() {
+                return id;
+            }
+
+            @Override
+            public String getPersonalCode() {
+                return personalCode;
+            }
+
+            @Override
+            public Long getContractTypeId() {
+                return contractTypeId;
+            }
+
+            @Override
+            public String getJudgeRoleTypeId() {
+                return judgeRoleTypeId;
+            }
+
+            @Override
+            public String getEpimmsId() {
+                return epimmsId;
+            }
+
+            @Override
+            public LocalDate getSittingDate() {
+                return sittingDate;
+            }
+
+            @Override
+            public StatusId getStatusId() {
+                return statusId;
+            }
+        };
+        return sittingRecordPublishFields;
     }
 }

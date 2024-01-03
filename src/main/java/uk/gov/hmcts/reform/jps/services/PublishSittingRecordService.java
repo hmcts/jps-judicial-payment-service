@@ -1,15 +1,12 @@
 package uk.gov.hmcts.reform.jps.services;
 
 import lombok.RequiredArgsConstructor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.CourtVenue;
-import uk.gov.hmcts.reform.jps.domain.ExportedFileData;
 import uk.gov.hmcts.reform.jps.domain.ExportedFileDataHeader;
 import uk.gov.hmcts.reform.jps.domain.Fee;
 import uk.gov.hmcts.reform.jps.domain.JohPayroll;
@@ -29,6 +26,7 @@ import uk.gov.hmcts.reform.jps.repository.SittingRecordRepository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.Month;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
@@ -37,7 +35,6 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @Service
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class PublishSittingRecordService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(PublishSittingRecordService.class);
 
     private final SittingRecordRepository sittingRecordRepository;
     private final StatusHistoryService statusHistoryService;
@@ -143,32 +140,85 @@ public class PublishSittingRecordService {
                      dateRangeTo
                  ).stream()) {
             stream.forEach(
-                sittingRecordPublishFields -> {
-                    publishErrors.setError(false);
-                    publishErrorCheckerService.evaluate(
-                        hmctsServiceCode,
-                        sittingRecordPublishFields,
-                        publishErrors
-                    );
-                    if (!publishErrors.isError()) {
-                        FileInfo fileInfo = getFileInfo(
-                            fileInfos,
-                            serviceName,
-                            publishedByIdamId,
-                            publishedByName
-                        );
-
-                        if (publish) {
-                            doPublish(sittingRecordPublishFields, fileInfo, hmctsServiceCode,
-                                      fileInfos.getGroupNameCount()
-                            );
-                        }
-                    }
-                }
+                sittingRecordPublishFields -> processSinglePublishFields(sittingRecordPublishFields, publishErrors,
+                                                                         hmctsServiceCode,
+                                                                         fileInfos, serviceName,
+                                                                         publishedByIdamId, publishedByName, publish)
             );
         }
 
+        identifyJohsMarkedAsPartTime(publishErrors, hmctsServiceCode, dateRangeTo);
+
         return createPublishResponse(fileInfos, publishErrors);
+    }
+
+    protected void processSinglePublishFields(SittingRecordPublishFields sittingRecordPublishFields,
+                                              PublishErrors publishErrors, String hmctsServiceCode, FileInfos fileInfos,
+                                              String serviceName, String publishedByIdamId, String publishedByName,
+                                              boolean publish) {
+        publishErrors.setError(false);
+        publishErrorCheckerService.evaluate(
+            hmctsServiceCode,
+            sittingRecordPublishFields,
+            publishErrors
+        );
+
+        if (!publishErrors.isError()) {
+            FileInfo fileInfo = getFileInfo(
+                fileInfos,
+                serviceName,
+                publishedByIdamId,
+                publishedByName
+            );
+
+            if (publish) {
+                doPublishSinglePublishFields(sittingRecordPublishFields, fileInfo, hmctsServiceCode,
+                                             fileInfos.getGroupNameCount()
+                );
+            }
+        }
+    }
+
+    public void doPublishSinglePublishFields(SittingRecordPublishFields sittingRecordPublishFields, FileInfo fileInfo,
+                                             String hmctsServiceCode, Integer groupNameCount) {
+
+        SittingRecord sittingRecord = getSittingRecord(sittingRecordPublishFields.getId());
+
+        String groupName = getGroupName(hmctsServiceCode, groupNameCount);
+        String publishedByUid = securityUtils.getUserInfo().getUid();
+        String publishedByName = securityUtils.getUserInfo().getName();
+
+        CourtVenue courtVenue = courtVenueService.getCourtVenue(hmctsServiceCode, sittingRecord.getEpimmsId())
+            .orElseThrow(() -> new IllegalArgumentException("Court venue missing"));
+
+        JudicialOfficeHolder judicialOfficeHolder = judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
+                sittingRecord.getPersonalCode(),
+                sittingRecord.getSittingDate())
+            .orElseThrow(() -> new IllegalArgumentException("JudicialOfficeHolder missing"));
+        JohPayroll johPayroll = judicialOfficeHolder.getJohPayrolls().get(0);
+
+        ExportedFileDataHeader exportedFileDataHeader = exportedFileDataHeaderService.createExportedFileDataHeader(
+            groupName, publishedByName, hmctsServiceCode);
+
+        exportedFilesService.createExportedFile(exportedFileDataHeader,
+                                                fileInfo.getFileName(),
+                                                fileInfo.getRecordCount());
+
+        exportedFileDataService.createExportedFileData(sittingRecord,
+                                                       courtVenue,
+                                                       johPayroll);
+
+        statusHistoryService.publish(sittingRecord, publishedByUid, publishedByName);
+
+        // Requirement 7.8
+        long sittingCount = evaluatePublishedSittingCount(sittingRecord.getPersonalCode(),
+                                                          sittingRecord.getSittingDate());
+        if (properties.isMedicalMember(sittingRecord.getJudgeRoleTypeId()) && sittingCount > 0) {
+            String currentFinancialYear = getFinancialYear(LocalDate.now());
+            sittingDaysService.updateSittingCount(sittingCount, sittingRecord.getJudgeRoleTypeId(),
+                                                  sittingRecord.getPersonalCode(), currentFinancialYear);
+        }
+
     }
 
     protected BigDecimal getMedicalMemberFee(
@@ -192,44 +242,6 @@ public class PublishSittingRecordService {
         return getPublishedSittingCount(publishSittingRecordCount, sittingDateFinancialYear);
     }
 
-    public void doPublish(SittingRecordPublishFields sittingRecordPublishFields, FileInfo fileInfo,
-                          String hmctsServiceCode, Integer groupNameCount) {
-
-        SittingRecord sittingRecord = getSittingRecord(sittingRecordPublishFields.getId());
-
-        String groupName = getGroupName(hmctsServiceCode, groupNameCount);
-        String publishedByUid = securityUtils.getUserInfo().getUid();
-        String publishedByName = securityUtils.getUserInfo().getName();
-
-        CourtVenue courtVenue = courtVenueService.getCourtVenue(hmctsServiceCode, sittingRecord.getEpimmsId())
-            .orElseThrow(() -> new IllegalArgumentException("Court venue missing"));
-
-        JudicialOfficeHolder judicialOfficeHolder = judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
-            sittingRecord.getPersonalCode(),
-            sittingRecord.getSittingDate())
-            .orElseThrow(() -> new IllegalArgumentException("JudicialOfficeHolder missing"));
-        JohPayroll johPayroll = judicialOfficeHolder.getJohPayrolls().get(0);
-
-        ExportedFileDataHeader exportedFileDataHeader = exportedFileDataHeaderService.createExportedFileDataHeader(
-            groupName, publishedByName, hmctsServiceCode);
-
-        exportedFilesService.createExportedFile(exportedFileDataHeader,
-                                                fileInfo.getFileName(),
-                                                fileInfo.getRecordCount());
-
-        ExportedFileData exportedFileData = exportedFileDataService.createExportedFileData(sittingRecord, courtVenue,
-                                                                                           johPayroll);
-
-        statusHistoryService.publish(sittingRecord, publishedByUid, publishedByName);
-    }
-
-    private String getGroupName(String hmctsServiceCode, Integer groupNameCount) {
-        return hmctsServiceCode
-            + "_" + groupNameCount
-            + "_" + LocalDate.now().getMonth()
-            + "_" + LocalDate.now().getYear();
-    }
-
     protected Long getPublishedSittingCount(PublishSittingRecordCount publishSittingRecordCount,
                                             String sittingDateFinancialYear) {
         long publishedSittingCount;
@@ -243,6 +255,24 @@ public class PublishSittingRecordService {
             throw new IllegalArgumentException("Financial year is invalid : " + sittingDateFinancialYear);
         }
         return publishedSittingCount;
+    }
+
+    protected void identifyJohsMarkedAsPartTime(PublishErrors publishErrors,
+                                                String hmctsServiceCode,
+                                                LocalDate dateRangeTo) {
+        List<Object[]> results = sittingRecordRepository.findJohPartTimeNoAttr(hmctsServiceCode, dateRangeTo);
+        results.stream().forEach(result ->
+            publishErrorCheckerService.addJohAttributesErrorInfo(publishErrors,
+                                                   (String) result[0],
+                                                   (LocalDate) result[1])
+        );
+    }
+
+    private String getGroupName(String hmctsServiceCode, Integer groupNameCount) {
+        return hmctsServiceCode
+            + "_" + groupNameCount
+            + "_" + LocalDate.now().getMonth()
+            + "_" + LocalDate.now().getYear();
     }
 
     private PublishResponse createPublishResponse(FileInfos fileInfos, PublishErrors publishErrors) {
