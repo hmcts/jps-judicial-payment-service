@@ -14,6 +14,7 @@ import uk.gov.hmcts.reform.jps.domain.SittingDays;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase.Replace.NONE;
 import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_PUBLISHED_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
@@ -26,7 +27,6 @@ public class SittingDaysRepositoryTest {
 
     @Autowired
     private SittingDaysRepository sittingDaysRepository;
-
 
     @Test
     @Sql(RESET_DATABASE)
@@ -82,4 +82,18 @@ public class SittingDaysRepositoryTest {
         assertThat(sittingCountByPersonalCodeAndFinancialYear)
             .isEqualTo(count);
     }
+
+    @Test
+    void shouldUpdateSittingCount() {
+        SittingDays persistedSittingDays = getSittingDaysPersisted();
+        Long sittingDaysCount = 117L;
+
+        sittingDaysRepository.updateSittingCount(sittingDaysCount, persistedSittingDays.getJudgeRoleTypeId(),
+                                                 persistedSittingDays.getPersonalCode(),
+                                                 persistedSittingDays.getFinancialYear());
+        Optional<SittingDays> optionalSittingDays = sittingDaysRepository.findById(persistedSittingDays.getId());
+
+        assertEquals(sittingDaysCount, optionalSittingDays.get().getSittingCount());
+    }
+
 }
