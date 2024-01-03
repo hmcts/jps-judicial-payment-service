@@ -63,61 +63,42 @@ class PublishSittingRecordServiceTest extends BasePublishSittingRecord {
 
     @Mock
     private ApplicationProperties applicationProperties;
-
     @Mock
     private CourtVenueErrorChecker courtVenueErrorChecker;
-
     @Mock
     private CourtVenueService courtVenueService;
-
     @Mock
     private FeeInErrorChecker feeInErrorChecker;
-
     @Mock
     private FeeService feeService;
-
     @Mock
     private FileInfos fileInfos;
-
     @Mock
     private JudicialOfficeHolderService judicialOfficeHolderService;
-
     @Mock
     private JohAttributesErrorChecker johAttributesErrorChecker;
-
     @Mock
     private JohPayrollErrorChecker johPayrollErrorChecker;
-
     @Mock
     private ServiceService serviceService;
-
     @Mock
     private ServiceErrorChecker serviceErrorChecker;
-
     @Mock
     private SittingDaysService sittingDaysService;
-
     @Mock
     private SittingRecordRepository sittingRecordRepository;
-
     @Mock
     private StatusHistoryService statusHistoryService;
-
     @Mock
     private SecurityUtils securityUtils;
-
     @Mock
     private ExportedFileDataHeaderRepository exportedFileDataHeaderRepository;
-
     @Mock
     private ExportedFileDataHeaderService exportedFileDataHeaderService;
-
     @Mock
     private ExportedFileDataService exportedFileDataService;
-
     @Mock
     private ExportedFilesService exportedFilesService;
-
     @Mock
     private PublishErrorCheckerService publishErrorCheckerService;
 
