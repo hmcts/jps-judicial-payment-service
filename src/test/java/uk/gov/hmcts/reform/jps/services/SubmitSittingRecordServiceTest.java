@@ -10,6 +10,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import uk.gov.hmcts.reform.jps.components.ApplicationProperties;
+import uk.gov.hmcts.reform.jps.components.JohAttributesErrorChecker;
 import uk.gov.hmcts.reform.jps.data.SecurityUtils;
 import uk.gov.hmcts.reform.jps.domain.Fee;
 import uk.gov.hmcts.reform.jps.domain.JohAttributes;
@@ -77,6 +78,9 @@ class SubmitSittingRecordServiceTest {
 
     @Mock
     ServiceService serviceService;
+
+    @Mock
+    JohAttributesErrorChecker johAttributesErrorChecker;
 
     @InjectMocks
     FeeService feeService;
