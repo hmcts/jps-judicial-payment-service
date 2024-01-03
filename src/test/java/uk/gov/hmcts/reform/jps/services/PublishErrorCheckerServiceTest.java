@@ -27,33 +27,25 @@ class PublishErrorCheckerServiceTest {
 
     @Mock
     CourtVenueService courtVenueService;
+    @Mock
+    JohPayrollService johPayrollService;
+    @Mock
+    private FeeService feeService;
+    @Mock
+    FeeInErrorChecker feeInErrorChecker;
+    @Mock
+    ServiceService serviceService;
+    @Mock
+    JudicialOfficeHolderService judicialOfficeHolderService;
+    @Mock
+    JudicialUserDetailsService judicialUserDetailsService;
 
     @InjectMocks
     CourtVenueErrorChecker courtVenueErrorChecker;
-
-    @Mock
-    JohPayrollService johPayrollService;
-
     @InjectMocks
     JohPayrollErrorChecker johPayrollErrorChecker;
-
-    @Mock
-    private FeeService feeService;
-
-    @Mock
-    FeeInErrorChecker feeInErrorChecker;
-
-    @Mock
-    ServiceService serviceService;
-
     @InjectMocks
     ServiceErrorChecker serviceErrorChecker;
-
-    @Mock
-    JudicialOfficeHolderService judicialOfficeHolderService;
-
-    @Mock
-    JudicialUserDetailsService judicialUserDetailsService;
 
     JohAttributesErrorChecker johAttributesErrorChecker;
 
