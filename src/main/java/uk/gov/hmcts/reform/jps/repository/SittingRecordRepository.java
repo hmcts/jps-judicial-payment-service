@@ -87,4 +87,25 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
                               @Param("endDate") LocalDate endDate,
                               @Param("serviceOnboardedDate") LocalDate serviceOnboardedDate
     );
+
+
+    @Query(
+        "select distinct sr.personalCode, sr.sittingDate from SittingRecord sr "
+            + "inner join JudicialOfficeHolder joh on joh.personalCode=sr.personalCode "
+            + "inner join JohAttributes ja on ja.judicialOfficeHolder.id=joh.id "
+            + "where sr.hmctsServiceId = :hmctsServiceId "
+            + "and sr.statusId ='RECORDED' "
+            + "and sr.sittingDate <= :dateRangeTo "
+            // + "and ja.crownServantFlag = false "
+            + "and ja.effectiveStartDate = ("
+            + "    SELECT MAX(ja2.effectiveStartDate)"
+            + "    FROM JohAttributes ja2"
+            + "    WHERE ja2.effectiveStartDate <= sr.sittingDate"
+            + ") "
+    )
+    List<Object[]> findJohPartTimeNoAttr(@Param("hmctsServiceId") String hmctsServiceId,
+                              @Param("dateRangeTo") LocalDate dateRangeTo
+    );
+
+
 }
