@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.jps.components.ServiceErrorChecker;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection;
 import uk.gov.hmcts.reform.jps.model.PublishErrors;
 
+import java.time.LocalDate;
+
 @Service
 public class PublishErrorCheckerService {
     private final CourtVenueErrorChecker courtVenueErrorChecker;
@@ -17,6 +19,7 @@ public class PublishErrorCheckerService {
     private final JohAttributesErrorChecker johAttributesErrorChecker;
     private final JohPayrollErrorChecker johPayrollErrorChecker;
     private final FeeInErrorChecker feeInErrorChecker;
+    private final ServiceErrorChecker serviceErrorChecker;
 
     @Autowired
     public PublishErrorCheckerService(CourtVenueErrorChecker courtVenueErrorChecker,
@@ -28,6 +31,7 @@ public class PublishErrorCheckerService {
         this.johAttributesErrorChecker = johAttributesErrorChecker;
         this.johPayrollErrorChecker = johPayrollErrorChecker;
         this.feeInErrorChecker = feeInErrorChecker;
+        this.serviceErrorChecker = serviceErrorChecker;
 
         this.courtVenueErrorChecker.next(johAttributesErrorChecker);
         this.johAttributesErrorChecker.next(johPayrollErrorChecker);
@@ -42,5 +46,13 @@ public class PublishErrorCheckerService {
                                         hmctsServiceCode,
                                         sittingRecord);
 
+    }
+
+    public void addJohAttributesErrorInfo(PublishErrors publishErrors,
+                 String personalCode,
+                 LocalDate sittingDate) {
+        johAttributesErrorChecker.addErrorInfo(publishErrors,
+                                               personalCode,
+                                               sittingDate);
     }
 }

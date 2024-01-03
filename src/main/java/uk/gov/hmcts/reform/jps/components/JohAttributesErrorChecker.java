@@ -10,6 +10,8 @@ import uk.gov.hmcts.reform.jps.refdata.judicial.model.JudicialUserDetailsApiResp
 import uk.gov.hmcts.reform.jps.services.JudicialOfficeHolderService;
 import uk.gov.hmcts.reform.jps.services.refdata.JudicialUserDetailsService;
 
+import java.time.LocalDate;
+
 @Component
 @RequiredArgsConstructor(onConstructor_ = {@Autowired})
 public class JohAttributesErrorChecker extends ErrorChecker {
@@ -20,7 +22,6 @@ public class JohAttributesErrorChecker extends ErrorChecker {
     public void evaluate(PublishErrors publishErrors,
                          String hmctsServiceCode,
                          SittingRecordPublishFields sittingRecord) {
-        LOGGER.debug("evaluate");
         evaluate(publishErrors, hmctsServiceCode, sittingRecord,
                  () ->
                      judicialOfficeHolderService.getJudicialOfficeHolderWithJohAttributes(
@@ -45,6 +46,15 @@ public class JohAttributesErrorChecker extends ErrorChecker {
                                                 .email(judicialUserDetailsApiResponse.getEmailId())
                                                 .postNominals(judicialUserDetailsApiResponse.getPostNominals())
                                                 .fullName(judicialUserDetailsApiResponse.getFullName())
+                                                .build());
+    }
+
+    public void addErrorInfo(PublishErrors publishErrors,
+                                String personalCode,
+                                LocalDate sittingDate) {
+        publishErrors.addJohAttributesError(JohAttributesInError.builder()
+                                                .personalCode(personalCode)
+                                                .sittingDate(sittingDate)
                                                 .build());
     }
 }
