@@ -76,6 +76,9 @@ public class BaseTest {
     public static final String INSERT_SUBMITTED_TEST_DATA
         = "classpath:sql/insert_submitted_test_data.sql";
 
+    public static final String INSERT_JOH_PART_TIME
+        = "classpath:sql/insert_joh_part_time.sql";
+
     @BeforeEach
     void init() {
         final String hostUrl = "http://localhost:" + wiremockPort;
