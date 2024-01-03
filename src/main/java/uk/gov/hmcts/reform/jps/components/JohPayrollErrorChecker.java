@@ -20,7 +20,6 @@ public class JohPayrollErrorChecker extends ErrorChecker {
     public void evaluate(PublishErrors publishErrors,
                          String hmctsServiceCode,
                          SittingRecordPublishFields sittingRecord) {
-        LOGGER.debug("evaluate");
         evaluate(publishErrors, hmctsServiceCode, sittingRecord,
                  () ->
                      judicialOfficeHolderService.getJudicialOfficeHolderWithJohPayroll(
