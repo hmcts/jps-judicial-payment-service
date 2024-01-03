@@ -80,7 +80,6 @@ public class StatusHistoryService {
                          changedByUserName);
     }
 
-    @Transactional
     public void publish(SittingRecord sittingRecord,
                              String changedByUserId,
                              String changedByUserName) {
