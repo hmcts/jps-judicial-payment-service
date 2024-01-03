@@ -23,16 +23,8 @@ public class ExportedFileDataService {
                                                       JohPayroll johPayroll) {
         ExportedFileData exportedFileData = ExportedFileData.builder()
             .sittingRecord(sittingRecord)
-            //.recordType(recordType)
-            //.transactionId(transactionId)
-            //.employeeNumber(employeeNumber)
-            //.transactionDate(transactionDate)
-            //.transactionTime(transactionTime)
             .payElementId(Long.valueOf(johPayroll.getPayrollId()))
             .payElementStartDate(sittingRecord.getSittingDate())
-            //.fixedOrTempIndicator(fixedOrTempIndicator)
-            //.employeesValue()
-            //.postId(postId)
             .costCenter(courtVenue.getCostCenterCode())
             .build();
         insertRecord(exportedFileData);
