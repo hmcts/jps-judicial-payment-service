@@ -25,7 +25,7 @@ VALUES (2,'4918180');
 
 INSERT INTO public.joh_attributes
 (local_joh_record_id, effective_start_date, crown_servant_flag, london_flag)
-VALUES (2, '2023-05-11', true, false);
+VALUES (2, '2023-05-11', false, false);
 
 INSERT INTO public.joh_payroll
 (joh_payroll_id, local_joh_record_id, effective_start_date, judge_role_type_id, payroll_id)

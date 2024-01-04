@@ -96,7 +96,7 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
             + "where sr.hmctsServiceId = :hmctsServiceId "
             + "and sr.statusId ='RECORDED' "
             + "and sr.sittingDate <= :dateRangeTo "
-            // + "and ja.crownServantFlag = false "
+            + "and ja.crownServantFlag = false "
             + "and ja.effectiveStartDate = ("
             + "    SELECT MAX(ja2.effectiveStartDate)"
             + "    FROM JohAttributes ja2"
