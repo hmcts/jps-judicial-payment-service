@@ -28,7 +28,7 @@ Feature: F-000 - Scenarios for the /Test endpoint - Smoke tests
     And a call is submitted to the "Test" endpoint using a "GET" request
     Then a "negative" response is received with a "403 Forbidden" status code
 
-  @000.4
+  @S-000.4
   @Ignore
   Scenario: User with valid role but missing S2S token submits request on /test POST endpoint
     Given a user with the IDAM role of "jps-recorder"
