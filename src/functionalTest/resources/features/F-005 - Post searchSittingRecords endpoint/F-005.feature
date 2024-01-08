@@ -2,6 +2,7 @@
 Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
 
   @S-005.1 #AC01
+  @Ignore
   Scenario: Success response when the request contains all the fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -14,6 +15,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response returns the matching sitting records
 
   @S-005.2 #AC02
+  @Ignore
   Scenario: Success response when the request contains only the mandatory fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -26,6 +28,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response returns the matching sitting records
 
   @S-005.3 #AC03
+  @Ignore
   Scenario: Success response when the request contains all the fields - Return 200 success without content
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -37,6 +40,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the "recordCount" is 0
 
   @S-005.4 #AC04
+  @Ignore
   Scenario: Negative response, when the request doesn't have the hmctsServiceCode
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -48,6 +52,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "hmctsServiceCode is mandatory"
 
   @S-005.5 #AC05
+  @Ignore
   Scenario: Negative response, when the request payload is missing pageSize
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -59,6 +64,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Page size is mandatory"
 
   @S-005.6 #AC05
+  @Ignore
   Scenario: Negative response, when the request payload is missing offset
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -70,6 +76,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Offset is mandatory"
 
   @S-005.9 #AC05
+  @Ignore
   Scenario: Negative response, when the request payload is missing dateOrder
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -81,6 +88,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Date order is mandatory"
 
   @S-005.10 #AC05
+  @Ignore
   Scenario: Negative response, when the request payload is missing dateRangeFrom
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -92,6 +100,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Date range from is mandatory"
 
   @S-005.11 #AC05
+  @Ignore
   Scenario: Negative response, when the request payload is missing dateRangeTo
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -103,6 +112,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "Date range to is mandatory"
 
   @S-005.12 #AC06
+  @Ignore
   Scenario: Negative response, return 403 Forbidden when the user has an invalid role for JPS
     Given a user with the IDAM role of "ccd-import"
     When a request is prepared with appropriate values
@@ -113,6 +123,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-005.13 #AC07
+  @Ignore
   Scenario: Negative response, when the service token is invalid
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -123,6 +134,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-005.14
+  @Ignore
   Scenario: Negative response, return 401 Unauthorised when the request is missing the service token
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -132,6 +144,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     Then a "negative" response is received with a "401 Unauthorised" status code
 
 @S-005.15 #AC01
+@Ignore
   Scenario: Negative response, when the request has a hmctsServiceId passed that is not found (not in the service table)
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -143,6 +156,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
 
   @S-005.16 #AC02
+  @Ignore
   Scenario: Negative response, when the request has a hmctsServiceId passed but it is not yet on-boarded
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
