@@ -114,7 +114,6 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-003.10 #AC09
-  @Ignore
   Scenario: Negative response - Return 400 Bad Request when sittingRecordId is not passed
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -160,7 +159,6 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-003.14
-  @Ignore
   Scenario: Negative response - Return 404 Not Found when the sittingRecordId passed doesn't exist
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values

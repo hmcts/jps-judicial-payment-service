@@ -2,7 +2,6 @@
 Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
   @S-004.1 #AC01
-  @Ignore
   Scenario: Return 201 success with content where errorCode to "valid" in response when one sitting record is added
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -16,7 +15,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].statusId" as "RECORDED"
 
   @S-004.2 #AC02
-  @Ignore
   Scenario: Return 201 success with content where errorCode to "valid" in response when multiple sitting records are added
     Given a user with the IDAM role of "jps-submitter"
     When a request is prepared with appropriate values
@@ -37,7 +35,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[2].statusId" as "RECORDED"
 
   @S-004.3 #AC03
-  @Ignore
   Scenario: Negative response, return 400 when an invalid venue is supplied for the service
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -50,7 +47,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].errorCode" as "INVALID_LOCATION"
 
   @S-004.4 #AC04
-  @Ignore
   Scenario: Negative response, return 400 when an invalid hmctsServiceCode is passed
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -62,7 +58,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
 
   @S-004.5 #AC05
-  @Ignore
   Scenario: Negative response, return 400 when request doesn't have any sitting records
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -74,7 +69,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "006 Insufficient sitting Records"
 
   @S-004.6 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'hmctsServiceCode'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -86,7 +80,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "hmctsServiceCode is mandatory"
 
   @S-004.7 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'recordedByIdamId'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -98,7 +91,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Recorded By Idam Id is mandatory"
 
   @S-004.8 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'recordedByName'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -110,7 +102,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Recorded By Name is mandatory"
 
   @S-004.9 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'sittingDate'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -122,7 +113,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Sitting date is mandatory"
 
   @S-004.10 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'epimmsId'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -134,7 +124,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Epimms Id is mandatory"
 
   @S-004.11 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'personalCode'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -146,7 +135,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Personal code is mandatory"
 
   @S-004.12 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'contractTypeId'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -158,7 +146,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Contract Type Id  is mandatory"
 
   @S-004.13 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'judgeRoleTypeId'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -170,7 +157,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "Judge Role Type Id is mandatory"
 
   @S-004.14 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'am'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -182,7 +168,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "AM/PM/Full Day is mandatory"
 
   @S-004.15 #AC06
-  @Ignore
   Scenario: Negative response, return 400 Bad Request when the request is missing 'pm'
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -194,7 +179,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "AM/PM/Full Day is mandatory"
 
   @S-004.16 #AC07
-  @Ignore
   Scenario: Negative response, return 403 Forbidden, valid JPS role but invalid role for this endpoint
     Given a user with the IDAM role of "jps-publisher"
     When a request is prepared with appropriate values
@@ -205,7 +189,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-004.17 #AC08
-  @Ignore
   Scenario: Negative response, return 403 Forbidden when the user has an invalid role
     Given a user with the IDAM role of "ccd-import"
     When a request is prepared with appropriate values
@@ -216,7 +199,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "403 Forbidden" status code
 
   @S-004.18 #AC08
-  @Ignore
   Scenario: Negative response, return 401 Unauthorised when the request is missing the service token
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -226,7 +208,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     Then a "negative" response is received with a "401 Unauthorised" status code
 
   @S-004.19 #AC09
-  @Ignore
   Scenario: Negative response, return 403 Forbidden when the request uses an invalid service token
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -302,7 +283,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.23 @PossibleDuplicates #AC05
-  @Ignore
   Scenario: Positive response, Return 201 - Success when period doesn't match with existing record
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -376,7 +356,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[2].errorCode" as "VALID"
 
   @S-004.26 @PossibleDuplicates #AC09
-  @Ignore
   Scenario: Positive response - Return 201 for multiple records
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -417,7 +396,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.28 @PossibleDuplicates #AC08
-  @Ignore
   Scenario: Negative response - Return 400 - 008 could not insert generic error
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -493,7 +471,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.32 @PossibleDuplicates
-  @Ignore
   Scenario: When epimmsId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -508,7 +485,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].createdByName" as "Recorder"
 
   @S-004.33 @PossibleDuplicates
-  @Ignore
   Scenario: When epimmsId, judgeRoleTypeId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -565,7 +541,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
 @S-004.36 #AC01
-@Ignore
   Scenario: Negative response, when the request has a hmctsServiceId passed that is not found (not in the service table)
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -577,7 +552,6 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errors[0].message" as "004 unknown hmctsServiceCode"
 
   @S-004.37 #AC02
-  @Ignore
   Scenario: Negative response, when the request has a hmctsServiceId passed but it is not yet on-boarded
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
