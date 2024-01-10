@@ -74,10 +74,6 @@ variable "database_name" {
   default = "jps_judicial_payment_service"
 }
 
-variable "postgresql_version" {
-  default = "11"
-}
-
 variable "db_replicas" {
   type    = list(string)
   default = []

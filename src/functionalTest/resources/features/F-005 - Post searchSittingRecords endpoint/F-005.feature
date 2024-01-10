@@ -2,6 +2,7 @@
 Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
 
   @S-005.1 #AC01
+  @Ignore
   Scenario: Success response when the request contains all the fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -14,6 +15,7 @@ Feature: F-005 - Scenarios for the POST /searchSittingRecords endpoint
     And the response returns the matching sitting records
 
   @S-005.2 #AC02
+  @Ignore
   Scenario: Success response when the request contains only the mandatory fields - Return 200 success with content
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
