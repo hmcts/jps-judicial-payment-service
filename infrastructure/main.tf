@@ -53,20 +53,33 @@ module "postgresql_v15" {
 ////////////////////////////////
 // Populate Vault with DB info
 ////////////////////////////////
-resource "azurerm_key_vault_secret" "POSTGRES-USER-V15" {
-  name         = "${var.component}-POSTGRES-USER-V15"
+
+resource "azurerm_key_vault_secret" "POSTGRES-USER" {
+  name         = "${var.component}-POSTGRES-USER"
   value        = module.postgresql_v15.username
   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
 }
 
-resource "azurerm_key_vault_secret" "POSTGRES-PASS-V15" {
-  name         = "${var.component}-POSTGRES-PASS-V15"
+resource "azurerm_key_vault_secret" "POSTGRES-PASS" {
+  name         = "${var.component}-POSTGRES-PASS"
   value        = module.postgresql_v15.password
   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
 }
 
-resource "azurerm_key_vault_secret" "POSTGRES-HOST-V15" {
-  name         = "${var.component}-POSTGRES-HOST-V15"
+resource "azurerm_key_vault_secret" "POSTGRES-HOST" {
+  name         = "${var.component}-POSTGRES-HOST"
   value        = module.postgresql_v15.fqdn
+  key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES-PORT" {
+  name         = "${var.component}-POSTGRES-PORT"
+  value        = var.postgresql_flexible_server_port
+  key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
+}
+
+resource "azurerm_key_vault_secret" "POSTGRES-DATABASE" {
+  name         = "${var.component}-POSTGRES-DATABASE"
+  value        = var.database_name
   key_vault_id = data.azurerm_key_vault.jps_shared_key_vault.id
 }
