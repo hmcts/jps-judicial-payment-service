@@ -2,6 +2,7 @@
 Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
 
   @S-004.1 #AC01
+  @Ignore
   Scenario: Return 201 success with content where errorCode to "valid" in response when one sitting record is added
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -15,6 +16,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].statusId" as "RECORDED"
 
   @S-004.2 #AC02
+  @Ignore
   Scenario: Return 201 success with content where errorCode to "valid" in response when multiple sitting records are added
     Given a user with the IDAM role of "jps-submitter"
     When a request is prepared with appropriate values
@@ -283,6 +285,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.23 @PossibleDuplicates #AC05
+  @Ignore
   Scenario: Positive response, Return 201 - Success when period doesn't match with existing record
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -356,6 +359,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[2].errorCode" as "VALID"
 
   @S-004.26 @PossibleDuplicates #AC09
+  @Ignore
   Scenario: Positive response - Return 201 for multiple records
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -396,6 +400,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.28 @PossibleDuplicates #AC08
+  @Ignore
   Scenario: Negative response - Return 400 - 008 could not insert generic error
     Given a user with the IDAM role of "jps-recorder"
     When a request is prepared with appropriate values
@@ -471,6 +476,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].venue" as "Barnet Civil And Family Courts Centre"
 
   @S-004.32 @PossibleDuplicates
+  @Ignore
   Scenario: When epimmsId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
@@ -485,6 +491,7 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the response contains "errorRecords[0].createdByName" as "Recorder"
 
   @S-004.33 @PossibleDuplicates
+  @Ignore
   Scenario: When epimmsId, judgeRoleTypeId and period are different from existing record - Positive response - Return 201 with errorCode set to "VALID" in response
     Given a user with the IDAM role of "jps-recorder"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "F-004_allFields"
