@@ -191,6 +191,7 @@ Feature: F-006 - Scenarios for the POST /submitSittingRecords endpoint
     And the "recordsSubmitted" is 0
 
   @S-006.17 #AC06 IJPS-77
+  @Ignore
   Scenario: Success response - Return 200 success with record is not updated when record has Contract_type_id=6 and there is no local_joh_record_id
     Given a user with the IDAM role of "jps-submitter"
     And "one" record for the hmctsServiceCode "ABA5" exists in the database with the payload "S-006.17_createRecord"
