@@ -130,4 +130,29 @@ class JudicialUserDetailsServiceTest {
         verify(judicialUserServiceClient,never())
             .getJudicialUserDetails(isA(JudicialUserDetailsApiRequest.class));
     }
+
+    @Test
+    void shouldReturnJudicialUserNameWhenUserPresent() {
+        String personalCode = "4918500";
+        when(judicialUserServiceClient.getJudicialUserDetails(JudicialUserDetailsApiRequest.builder()
+                                                                  .personalCode(List.of(personalCode))
+                                                                  .build()))
+            .thenReturn(response);
+
+        assertThat(judicialUserDetailsService.getJudicialUserName(personalCode))
+            .isEqualTo("First Judge");
+    }
+
+    @Test
+    void shouldReturnJudicialUserDetailsWhenUserPresent() {
+        String personalCode = "4918500";
+        when(judicialUserServiceClient.getJudicialUserDetails(JudicialUserDetailsApiRequest.builder()
+                                                                  .personalCode(List.of(personalCode))
+                                                                  .build()))
+            .thenReturn(response);
+
+        assertThat(judicialUserDetailsService.getJudicialUserDetails(personalCode))
+            .map(JudicialUserDetailsApiResponse::getFullName)
+            .hasValue("First Judge");
+    }
 }

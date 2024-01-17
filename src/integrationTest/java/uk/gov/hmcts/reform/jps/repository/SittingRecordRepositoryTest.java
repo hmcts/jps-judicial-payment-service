@@ -10,6 +10,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import uk.gov.hmcts.reform.jps.AbstractTest;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection;
 import uk.gov.hmcts.reform.jps.domain.StatusHistory;
 import uk.gov.hmcts.reform.jps.model.JpsRole;
 import uk.gov.hmcts.reform.jps.model.RecordSubmitFields;
@@ -22,10 +23,13 @@ import java.time.Month;
 import java.util.List;
 import java.util.Optional;
 
+import static java.time.LocalDate.of;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static uk.gov.hmcts.reform.jps.BaseTest.ADD_SITTING_RECORD_STATUS_HISTORY;
+import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_JOH_PART_TIME;
 import static uk.gov.hmcts.reform.jps.BaseTest.INSERT_PUBLISHED_TEST_DATA;
 import static uk.gov.hmcts.reform.jps.BaseTest.RESET_DATABASE;
 import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
@@ -35,21 +39,19 @@ import static uk.gov.hmcts.reform.jps.model.StatusId.SUBMITTED;
 @ActiveProfiles("itest")
 class SittingRecordRepositoryTest extends AbstractTest {
 
-
     @Autowired
     private SittingRecordRepository recordRepository;
 
     private StatusHistory statusHistoryRecorded;
 
     private static final String PERSONAL_CODE = "001";
-
+    private static final String JOHN_DOE = "John Doe";
 
     @Test
     void shouldSaveSittingRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
-                                                   JpsRole.ROLE_RECORDER.name(),
-                                                   "John Doe",
+                                                   JpsRole.ROLE_RECORDER.name(), JOHN_DOE,
                                                    sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded1);
         SittingRecord persistedSittingRecord = recordRepository.save(sittingRecord);
@@ -80,7 +82,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
             .statusId(SUBMITTED)
             .changedDateTime(LocalDateTime.now())
             .changedByUserId(JpsRole.ROLE_SUBMITTER.getValue())
-            .changedByName("John Doe")
+            .changedByName(JOHN_DOE)
             .sittingRecord(settingRecordToUpdate)
             .build();
         settingRecordToUpdate.addStatusHistory(statusHistory);
@@ -100,8 +102,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
     void shouldDeleteSelectedRecord() {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         StatusHistory statusHistoryRecorded1 = createStatusHistory(sittingRecord.getStatusId(),
-                                                   JpsRole.ROLE_RECORDER.getValue(),
-                                                   "John Doe",
+                                                   JpsRole.ROLE_RECORDER.getValue(), JOHN_DOE,
                                                    sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded1);
 
@@ -135,7 +136,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         SittingRecord sittingRecord = createSittingRecord(LocalDate.now().minusDays(2), PERSONAL_CODE);
         statusHistoryRecorded = createStatusHistory(sittingRecord.getStatusId(),
                                                     JpsRole.ROLE_RECORDER.getValue(),
-                                                    "John Doe",
+                                                    JOHN_DOE,
                                                     sittingRecord);
         sittingRecord.addStatusHistory(statusHistoryRecorded);
         StatusHistory statusHistorySubmitted1 = createStatusHistory(
@@ -180,7 +181,7 @@ class SittingRecordRepositoryTest extends AbstractTest {
         StatusHistory statusHistory = createStatusHistory(
             StatusId.DELETED,
             JpsRole.ROLE_RECORDER.name(),
-            "John Doe",
+            JOHN_DOE,
             sittingRecord
         );
         sittingRecord.addStatusHistory(statusHistory);
@@ -234,5 +235,44 @@ class SittingRecordRepositoryTest extends AbstractTest {
 
         assertThat(submittedCount)
             .isEqualTo(count);
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, ADD_SITTING_RECORD_STATUS_HISTORY})
+    void shouldReturnSubmittedRecordWhenRecordsPresentForSittingDates() {
+        List<SittingRecordPublishProjection.SittingRecordPublishFields> sittingRecordPublishFields =
+            recordRepository.findByStatusIdAndSittingDateLessThanEqual(
+                SUBMITTED,
+                LocalDate.now()
+            ).stream().toList();
+        assertThat(sittingRecordPublishFields)
+            .map(SittingRecordPublishProjection.SittingRecordPublishFields::getId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getPersonalCode,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getContractTypeId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getJudgeRoleTypeId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getEpimmsId,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getSittingDate,
+                 SittingRecordPublishProjection.SittingRecordPublishFields::getStatusId)
+            .contains(tuple(4L,
+                            "4918178",
+                            1L,
+                            "HealthWorker",
+                            "852649",
+                            of(2023, Month.MAY,11),
+                            SUBMITTED)
+            );
+    }
+
+    @Test
+    @Sql(scripts = {RESET_DATABASE, INSERT_JOH_PART_TIME})
+    void shouldReturnJohPartTimeNoAttr() {
+        String hmctsServiceId = "BBA3";
+        LocalDate dateRangeTo = LocalDate.of(2023, 11, 20);
+
+        List<Object[]> results = recordRepository.findJohPartTimeNoAttr(hmctsServiceId, dateRangeTo);
+        assertEquals(1, results.size());
+        Object[] result = results.get(0);
+        assertEquals("4918180", result[0]);
+        assertEquals(LocalDate.of(2023, 5,11), result[1]);
     }
 }

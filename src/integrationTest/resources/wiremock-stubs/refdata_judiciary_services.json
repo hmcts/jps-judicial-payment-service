@@ -50,7 +50,97 @@
             "end_date": "string"
           }
         ]
+      },
+
+      {
+        "sidam_id": "string",
+        "object_id": "string",
+        "known_as": "Harry",
+        "surname": "Webb",
+        "full_name": "Harry Webb",
+        "post_nominals": "Commander",
+        "email_id": "7009459EMP-@ejudiciary.net",
+        "personal_code": "5918178",
+        "appointments": [
+          {
+            "base_location_id": "string",
+            "epimms_id": "string",
+            "court_name": "string",
+            "cft_region_id": "string",
+            "cft_region": "string",
+            "location_id": "string",
+            "location": "string",
+            "is_principal_appointment": "string",
+            "appointment": "string",
+            "appointment_type": "string",
+            "service_code": "string",
+            "roles": [
+              "string"
+            ],
+            "start_date": "string",
+            "end_date": "string"
+          }
+
+        ],
+        "authorisations": [
+          {
+            "jurisdiction": "string",
+            "ticket_description": "string",
+            "ticket_code": "string",
+            "service_codes": [
+              "string"
+            ],
+            "start_date": "string",
+            "end_date": "string"
+          }
+        ]
+      },
+
+      {
+        "sidam_id": "string",
+        "object_id": "string",
+        "known_as": "John",
+        "surname": "Smith",
+        "full_name": "John Smith",
+        "post_nominals": "Commander",
+        "email_id": "7009460EMP-@ejudiciary.net",
+        "personal_code": "6018178",
+        "appointments": [
+          {
+            "base_location_id": "string",
+            "epimms_id": "string",
+            "court_name": "string",
+            "cft_region_id": "string",
+            "cft_region": "string",
+            "location_id": "string",
+            "location": "string",
+            "is_principal_appointment": "string",
+            "appointment": "string",
+            "appointment_type": "string",
+            "service_code": "string",
+            "roles": [
+              "string"
+            ],
+            "start_date": "string",
+            "end_date": "string"
+          }
+
+        ],
+        "authorisations": [
+          {
+            "jurisdiction": "string",
+            "ticket_description": "string",
+            "ticket_code": "string",
+            "service_codes": [
+              "string"
+            ],
+            "start_date": "string",
+            "end_date": "string"
+          }
+        ]
       }
+
+
     ]
   }
 }

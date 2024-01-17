@@ -3,5 +3,6 @@
   "offset": "0",
   "dateOrder": "ASCENDING",
   "dateRangeFrom": "dateToBeReplaced",
-  "dateRangeTo": "dateToBeReplaced"
+  "dateRangeTo": "dateToBeReplaced",
+  "statusId": "RECORDED"
 }

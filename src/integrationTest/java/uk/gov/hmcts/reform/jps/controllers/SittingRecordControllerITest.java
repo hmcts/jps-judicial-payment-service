@@ -90,6 +90,7 @@ class SittingRecordControllerITest {
 
     public static final String TO_DATE_CONST = "toDate";
     public static final String RECORDING_USERS_JSON_CONST = "$.recordingUsers";
+    public static final String JOH_ROLES_JSON_CONST = "$.johRoles";
 
 
     @Test
@@ -108,6 +109,9 @@ class SittingRecordControllerITest {
                 jsonPath(RECORDING_USERS_JSON_CONST).exists(),
                 jsonPath(RECORDING_USERS_JSON_CONST).isArray(),
                 jsonPath(RECORDING_USERS_JSON_CONST).isEmpty(),
+                jsonPath(JOH_ROLES_JSON_CONST).exists(),
+                jsonPath(JOH_ROLES_JSON_CONST).isArray(),
+                jsonPath(JOH_ROLES_JSON_CONST).isEmpty(),
                 jsonPath("$.sittingRecords").isEmpty()
             )
             .andReturn();

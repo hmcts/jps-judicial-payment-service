@@ -96,7 +96,7 @@ configurations {
 
 tasks.withType(JavaCompile).configureEach {
   options.compilerArgs << "-Xlint:unchecked" << "-Werror"
-  options.annotationProcessorGeneratedSourcesDirectory = file("src/generated/java")
+  options.annotationProcessorGeneratedSourcesDirectory = file("target/generated/java")
 }
 
 // https://github.com/gradle/gradle/issues/16791

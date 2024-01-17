@@ -11,10 +11,12 @@ import uk.gov.hmcts.reform.jps.model.in.CourtVenueRequest;
 import uk.gov.hmcts.reform.jps.repository.CourtVenueRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -91,6 +93,18 @@ class CourtVenueServiceTest {
         courtVenue.setHmctsServiceId("ABA5");
         courtVenue.setEpimmsId("1234");
         return courtVenue;
+    }
+
+    @Test
+    void shouldReturnCourtVenueWhenRecordPresent() {
+        when(courtVenueRepository.findByHmctsServiceIdAndEpimmsId(anyString(), anyString()))
+            .thenReturn(Optional.of(uk.gov.hmcts.reform.jps.domain.CourtVenue.builder()
+                                        .build()));
+        Optional<uk.gov.hmcts.reform.jps.domain.CourtVenue> courtVenue = courtVenueService.getCourtVenue(
+            "ABA5",
+            "1234"
+        );
+        assertThat(courtVenue).isPresent();
     }
 
 }

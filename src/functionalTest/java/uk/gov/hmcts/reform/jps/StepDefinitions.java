@@ -39,8 +39,8 @@ public class StepDefinitions extends TestVariables {
     RequestSpecification request;
     RequestSpecification given;
     Response response;
-    static String JOH_KEY = "JOH";
-    static String SERVICE_KEY = "SERVICE";
+    static final String JOH_KEY = "JOH";
+    static final String SERVICE_KEY = "SERVICE";
 
     static Map<String,String> responses = new HashMap<>();
 
@@ -88,30 +88,6 @@ public class StepDefinitions extends TestVariables {
         );
     }
 
-
-    private static void createRecords(String data, String url, String key) throws IOException {
-        String body = new
-            String(Files.readAllBytes(Paths.get(data)));
-        Response response = createRecords(url, body, 201);
-
-        responses.put(key,response.getBody().asString());
-    }
-
-    private static Response createRecords(String url, String body, int statusCode) {
-        return getValidatableResponse(url, body, statusCode)
-            .extract().response();
-    }
-
-    private static ValidatableResponse getValidatableResponse(String url, String body, int statusCode) {
-        return given().header("Content-Type", "application/json")
-            .header("Authorization", recorderAccessToken)
-            .header("ServiceAuthorization", validS2sToken)
-            .body(body).log().all()
-            .when().post(url)
-            .then().log().all().assertThat().statusCode(statusCode);
-    }
-
-
     @Given("a user with the IDAM role of {string}")
     public void userWithTheIdamRoleOf(String role) {
         if (role.equalsIgnoreCase("jps-recorder")) {
@@ -134,6 +110,7 @@ public class StepDefinitions extends TestVariables {
         String payload) throws IOException {
         if (recordCount.equalsIgnoreCase("one")) {
             randomDate = RandomDateGenerator.generateRandomDate().toString();
+            updateServices(randomDate);
         }
 
         String body = new
@@ -154,6 +131,7 @@ public class StepDefinitions extends TestVariables {
         String body = new
             String(Files.readAllBytes(Paths.get("./src/functionalTest/resources/payloads/" + payload + ".json")));
         body = body.replace("dateToBeReplaced", randomDate);
+        updateServices(randomDate);
 
         RestAssured.baseURI = testUrl;
         given().header("Content-Type", "application/json")
@@ -218,6 +196,7 @@ public class StepDefinitions extends TestVariables {
         if (description.equalsIgnoreCase("payload with 3 sitting records") || description.equalsIgnoreCase(
             "payload with one sitting record")) {
             randomDate = RandomDateGenerator.generateRandomDate().toString();
+            updateServices(randomDate);
         }
 
         body = body.replace("dateToBeReplaced", randomDate);
@@ -319,4 +298,55 @@ public class StepDefinitions extends TestVariables {
     public void theAttributeIs(String attribute, Integer value) {
         response.then().assertThat().body(attribute,equalTo(value));
     }
+
+    protected static void updateServices(String randomDate) throws IOException {
+        RestAssured.baseURI = testUrl;
+        LOGGER.info("delete services");
+        getValidatableResponse(
+            "/testing-support/delete-service",
+            responses.get(SERVICE_KEY),
+            200
+        );
+
+        LOGGER.info("add services with random date");
+        createRecords(
+            "./src/functionalTest/resources/payloads/setup/addServices.json",
+            "/testing-support/save-service",
+            SERVICE_KEY,
+            randomDate
+        );
+    }
+
+    private static void createRecords(String data, String url, String key) throws IOException {
+        createRecords(data, url, key, randomDate);
+    }
+
+    private static void createRecords(String data, String url, String key, String randomDate) throws IOException {
+        LOGGER.info("void = createRecords('{}', '{}', '{}', '{}')", data, url, key, randomDate);
+        String body = new
+            String(Files.readAllBytes(Paths.get(data)));
+
+        body = body.replace("dateToBeReplaced", randomDate);
+        LOGGER.info("body: {}", body);
+
+        Response response = createRecords(url, body, 201);
+
+        responses.put(key,response.getBody().asString());
+    }
+
+    private static Response createRecords(String url, String body, int statusCode) {
+        LOGGER.info("Response = createRecords('{}', '{}', '{}')", url, body, statusCode);
+        return getValidatableResponse(url, body, statusCode)
+            .extract().response();
+    }
+
+    private static ValidatableResponse getValidatableResponse(String url, String body, int statusCode) {
+        return given().header("Content-Type", "application/json")
+            .header("Authorization", recorderAccessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .body(body).log().all()
+            .when().post(url)
+            .then().log().all().assertThat().statusCode(statusCode);
+    }
+
 }

@@ -17,5 +17,6 @@ import java.util.List;
 public class SittingRecordSearchResponse {
     private long recordCount;
     private List<RecordingUser> recordingUsers;
+    private List<String> johRoles;
     private List<SittingRecord> sittingRecords;
 }

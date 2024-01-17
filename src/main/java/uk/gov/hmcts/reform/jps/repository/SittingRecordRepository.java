@@ -9,10 +9,12 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.hmcts.reform.jps.domain.SittingRecord;
 import uk.gov.hmcts.reform.jps.domain.SittingRecordDuplicateProjection;
+import uk.gov.hmcts.reform.jps.domain.SittingRecordPublishProjection;
 import uk.gov.hmcts.reform.jps.model.StatusId;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -39,6 +41,12 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
             Collection<StatusId> statusId
         );
 
+    Streamable<SittingRecordPublishProjection.SittingRecordPublishFields>
+        findByStatusIdAndSittingDateLessThanEqual(
+            StatusId statusId,
+            LocalDate sittingDate
+        );
+
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("update SittingRecord s"
@@ -60,4 +68,44 @@ public interface SittingRecordRepository extends JpaRepository<SittingRecord, Lo
         LocalDate startDateTime,
         LocalDate endDateTime
     );
+
+    @Query(
+        "select distinct sr.judgeRoleTypeId "
+        + "from SittingRecord sr inner join StatusHistory sh on sr.id=sh.sittingRecord.id "
+        + "where sr.hmctsServiceId = :hmctsServiceId "
+        + "and ( CAST(:regionId as org.hibernate.type.StringType) is null "
+        + "or sr.regionId = CAST(:regionId as org.hibernate.type.StringType) ) "
+        + "and ( CAST(:statusId as org.hibernate.type.StringType) is null "
+        + "or sr.statusId = CAST(:statusId as org.hibernate.type.StringType) ) "
+        + "or (sr.statusId='PUBLISHED' and (sr.sittingDate between :startDate and now()) "
+        + "or sr.statusId='SUBMITTED' and (sr.sittingDate between :serviceOnboardedDate and :endDate)) "
+        )
+    List<String> findJohRoles(@Param("hmctsServiceId") String hmctsServiceId,
+                              @Param("regionId") String regionId,
+                              @Param("statusId") String statusId,
+                              @Param("startDate") LocalDate startDate,
+                              @Param("endDate") LocalDate endDate,
+                              @Param("serviceOnboardedDate") LocalDate serviceOnboardedDate
+    );
+
+
+    @Query(
+        "select distinct sr.personalCode, sr.sittingDate from SittingRecord sr "
+            + "inner join JudicialOfficeHolder joh on joh.personalCode=sr.personalCode "
+            + "inner join JohAttributes ja on ja.judicialOfficeHolder.id=joh.id "
+            + "where sr.hmctsServiceId = :hmctsServiceId "
+            + "and sr.statusId ='RECORDED' "
+            + "and sr.sittingDate <= :dateRangeTo "
+            + "and ja.crownServantFlag = false "
+            + "and ja.effectiveStartDate = ("
+            + "    SELECT MAX(ja2.effectiveStartDate)"
+            + "    FROM JohAttributes ja2"
+            + "    WHERE ja2.effectiveStartDate <= sr.sittingDate"
+            + ") "
+    )
+    List<Object[]> findJohPartTimeNoAttr(@Param("hmctsServiceId") String hmctsServiceId,
+                              @Param("dateRangeTo") LocalDate dateRangeTo
+    );
+
+
 }

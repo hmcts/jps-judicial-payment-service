@@ -46,7 +46,7 @@ public class JudicialOfficeHolderService {
         return Optional.ofNullable(judicialOfficeHoldersRequest.getJudicialOfficeHolders())
             .orElseThrow(() -> new IllegalArgumentException("Joh records missing"))
             .stream()
-            .map(this::getJudicialOfficeHolder)
+            .map(this::getDomainJudicialOfficeHolder)
             .collect(collectingAndThen(
                 toList(),
                 judicialOfficeHolders -> judicialOfficeHolderRepository.saveAll(judicialOfficeHolders).stream()
@@ -69,10 +69,7 @@ public class JudicialOfficeHolderService {
                                            LocalDate sittingDate,
                                            Function<JohAttributes, Boolean> flag) {
         Optional<JudicialOfficeHolder> judicialOfficeHolder =
-            judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
-                personalCode,
-                sittingDate
-            );
+            getJudicialOfficeHolderWithJohAttributes(personalCode, sittingDate);
 
         return judicialOfficeHolder.stream()
             .map(JudicialOfficeHolder::getJohAttributes)
@@ -81,7 +78,23 @@ public class JudicialOfficeHolderService {
             .map(flag);
     }
 
-    private JudicialOfficeHolder getJudicialOfficeHolder(
+    public Optional<JudicialOfficeHolder> getJudicialOfficeHolderWithJohAttributes(String personalCode,
+                                                                                   LocalDate sittingDate) {
+        return judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohAttributesFilteredByEffectiveStartDate(
+                personalCode,
+                sittingDate
+            );
+    }
+
+    public Optional<JudicialOfficeHolder> getJudicialOfficeHolderWithJohPayroll(String personalCode,
+                                                                                LocalDate sittingDate) {
+        return judicialOfficeHolderRepository.findJudicialOfficeHolderWithJohPayrollFilteredByEffectiveStartDate(
+                personalCode,
+                sittingDate
+            );
+    }
+
+    private JudicialOfficeHolder getDomainJudicialOfficeHolder(
         uk.gov.hmcts.reform.jps.model.JudicialOfficeHolder judicialOfficeHolder) {
         JudicialOfficeHolder domainJudicialOfficeHolder = JudicialOfficeHolder.builder()
             .personalCode(judicialOfficeHolder.getPersonalCode())

@@ -46,7 +46,7 @@ public class FeeService {
         feeRepository.deleteByIds(ids);
     }
 
-    public Fee findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
+    public Optional<Fee> findByHmctsServiceIdAndJudgeRoleTypeIdAndSittingDate(
         String hmctsServiceCode,
         String judgeRoleId,
         LocalDate sittingDate
@@ -56,8 +56,6 @@ public class FeeService {
             hmctsServiceCode,
             judgeRoleId,
             sittingDate
-        ).orElseThrow(() -> new IllegalArgumentException(
-            "Fee not set/active for hmctsServiceCode and judgeRoleTypeId " + judgeRoleId)
         );
     }
 }
