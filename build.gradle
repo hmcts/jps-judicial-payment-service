@@ -352,6 +352,11 @@ dependencies {
   implementation group: 'org.glassfish', name: 'jakarta.el', version: '4.0.2'
   implementation group: 'javax.el', name: 'javax.el-api', version: '3.0.1-b06'
   implementation group: 'org.testcontainers', name: 'junit-jupiter', version: testcontainersVersion
+  constraints{
+    implementation('org.apache.commons:commons-compress:1.26.1') {
+      because 'Testcontainers is bringing in v1.22 so changed to 1.26.1 as needed much newer version to resolve CVE'
+    }
+  }
 
   integrationTestImplementation sourceSets.main.runtimeClasspath
   integrationTestImplementation sourceSets.test.runtimeClasspath
