@@ -267,7 +267,7 @@ repositories {
 }
 
 ext {
-  log4JVersion = "2.19.0"
+  log4JVersion = "2.23.1"
   testcontainersVersion = '1.17.6'
 }
 
