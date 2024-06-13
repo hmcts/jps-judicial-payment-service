@@ -9,11 +9,13 @@ Feature: F-004 - Scenarios for the POST /recordSittingRecords endpoint
     And the request contains a valid service token
     And the request contains the "hmctsServiceCode" as "ABA5"
     And the request body contains the "payload with one sitting record" as in "F-004_allFields"
+    And a search is done on the hmctsServiceCode "ABA5", with the payload "F-005_allFields" to get the "sittingRecords[0].sittingRecordId"
     And a call is submitted to the "RecordSittingRecords" endpoint using a "POST" request
     Then a "positive" response is received with a "201 Created" status code
     And the response contains "errorRecords[0].errorCode" as "VALID"
     And the response contains "errorRecords[0].createdByName" as "Recorder"
     And the response contains "errorRecords[0].statusId" as "RECORDED"
+    And a call to delete the previously created record done by the "jps-submitter" user
 
   @S-004.2 #AC02
   @Ignore

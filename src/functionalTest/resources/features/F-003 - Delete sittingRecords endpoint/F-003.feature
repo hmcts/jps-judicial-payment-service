@@ -49,6 +49,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-submitter" user
 
   @S-003.5 #AC05
   @Ignore
@@ -61,6 +62,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-recorder" user
 
   @S-003.6 #AC05
   @Ignore
@@ -73,6 +75,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-recorder" user
 
 
   @S-003.7 #AC06
@@ -87,6 +90,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-admin" user
 
   @S-003.8 #AC07
   @Ignore
@@ -100,6 +104,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-admin" user
 
   @S-003.9 #AC08
   @Ignore
@@ -112,6 +117,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-recorder" user
 
   @S-003.10 #AC09
   Scenario: Negative response - Return 400 Bad Request when sittingRecordId is not passed
@@ -134,6 +140,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-recorder" user
 
   @S-003.12 #AC11
   @Ignore
@@ -145,6 +152,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "401 Unauthorised" status code
+    And a call to delete the previously created record done by the "jps-recorder" user
 
   @S-003.13
   @Ignore
@@ -157,6 +165,7 @@ Feature: F-003 - Scenarios for the DELETE /sittingRecords endpoint
     And the request contains the "sittingRecordId" as "id of the previously created record"
     And a call is submitted to the "SittingRecord" endpoint using a "DELETE" request
     Then a "negative" response is received with a "403 Forbidden" status code
+    And a call to delete the previously created record done by the "jps-recorder" user
 
   @S-003.14
   Scenario: Negative response - Return 404 Not Found when the sittingRecordId passed doesn't exist

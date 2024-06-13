@@ -164,7 +164,7 @@ public class StepDefinitions extends TestVariables {
             .then().log().all().assertThat().statusCode(200).body("recordsSubmitted", equalTo(1));
     }
 
-    @Given("a search is done on the hmctsServiceCode {string}, with the payload {string} to get the {string}")
+    @When("a search is done on the hmctsServiceCode {string}, with the payload {string} to get the {string}")
     public void searchIsDoneOnTheHmctsServiceCodeWithThePayloadToGetThe(String serviceCode, String payload, String
         attribute) throws IOException {
         String body = new
@@ -318,5 +318,27 @@ public class StepDefinitions extends TestVariables {
     @Then("the {string} is {int}")
     public void theAttributeIs(String attribute, Integer value) {
         response.then().assertThat().body(attribute,equalTo(value));
+    }
+
+    @Then("a call to delete the previously created record done by the {string} user")
+    public void callToDeletePreviouslyCreatedRecord(String userType) throws IOException {
+
+        String sittingRecordId = recordAttribute;
+
+        if (userType.equalsIgnoreCase("jps-recorder")) {
+            accessToken  = recorderAccessToken;
+        } else if (userType.equalsIgnoreCase("jps-submitter")) {
+            accessToken  = submitterAccessToken;
+        } else if (userType.equalsIgnoreCase("jps-admin")) {
+            accessToken = adminAccessToken;
+        }
+
+        RestAssured.baseURI = testUrl;
+        given().log().all()
+            .header("Content-Type", "application/json")
+            .header("Authorization", accessToken)
+            .header("ServiceAuthorization", validS2sToken)
+            .when().delete("/sittingRecord/" + sittingRecordId)
+            .then().log().all().assertThat().statusCode(200);
     }
 }
